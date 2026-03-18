@@ -3,8 +3,13 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useSupplierAuth } from '../../context/SupplierAuthContext';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+    PhilippinePeso, ClipboardList, Package, Truck,
+    BarChart3, ArrowRight, Plus, ClipboardCheck, Settings,
+    ChevronRight, FileText
+} from 'lucide-react';
 
 export default function SupplierDashboard() {
     const { supplier } = useSupplierAuth();
@@ -55,10 +60,10 @@ export default function SupplierDashboard() {
     if (loading) return <div className="flex items-center justify-center h-64"><div className="spinner" /></div>;
 
     const statCards = [
-        { label: 'Total Revenue', value: `₱${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: '💰', color: '#10b981', bg: '#ecfdf5' },
-        { label: 'Total Orders', value: stats.total, icon: '🧾', color: '#3b82f6', bg: '#eff6ff' },
-        { label: 'My Products', value: stats.productCount, icon: '📦', color: '#8b5cf6', bg: '#f5f3ff' },
-        { label: 'Pending Delivery', value: stats.approved, icon: '🚚', color: '#f59e0b', bg: '#fffbeb' },
+        { label: 'Total Revenue', value: `₱${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, Icon: PhilippinePeso, color: '#10b981', bg: '#ecfdf5' },
+        { label: 'Total Orders', value: stats.total, Icon: ClipboardList, color: '#3b82f6', bg: '#eff6ff' },
+        { label: 'My Products', value: stats.productCount, Icon: Package, color: '#8b5cf6', bg: '#f5f3ff' },
+        { label: 'Pending Delivery', value: stats.approved, Icon: Truck, color: '#f59e0b', bg: '#fffbeb' },
     ];
 
     return (
@@ -79,7 +84,9 @@ export default function SupplierDashboard() {
                         </Button>
                     </div>
                 </div>
-                <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 text-[6rem] sm:text-[8rem] opacity-10">📊</div>
+                <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 opacity-10">
+                    <BarChart3 className="h-32 w-32" />
+                </div>
             </Card>
 
             {/* Stats Grid */}
@@ -87,7 +94,9 @@ export default function SupplierDashboard() {
                 {statCards.map((s, i) => (
                     <Card key={i} className="p-4 hover:shadow-lg transition-shadow">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 shadow-sm" style={{ background: s.bg }}>{s.icon}</div>
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm" style={{ background: s.bg }}>
+                                <s.Icon className="h-5 w-5" style={{ color: s.color }} />
+                            </div>
                             <div className="flex-1 min-w-0">
                                 <div className="text-xl font-extrabold tracking-tight truncate" style={{ color: s.color }}>{s.value}</div>
                                 <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wide mt-0.5">{s.label}</div>
@@ -104,12 +113,12 @@ export default function SupplierDashboard() {
                     <div className="p-5 border-b border-border flex justify-between items-center bg-secondary/30">
                         <h3 className="font-bold text-foreground text-base">Recent Purchase Orders</h3>
                         <Link to="/supplier/orders" className="text-xs font-bold text-primary no-underline hover:underline flex items-center gap-1">
-                            View All <span>→</span>
+                            View All <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                     </div>
                     {recentPos.length === 0 ? (
                         <div className="py-16 text-center text-muted-foreground">
-                            <div className="text-5xl mb-4 opacity-40">🧾</div>
+                            <FileText className="h-12 w-12 mx-auto mb-4 opacity-30" />
                             <p className="font-medium">No purchase orders yet</p>
                             <p className="text-xs mt-1">Orders will appear here once created</p>
                         </div>
@@ -117,7 +126,9 @@ export default function SupplierDashboard() {
                         <div className="divide-y divide-border/50">
                             {recentPos.map((po) => (
                                 <div key={po.id} className="px-5 py-4 flex items-center gap-4 hover:bg-secondary/30 transition-colors">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-xl shrink-0 shadow-sm">🧾</div>
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center shrink-0 shadow-sm">
+                                    <FileText className="h-5 w-5 text-primary" />
+                                </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="font-bold text-sm text-primary mb-0.5">{po.po_number}</div>
                                         <div className="text-xs text-muted-foreground font-medium">{new Date(po.created_at).toLocaleDateString()} • {po.items?.length || 0} item{po.items?.length !== 1 ? 's' : ''}</div>
@@ -137,17 +148,19 @@ export default function SupplierDashboard() {
                         <h3 className="font-bold text-foreground mb-4 text-base">Quick Actions</h3>
                         <div className="space-y-3">
                             {[
-                                { to: '/supplier/products', icon: '➕', title: 'Add New Product', desc: 'List products for admin to purchase' },
-                                { to: '/supplier/orders', icon: '📋', title: 'Check Orders', desc: 'Review and manage POs' },
-                                { to: '/supplier/settings', icon: '⚙️', title: 'Account Settings', desc: 'Update profile & preferences' },
+                                { to: '/supplier/products', Icon: Plus, title: 'Add New Product', desc: 'List products for admin to purchase' },
+                                { to: '/supplier/orders', Icon: ClipboardCheck, title: 'Check Orders', desc: 'Review and manage POs' },
+                                { to: '/supplier/settings', Icon: Settings, title: 'Account Settings', desc: 'Update profile & preferences' },
                             ].map((a, i) => (
                                 <Link key={i} to={a.to} className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-secondary/60 to-secondary/40 no-underline text-inherit hover:from-secondary hover:to-secondary/60 transition-all hover:shadow-md group">
-                                    <div className="text-2xl group-hover:scale-110 transition-transform">{a.icon}</div>
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-background shadow-sm group-hover:scale-110 transition-transform">
+                                        <a.Icon className="h-5 w-5 text-primary" />
+                                    </div>
                                     <div className="flex-1">
                                         <div className="font-bold text-sm text-foreground mb-0.5">{a.title}</div>
                                         <div className="text-xs text-muted-foreground leading-relaxed">{a.desc}</div>
                                     </div>
-                                    <span className="text-muted-foreground group-hover:text-foreground transition-colors">→</span>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                                 </Link>
                             ))}
                         </div>

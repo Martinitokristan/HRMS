@@ -18,7 +18,7 @@ class SupplierProductController extends Controller
             ->where('supplier_id', $supplier->id)
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('sku', 'like', "%{$request->search}%");
+                  ->orWhere('barcode', 'like', "%{$request->search}%");
             })
             ->when($request->category_id, function ($q) use ($request) {
                 $q->where('category_id', $request->category_id);
@@ -40,11 +40,13 @@ class SupplierProductController extends Controller
 
         $data = $request->validate([
             'name'           => 'required|string|max:150',
-            'sku'            => 'nullable|string|max:50',
+            'barcode'        => 'nullable|string|max:50',
             'description'    => 'nullable|string',
             'category_id'    => 'nullable|exists:categories,id',
             'price'          => 'required|numeric|min:0',
             'min_order_qty'  => 'nullable|integer|min:1',
+            'total_stock'    => 'nullable|integer|min:0',
+            'base_size'      => 'nullable|string|max:50',
             'is_promoted'    => 'nullable|boolean',
             'variants'       => 'nullable|string',
         ]);
@@ -55,17 +57,27 @@ class SupplierProductController extends Controller
                 $imagePath = $request->file('image')->store('supplier-products', 'public');
             }
 
+            $additionalImages = [];
+            if ($request->hasFile('additional_images')) {
+                foreach ($request->file('additional_images') as $file) {
+                    $additionalImages[] = $file->store('supplier-products', 'public');
+                }
+            }
+
             $product = SupplierProduct::create([
-                'supplier_id'   => $supplier->id,
-                'name'          => $data['name'],
-                'sku'           => $data['sku'] ?? null,
-                'description'   => $data['description'] ?? null,
-                'category_id'   => $data['category_id'] ?? null,
-                'price'         => $data['price'],
-                'min_order_qty' => $data['min_order_qty'] ?? 1,
-                'image_path'    => $imagePath,
-                'is_promoted'   => $data['is_promoted'] ?? false,
-                'status'        => 'active',
+                'supplier_id'       => $supplier->id,
+                'name'              => $data['name'],
+                'barcode'           => $data['barcode'] ?? null,
+                'description'       => $data['description'] ?? null,
+                'category_id'       => $data['category_id'] ?? null,
+                'price'             => $data['price'],
+                'min_order_qty'     => $data['min_order_qty'] ?? 1,
+                'total_stock'       => $data['total_stock'] ?? 0,
+                'base_size'         => $data['base_size'] ?? null,
+                'image_path'        => $imagePath,
+                'additional_images' => $additionalImages,
+                'is_promoted'       => $data['is_promoted'] ?? false,
+                'status'            => 'active',
             ]);
 
             if ($request->has('variants')) {
@@ -77,14 +89,24 @@ class SupplierProductController extends Controller
                         if ($request->hasFile($fileKey)) {
                             $variantImage = $request->file($fileKey)->store('supplier-product-variants', 'public');
                         }
+
+                        $variantExtras = [];
+                        $extraKey = "variant_extra_images_{$index}";
+                        if ($request->hasFile($extraKey)) {
+                            foreach ($request->file($extraKey) as $file) {
+                                $variantExtras[] = $file->store('supplier-product-variants', 'public');
+                            }
+                        }
+
                         $product->variants()->create([
-                            'size'           => $v['size'] ?? null,
-                            'color'          => $v['color'] ?? null,
-                            'weight'         => $v['weight'] ?? null,
-                            'stock'          => $v['stock'] ?? 0,
-                            'price_override' => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
-                            'sku_suffix'     => $v['sku_suffix'] ?? null,
-                            'image_path'     => $variantImage,
+                            'size'              => $v['size'] ?? null,
+                            'color'             => $v['color'] ?? null,
+                            'weight'            => $v['weight'] ?? null,
+                            'stock'             => $v['stock'] ?? 0,
+                            'price_override'    => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
+                            'barcode_suffix'    => $v['barcode_suffix'] ?? null,
+                            'image_path'        => $variantImage,
+                            'additional_images' => $variantExtras,
                         ]);
                     }
                 }
@@ -108,11 +130,13 @@ class SupplierProductController extends Controller
 
         $data = $request->validate([
             'name'           => 'required|string|max:150',
-            'sku'            => 'nullable|string|max:50',
+            'barcode'        => 'nullable|string|max:50',
             'description'    => 'nullable|string',
             'category_id'    => 'nullable|exists:categories,id',
             'price'          => 'required|numeric|min:0',
             'min_order_qty'  => 'nullable|integer|min:1',
+            'total_stock'    => 'nullable|integer|min:0',
+            'base_size'      => 'nullable|string|max:50',
             'is_promoted'    => 'nullable|boolean',
             'variants'       => 'nullable|string',
         ]);
@@ -121,6 +145,18 @@ class SupplierProductController extends Controller
             if ($request->hasFile('image')) {
                 $data['image_path'] = $request->file('image')->store('supplier-products', 'public');
             }
+
+            // Handle base product additional images
+            $additionalImages = [];
+            if ($request->has('existing_additional_images')) {
+                $additionalImages = json_decode($request->existing_additional_images, true) ?: [];
+            }
+            if ($request->hasFile('additional_images')) {
+                foreach ($request->file('additional_images') as $file) {
+                    $additionalImages[] = $file->store('supplier-products', 'public');
+                }
+            }
+            $data['additional_images'] = $additionalImages;
 
             $product->update($data);
 
@@ -136,14 +172,27 @@ class SupplierProductController extends Controller
                         } elseif (!empty($v['existing_image_path'])) {
                             $variantImage = $v['existing_image_path'];
                         }
+
+                        $variantExtras = [];
+                        if (isset($v['existing_extra_images']) && is_array($v['existing_extra_images'])) {
+                            $variantExtras = $v['existing_extra_images'];
+                        }
+                        $extraKey = "variant_extra_images_{$index}";
+                        if ($request->hasFile($extraKey)) {
+                            foreach ($request->file($extraKey) as $file) {
+                                $variantExtras[] = $file->store('supplier-product-variants', 'public');
+                            }
+                        }
+                        
                         $product->variants()->create([
-                            'size'           => $v['size'] ?? null,
-                            'color'          => $v['color'] ?? null,
-                            'weight'         => $v['weight'] ?? null,
-                            'stock'          => $v['stock'] ?? 0,
-                            'price_override' => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
-                            'sku_suffix'     => $v['sku_suffix'] ?? null,
-                            'image_path'     => $variantImage,
+                            'size'              => $v['size'] ?? null,
+                            'color'             => $v['color'] ?? null,
+                            'weight'            => $v['weight'] ?? null,
+                            'stock'             => $v['stock'] ?? 0,
+                            'price_override'    => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
+                            'barcode_suffix'    => $v['barcode_suffix'] ?? null,
+                            'image_path'        => $variantImage,
+                            'additional_images' => $variantExtras,
                         ]);
                     }
                 }
@@ -177,7 +226,7 @@ class SupplierProductController extends Controller
             ->where('status', 'active')
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('sku', 'like', "%{$request->search}%");
+                  ->orWhere('barcode', 'like', "%{$request->search}%");
             })
             ->when($request->category_id, function ($q) use ($request) {
                 $q->where('category_id', $request->category_id);

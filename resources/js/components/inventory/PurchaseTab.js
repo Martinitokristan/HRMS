@@ -193,7 +193,7 @@ export default function PurchaseTab() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-                                            <TableHead className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider">Product / SKU</TableHead>
+                                            <TableHead className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider">Product / Barcode</TableHead>
                                             <TableHead className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-center">Qty</TableHead>
                                             <TableHead className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-right">Unit Rate</TableHead>
                                             <TableHead className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-right">Total Amount</TableHead>
@@ -202,12 +202,12 @@ export default function PurchaseTab() {
                                     <TableBody>
                                         {viewPo.items?.map(i => {
                                             const productName = i.product?.name || i.supplier_product?.name || 'Loading Name...';
-                                            const sku = i.product?.sku || i.supplier_product?.sku || 'N/A';
+                                            const barcode = i.product?.barcode || i.supplier_product?.barcode || 'N/A';
                                             return (
                                                 <TableRow key={i.id}>
                                                     <TableCell className="px-4 py-3">
                                                         <div className="font-bold text-foreground mb-0.5">{productName}</div>
-                                                        <Badge variant="outline" className="font-mono text-[11px]">SKU: {sku}</Badge>
+                                                        <Badge variant="outline" className="font-mono text-[11px]">Barcode: {barcode}</Badge>
                                                         {i.product_variant && (
                                                             <div className="text-[11px] text-primary font-bold mt-1">
                                                                 ({[i.product_variant.size_value?.label, i.product_variant.color_value?.label].filter(Boolean).join(' ')})

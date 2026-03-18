@@ -19,7 +19,7 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
     const [variantEnabled, setVariantEnabled] = useState(false);
     
     // Each row represents exactly one stock entry (one specific size + color combination)
-    // Structure: { id: Date.now(), size_value_id: '', color_value_id: '', weight_value_id: '', stock: 0, price_override: '', sku_suffix: '' }
+    // Structure: { id: Date.now(), size_value_id: '', color_value_id: '', weight_value_id: '', stock: 0, price_override: '', barcode_suffix: '' }
     const [variantRows, setVariantRows] = useState([]);
 
     const sizeVariant = variants?.find(v => v.name.toLowerCase() === 'size');
@@ -55,7 +55,7 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
                     weight_value_id: pv.weight_value_id || '',
                     stock: pv.stock || 0,
                     price_override: pv.price_override || '',
-                    sku_suffix: pv.sku_suffix || ''
+                    barcode_suffix: pv.barcode_suffix || ''
                 }));
                 setVariantRows(rows);
             } else {
@@ -63,7 +63,7 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
                 setVariantRows([]);
             }
         } else {
-            setForm({ name: '', sku: '', category_id: '', supplier_id: '', unit_type_id: '', purchase_price: '', sell_price: '', description: '' });
+            setForm({ name: '', barcode: '', category_id: '', supplier_id: '', unit_type_id: '', purchase_price: '', sell_price: '', description: '' });
             setImagePreview(null);
             setVariantEnabled(false);
             setVariantRows([]);
@@ -73,7 +73,7 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
     const handleAddRow = () => {
         setVariantRows(prev => [
             ...prev,
-            { id: Date.now() + Math.random(), size_value_id: '', color_value_id: '', stock: 0, price_override: '', sku_suffix: '' }
+            { id: Date.now() + Math.random(), size_value_id: '', color_value_id: '', stock: 0, price_override: '', barcode_suffix: '' }
         ]);
     };
 
@@ -110,7 +110,7 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
                 price_override: row.price_override !== '' && row.price_override !== null && row.price_override !== undefined
                     ? row.price_override
                     : null,
-                sku_suffix: row.sku_suffix || null,
+                barcode_suffix: row.barcode_suffix || null,
             }))
             : [];
         fd.append('variants', JSON.stringify(variantList));
@@ -172,9 +172,9 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
                         {errors.name && <small className="error-text">{errors.name[0]}</small>}
                     </div>
                     <div className="pm-field">
-                        <label>Base SKU *</label>
-                        <input name="sku" required value={form.sku} onChange={handleInputChange} placeholder="POLO-001" className={errors.sku ? 'has-error' : ''} />
-                        {errors.sku && <small className="error-text">{errors.sku[0]}</small>}
+                        <label>Barcode *</label>
+                        <input name="barcode" required value={form.barcode} onChange={handleInputChange} placeholder="POLO-001" className={errors.barcode ? 'has-error' : ''} />
+                        {errors.barcode && <small className="error-text">{errors.barcode[0]}</small>}
                     </div>
                     <div className="pm-field">
                         <label>Category *</label>
@@ -320,8 +320,8 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
                                                         <input
                                                             type="text"
                                                             className="pm-matrix-input"
-                                                            value={row.sku_suffix}
-                                                            onChange={e => handleRowChange(row.id, 'sku_suffix', e.target.value)}
+                                                            value={row.barcode_suffix}
+                                                            onChange={e => handleRowChange(row.id, 'barcode_suffix', e.target.value)}
                                                             placeholder="-RED-44"
                                                         />
                                                     </td>

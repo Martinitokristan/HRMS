@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Camera } from 'lucide-react';
+import { ArrowLeft, Camera, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const RiderSettings = ({ onBack }) => {
     const { user, setUser } = useAuth();
@@ -102,7 +102,7 @@ const RiderSettings = ({ onBack }) => {
                     <Card role="alert" className={`p-4 mb-6 flex items-center gap-3 font-medium text-sm ${
                         message.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-destructive/5 border-destructive/20 text-destructive'
                     }`}>
-                        <span>{message.type === 'success' ? '✅' : '⚠️'}</span>
+                        {message.type === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertTriangle className="h-4 w-4 shrink-0" />}
                         {message.text}
                     </Card>
                 )}

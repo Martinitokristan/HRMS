@@ -119,17 +119,36 @@ class RiderController extends Controller
             }),
         ];
 
-        $deliveries = Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
-            ->where('rider_id', $riderId)
-            ->latest()
-            ->get();
-
         // Get rider's current location for distance calculations
         $riderProfile = RiderProfile::where('user_id', $riderId)->first();
         $riderLat = $riderProfile->current_latitude ?? 7.0707; // Default Davao coordinates
         $riderLon = $riderProfile->current_longitude ?? 125.6080;
 
         $distanceCalculator = app(\App\Services\DistanceCalculator::class);
+
+        $deliveries = Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
+            ->where('rider_id', $riderId)
+            ->latest()
+            ->get()
+            ->map(function($d) use ($riderLat, $riderLon, $distanceCalculator) {
+                // Add customer coordinates and distance info
+                $profile = $d->sale->customer->customerProfile;
+                
+                if ($profile && $profile->latitude && $profile->longitude) {
+                    $d->customer_latitude = $profile->latitude;
+                    $d->customer_longitude = $profile->longitude;
+                    
+                    // Calculate distance and ETA
+                    $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $profile->latitude, $profile->longitude);
+                    $d->distance = $distanceCalculator->formatDistance($distanceKm);
+                    $d->distance_value = $distanceKm;
+                    
+                    $eta = $distanceCalculator->calculateETA($distanceKm);
+                    $d->eta = $eta['text'];
+                }
+                
+                return $d;
+            });
 
         $nearby = Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
             ->whereNull('rider_id')
@@ -145,6 +164,12 @@ class RiderController extends Controller
 
                 // Calculate real distance using Haversine formula
                 $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $customerLat, $customerLon);
+                
+                // Only include orders within 5km radius
+                if ($distanceKm > 5) {
+                    return null;
+                }
+                
                 $d->latitude = $customerLat;
                 $d->longitude = $customerLon;
                 $d->distance = $distanceCalculator->formatDistance($distanceKm);
@@ -156,6 +181,7 @@ class RiderController extends Controller
 
                 return $d;
             })
+            ->filter() // Remove null values (orders > 10km away)
             ->sortBy('distance_value') // Sort by actual distance (closest first)
             ->values();
 
@@ -266,6 +292,46 @@ class RiderController extends Controller
     public function markNotificationsRead(Request $request)
     {
         $request->user()->unreadNotifications->markAsRead();
+        return response()->json(['status' => 'success']);
+    }
+
+    public function updateLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'broadcast' => 'boolean'
+        ]);
+
+        $riderId = $request->user()->id;
+        $profile = RiderProfile::where('user_id', $riderId)->first();
+        
+        if ($profile) {
+            $profile->current_latitude = $request->latitude;
+            $profile->current_longitude = $request->longitude;
+            $profile->save();
+        }
+
+        // Real-time broadcasting if enabled
+        if ($request->boolean('broadcast')) {
+            // Broadcast to all active deliveries for this rider
+            $activeDeliveries = \App\Models\Delivery::where('rider_id', $riderId)
+                ->whereIn('status', ['pending', 'in_progress'])
+                ->with('sale.customer')
+                ->get();
+
+            foreach ($activeDeliveries as $delivery) {
+                // Broadcast to customer's channel
+                broadcast(new \App\Events\RiderLocationUpdated(
+                    $delivery->sale->customer_id,
+                    $riderId,
+                    $request->latitude,
+                    $request->longitude,
+                    $delivery->tracking_number
+                ));
+            }
+        }
+
         return response()->json(['status' => 'success']);
     }
 }

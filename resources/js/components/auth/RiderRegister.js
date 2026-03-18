@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload } from 'lucide-react';
+import { Upload, Bike } from 'lucide-react';
 
 export default function RiderRegister() {
     const [form, setForm] = useState({
@@ -16,10 +16,13 @@ export default function RiderRegister() {
         password: '',
         password_confirmation: '',
         vehicle_type: 'Motorcycle',
+        vehicle_model: '',
         plate_number: '',
         license_number: '',
         address: '',
         valid_id_type: 'Drivers License',
+        id_number: '',
+        emergency_contact: '',
     });
     const [idFile, setIdFile] = useState(null);
     const [submitting, setSubmitting] = useState(false);
@@ -112,8 +115,18 @@ export default function RiderRegister() {
                                         </select>
                                     </div>
                                     <div className="space-y-1.5">
+                                        <Label>Vehicle Model</Label>
+                                        <Input type="text" value={form.vehicle_model} onChange={(e) => setForm({...form, vehicle_model: e.target.value})} required placeholder="Honda TMX 155" />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
                                         <Label>Plate Number</Label>
                                         <Input type="text" value={form.plate_number} onChange={(e) => setForm({...form, plate_number: e.target.value})} required placeholder="ABC-1234" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label>Emergency Contact</Label>
+                                        <Input type="tel" value={form.emergency_contact} onChange={(e) => setForm({...form, emergency_contact: e.target.value})} required placeholder="09XXXXXXXXX" />
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
@@ -132,10 +145,14 @@ export default function RiderRegister() {
                                         </select>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label>ID Image Upload</Label>
-                                        <div className="relative">
-                                            <Input type="file" onChange={(e) => setIdFile(e.target.files[0])} required accept="image/*" className="text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
-                                        </div>
+                                        <Label>ID Number</Label>
+                                        <Input type="text" value={form.id_number} onChange={(e) => setForm({...form, id_number: e.target.value})} required placeholder="ID Number" />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label>ID Image Upload</Label>
+                                    <div className="relative">
+                                        <Input type="file" onChange={(e) => setIdFile(e.target.files[0])} required accept="image/*" className="text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
                                     </div>
                                 </div>
                             </div>
@@ -155,7 +172,7 @@ export default function RiderRegister() {
             {/* Right - Branding */}
             <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-12 text-white" style={{ backgroundImage: 'linear-gradient(rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.9)), url("/images/hero-banner.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <div className="max-w-md text-center">
-                    <div className="text-6xl mb-6">🛵</div>
+                    <Bike className="h-16 w-16 mx-auto mb-6 text-white/80" />
                     <h2 className="text-2xl font-extrabold mb-3">Fleet Partnership</h2>
                     <p className="text-white/70 mb-8">Join our professional last-mile delivery fleet. High commission rates and automated route optimization.</p>
                     <div className="space-y-3 text-left">

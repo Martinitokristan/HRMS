@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, User, Building2 } from 'lucide-react';
 
 export default function SupplierRegister() {
     const [form, setForm] = useState({
@@ -53,7 +53,7 @@ export default function SupplierRegister() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Company Section */}
                         <div>
-                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">🏢 Company Information</h3>
+                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><Building2 className="h-4 w-4" /> Company Information</h3>
                             <div className="space-y-4">
                                 <div className="space-y-1.5">
                                     <Label>Company / Business Name *</Label>
@@ -68,7 +68,7 @@ export default function SupplierRegister() {
 
                         {/* Contact Section */}
                         <div>
-                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">👤 Primary Contact</h3>
+                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><User className="h-4 w-4" /> Primary Contact</h3>
                             <div className="space-y-4">
                                 <div className="space-y-1.5">
                                     <Label>Full Name *</Label>

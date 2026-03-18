@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class SupplierProduct extends Model
 {
     protected $fillable = [
-        'supplier_id', 'name', 'sku', 'description', 'category_id',
-        'price', 'min_order_qty', 'image_path', 'is_promoted', 'status',
+        'supplier_id', 'name', 'barcode', 'description', 'category_id',
+        'price', 'min_order_qty', 'total_stock', 'base_size', 'image_path', 'additional_images', 'is_promoted', 'status',
     ];
 
     protected $casts = [
-        'is_promoted' => 'boolean',
+        'is_promoted'       => 'boolean',
+        'additional_images' => 'array',
     ];
 
     public function supplier()

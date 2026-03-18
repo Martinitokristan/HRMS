@@ -82,12 +82,10 @@ class DeliveryController extends Controller
 
         $delivery->update([
             'rider_id' => $request->rider_id,
-            'status'   => 'in_progress',
+            'status'   => 'pending',
         ]);
 
-        // Update rider profile availability
-        RiderProfile::where('user_id', $request->rider_id)
-            ->update(['availability' => 'on_delivery']);
+        // Do NOT set on_delivery yet — rider must accept first (in_progress transition does this)
 
         // Notify Rider
         $delivery->rider->notify(new NewOrderAssigned($delivery));
@@ -95,6 +93,98 @@ class DeliveryController extends Controller
         return response()->json([
             'data'    => $delivery->fresh()->load(['sale', 'rider']),
             'message' => 'Rider assigned successfully',
+            'status'  => 'success',
+        ]);
+    }
+
+    public function selfAssign(Request $request, $id)
+    {
+        $rider = $request->user();
+        
+        // Verify user is a rider
+        if ($rider->role !== 'rider') {
+            return response()->json(['error' => 'Unauthorized - must be a rider'], 403);
+        }
+
+        $delivery = Delivery::findOrFail($id);
+        
+        // Verify delivery is not already assigned
+        if ($delivery->rider_id) {
+            return response()->json(['error' => 'Order already assigned'], 400);
+        }
+
+        // Verify delivery is pending
+        if ($delivery->status !== 'pending') {
+            return response()->json(['error' => 'Order not available for assignment'], 400);
+        }
+
+        // Assign the rider
+        $delivery->update([
+            'rider_id' => $rider->id,
+            'status'   => 'pending', // Still pending until rider accepts
+        ]);
+
+        // Update rider availability
+        RiderProfile::where('user_id', $rider->id)->update(['availability' => 'on_delivery']);
+
+        // Notify customer that rider has been assigned
+        CustomerNotification::create([
+            'customer_id' => $delivery->sale->customer_id,
+            'title' => 'Rider Assigned',
+            'message' => "A rider has been assigned to your order #{$delivery->tracking_number}",
+            'type' => 'rider_assigned'
+        ]);
+
+        return response()->json([
+            'data'    => $delivery->fresh()->load(['sale', 'rider']),
+            'message' => 'Order assigned successfully! Please accept to start delivery.',
+            'status'  => 'success',
+        ]);
+    }
+
+    public function declineOrder(Request $request, $id)
+    {
+        $request->validate(['note' => 'required|string|max:500']);
+        
+        $rider = $request->user();
+        
+        // Verify user is a rider
+        if ($rider->role !== 'rider') {
+            return response()->json(['error' => 'Unauthorized - must be a rider'], 403);
+        }
+
+        $delivery = Delivery::findOrFail($id);
+        
+        // Verify this delivery is assigned to this rider
+        if ($delivery->rider_id !== $rider->id) {
+            return response()->json(['error' => 'This order is not assigned to you'], 400);
+        }
+
+        // Verify delivery is still pending
+        if (!in_array($delivery->status, ['pending', 'assigned'])) {
+            return response()->json(['error' => 'Order cannot be declined'], 400);
+        }
+
+        // Remove rider assignment and make available again
+        $delivery->update([
+            'rider_id' => null,
+            'status'   => 'pending',
+            'notes'    => ($delivery->notes ? $delivery->notes . "\n" : '') . "Declined by rider: {$request->note}"
+        ]);
+
+        // Update rider availability back to available
+        RiderProfile::where('user_id', $rider->id)->update(['availability' => 'available']);
+
+        // Notify admin about the decline
+        CustomerNotification::create([
+            'customer_id' => $delivery->sale->customer_id,
+            'title' => 'Rider Declined Order',
+            'message' => "The assigned rider declined your order #{$delivery->tracking_number}. Reason: {$request->note}",
+            'type' => 'rider_declined'
+        ]);
+
+        return response()->json([
+            'message' => 'Order declined successfully',
             'status'  => 'success',
         ]);
     }
@@ -108,6 +198,11 @@ class DeliveryController extends Controller
 
         if ($request->status === 'in_progress') {
             $updates['pickup_at'] = now();
+            // Mark rider as on_delivery when they accept
+            if ($delivery->rider_id) {
+                RiderProfile::where('user_id', $delivery->rider_id)
+                    ->update(['availability' => 'on_delivery']);
+            }
         }
 
         if ($request->status === 'delivered') {
@@ -230,6 +325,37 @@ class DeliveryController extends Controller
             'data'   => $notifications,
             'unread' => $notifications->where('is_read', false)->count(),
             'status' => 'success',
+        ]);
+    }
+
+    /**
+     * Get current rider location for a delivery.
+     */
+    public function getRiderLocation(Request $request, $id)
+    {
+        $delivery = Delivery::findOrFail($id);
+        
+        // Verify this delivery belongs to the authenticated customer
+        if ($delivery->sale->customer_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if (!$delivery->rider_id) {
+            return response()->json(['data' => null]);
+        }
+
+        $riderProfile = RiderProfile::where('user_id', $delivery->rider_id)->first();
+        
+        if (!$riderProfile || !$riderProfile->current_latitude || !$riderProfile->current_longitude) {
+            return response()->json(['data' => null]);
+        }
+
+        return response()->json([
+            'data' => [
+                'latitude' => $riderProfile->current_latitude,
+                'longitude' => $riderProfile->current_longitude,
+                'updated_at' => $riderProfile->updated_at
+            ]
         ]);
     }
 

@@ -325,7 +325,7 @@ export default function SupplierOrders() {
                                                 <TableRow key={item.id}>
                                                     <TableCell>
                                                         <div className="font-bold text-sm text-foreground">{item.product?.name || item.supplier_product?.name}</div>
-                                                        <div className="text-xs text-muted-foreground">SKU: {item.product?.sku || item.supplier_product?.sku || 'N/A'}</div>
+                                                        <div className="text-xs text-muted-foreground">Barcode: {item.product?.barcode || item.supplier_product?.barcode || 'N/A'}</div>
                                                     </TableCell>
                                                     <TableCell className="text-center font-semibold">{item.quantity}</TableCell>
                                                     <TableCell className="text-right">₱{Number(item.unit_cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}</TableCell>

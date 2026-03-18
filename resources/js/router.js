@@ -76,10 +76,7 @@ function SupplierProtectedRoute({ children }) {
 
     useEffect(() => {
         const token = localStorage.getItem('supplier_token');
-        console.log('SupplierProtectedRoute: token from localStorage:', token ? token.substring(0, 20) + '...' : 'null');
-        console.log('SupplierProtectedRoute: token length:', token ? token.length : 0);
         if (token) {
-            // Set axios auth header
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             setAuthenticated(true);
         }

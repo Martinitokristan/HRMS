@@ -25,12 +25,15 @@ class AuthController extends Controller
 
         if ($role === 'rider') {
             $rules = array_merge($rules, [
-                'vehicle_type'   => 'required|string',
-                'plate_number'   => 'required|string',
-                'license_number' => 'required|string',
-                'address'        => 'required|string',
-                'valid_id_type'  => 'required|string',
-                'valid_id_file'  => 'required|file|image|max:5000',
+                'vehicle_type'      => 'required|string',
+                'vehicle_model'     => 'required|string',
+                'plate_number'      => 'required|string',
+                'license_number'    => 'required|string',
+                'address'           => 'required|string',
+                'valid_id_type'     => 'required|string',
+                'valid_id_file'     => 'required|file|image|max:5000',
+                'id_number'         => 'required|string',
+                'emergency_contact' => 'required|string',
             ]);
         } else {
             $rules = array_merge($rules, [
@@ -60,14 +63,18 @@ class AuthController extends Controller
                 }
 
                 \App\Models\RiderProfile::create([
-                    'user_id'        => $user->id,
-                    'vehicle_type'   => $request->vehicle_type,
-                    'plate_number'   => $request->plate_number,
-                    'license_number' => $request->license_number,
-                    'address'        => $request->address,
-                    'valid_id_type'  => $request->valid_id_type,
-                    'valid_id_path'  => $idPath,
-                    'availability'   => 'off_duty',
+                    'user_id'           => $user->id,
+                    'vehicle_type'      => $request->vehicle_type,
+                    'vehicle_model'     => $request->vehicle_model,
+                    'plate_number'      => $request->plate_number,
+                    'license_number'    => $request->license_number,
+                    'address'           => $request->address,
+                    'valid_id_type'     => $request->valid_id_type,
+                    'valid_id_path'     => $idPath,
+                    'id_number'         => $request->id_number,
+                    'id_file_path'      => $idPath,
+                    'emergency_contact' => $request->emergency_contact,
+                    'availability'      => 'off_duty',
                 ]);
             } else {
                 \App\Models\CustomerProfile::create([

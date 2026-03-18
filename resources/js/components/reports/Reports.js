@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Download, Loader2 } from 'lucide-react';
+import { BarChart3, Download, Loader2, PhilippinePeso, Package, TrendingUp, Target, CheckCircle2, Clock, Truck, XCircle, CreditCard, Banknote, Trophy, Medal } from 'lucide-react';
 
 // Removed inline LineChart definition since it's now a shared component
 
@@ -266,18 +266,18 @@ export default function Reports() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <StatCard label="Total Revenue" value={formatCurr(summary.total_revenue)} icon="💰" accentColor="green" trend={summary.revenue_change} trendUp={summary.revenue_change >= 0} />
-                <StatCard label="Total Orders" value={formatNumber(summary.total_orders)} icon="📦" accentColor="blue" trend={summary.orders_change} trendUp={summary.orders_change >= 0} />
-                <StatCard label="Average Order Value" value={formatCurr(summary.average_order_value)} icon="📈" accentColor="purple" trend={summary.aov_change} trendUp={summary.aov_change >= 0} />
-                <StatCard label="Conversion Rate" value={`${(summary.conversion_rate || 0).toFixed(1)}%`} icon="🎯" accentColor="amber" />
+                <StatCard label="Total Revenue" value={formatCurr(summary.total_revenue)} icon={PhilippinePeso} accentColor="green" trend={summary.revenue_change} trendUp={summary.revenue_change >= 0} />
+                <StatCard label="Total Orders" value={formatNumber(summary.total_orders)} icon={Package} accentColor="blue" trend={summary.orders_change} trendUp={summary.orders_change >= 0} />
+                <StatCard label="Average Order Value" value={formatCurr(summary.average_order_value)} icon={TrendingUp} accentColor="purple" trend={summary.aov_change} trendUp={summary.aov_change >= 0} />
+                <StatCard label="Conversion Rate" value={`${(summary.conversion_rate || 0).toFixed(1)}%`} icon={Target} accentColor="amber" />
             </div>
 
             {/* Tabs */}
             <Tabs value={activeTab} className="mb-6">
                 <TabsList>
-                    <TabsTrigger value="overview" onClick={() => setActiveTab('overview')} className="gap-1.5">📋 Overview</TabsTrigger>
-                    <TabsTrigger value="trends" onClick={() => setActiveTab('trends')} className="gap-1.5">📊 Trends</TabsTrigger>
-                    <TabsTrigger value="products" onClick={() => setActiveTab('products')} className="gap-1.5">🏆 Top Products</TabsTrigger>
+                    <TabsTrigger value="overview" onClick={() => setActiveTab('overview')} className="gap-1.5">Overview</TabsTrigger>
+                    <TabsTrigger value="trends" onClick={() => setActiveTab('trends')} className="gap-1.5">Trends</TabsTrigger>
+                    <TabsTrigger value="products" onClick={() => setActiveTab('products')} className="gap-1.5">Top Products</TabsTrigger>
                 </TabsList>
             </Tabs>
 
@@ -286,19 +286,21 @@ export default function Reports() {
                 {activeTab === 'overview' && (
                     <div className="space-y-6">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <MetricCard title="Delivered" value={summary.delivered_orders || 0} total={totalOrders} color="#22C55E" icon="✅" />
-                            <MetricCard title="Pending" value={summary.pending_orders || 0} total={totalOrders} color="#F59E0B" icon="⏳" />
-                            <MetricCard title="In Progress" value={summary.in_progress_orders || 0} total={totalOrders} color="#3B82F6" icon="🚚" />
-                            <MetricCard title="Failed" value={summary.failed_orders || 0} total={totalOrders} color="#EF4444" icon="❌" />
+                            <MetricCard title="Delivered" value={summary.delivered_orders || 0} total={totalOrders} color="#22C55E" icon={<CheckCircle2 className="h-5 w-5" />} />
+                            <MetricCard title="Pending" value={summary.pending_orders || 0} total={totalOrders} color="#F59E0B" icon={<Clock className="h-5 w-5" />} />
+                            <MetricCard title="In Progress" value={summary.in_progress_orders || 0} total={totalOrders} color="#3B82F6" icon={<Truck className="h-5 w-5" />} />
+                            <MetricCard title="Failed" value={summary.failed_orders || 0} total={totalOrders} color="#EF4444" icon={<XCircle className="h-5 w-5" />} />
                         </div>
 
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-base">💳 Payment Method</CardTitle>
+                                <CardTitle className="text-base flex items-center gap-2"><CreditCard className="h-4 w-4" /> Payment Method</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Card className="bg-secondary/30 p-4 flex items-center gap-4">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10 text-2xl">💵</div>
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10">
+                                        <Banknote className="h-6 w-6 text-amber-500" />
+                                    </div>
                                     <div>
                                         <div className="text-sm font-semibold text-foreground">Cash on Delivery</div>
                                         <div className="text-sm text-muted-foreground">{summary.cod_orders || 0} orders</div>
@@ -323,10 +325,10 @@ export default function Reports() {
                             />
                         </Card>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <MiniStat label="Highest Daily Revenue" value={formatCurr(Math.max(...chartData.map(d => d.value), 0))} icon="📊" />
-                            <MiniStat label="Average Daily" value={formatCurr(summary.total_revenue / (chartData.length || 1))} icon="📉" />
-                            <MiniStat label="Peak Orders Day" value={`${Math.max(...chartData.map(d => d.orders), 0)} orders`} icon="📅" />
-                            <MiniStat label="Active Days" value={`${chartData.filter(d => d.value > 0).length} days`} icon="📆" />
+                            <MiniStat label="Highest Daily Revenue" value={formatCurr(Math.max(...chartData.map(d => d.value), 0))} icon={<BarChart3 className="h-4 w-4" />} />
+                            <MiniStat label="Average Daily" value={formatCurr(summary.total_revenue / (chartData.length || 1))} icon={<TrendingUp className="h-4 w-4" />} />
+                            <MiniStat label="Peak Orders Day" value={`${Math.max(...chartData.map(d => d.orders), 0)} orders`} icon={<Target className="h-4 w-4" />} />
+                            <MiniStat label="Active Days" value={`${chartData.filter(d => d.value > 0).length} days`} icon={<Clock className="h-4 w-4" />} />
                         </div>
                     </div>
                 )}
@@ -340,25 +342,25 @@ export default function Reports() {
                                 color="#f97316"
                             />
                         </Card>
-                        <h3 className="text-base font-bold text-foreground">🏆 Top Performing Products</h3>
+                        <h3 className="text-base font-bold text-foreground flex items-center gap-2"><Trophy className="h-4 w-4 text-amber-500" /> Top Performing Products</h3>
                         <div className="space-y-2">
                             {topProducts.length === 0 ? (
                                 <Card className="p-8 text-center">
-                                    <div className="text-3xl mb-2 opacity-50">📦</div>
+                                    <Package className="h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground" />
                                     <p className="text-sm text-muted-foreground">No product data available for this period</p>
                                 </Card>
                             ) : (
                                 topProducts.map((product, idx) => (
                                     <Card key={product.id} className="p-4 flex items-center gap-4">
-                                        <div className="text-2xl w-8 text-center shrink-0">
-                                            {idx === 0 && '🥇'}
-                                            {idx === 1 && '🥈'}
-                                            {idx === 2 && '🥉'}
+                                        <div className="w-8 text-center shrink-0">
+                                            {idx === 0 && <Trophy className="h-5 w-5 text-amber-400 mx-auto" />}
+                                            {idx === 1 && <Medal className="h-5 w-5 text-slate-400 mx-auto" />}
+                                            {idx === 2 && <Medal className="h-5 w-5 text-orange-400 mx-auto" />}
                                             {idx > 2 && <span className="text-sm font-bold text-muted-foreground">#{idx + 1}</span>}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="font-semibold text-foreground truncate">{product.name}</div>
-                                            <div className="text-[12px] text-muted-foreground">SKU: {product.sku}</div>
+                                            <div className="text-[12px] text-muted-foreground">Barcode: {product.barcode}</div>
                                         </div>
                                         <div className="flex items-center gap-6 shrink-0">
                                             <div className="text-right">

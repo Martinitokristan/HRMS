@@ -7,7 +7,7 @@ import ProductDetailModal from './ProductDetailModal';
 import Modal from '../shared/Modal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Trash2, ShoppingCart, Minus, Plus, Check, X } from 'lucide-react';
+import { ArrowLeft, Trash2, ShoppingCart, Minus, Plus, Check, X, Package, ArrowRight } from 'lucide-react';
 
 export default function CartPage() {
     const navigate = useNavigate();
@@ -214,7 +214,7 @@ export default function CartPage() {
                             <div className="w-24 h-24 rounded-2xl bg-secondary flex items-center justify-center text-3xl shrink-0 overflow-hidden border border-border">
                                 {item.image_path ? (
                                     <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-cover" />
-                                ) : '📦'}
+                                ) : <Package className="h-8 w-8 opacity-20 text-muted-foreground" />}
                             </div>
 
                             {/* Product Info */}
@@ -258,7 +258,7 @@ export default function CartPage() {
 
                 {/* Checkout Button */}
                 <Button className="w-full h-12 text-base font-bold gap-2 mb-3" onClick={handleCheckout}>
-                    Proceed to Checkout <span>→</span>
+                    Proceed to Checkout <ArrowRight className="h-4 w-4" />
                 </Button>
 
                 {/* Continue Shopping */}

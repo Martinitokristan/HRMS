@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Package } from 'lucide-react';
 
 export default function SupplierLogin() {
     const [form, setForm] = useState({ email: '', password: '' });
@@ -70,7 +71,7 @@ export default function SupplierLogin() {
             {/* Right - Branding */}
             <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-12 text-white bg-gradient-to-br from-slate-900 to-slate-800 relative" style={{ backgroundImage: 'linear-gradient(rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.9)), url("/images/hero-banner.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <div className="max-w-md text-center">
-                    <div className="text-6xl mb-6">📦</div>
+                    <Package className="h-16 w-16 mx-auto mb-6 text-white/80" />
                     <h2 className="text-2xl font-extrabold mb-3">Fulfillment Excellence</h2>
                     <p className="text-white/70 mb-8">Monitor your purchase orders and manage stock availability through our high-performance supplier gateway.</p>
                     <div className="space-y-3 text-left">

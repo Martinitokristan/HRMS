@@ -175,4 +175,48 @@ class SettingsController extends Controller
         $request->user()->unreadNotifications->markAsRead();
         return response()->json(['status' => 'success']);
     }
+
+    // Supplier-specific methods
+    public function getVariantValues()
+    {
+        $variants = Variant::with('values')->get();
+        return response()->json([
+            'data' => $variants,
+            'status' => 'success',
+        ]);
+    }
+
+    public function storeVariantValue(Request $request)
+    {
+        $request->validate([
+            'variant_id' => 'required|exists:variants,id',
+            'label'      => 'required|string',
+        ]);
+
+        $value = VariantValue::create($request->only(['variant_id', 'label', 'hex_code', 'description', 'category']));
+
+        return response()->json(['data' => $value, 'status' => 'success']);
+    }
+
+    public function getUnitTypes()
+    {
+        $unitTypes = UnitType::all();
+        return response()->json([
+            'data' => $unitTypes,
+            'status' => 'success',
+        ]);
+    }
+
+    public function storeUnitType(Request $request)
+    {
+        $request->validate([
+            'purchase_unit' => 'required|string',
+            'sell_unit'     => 'required|string',
+            'multiplier'    => 'required|numeric|min:0.01',
+        ]);
+
+        $unit = UnitType::create($request->only(['purchase_unit', 'sell_unit', 'multiplier']));
+
+        return response()->json(['data' => $unit, 'status' => 'success']);
+    }
 }

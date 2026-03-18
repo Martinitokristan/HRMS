@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useSupplierAuth } from '../../context/SupplierAuthContext';
+import axios from 'axios';
+import {
+    LayoutDashboard, Package, ShoppingCart, FolderOpen,
+    Settings, Bell, LogOut, Menu, ChevronDown, Plus, X
+} from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 export default function SupplierLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -45,50 +51,91 @@ export default function SupplierLayout() {
         navigate('/login');
     };
 
+    const navItem = (to, Icon, label) => (
+        <NavLink
+            to={to}
+            className={({ isActive }) => cn(
+                'flex items-center gap-2.5 px-5 py-2.5 text-sm font-medium rounded-none transition-all duration-200',
+                'border-l-[3px] border-transparent',
+                isActive
+                    ? 'text-white bg-white/10 border-l-[#FF6B35]'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.06]'
+            )}
+            onClick={() => setSidebarOpen(false)}
+        >
+            <Icon className="h-[18px] w-[18px] shrink-0" />
+            {label}
+        </NavLink>
+    );
+
     return (
-        <div className="admin-layout">
+        <div className="flex min-h-screen bg-background">
+            {/* Mobile overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className={`sidebar supplier-sidebar ${sidebarOpen ? 'open' : ''}`}>
-                <div className="sidebar__logo">
-                    <span>HRMS <span>Supplier</span></span>
-                    <span className="logo-badge">Pro</span>
+            <aside className={cn(
+                'fixed top-0 left-0 z-[100] flex h-screen w-[260px] flex-col bg-[#0F172A] transition-transform duration-300',
+                sidebarOpen ? 'translate-x-0 shadow-[8px_0_30px_rgba(0,0,0,0.2)]' : '-translate-x-full lg:translate-x-0'
+            )}>
+                {/* Logo */}
+                <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-5">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B35]">
+                            <span className="text-[13px] font-black text-white">H</span>
+                        </div>
+                        <span className="text-[17px] font-bold tracking-tight text-white">
+                            HRMS <span className="text-[#FF6B35]">Supplier</span>
+                        </span>
+                    </div>
+                    <button
+                        className="lg:hidden flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:text-white"
+                        onClick={() => setSidebarOpen(false)}
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
                 </div>
 
-                <nav className="sidebar__nav">
-                    <div className="sidebar__section-label">Main</div>
-                    <NavLink to="/supplier/dashboard" className={({ isActive }) => `sidebar__item ${isActive ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
-                        <span className="icon">📊</span> Dashboard
-                    </NavLink>
-                    
-                    <NavLink to="/supplier/products" className={({ isActive }) => `sidebar__item ${isActive ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
-                        <span className="icon">📦</span> My Products
-                    </NavLink>
-                    <NavLink to="/supplier/orders" className={({ isActive }) => `sidebar__item ${isActive ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
-                        <span className="icon">🧾</span> Purchase Orders
-                    </NavLink>
-                    
-                    {/* Category Dropdown (Moved below PO) */}
-                    <button 
-                        className={`sidebar__accordion-btn ${catsOpen ? 'active' : ''}`}
+                {/* Nav */}
+                <nav className="flex-1 overflow-y-auto py-3">
+                    <p className="px-5 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">Main</p>
+                    {navItem('/supplier/dashboard', LayoutDashboard, 'Dashboard')}
+                    {navItem('/supplier/products', Package, 'My Products')}
+                    {navItem('/supplier/orders', ShoppingCart, 'Purchase Orders')}
+
+                    {/* Category Accordion */}
+                    <button
                         onClick={() => setCatsOpen(!catsOpen)}
+                        className={cn(
+                            'flex w-full items-center justify-between px-5 py-2.5 text-sm font-medium transition-all duration-200',
+                            'border-l-[3px] border-transparent text-white/60 hover:text-white hover:bg-white/[0.06]'
+                        )}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span className="icon">📂</span> Category
-                        </div>
-                        <span className={`arrow ${catsOpen ? 'open' : ''}`}>▼</span>
+                        <span className="flex items-center gap-2.5">
+                            <FolderOpen className="h-[18px] w-[18px] shrink-0" />
+                            Category
+                        </span>
+                        <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', catsOpen && 'rotate-180')} />
                     </button>
-                    <div className={`sidebar__sub-items ${catsOpen ? 'open' : ''}`}>
+                    <div className={cn('overflow-hidden transition-all duration-250', catsOpen ? 'max-h-60' : 'max-h-0')}>
                         {categories.map(cat => (
-                            <div key={cat.id} style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <NavLink 
-                                    to={`/supplier/products?category_id=${cat.id}`} 
-                                    className="sidebar__sub-item"
+                            <div key={cat.id} className="flex items-center">
+                                <NavLink
+                                    to={`/supplier/products?category_id=${cat.id}`}
+                                    className={({ isActive }) => cn(
+                                        'flex flex-1 items-center py-2 pl-[3.25rem] pr-3 text-[13px] transition-colors duration-200',
+                                        isActive ? 'text-[#FF6B35] font-semibold' : 'text-white/55 hover:text-white'
+                                    )}
                                     onClick={() => setSidebarOpen(false)}
-                                    style={{ flex: 1 }}
                                 >
                                     {cat.name}
                                 </NavLink>
-                                <button 
+                                <button
                                     title="Add Product to this Category"
                                     onClick={(e) => {
                                         e.preventDefault();
@@ -96,75 +143,74 @@ export default function SupplierLayout() {
                                         navigate(`/supplier/products?category_id=${cat.id}&open_form=true`);
                                         setSidebarOpen(false);
                                     }}
-                                    style={{
-                                        background: 'rgba(52, 152, 219, 0.1)', border: 'none', color: '#3498db',
-                                        cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', marginRight: '10px',
-                                        fontSize: '0.8rem', fontWeight: 700
-                                    }}>
-                                    +
+                                    className="mr-3 flex h-6 w-6 items-center justify-center rounded text-white/40 hover:bg-white/10 hover:text-white"
+                                >
+                                    <Plus className="h-3.5 w-3.5" />
                                 </button>
                             </div>
                         ))}
                     </div>
 
-                    <div className="sidebar__section-label">System</div>
-                    <NavLink to="/supplier/settings" className={({ isActive }) => `sidebar__item ${isActive ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}>
-                        <span className="icon">⚙️</span> Settings
-                    </NavLink>
+                    <p className="px-5 pt-4 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">System</p>
+                    {navItem('/supplier/settings', Settings, 'Settings')}
                 </nav>
 
-                <div className="sidebar__footer">
-                    <div style={{ padding: '0.75rem 1.25rem', borderTop: '1px solid var(--border)' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.25rem' }}>
-                            {supplier?.name || 'Supplier'}
+                {/* Footer */}
+                <div className="border-t border-white/[0.08] p-4">
+                    <div className="flex items-center gap-3 px-1">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FF6B35]/20 text-[#FF6B35] text-sm font-bold">
+                            {supplier?.name?.charAt(0) || 'S'}
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text3)' }}>
-                            {supplier?.email || ''}
+                        <div className="flex-1 min-w-0">
+                            <p className="truncate text-sm font-semibold text-white">{supplier?.name || 'Supplier'}</p>
+                            <p className="truncate text-[11px] text-white/40">{supplier?.email || ''}</p>
                         </div>
                     </div>
                 </div>
             </aside>
 
-            <div className="flex-1 w-full" style={{ width: '100%' }}>
+            {/* Main area */}
+            <div className="flex flex-1 flex-col lg:pl-[260px]">
                 {/* Topbar */}
-                <header className="topbar">
-                    <div className="d-flex align-center gap-2">
-                        <button className="topbar__btn topbar__hamburger" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                            ☰
+                <header className="fixed top-0 left-0 right-0 lg:left-[260px] z-[90] flex h-16 items-center justify-between border-b border-border bg-white px-5 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <button
+                            className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-border bg-white text-muted-foreground transition-all hover:bg-secondary hover:text-foreground lg:hidden"
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                        >
+                            <Menu className="h-[18px] w-[18px]" />
                         </button>
-                        <h1 className="topbar__title">{getPageTitle()}</h1>
+                        <h1 className="text-[17px] font-bold tracking-tight text-foreground">{getPageTitle()}</h1>
                     </div>
 
-                    <div className="topbar__actions">
-                        <div style={{ position: 'relative' }}>
-                            <button className="topbar__btn relative" onClick={() => { setNotiOpen(!notiOpen); setProfileOpen(false); }}>
-                                🔔
+                    <div className="flex items-center gap-2">
+                        {/* Notification Bell */}
+                        <div className="relative">
+                            <button
+                                className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-border bg-white text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+                                onClick={() => { setNotiOpen(!notiOpen); setProfileOpen(false); }}
+                            >
+                                <Bell className="h-[18px] w-[18px]" />
                                 {unreadNoti > 0 && (
-                                    <span style={{
-                                        position: 'absolute', top: 2, right: 2, width: 16, height: 16,
-                                        background: '#ef4444', color: '#fff', borderRadius: '50%',
-                                        fontSize: '0.6rem', fontWeight: 700, display: 'flex',
-                                        alignItems: 'center', justifyContent: 'center',
-                                    }}>{unreadNoti}</span>
+                                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-white border-2 border-white">
+                                        {unreadNoti > 9 ? '9+' : unreadNoti}
+                                    </span>
                                 )}
                             </button>
-                            
                             {notiOpen && (
                                 <>
-                                    <div style={{ position: 'fixed', inset: 0, zIndex: 299 }} onClick={() => setNotiOpen(false)} />
-                                    <div className="noti-dropdown" style={{
-                                        position: 'absolute', right: 0, top: '100%', marginTop: 8,
-                                        width: 300, background: '#fff', borderRadius: 12,
-                                        boxShadow: '0 10px 40px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0',
-                                        zIndex: 300, overflow: 'hidden'
-                                    }}>
-                                        <div style={{ padding: '10px 15px', borderBottom: '1px solid #f1f5f9', fontWeight: 700 }}>Notifications</div>
-                                        <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+                                    <div className="fixed inset-0 z-[299]" onClick={() => setNotiOpen(false)} />
+                                    <div className="absolute right-0 top-[calc(100%+8px)] z-[300] w-[300px] max-h-[360px] flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-xl">
+                                        <div className="border-b border-border px-4 py-3 font-bold text-foreground">Notifications</div>
+                                        <div className="flex-1 overflow-y-auto">
                                             {notifications.length === 0 ? (
-                                                <div style={{ padding: 20, textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>No notifications</div>
+                                                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                                                    <Bell className="h-7 w-7 mb-2 opacity-30" />
+                                                    <p className="text-sm">No notifications</p>
+                                                </div>
                                             ) : notifications.map(n => (
-                                                <div key={n.id} style={{ padding: '10px 15px', borderBottom: '1px solid #f8fafc', background: n.read_at ? '#fff' : '#f0f9ff' }}>
-                                                    <div style={{ fontSize: '0.8rem', color: '#1e293b' }}>{n.data?.message}</div>
+                                                <div key={n.id} className={cn('border-b border-border/60 px-4 py-3 text-[13px]', !n.read_at && 'bg-[#EFF6FF] font-semibold')}>
+                                                    {n.data?.message}
                                                 </div>
                                             ))}
                                         </div>
@@ -173,25 +219,35 @@ export default function SupplierLayout() {
                             )}
                         </div>
 
-                        <div style={{ position: 'relative' }}>
-                            <div className="topbar__avatar" onClick={() => { setProfileOpen(!profileOpen); setNotiOpen(false); }}>
-                                {supplier?.name?.charAt(0) || 'S'}
-                            </div>
-
+                        {/* Profile */}
+                        <div className="relative">
+                            <button
+                                onClick={() => { setProfileOpen(!profileOpen); setNotiOpen(false); }}
+                                className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#FFF1EB] text-[#FF6B35] font-bold text-sm transition-all hover:bg-[#FF6B35] hover:text-white"
+                            >
+                                {supplier?.name?.charAt(0)?.toUpperCase() || 'S'}
+                            </button>
                             {profileOpen && (
                                 <>
-                                    <div style={{ position: 'fixed', inset: 0, zIndex: 299 }} onClick={() => setProfileOpen(false)} />
-                                    <div className="profile-dropdown">
-                                        <div className="profile-dropdown__user">
-                                            <div className="name">{supplier?.name}</div>
-                                            <div className="email">{supplier?.email}</div>
+                                    <div className="fixed inset-0 z-[299]" onClick={() => setProfileOpen(false)} />
+                                    <div className="absolute right-0 top-[calc(100%+8px)] z-[300] w-[220px] overflow-hidden rounded-2xl border border-border bg-white shadow-xl">
+                                        <div className="border-b border-border px-4 py-3.5">
+                                            <p className="font-semibold text-sm text-foreground">{supplier?.name}</p>
+                                            <p className="text-[12px] text-muted-foreground truncate">{supplier?.email}</p>
+                                            <span className="mt-1.5 inline-block rounded-full bg-[#FFF1EB] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FF6B35]">Supplier</span>
                                         </div>
-                                        <div className="profile-dropdown__item" onClick={() => { setProfileOpen(false); navigate('/supplier/settings'); }}>
-                                            Settings
-                                        </div>
-                                        <div className="profile-dropdown__item danger" onClick={handleLogout}>
-                                            Logout
-                                        </div>
+                                        <button
+                                            onClick={() => { setProfileOpen(false); navigate('/supplier/settings'); }}
+                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                                        >
+                                            <Settings className="h-4 w-4" /> Settings
+                                        </button>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#EF4444] transition-colors hover:bg-[#FEF2F2]"
+                                        >
+                                            <LogOut className="h-4 w-4" /> Logout
+                                        </button>
                                     </div>
                                 </>
                             )}
@@ -199,18 +255,10 @@ export default function SupplierLayout() {
                     </div>
                 </header>
 
-                <main className="main-content">
+                <main className="flex-1 px-5 py-6 pt-[calc(64px+1.5rem)] lg:px-7 xl:px-8">
                     <Outlet />
                 </main>
             </div>
-
-            {sidebarOpen && (
-                <div
-                    className="modal-backdrop"
-                    style={{ zIndex: 90 }}
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
         </div>
     );
 }

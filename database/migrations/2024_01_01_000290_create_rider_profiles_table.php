@@ -12,7 +12,12 @@ class CreateRiderProfilesTable extends Migration
             $table->id();
             $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade');
             $table->string('vehicle_type', 50)->nullable();
+            $table->string('vehicle_model', 100)->nullable();
             $table->string('plate_number', 20)->nullable();
+            $table->string('id_type', 50)->nullable();
+            $table->string('id_number', 50)->nullable();
+            $table->string('id_file_path')->nullable();
+            $table->string('emergency_contact', 20)->nullable();
             $table->decimal('current_latitude', 10, 7)->nullable();
             $table->decimal('current_longitude', 10, 7)->nullable();
             $table->string('valid_id_type')->nullable();

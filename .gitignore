@@ -13,6 +13,12 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/.role_improvement_suggestions.md
+/.roles_and_permissions_guide.md
+/.REAL_TIME_DATABASE_SYNC.md
+/.STORAGE_STRUCTURE.md
+/.test_crash.php
+/.analysis_results.md
 
 # Log files
 *.log

@@ -12,12 +12,15 @@ class CreateSupplierProductsTable extends Migration
             $table->id();
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
             $table->string('name', 150);
-            $table->string('sku', 50)->nullable();
+            $table->string('barcode', 50)->nullable();
             $table->text('description')->nullable();
             $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->decimal('price', 12, 2)->default(0);
             $table->integer('min_order_qty')->default(1);
+            $table->integer('total_stock')->default(0);
+            $table->string('base_size')->nullable();
             $table->string('image_path')->nullable();
+            $table->json('additional_images')->nullable();
             $table->boolean('is_promoted')->default(false);
             $table->enum('status', ['active', 'inactive', 'pending'])->default('active');
             $table->timestamps();
@@ -31,8 +34,9 @@ class CreateSupplierProductsTable extends Migration
             $table->string('weight')->nullable();
             $table->decimal('price_override', 12, 2)->nullable();
             $table->integer('stock')->default(0);
-            $table->string('sku_suffix', 30)->nullable();
+            $table->string('barcode_suffix', 30)->nullable();
             $table->string('image_path')->nullable();
+            $table->json('additional_images')->nullable();
             $table->timestamps();
         });
     }

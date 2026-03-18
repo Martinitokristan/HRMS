@@ -94,7 +94,7 @@ class ReportController extends Controller
                 ->select(
                     'products.id',
                     'products.name',
-                    'products.sku',
+                    'products.barcode',
                     DB::raw('SUM(sale_items.quantity) as total_sold'),
                     DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue')
                 )
@@ -120,7 +120,7 @@ class ReportController extends Controller
     {
         $items = Inventory::with(['product.category'])
             ->join('products', 'inventory.product_id', '=', 'products.id')
-            ->selectRaw('inventory.*, products.name, products.sku')
+            ->selectRaw('inventory.*, products.name, products.barcode')
             ->paginate($request->get('per_page', 20));
 
         return response()->json(['data' => $items, 'status' => 'success']);

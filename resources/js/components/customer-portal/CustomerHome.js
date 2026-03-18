@@ -4,10 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProductDetailModal from './ProductDetailModal';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, Search, X, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Search, X, Package, ClipboardList, LogOut, Bell } from 'lucide-react';
 
 export default function CustomerHome() {
     const { user, logout } = useAuth();
@@ -20,13 +19,12 @@ export default function CustomerHome() {
     const [cart, setCart] = useState([]);
     const [flyingItem, setFlyingItem] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [searchOpen, setSearchOpen] = useState(false);
-    const searchRef = useRef(null);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const profileRef = useRef(null);
 
     // Notifications
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [notiOpen, setNotiOpen] = useState(false);
 
     // Load cart from localStorage
     useEffect(() => {
@@ -52,29 +50,55 @@ export default function CustomerHome() {
     // Fetch categories
     useEffect(() => { axios.get('/categories').then(r => setCategories(r.data.data || [])).catch(() => {}); }, []);
 
-    // Fetch products
+    // Close profile dropdown when clicking outside
     useEffect(() => {
-        setLoading(true);
-        const params = { page: 1, per_page: 40 };
-        if (search) params.search = search;
-        if (categoryFilter) params.category_id = categoryFilter;
-        axios.get('/products', { params })
-            .then(r => { const d = r.data.data; setProducts(d.data ? d.data : d); })
-            .finally(() => setLoading(false));
+        const handleClickOutside = (e) => {
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setProfileOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Fetch products with debouncing
+    useEffect(() => {
+        let isMounted = true;
+        let debounce;
+
+        const fetch = () => {
+            setLoading(true);
+            const params = { page: 1, per_page: 40 };
+            if (search) params.search = search;
+            if (categoryFilter) params.category_id = categoryFilter;
+            axios.get('/products', { params })
+                .then(r => { 
+                    if (isMounted) {
+                        const d = r.data.data; 
+                        setProducts(d.data ? d.data : d); 
+                    }
+                })
+                .finally(() => {
+                    if (isMounted) setLoading(false);
+                });
+        };
+
+        // Debounce search to reduce API calls (400ms for responsive UX)
+        debounce = setTimeout(fetch, 400);
+
+        return () => {
+            clearTimeout(debounce);
+            isMounted = false;
+        };
     }, [search, categoryFilter]);
 
-    // Poll notifications
+    // Fetch notifications (optimized - only fetch when needed)
     useEffect(() => {
         if (!user) return;
-        const fetchNoti = () => {
-            axios.get('/customer/notifications').then(r => {
-                setNotifications(r.data.data || []);
-                setUnreadCount(r.data.unread || 0);
-            }).catch(() => {});
-        };
-        fetchNoti();
-        const interval = setInterval(fetchNoti, 10000);
-        return () => clearInterval(interval);
+        axios.get('/customer/notifications').then(r => {
+            setNotifications(r.data.data || []);
+            setUnreadCount(r.data.unread || 0);
+        }).catch(() => {});
     }, [user]);
 
     const markRead = () => {
@@ -112,163 +136,233 @@ export default function CustomerHome() {
     const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
     return (
-        <div className="min-h-screen bg-[#fdfdfd]">
+        <div className="min-h-screen bg-white">
             {/* ===== STICKY HEADER ===== */}
-            <header className="sticky top-0 z-50 bg-white border-b border-border">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2.5 cursor-pointer shrink-0" onClick={() => navigate('/shop')}>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground text-white font-bold text-sm">H</div>
-                        <div className="text-lg font-black text-foreground hidden sm:block">HRMS <span className="text-primary">Pro</span></div>
+            <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-6">
+                    {/* Logo */}
+                    <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => navigate('/shop')}>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-sm">H</div>
+                        <div className="text-base font-bold text-gray-900">HRMS <span className="font-normal text-gray-600">Pro</span></div>
                     </div>
 
-                    <div className="flex-1 max-w-lg relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            ref={searchRef}
+                    {/* Centered Search */}
+                    <div className="flex-1 max-w-xl mx-auto relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                        <input
                             type="text"
-                            placeholder="Find professional tools..."
+                            placeholder="Search products..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="pl-9 pr-8"
+                            className="w-full h-9 pl-9 pr-8 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400"
                         />
                         {search && (
-                            <button className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setSearch('')}>
+                            <button className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" onClick={() => setSearch('')}>
                                 <X className="h-4 w-4" />
                             </button>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <Button id="cart-icon-btn" variant="default" size="icon" className="relative" onClick={() => navigate('/shop/cart')}>
-                            <ShoppingCart className="h-4 w-4" />
-                            {cartCount > 0 && <span id="cart-count-badge" className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">{cartCount}</span>}
-                        </Button>
+                    {/* Right Actions */}
+                    <div className="flex items-center gap-4 shrink-0">
+                        {/* Cart */}
+                        <button id="cart-icon-btn" className="relative flex items-center gap-2 text-gray-700 hover:text-gray-900" onClick={() => navigate('/shop/cart')}>
+                            <div className="relative">
+                                <ShoppingCart className="h-5 w-5" />
+                                {cartCount > 0 && (
+                                    <span id="cart-count-badge" className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">{cartCount}</span>
+                                )}
+                            </div>
+                            <span className="text-sm font-medium hidden sm:inline">Cart</span>
+                        </button>
 
                         {user ? (
-                            <div className="user-menu">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-white text-sm font-bold cursor-pointer">{user.name?.charAt(0)}</div>
-                                <div className="user-dropdown">
-                                    <Link to="/shop/history">My Orders</Link>
-                                    <button onClick={() => { logout(); navigate('/'); }}>Sign Out</button>
+                            <>
+                                <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-medium hidden sm:flex" onClick={() => navigate('/shop/history')}>
+                                    <ClipboardList className="h-5 w-5" /> My Orders
+                                </button>
+                                <div ref={profileRef} className="relative">
+                                    <div 
+                                        className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white text-sm font-bold cursor-pointer"
+                                        onClick={() => setProfileOpen(!profileOpen)}
+                                    >
+                                        {user.name?.charAt(0)?.toUpperCase()}
+                                    </div>
+                                    {profileOpen && (
+                                        <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
+                                            <div className="px-3 py-2 border-b border-gray-200">
+                                                <div className="text-xs font-semibold text-gray-900 truncate">{user.name}</div>
+                                                <div className="text-[11px] text-gray-500 truncate">{user.email}</div>
+                                            </div>
+                                            <button onClick={() => { navigate('/shop/history'); setProfileOpen(false); }} className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full text-left sm:hidden">
+                                                <ClipboardList className="h-4 w-4" /> My Orders
+                                            </button>
+                                            <button onClick={() => { logout(); navigate('/'); setProfileOpen(false); }} className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-gray-50 transition-colors w-full text-left">
+                                                <LogOut className="h-4 w-4" /> Sign Out
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            </>
                         ) : (
-                            <Button variant="outline" size="sm" asChild><Link to="/login">Sign In</Link></Button>
+                            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" asChild><Link to="/login">Sign In</Link></Button>
                         )}
                     </div>
                 </div>
             </header>
 
-            {/* ===== CATEGORY STRIP ===== */}
-            <div className="border-b border-border bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex gap-2 overflow-x-auto scrollbar-hide">
-                    <Button
-                        variant={!categoryFilter ? 'default' : 'outline'}
-                        size="sm"
-                        className="rounded-full shrink-0"
-                        onClick={() => setCategoryFilter('')}
-                    >All Tools</Button>
-                    {categories.map(c => (
-                        <Button
-                            key={c.id}
-                            variant={categoryFilter == c.id ? 'default' : 'outline'}
-                            size="sm"
-                            className="rounded-full shrink-0"
-                            onClick={() => setCategoryFilter(categoryFilter == c.id ? '' : c.id)}
-                        >{c.name}</Button>
-                    ))}
+            {/* ===== CATEGORY TABS ===== */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+                        <button
+                            className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
+                                !categoryFilter 
+                                    ? 'text-orange-500 border-b-2 border-orange-500' 
+                                    : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                            onClick={() => setCategoryFilter('')}
+                        >
+                            All Products
+                        </button>
+                        {categories.map(c => (
+                            <button
+                                key={c.id}
+                                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
+                                    categoryFilter == c.id 
+                                        ? 'text-orange-500 border-b-2 border-orange-500' 
+                                        : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                                onClick={() => setCategoryFilter(c.id)}
+                            >
+                                {c.name}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
             {/* ===== PRODUCT GRID ===== */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-foreground">{categoryFilter ? categories.find(c => c.id == categoryFilter)?.name || 'Products' : 'Hardware Catalog'}</h2>
-                    <span className="text-sm text-muted-foreground font-medium">{products.length} Professional Items</span>
+            <main className="max-w-7xl mx-auto px-6 py-6">
+                <div className="mb-5">
+                    <h2 className="text-xl font-bold text-gray-900">
+                        {categoryFilter ? categories.find(c => c.id == categoryFilter)?.name || 'Products' : 'Product Catalog'}
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-0.5">{products.length} items available</p>
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                         {[...Array(8)].map((_, i) => (
-                            <Card key={i} className="overflow-hidden animate-pulse">
-                                <div className="aspect-[1.1] bg-secondary" />
-                                <div className="p-5 space-y-3">
-                                    <div className="h-3 bg-secondary rounded w-2/5" />
-                                    <div className="h-4 bg-secondary rounded w-4/5" />
-                                    <div className="flex justify-between">
-                                        <div className="h-5 bg-secondary rounded w-1/3" />
-                                        <div className="h-9 w-9 bg-secondary rounded-xl" />
-                                    </div>
+                            <div key={i} className="bg-white border border-gray-200 rounded-lg overflow-hidden animate-pulse">
+                                <div className="aspect-square bg-gray-100" />
+                                <div className="p-4 space-y-3">
+                                    <div className="h-3 bg-gray-100 rounded w-2/5" />
+                                    <div className="h-4 bg-gray-100 rounded w-4/5" />
+                                    <div className="h-8 bg-gray-100 rounded" />
                                 </div>
-                            </Card>
+                            </div>
                         ))}
                     </div>
                 ) : products.length === 0 ? (
-                    <Card className="text-center py-16 px-8">
-                        <div className="text-5xl mb-4">🔧</div>
-                        <h3 className="text-lg font-bold text-foreground mb-2">No equipment found</h3>
-                        <p className="text-sm text-muted-foreground mb-6">We couldn't find any products matching your specific hardware requirements.</p>
-                        <Button onClick={() => { setSearch(''); setCategoryFilter(''); }}>Reset Catalog</Button>
-                    </Card>
+                    <div className="text-center py-20 px-8 bg-white border border-gray-200 rounded-lg">
+                        <Package className="h-12 w-12 mx-auto mb-4 text-gray-400 opacity-30" />
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">No products found</h3>
+                        <p className="text-sm text-gray-500 mb-6">Try adjusting your search or category filter.</p>
+                        <Button className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setSearch(''); setCategoryFilter(''); }}>Clear Filters</Button>
+                    </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                         {products.map(p => {
-                            const totalVariantStock = p.product_variants?.reduce((s, v) => s + (v.stock || 0), 0) || 0;
-                            const inStock = p.product_variants?.length > 0 ? totalVariantStock > 0 : (p.inventory?.current_stock || 0) > 0;
+                            const allVariants = p.product_variants || [];
+                            const hasVariants = allVariants.length > 0;
+                            const totalVariantStock = allVariants.reduce((s, v) => s + Number(v.stock || 0), 0);
+                            const baseStock = Number(p.inventory?.current_stock || 0);
+                            // Product is in stock if either base has stock OR any variant has stock
+                            const inStock = hasVariants ? (totalVariantStock > 0 || baseStock > 0) : baseStock > 0;
                             const imgSrc = p.image_path ? `/storage/${p.image_path}` : null;
-                            const hasVariants = p.product_variants?.length > 0;
+
+                            const colorMap = {};
+                            allVariants.forEach(v => { if (v.color_value) colorMap[v.color_value_id] = v.color_value; });
+                            const colors = Object.values(colorMap);
+
+                            const sizeMap = {};
+                            allVariants.forEach(v => { if (v.size_value) sizeMap[v.size_value_id] = v.size_value; });
+                            const sizes = Object.values(sizeMap);
 
                             return (
-                                <Card key={p.id} className="pcard overflow-hidden cursor-pointer group transition-all hover:shadow-lg hover:-translate-y-0.5" onClick={() => setSelectedProduct(p)}>
-                                    <div className="pcard__img aspect-[1.1] bg-secondary flex items-center justify-center relative overflow-hidden">
+                                <div
+                                    key={p.id}
+                                    className="pcard group bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg"
+                                    onClick={() => setSelectedProduct(p)}
+                                >
+                                    {/* Product Image */}
+                                    <div className="pcard__img relative aspect-square bg-gray-50 overflow-hidden">
                                         {imgSrc
-                                            ? <img src={imgSrc} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                                            : <div className="text-5xl opacity-20">🏗️</div>
+                                            ? <img src={imgSrc} alt={p.name} loading="lazy" className="w-full h-full object-cover" />
+                                            : <div className="w-full h-full flex items-center justify-center"><Package className="h-16 w-16 text-gray-300 opacity-40" /></div>
                                         }
-                                        {!inStock && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Badge variant="destructive" className="text-xs font-bold">SOLD OUT</Badge></div>}
+                                        {!inStock && (
+                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                                <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">Coming Soon</span>
+                                            </div>
+                                        )}
+                                        {p.category?.name && (
+                                            <div className="absolute top-2 left-2">
+                                                <span className="text-[10px] font-semibold uppercase tracking-wide bg-white/95 text-gray-700 px-2 py-1 rounded shadow-sm">
+                                                    {p.category.name}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
+
+                                    {/* Product Info */}
                                     <div className="p-4">
-                                        <div className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">{p.category?.name || 'Supply'}</div>
-                                        <div className="font-bold text-foreground text-sm mb-3 line-clamp-2">{p.name}</div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-lg font-black text-foreground">₱{Number(p.sell_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                                            <Button
-                                                size="icon"
-                                                className="h-9 w-9 rounded-xl"
-                                                disabled={!inStock}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const img = e.currentTarget.closest('.pcard').querySelector('.pcard__img');
+                                        <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-tight">{p.name}</h3>
+
+                                        {p.description && (
+                                            <p className="text-xs text-gray-500 line-clamp-2 mb-2 leading-relaxed">{p.description}</p>
+                                        )}
+
+                                        {/* Stock */}
+                                        <div className="text-xs text-gray-600 mb-2">
+                                            {inStock ? (
+                                                <span className="text-green-600 font-medium">
+                                                    Stock: {baseStock} units
+                                                </span>
+                                            ) : (
+                                                <span className="text-red-600 font-medium">Out of Stock</span>
+                                            )}
+                                        </div>
+
+                                        {/* Price */}
+                                        <div className="text-lg font-bold text-gray-900 mb-3">₱{Number(p.sell_price).toFixed(2)}</div>
+
+                                        {/* Add to Cart Button */}
+                                        <button
+                                            className="w-full h-9 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                            disabled={!inStock}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (hasVariants) {
+                                                    setSelectedProduct(p);
+                                                } else {
+                                                    const imgEl = e.currentTarget.closest('.pcard').querySelector('.pcard__img');
                                                     const cartBtn = document.getElementById('cart-icon-btn');
-                                                    if (img && cartBtn) {
-                                                        const s = img.getBoundingClientRect();
+                                                    if (imgEl && cartBtn) {
+                                                        const s = imgEl.getBoundingClientRect();
                                                         const d = cartBtn.getBoundingClientRect();
-                                                        setFlyingItem({
-                                                            id: p.id, img: imgSrc,
-                                                            startX: s.left + s.width / 2, startY: s.top + s.height / 2,
-                                                            endX: d.left + d.width / 2, endY: d.top + d.height / 2,
-                                                        });
+                                                        setFlyingItem({ id: p.id, img: imgSrc, startX: s.left + s.width / 2, startY: s.top + s.height / 2, endX: d.left + d.width / 2, endY: d.top + d.height / 2 });
                                                         setTimeout(() => setFlyingItem(null), 800);
                                                     }
-                                                    if (hasVariants) {
-                                                        const first = p.product_variants.find(v => (v.stock || 0) > 0);
-                                                        if (first) {
-                                                            addToCart(p, {
-                                                                variant_id: first.id,
-                                                                price: first.price_override || p.sell_price,
-                                                                variants: { Size: first.size_value, Color: first.color_value, Weight: first.weight_value }
-                                                            });
-                                                        }
-                                                    } else {
-                                                        addToCart(p);
-                                                    }
-                                                }}
-                                            >
-                                                +
-                                            </Button>
-                                        </div>
+                                                    addToCart(p);
+                                                }
+                                            }}
+                                        >
+                                            🛒 Add to Cart
+                                        </button>
                                     </div>
-                                </Card>
+                                </div>
                             );
                         })}
                     </div>
@@ -288,7 +382,7 @@ export default function CustomerHome() {
                     '--start-x': `${flyingItem.startX}px`, '--start-y': `${flyingItem.startY}px`,
                     '--end-x': `${flyingItem.endX}px`, '--end-y': `${flyingItem.endY}px`,
                 }}>
-                    {flyingItem.img ? <img src={flyingItem.img} alt="" /> : '🛠️'}
+                    {flyingItem.img ? <img src={flyingItem.img} alt="" /> : <Package className="h-8 w-8 text-primary" />}
                 </div>
             )}
         </div>

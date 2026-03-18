@@ -132,7 +132,7 @@ export default function Riders() {
                                 </TableCell>
                                 <TableCell className="px-4 py-3">
                                     <div className="text-sm">
-                                        <div className="font-semibold text-primary">{r.rider_profile?.vehicle_type} ({r.rider_profile?.plate_number})</div>
+                                        <div className="font-semibold text-primary">{r.rider_profile?.vehicle_type} - {r.rider_profile?.vehicle_model} ({r.rider_profile?.plate_number})</div>
                                         <div className="text-[11px] text-muted-foreground">License: {r.rider_profile?.license_number || 'N/A'}</div>
                                         {r.rider_profile?.valid_id_path && (
                                             <a 

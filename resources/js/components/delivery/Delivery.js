@@ -12,13 +12,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RefreshCw, Truck, Eye, Rocket, CheckCircle2, XCircle, Trash2 } from 'lucide-react';
+import { RefreshCw, Truck, Eye, Rocket, CheckCircle2, XCircle, Trash2, Package, Clock, CheckCheck } from 'lucide-react';
 
 const STATUS_CONFIG = {
-    pending: { label: 'Pending', color: '#F59E0B', bgColor: '#FEF3C7', icon: '⏳' },
-    in_progress: { label: 'In Progress', color: '#3B82F6', bgColor: '#EFF6FF', icon: '🚚' },
-    delivered: { label: 'Delivered', color: '#22C55E', bgColor: '#F0FDF4', icon: '✅' },
-    failed: { label: 'Failed', color: '#EF4444', bgColor: '#FEF2F2', icon: '❌' }
+    pending: { label: 'Pending', color: '#F59E0B', bgColor: '#FEF3C7' },
+    in_progress: { label: 'In Progress', color: '#3B82F6', bgColor: '#EFF6FF' },
+    delivered: { label: 'Delivered', color: '#22C55E', bgColor: '#F0FDF4' },
+    failed: { label: 'Failed', color: '#EF4444', bgColor: '#FEF2F2' }
 };
 
 export default function Delivery() {
@@ -84,10 +84,10 @@ export default function Delivery() {
         if (!riderId) return;
         try {
             await axios.put(`/deliveries/${deliveryId}/assign`, { rider_id: riderId });
-            showToast('✅ Rider assigned successfully');
+            showToast('Rider assigned successfully');
             triggerRefresh();
         } catch (err) {
-            showToast('❌ Assignment failed', 'error');
+            showToast('Assignment failed', 'error');
         }
     };
 
@@ -95,10 +95,10 @@ export default function Delivery() {
         try {
             await axios.put(`/deliveries/${deliveryId}/status`, { status });
             const statusLabel = STATUS_CONFIG[status]?.label || status;
-            showToast(`✅ Delivery marked as ${statusLabel}`);
+            showToast(`Delivery marked as ${statusLabel}`);
             triggerRefresh();
         } catch (err) {
-            showToast('❌ Status update failed', 'error');
+            showToast('Status update failed', 'error');
         }
     };
 
@@ -106,10 +106,10 @@ export default function Delivery() {
         if (!deleteId) return;
         try {
             await axios.delete(`/deliveries/${deleteId}`);
-            showToast('✅ Delivery deleted successfully');
+            showToast('Delivery deleted successfully');
             triggerRefresh();
         } catch (err) {
-            showToast(err.response?.data?.message || '❌ Delete failed', 'error');
+            showToast(err.response?.data?.message || 'Delete failed', 'error');
         } finally {
             setDeleteId(null);
         }
@@ -124,13 +124,13 @@ export default function Delivery() {
                     axios.put(`/deliveries/${id}/assign`, { rider_id: bulkRiderId })
                 )
             );
-            showToast(`✅ Assigned ${selectedDeliveries.length} deliveries to rider`);
+            showToast(`Assigned ${selectedDeliveries.length} deliveries to rider`);
             setSelectedDeliveries([]);
             setShowBulkAssign(false);
             setBulkRiderId('');
             triggerRefresh();
         } catch (err) {
-            showToast('❌ Bulk assignment failed', 'error');
+            showToast('Bulk assignment failed', 'error');
         }
     };
 
@@ -167,11 +167,11 @@ export default function Delivery() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                <StatCard label="Total Deliveries" value={stats.total} icon="📦" accentColor="accent" />
-                <StatCard label="Pending" value={stats.pending} icon="⏳" accentColor="amber" />
-                <StatCard label="In Progress" value={stats.in_progress} icon="🚚" accentColor="blue" />
-                <StatCard label="Delivered Today" value={stats.today_delivered} icon="✅" accentColor="green" />
-                <StatCard label="Failed" value={stats.failed} icon="❌" accentColor="red" />
+                <StatCard label="Total Deliveries" value={stats.total} icon={Package} accentColor="accent" />
+                <StatCard label="Pending" value={stats.pending} icon={Clock} accentColor="amber" />
+                <StatCard label="In Progress" value={stats.in_progress} icon={Truck} accentColor="blue" />
+                <StatCard label="Delivered Today" value={stats.today_delivered} icon={CheckCheck} accentColor="green" />
+                <StatCard label="Failed" value={stats.failed} icon={XCircle} accentColor="red" />
             </div>
 
             {/* Bulk Actions Bar */}
@@ -228,7 +228,7 @@ export default function Delivery() {
             {/* Results Header */}
             <div className="flex items-center justify-between mb-2 px-1">
                 <span className="text-sm text-muted-foreground">Showing {deliveries.length} of {total} deliveries</span>
-                {riders.length > 0 && <span className="text-sm text-muted-foreground">🚴 {riders.length} riders available</span>}
+                {riders.length > 0 && <span className="text-sm text-muted-foreground flex items-center gap-1"><Truck className="h-3.5 w-3.5" /> {riders.length} riders available</span>}
             </div>
 
             {/* Deliveries Table */}
@@ -256,7 +256,7 @@ export default function Delivery() {
                         ) : deliveries.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-16">
-                                    <div className="text-4xl mb-2 opacity-50">📭</div>
+                                    <Package className="h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground" />
                                     <h3 className="text-base font-semibold text-foreground mb-1">No deliveries found</h3>
                                     <p className="text-sm text-muted-foreground">Try adjusting your filters or search criteria</p>
                                 </TableCell>

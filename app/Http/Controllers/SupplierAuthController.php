@@ -155,6 +155,40 @@ class SupplierAuthController extends Controller
         ]);
     }
 
+    public function changePassword(Request $request)
+    {
+        $supplier = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+                'status' => 'error',
+            ], 422);
+        }
+
+        if (!Hash::check($request->current_password, $supplier->password)) {
+            return response()->json([
+                'message' => 'Current password is incorrect',
+                'status' => 'error',
+            ], 401);
+        }
+
+        $supplier->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json([
+            'message' => 'Password changed successfully',
+            'status' => 'success',
+        ]);
+    }
+
     public function verifyEmail(Request $request)
     {
         $supplier = Supplier::where('email', $request->email)->first();

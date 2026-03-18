@@ -36,12 +36,20 @@ export default function RiderDetailsModal({ isOpen, onClose, rider }) {
                         <div className="font-bold text-md">{profile.vehicle_type || 'N/A'}</div>
                     </div>
                     <div className="info-group">
+                        <label className="text-xs font-bold text-muted uppercase d-block mb-1">Vehicle Model</label>
+                        <div className="font-bold text-md">{profile.vehicle_model || 'N/A'}</div>
+                    </div>
+                    <div className="info-group">
                         <label className="text-xs font-bold text-muted uppercase d-block mb-1">Plate Number</label>
                         <div className="font-bold text-md">{profile.plate_number || 'N/A'}</div>
                     </div>
                     <div className="info-group">
                         <label className="text-xs font-bold text-muted uppercase d-block mb-1">License Number</label>
                         <div className="font-bold text-md">{profile.license_number || 'N/A'}</div>
+                    </div>
+                    <div className="info-group">
+                        <label className="text-xs font-bold text-muted uppercase d-block mb-1">Emergency Contact</label>
+                        <div className="font-bold text-md">{profile.emergency_contact || 'N/A'}</div>
                     </div>
                 </div>
 

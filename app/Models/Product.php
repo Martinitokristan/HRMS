@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'sku', 'name', 'description', 'category_id', 'unit_type_id', 'supplier_id',
+        'barcode', 'name', 'description', 'category_id', 'unit_type_id', 'supplier_id',
         'purchase_price', 'sell_price', 'image_path', 'is_active',
     ];
 
@@ -30,7 +30,7 @@ class Product extends Model
 
     public function inventory()
     {
-        return $this->hasOne(Inventory::class);
+        return $this->hasOne(Inventory::class)->whereNull('product_variant_id');
     }
 
     public function saleItems()

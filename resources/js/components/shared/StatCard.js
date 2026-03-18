@@ -1,5 +1,7 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
+import { Card } from '@/components/ui/card';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const colorMap = {
     accent: { border: 'border-t-[#FF6B35]', iconBg: 'bg-[#FFF1EB]', iconText: 'text-[#FF6B35]' },
@@ -10,21 +12,21 @@ const colorMap = {
     purple: { border: 'border-t-[#8B5CF6]', iconBg: 'bg-[#F5F3FF]',  iconText: 'text-[#8B5CF6]' },
 };
 
-export default function StatCard({ label, value, trend, trendUp, icon, accentColor = 'accent' }) {
+export default function StatCard({ label, value, trend, trendUp, icon: Icon, accentColor = 'accent' }) {
     const colors = colorMap[accentColor] || colorMap.accent;
 
     return (
-        <div className={cn(
-            'relative overflow-hidden rounded-2xl border border-border bg-white p-6 shadow-card',
-            'border-t-[3px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover',
+        <Card className={cn(
+            'stat-card relative overflow-hidden p-6',
+            'border-t-[3px] transition-all duration-200 hover:-translate-y-0.5',
             colors.border
         )}>
-            {icon && (
+            {Icon && (
                 <div className={cn(
-                    'absolute top-4 right-4 flex h-11 w-11 items-center justify-center rounded-xl text-xl',
+                    'absolute top-4 right-4 flex h-11 w-11 items-center justify-center rounded-xl',
                     colors.iconBg, colors.iconText
                 )}>
-                    {icon}
+                    <Icon className="h-5 w-5" />
                 </div>
             )}
             <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-muted-foreground mb-2">
@@ -38,9 +40,12 @@ export default function StatCard({ label, value, trend, trendUp, icon, accentCol
                     'mt-2 flex items-center gap-1 text-xs font-bold',
                     trendUp ? 'text-[#22C55E]' : 'text-[#EF4444]'
                 )}>
-                    {trendUp ? '↑' : '↓'} {trend}
+                    {trendUp
+                        ? <TrendingUp className="h-3.5 w-3.5" />
+                        : <TrendingDown className="h-3.5 w-3.5" />}
+                    {trend}
                 </p>
             )}
-        </div>
+        </Card>
     );
 }

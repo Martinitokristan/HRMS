@@ -17,8 +17,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierAuthController;
 use App\Http\Controllers\SupplierProductController;
-
-
+use App\Http\Controllers\RouteController;
 
 // Auth (public)
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -34,6 +33,14 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
+// Route API proxy (public - no auth needed)
+Route::middleware(['throttle:60,1'])->post('/route', [RouteController::class, 'getRoute']);
+
+// Test route
+Route::get('/test', function() {
+    return response()->json(['message' => 'Route works!']);
+});
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -48,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::post('/inventory/transfer', [InventoryController::class, 'transferToStore']);
+    Route::post('/inventory/transfer-multiple', [InventoryController::class, 'transferMultipleToStore']);
     Route::post('/categories', [CategoryController::class, 'store']);
 
     // Suppliers & Unit Types
@@ -73,6 +81,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/deliveries', [DeliveryController::class, 'index']);
     Route::get('/deliveries/{id}', [DeliveryController::class, 'show']);
     Route::put('/deliveries/{id}/assign', [DeliveryController::class, 'assignRider']);
+    Route::post('/deliveries/{id}/self-assign', [DeliveryController::class, 'selfAssign']);
+    Route::post('/deliveries/{id}/decline', [DeliveryController::class, 'declineOrder']);
     Route::put('/deliveries/{id}/status', [DeliveryController::class, 'updateStatus']);
     Route::post('/deliveries/{id}/rate', [DeliveryController::class, 'submitRating']);
     Route::post('/deliveries/{id}/upload-proof', [DeliveryController::class, 'uploadProof']);
@@ -104,6 +114,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/riders/me/dashboard', [RiderController::class, 'dashboard']);
     Route::get('/riders/me/deliveries', [RiderController::class, 'myDeliveries']);
     Route::post('/riders/me/toggle-status', [RiderController::class, 'toggleStatus']);
+    Route::post('/riders/me/update-location', [RiderController::class, 'updateLocation']);
     Route::get('/riders/available', [RiderController::class, 'availableRiders']);
     Route::get('/riders/{id}/stats', [RiderController::class, 'stats']);
     Route::post('/riders/{id}/interview', [RiderController::class, 'scheduleInterview']);
@@ -119,6 +130,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Customer notifications (polling)
     Route::get('/customer/notifications', [DeliveryController::class, 'customerNotifications']);
+    Route::get('/customer/delivery/{id}/rider-location', [DeliveryController::class, 'getRiderLocation']);
     Route::post('/customer/notifications/read', [DeliveryController::class, 'markNotificationsRead']);
 
     // Settings
@@ -128,12 +140,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/settings/variant-types/{id}', [SettingsController::class, 'deleteVariantType']);
     Route::post('/settings/variant-values', [SettingsController::class, 'saveVariantValue']);
     Route::delete('/settings/variant-values/{id}', [SettingsController::class, 'deleteVariantValue']);
-    Route::get('/settings/unit-types', [SettingsController::class, 'getUnitTypes']); // Optional, index has it
+    Route::get('/settings/unit-types', [SettingsController::class, 'getUnitTypes']);
     Route::post('/settings/unit-types', [SettingsController::class, 'saveUnitType']);
     Route::delete('/settings/unit-types/{id}', [SettingsController::class, 'deleteUnitType']);
     Route::post('/settings/unit-conversions', [SettingsController::class, 'saveUnitConversion']);
     Route::delete('/settings/unit-conversions/{id}', [SettingsController::class, 'deleteUnitConversion']);
-    
+
     // Category Management in Settings
     Route::post('/settings/categories', [SettingsController::class, 'saveCategory']);
     Route::delete('/settings/categories/{id}', [SettingsController::class, 'deleteCategory']);
@@ -166,4 +178,19 @@ Route::middleware('supplier.auth')->group(function () {
 
     // Supplier access to categories
     Route::get('/supplier/categories', [\App\Http\Controllers\CategoryController::class, 'index']);
+    Route::post('/supplier/categories', [\App\Http\Controllers\CategoryController::class, 'store']);
+    Route::delete('/supplier/categories/{id}', [\App\Http\Controllers\CategoryController::class, 'destroy']);
+
+    // Supplier Variant Management (Sizes, Colors, Weights)
+    Route::get('/supplier/variant-values', [\App\Http\Controllers\SettingsController::class, 'getVariantValues']);
+    Route::post('/supplier/variant-values', [\App\Http\Controllers\SettingsController::class, 'storeVariantValue']);
+    Route::delete('/supplier/variant-values/{id}', [\App\Http\Controllers\SettingsController::class, 'deleteVariantValue']);
+
+    // Supplier Unit Type Management
+    Route::get('/supplier/unit-types', [\App\Http\Controllers\SettingsController::class, 'getUnitTypes']);
+    Route::post('/supplier/unit-types', [\App\Http\Controllers\SettingsController::class, 'storeUnitType']);
+    Route::delete('/supplier/unit-types/{id}', [\App\Http\Controllers\SettingsController::class, 'deleteUnitType']);
+
+    // Supplier password change
+    Route::put('/supplier/auth/change-password', [SupplierAuthController::class, 'changePassword']);
 });

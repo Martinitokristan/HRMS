@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
+import { Package } from 'lucide-react';
 
 export default function ProductForm({ product, categories, suppliers, unitTypes, variants, onSuccess, onCancel }) {
     const { showToast } = useToast();
@@ -13,7 +14,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
     });
 
     const [variantEnabled, setVariantEnabled] = useState(false);
-    // Each row: { id, size_value_id, color_value_id, weight_value_id, stock, price_override, sku_suffix, imageFile, imagePreview, existing_image_path }
+    // Each row: { id, size_value_id, color_value_id, weight_value_id, stock, price_override, barcode_suffix, imageFile, imagePreview, existing_image_path }
     const [variantRows, setVariantRows] = useState([]);
 
     const sizeVariant   = variants?.find(v => v.name.toLowerCase() === 'size');
@@ -46,7 +47,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                     weight_value_id:    pv.weight_value_id  || '',
                     stock:              pv.stock             || 0,
                     price_override:     pv.price_override    || '',
-                    sku_suffix:         pv.sku_suffix        || '',
+                    barcode_suffix:     pv.barcode_suffix    || '',
                     imageFile:          null,
                     imagePreview:       pv.image_path ? `/storage/${pv.image_path}` : null,
                     existing_image_path: pv.image_path || null,
@@ -66,7 +67,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
     const handleAddRow = () => {
         setVariantRows(prev => [
             ...prev,
-            { id: Date.now() + Math.random(), size_value_id: '', color_value_id: '', weight_value_id: '', stock: 0, price_override: '', sku_suffix: '', imageFile: null, imagePreview: null, existing_image_path: null }
+            { id: Date.now() + Math.random(), size_value_id: '', color_value_id: '', weight_value_id: '', stock: 0, price_override: '', barcode_suffix: '', imageFile: null, imagePreview: null, existing_image_path: null }
         ]);
     };
     const handleRemoveRow = (id) => setVariantRows(prev => prev.filter(r => r.id !== id));
@@ -101,7 +102,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                     stock:               row.stock           || 0,
                     price_override:      row.price_override !== '' && row.price_override !== null && row.price_override !== undefined
                         ? row.price_override : null,
-                    sku_suffix:          row.sku_suffix || null,
+                    barcode_suffix:      row.barcode_suffix || null,
                     existing_image_path: row.existing_image_path || null,
                 };
             })
@@ -258,7 +259,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
 
                     {!variantEnabled ? (
                         <div className="pf-no-variants">
-                            <div className="pf-no-variants-icon">📦</div>
+                            <div className="pf-no-variants-icon"><Package className="h-8 w-8 opacity-30 mx-auto" /></div>
                             <p>No variants added yet.<br /><strong>Get started by enabling variants.</strong></p>
                             <button
                                 type="button"
@@ -389,8 +390,8 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                                         <input
                                                             type="text"
                                                             className="pf-matrix-input"
-                                                            value={row.sku_suffix}
-                                                            onChange={e => handleRowChange(row.id, 'sku_suffix', e.target.value)}
+                                                            value={row.barcode_suffix}
+                                                            onChange={e => handleRowChange(row.id, 'barcode_suffix', e.target.value)}
                                                             placeholder="-RED-L"
                                                         />
                                                     </td>

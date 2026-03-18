@@ -110,10 +110,13 @@ class DatabaseSeeder extends Seeder
         // No Variant Values, Categories, Suppliers, or Products are created here.
         // The user will start fresh via the HRMS dashboard.
         
-        // ─── 4. SUPPLIERS ────────────────────────────────────────────────────
+        // ─── 4. UNIT TYPES ────────────────────────────────────────────────────
+        $this->call(UnitTypeSeeder::class);
+        
+        // ─── 5. SUPPLIERS ────────────────────────────────────────────────────
         $this->call(SupplierSeeder::class);
         
-        // ─── 5. RIDERS ───────────────────────────────────────────────────────
+        // ─── 6. RIDERS ───────────────────────────────────────────────────────
         $this->call(RiderSeeder::class);
     }
 }

@@ -11,7 +11,8 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Store, ShoppingCart } from 'lucide-react';
+import { Store, ShoppingCart, Package } from 'lucide-react';
+import VariantSelector from '../shared/VariantSelector';
 
 export default function SupplierCatalog() {
     const { showToast } = useToast();
@@ -27,6 +28,9 @@ export default function SupplierCatalog() {
     const [viewProduct, setViewProduct] = useState(null);
     const [orderQty, setOrderQty] = useState(1);
     const [actionLoading, setActionLoading] = useState(false);
+    const [selectedVariant, setSelectedVariant] = useState(null);
+    const [selectedOptions, setSelectedOptions] = useState({ size: '', color: '', weight: '' });
+    const [activeGalleryImage, setActiveGalleryImage] = useState(null);
 
     useEffect(() => { fetchProducts(); }, [page, search, categoryFilter, supplierFilter, promotedOnly]);
     useEffect(() => {
@@ -55,23 +59,46 @@ export default function SupplierCatalog() {
     };
 
     const handleOrder = async () => {
+        const variants = (viewProduct?.variants || []);
+        const hasVariants = variants.length > 0;
+
         if (!viewProduct || orderQty < (viewProduct.min_order_qty || 1)) {
             showToast('Please enter a valid quantity.', 'error');
             return;
         }
+
+        // Check stock for whichever option is selected
+        const availableStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
+        if (availableStock <= 0) {
+            showToast('This option is out of stock.', 'error');
+            return;
+        }
+        if (orderQty > availableStock) {
+            showToast(`Only ${availableStock} units available for this option.`, 'error');
+            return;
+        }
+
+        // Determine the price to use: variant price override > base product price
+        const unitCost = selectedVariant?.price_override ?? viewProduct.price;
+
         setActionLoading(true);
         try {
             await axios.post('/purchase-orders', {
                 supplier_id: viewProduct.supplier_id,
                 items: [{
                     supplier_product_id: viewProduct.id,
+                    supplier_product_variant_id: selectedVariant ? selectedVariant.id : null,
                     quantity: orderQty,
-                    unit_cost: viewProduct.price
+                    unit_cost: unitCost,
                 }]
             });
             showToast('Order request sent to supplier!', 'success');
             setViewProduct(null);
+            setSelectedVariant(null);
+            setSelectedOptions({ size: '', color: '', weight: '' });
             setOrderQty(1);
+            // Refresh catalog so new stock counts are visible immediately
+            fetchProducts();
         } catch (e) {
             showToast(e.response?.data?.message || 'Failed to place order.', 'error');
         } finally {
@@ -129,7 +156,7 @@ export default function SupplierCatalog() {
                 <div className="text-center py-12"><div className="spinner mx-auto" /></div>
             ) : products.data?.length === 0 ? (
                 <Card className="text-center py-16 px-8">
-                    <div className="text-4xl mb-2 opacity-50">🏪</div>
+                    <Store className="h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground" />
                     <h3 className="text-base font-bold text-foreground mb-1">No Supplier Products Found</h3>
                     <p className="text-sm text-muted-foreground">Suppliers haven't added any products yet.</p>
                 </Card>
@@ -145,7 +172,7 @@ export default function SupplierCatalog() {
                                 {p.image_path ? (
                                     <img src={`/storage/${p.image_path}`} alt={p.name} className="w-full h-full object-cover" />
                                 ) : (
-                                    <span className="text-5xl opacity-30">📦</span>
+                                    <Package className="h-12 w-12 opacity-20 text-muted-foreground" />
                                 )}
                                 {p.is_promoted && (
                                     <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-white text-center py-1 text-[10px] font-bold tracking-wider uppercase">
@@ -156,9 +183,20 @@ export default function SupplierCatalog() {
                             <div className="p-4">
                                 <div className="font-bold text-foreground mb-1">{p.name}</div>
                                 <div className="text-[12px] text-muted-foreground mb-1">{p.supplier?.name || 'Unknown Supplier'}</div>
-                                <div className="text-[12px] text-muted-foreground mb-3">
+                                <div className="text-[12px] text-muted-foreground mb-2">
                                     {p.category?.name || 'Uncategorized'} &bull; {p.variants?.length || 0} variant{p.variants?.length !== 1 ? 's' : ''}
                                 </div>
+                                
+                                {/* Stock Availability Badge */}
+                                <div className="mb-3">
+                                    <Badge 
+                                        variant={p.total_stock > 0 ? "default" : "destructive"} 
+                                        className="text-[10px] font-bold"
+                                    >
+                                        {p.total_stock > 0 ? `✓ ${p.total_stock} Available` : '✗ Out of Stock'}
+                                    </Badge>
+                                </div>
+                                
                                 <div className="flex items-center justify-between">
                                     <span className="font-bold text-lg text-primary">
                                         ₱{Number(p.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -175,121 +213,221 @@ export default function SupplierCatalog() {
 
             <Pagination page={page} total={products.total} perPage={20} onChange={setPage} />
 
-            {/* Product Detail Modal */}
-            <Modal isOpen={!!viewProduct} onClose={() => setViewProduct(null)}
-                title={viewProduct?.name || 'Product Details'} size="lg" hideFooter>
-                {viewProduct && (
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="rounded-xl overflow-hidden bg-secondary h-[280px] flex items-center justify-center">
-                                {viewProduct.image_path ? (
-                                    <img src={`/storage/${viewProduct.image_path}`} alt={viewProduct.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="text-6xl opacity-20">📦</span>
+            {/* Product Detail Modal - Modern Design */}
+            <Modal isOpen={!!viewProduct} onClose={() => { setViewProduct(null); setSelectedVariant(null); setSelectedOptions({ size: '', color: '', weight: '' }); setOrderQty(1); setActiveGalleryImage(null); }} title="Product Details" size="lg" hideFooter>
+                {viewProduct && (() => {
+                    const variants = (viewProduct.variants || []).map(v => ({
+                        id: v.id,
+                        size: v.size || '',
+                        color: v.color || '',
+                        weight: v.weight || '',
+                        stock: v.stock || 0,
+                        price_override: v.price_override || null,
+                        color_hex: v.color_hex || null,
+                        image_path: v.image_path || null,
+                        additional_images: v.additional_images || []
+                    }));
+                    const hasVariants = variants.length > 0;
+                    
+                    // selectedVariant === null means base/Regular is selected
+                    const currentPrice = selectedVariant ? (selectedVariant.price_override || viewProduct.price) : viewProduct.price;
+                    const currentStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
+                    const isOutOfStock = currentStock <= 0;
+                    const subtotal = currentPrice * orderQty;
+
+                    // Helper to get variant label
+                    const getVariantLabel = (v) => {
+                        const parts = [];
+                        if (v.size) parts.push(v.size);
+                        if (v.color) parts.push(v.color);
+                        if (v.weight) parts.push(v.weight);
+                        return parts.join(' / ') || 'Variant';
+                    };
+
+                    // Image Gallery Logic
+                    const mainImage = selectedVariant ? (selectedVariant.image_path || viewProduct.image_path) : viewProduct.image_path;
+                    const additionalImages = selectedVariant ? (selectedVariant.additional_images || []) : (viewProduct.additional_images || []);
+                    const allImages = [mainImage, ...additionalImages].filter(Boolean);
+                    const displayImage = activeGalleryImage || mainImage;
+
+                    return (
+                        <div className="grid grid-cols-1 md:grid-cols-[1.2fr,1fr] gap-0">
+                            {/* Left Side - Image & Gallery */}
+                            <div className="bg-secondary/10 p-6 flex flex-col items-center border-r border-border">
+                                {/* Main Image Box - FIXED SIZE */}
+                                <div className="w-full aspect-square relative rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center overflow-hidden mb-6">
+                                    {displayImage ? (
+                                        <img 
+                                            src={`/storage/${displayImage}`} 
+                                            alt={viewProduct.name} 
+                                            className="w-full h-full object-contain p-4" 
+                                        />
+                                    ) : (
+                                        <Package className="h-24 w-24 opacity-10 text-muted-foreground" />
+                                    )}
+                                </div>
+
+                                {/* Thumbnails Row */}
+                                {allImages.length > 1 && (
+                                    <div className="flex flex-wrap justify-center gap-3">
+                                        {allImages.map((img, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setActiveGalleryImage(img)}
+                                                className={`w-16 h-16 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${
+                                                    displayImage === img 
+                                                        ? 'border-orange-500 shadow-md ring-2 ring-orange-100' 
+                                                        : 'border-border hover:border-orange-200'
+                                                }`}
+                                            >
+                                                <img src={`/storage/${img}`} className="w-full h-full object-contain rounded-lg" />
+                                            </button>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Supplier</div>
-                                    <div className="font-bold text-lg text-foreground">{viewProduct.supplier?.name}</div>
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Category</div>
-                                    <div className="text-foreground">{viewProduct.category?.name || 'Uncategorized'}</div>
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Base Price</div>
-                                    <div className="font-bold text-2xl text-primary">
-                                        ₱{Number(viewProduct.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+
+                            {/* Right Side - Details */}
+                            <div className="p-6 flex flex-col">
+                                {/* Category & Title */}
+                                <div className="mb-4">
+                                    <div className="text-xs font-bold uppercase tracking-wider text-orange-500 mb-1">
+                                        {viewProduct.category?.name || 'SUPPLIES'}
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-foreground mb-2 leading-tight">
+                                        {viewProduct.name}
+                                    </h2>
+                                    <div className="text-3xl font-bold text-orange-500">
+                                        ₱{Number(currentPrice).toFixed(2)}
                                     </div>
                                 </div>
-                                <div>
-                                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Min Order Qty</div>
-                                    <div className="text-foreground">{viewProduct.min_order_qty || 1} units</div>
+
+                                {/* Stock Badge */}
+                                <div className="mb-4">
+                                    <Badge variant={isOutOfStock ? "destructive" : "success"} className="text-sm px-3 py-1">
+                                        {isOutOfStock ? 'Out of Stock' : `${currentStock} units in stock`}
+                                    </Badge>
                                 </div>
-                                {viewProduct.sku && (
-                                    <div>
-                                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">SKU</div>
-                                        <Badge variant="outline" className="font-mono">{viewProduct.sku}</Badge>
+
+                                {/* Barcode & Min Order */}
+                                <div className="space-y-2 mb-4 text-sm">
+                                    {viewProduct.barcode && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground font-semibold">Barcode:</span>
+                                            <span className="font-mono text-foreground">{viewProduct.barcode}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-muted-foreground font-semibold">MIN ORDER QTY:</span>
+                                        <span className="text-foreground">{viewProduct.min_order_qty || 1} units</span>
                                     </div>
-                                )}
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-muted-foreground font-semibold">SUPPLIER:</span>
+                                        <span className="text-foreground">{viewProduct.supplier?.name}</span>
+                                    </div>
+                                </div>
+
+                                {/* Description */}
                                 {viewProduct.description && (
-                                    <div>
-                                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Description</div>
+                                    <div className="mb-4">
+                                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">DESCRIPTION</div>
                                         <p className="text-sm text-foreground leading-relaxed">{viewProduct.description}</p>
                                     </div>
                                 )}
-                                <Card className="bg-secondary/50 p-4 mt-4">
-                                    <div className="flex items-end gap-3">
-                                        <div className="flex-1 space-y-1.5">
-                                            <Label className="text-[11px] font-bold">Quantity to Order</Label>
-                                            <Input
-                                                type="number"
-                                                min={viewProduct.min_order_qty || 1}
-                                                value={orderQty}
-                                                onChange={(e) => setOrderQty(parseInt(e.target.value) || 1)}
-                                            />
-                                        </div>
-                                        <div className="flex-[2]">
-                                            <Button className="w-full gap-2" onClick={handleOrder} disabled={actionLoading}>
-                                                <ShoppingCart className="h-4 w-4" />
-                                                {actionLoading ? 'Sending...' : `Order (₱${(viewProduct.price * orderQty).toLocaleString(undefined, { minimumFractionDigits: 2 })})`}
-                                            </Button>
+
+                                {/* Variants - show as clickable buttons with Regular as first option */}
+                                {hasVariants && (
+                                    <div className="mb-4">
+                                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">SELECT OPTION</div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {/* Regular / Base option */}
+                                            <button
+                                                type="button"
+                                                onClick={() => { setSelectedVariant(null); setOrderQty(viewProduct.min_order_qty || 1); setActiveGalleryImage(null); }}
+                                                className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${
+                                                    selectedVariant === null
+                                                        ? 'bg-white text-orange-500 border-orange-500 shadow-sm'
+                                                        : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
+                                                }`}
+                                            >
+                                                Regular
+                                            </button>
+
+                                            {/* Each variant as its own button */}
+                                            {variants.map(v => {
+                                                const isSelected = selectedVariant?.id === v.id;
+                                                const isOOS = v.stock <= 0;
+                                                return (
+                                                    <button
+                                                        key={v.id}
+                                                        type="button"
+                                                        disabled={isOOS}
+                                                        onClick={() => { setSelectedVariant(v); setSelectedOptions({ size: v.size, color: v.color, weight: v.weight }); setOrderQty(viewProduct.min_order_qty || 1); setActiveGalleryImage(null); }}
+                                                        className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${
+                                                            isOOS ? 'opacity-40 cursor-not-allowed bg-secondary/50 border-transparent text-muted-foreground'
+                                                            : isSelected ? 'bg-white text-orange-500 border-orange-500 shadow-sm'
+                                                            : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
+                                                        }`}
+                                                    >
+                                                        {getVariantLabel(v)}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
-                                </Card>
+                                )}
+
+                                {/* Quantity & Order Button */}
+                                <div className="mt-auto pt-4 border-t border-border">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
+                                            <button
+                                                onClick={() => setOrderQty(q => Math.max(viewProduct.min_order_qty || 1, q - 1))}
+                                                className="px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold"
+                                            >
+                                                −
+                                            </button>
+                                            <input
+                                                type="number"
+                                                value={orderQty}
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value) || 1;
+                                                    const minQty = viewProduct.min_order_qty || 1;
+                                                    const maxQty = currentStock;
+                                                    setOrderQty(Math.max(minQty, Math.min(maxQty, val)));
+                                                }}
+                                                min={viewProduct.min_order_qty || 1}
+                                                max={currentStock}
+                                                className="w-16 text-center border-x-2 border-gray-300 py-2 font-bold text-lg focus:outline-none"
+                                            />
+                                            <button
+                                                onClick={() => setOrderQty(q => Math.min(currentStock, q + 1))}
+                                                className="px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold"
+                                                disabled={orderQty >= currentStock}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                        <span className="text-sm text-muted-foreground">{currentStock} unit{currentStock !== 1 ? 's' : ''} in stock</span>
+                                    </div>
+                                    <Button
+                                        className="w-full h-12 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white"
+                                        onClick={handleOrder}
+                                        disabled={actionLoading || isOutOfStock}
+                                    >
+                                        🛒 {actionLoading ? 'Sending...' : `Order (₱${subtotal.toFixed(2)})`}
+                                    </Button>
+                                </div>
+
+                                {/* Footer Buttons */}
+                                <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
+                                    <Button variant="ghost" onClick={() => setViewProduct(null)}>Cancel</Button>
+                                    <Button variant="outline">View Full Specs</Button>
+                                </div>
                             </div>
                         </div>
-
-                        {/* Variants */}
-                        {viewProduct.variants?.length > 0 && (
-                            <div>
-                                <h4 className="text-sm font-bold text-foreground mb-3">Available Variants</h4>
-                                <Card className="overflow-hidden">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-                                                <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Size</TableHead>
-                                                <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Color</TableHead>
-                                                <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Weight</TableHead>
-                                                <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Stock</TableHead>
-                                                <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Price</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {viewProduct.variants.map(v => (
-                                                <TableRow key={v.id}>
-                                                    <TableCell className="px-4 py-3">{v.size || '-'}</TableCell>
-                                                    <TableCell className="px-4 py-3">
-                                                        {v.color ? (
-                                                            <span className="flex items-center gap-1.5">
-                                                                <span className="w-3.5 h-3.5 rounded-full border border-border shrink-0" style={{ background: v.color }} />
-                                                                {v.color}
-                                                            </span>
-                                                        ) : '-'}
-                                                    </TableCell>
-                                                    <TableCell className="px-4 py-3">{v.weight || '-'}</TableCell>
-                                                    <TableCell className="px-4 py-3">
-                                                        <Badge variant="outline" className={v.stock > 0 ? 'border-success/30 bg-success-light text-success-foreground' : 'border-destructive/30 bg-destructive/5 text-destructive'}>
-                                                            {v.stock > 0 ? `${v.stock} in stock` : 'Out of stock'}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell className="px-4 py-3 font-bold text-foreground">
-                                                        {v.price_override ? `₱${Number(v.price_override).toFixed(2)}` : 'Base price'}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </Card>
-                            </div>
-                        )}
-
-                        <div className="flex justify-end pt-2">
-                            <Button variant="outline" onClick={() => setViewProduct(null)}>Close</Button>
-                        </div>
-                    </div>
-                )}
+                    );
+                })()}
             </Modal>
         </div>
     );

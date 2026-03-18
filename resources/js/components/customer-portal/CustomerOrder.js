@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle } from 'lucide-react';
 
 import "leaflet/dist/leaflet.css";
 
@@ -231,7 +231,7 @@ export default function CustomerOrder() {
                                             <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center text-xl shrink-0 overflow-hidden">
                                                 {item.image_path ? (
                                                     <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-cover rounded-lg" />
-                                                ) : '📦'}
+                                                ) : <Package className="h-6 w-6 opacity-30 text-muted-foreground" />}
                                             </div>
                                             <div className="flex-1">
                                                 <span className="font-semibold">{item.qty}x</span> {item.name}
@@ -271,16 +271,18 @@ export default function CustomerOrder() {
                                                 <MapPin className="h-4 w-4 text-amber-600" />
                                                 <span className="font-semibold text-sm text-amber-800">Your Registered Location</span>
                                             </div>
-                                            <div className="text-xs text-muted-foreground">{customerProfile?.latitude?.toFixed(6)}, {customerProfile?.longitude?.toFixed(6)}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {customerProfile?.latitude ? Number(customerProfile.latitude).toFixed(6) : 'N/A'}, {customerProfile?.longitude ? Number(customerProfile.longitude).toFixed(6) : 'N/A'}
+                                            </div>
                                         </Card>
 
                                         <Card className="bg-blue-50 border-blue-200 p-3">
-                                            <p className="text-sm text-blue-800"><strong>📌 Delivery Confirmation:</strong><br />Your order will be delivered to the location shown above. Please ensure this is correct before placing your order.</p>
+                                            <p className="text-sm text-blue-800 flex items-start gap-2"><MapPin className="h-4 w-4 shrink-0 mt-0.5 text-blue-600" /><span><strong>Delivery Confirmation:</strong><br />Your order will be delivered to the location shown above. Please ensure this is correct before placing your order.</span></p>
                                         </Card>
                                     </>
                                 ) : (
                                     <Card className="bg-amber-50 border-amber-200 p-3">
-                                        <p className="text-sm text-amber-800"><strong>⚠️ No Location Data:</strong><br />Your account doesn't have GPS coordinates. The rider may need to contact you for directions.</p>
+                                        <p className="text-sm text-amber-800 flex items-start gap-2"><AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" /><span><strong>No Location Data:</strong><br />Your account doesn't have GPS coordinates. The rider may need to contact you for directions.</span></p>
                                     </Card>
                                 )}
 
@@ -365,7 +367,7 @@ export default function CustomerOrder() {
                                     <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center text-2xl shrink-0 overflow-hidden">
                                         {item.image_path ? (
                                             <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-cover rounded-xl" />
-                                        ) : '📦'}
+                                        ) : <Package className="h-7 w-7 opacity-20 text-muted-foreground" />}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="font-semibold text-foreground text-sm truncate">{item.name}</div>

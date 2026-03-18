@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../shared/Modal';
 import { StatusBadge } from '../shared/Badge';
+import { Pencil } from 'lucide-react';
 
 export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit }) {
     const { showToast } = useToast();
@@ -44,7 +45,7 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
                     <button className="btn btn-ghost" onClick={onClose}>Close</button>
                     {supplier && (
                         <button className="btn btn-primary" onClick={() => onEdit(supplier)}>
-                            ✏️ Edit Supplier
+                            <Pencil className="inline h-3.5 w-3.5 mr-1" /> Edit Supplier
                         </button>
                     )}
                 </div>

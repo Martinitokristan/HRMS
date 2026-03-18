@@ -1,297 +1,237 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../shared/Modal';
+import VariantSelector from '../shared/VariantSelector';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export default function ProductDetailModal({ isOpen, onClose, product, onAddToCart }) {
     const [qty, setQty] = useState(1);
-    const [selectedColor, setSelectedColor] = useState(null);
-    const [selectedSize, setSelectedSize] = useState(null);
+    const [selectedVariant, setSelectedVariant] = useState(null);
+    const [selectedOptions, setSelectedOptions] = useState({ size: '', color: '', weight: '' });
+    const [activeGalleryImage, setActiveGalleryImage] = useState(null);
 
     useEffect(() => {
         if (isOpen && product) {
             setQty(product.qty || 1);
-            setSelectedColor(product.selectedVariants?.Color || null);
-            setSelectedSize(product.selectedVariants?.Size || null);
+            setSelectedVariant(null);
+            setSelectedOptions({ size: '', color: '', weight: '' });
+            setActiveGalleryImage(null);
         }
     }, [isOpen, product]);
 
     if (!product) return null;
 
-    const allVariants = product.product_variants || [];
-    const hasVariants = allVariants.length > 0;
+    // Calculate base values first
+    const baseStock = Number(product.inventory?.current_stock || 0);
+    const allVariants = product.product_variants || product.variants || [];
+    const hasOriginalVariants = allVariants.length > 0;
 
-    const colorMap = {};
-    const sizeMap = {};
-    allVariants.forEach(v => {
-        if (v.color_value) colorMap[v.color_value_id] = v.color_value;
-        if (v.size_value)  sizeMap[v.size_value_id]  = v.size_value;
-    });
-    const availableColors = Object.values(colorMap);
-    const availableSizes  = Object.values(sizeMap);
-    const hasColors = availableColors.length > 0;
-    const hasSizes  = availableSizes.length  > 0;
+    // Convert product_variants to format expected by VariantSelector
+    const variantOptions = allVariants.map(v => ({
+        id: v.id,
+        size: v.size_value?.label || v.size || '',
+        color: v.color_value?.label || v.color || '',
+        weight: v.weight_value?.label || v.weight || '',
+        stock: v.stock || 0,
+        price_override: v.price_override || null,
+        color_hex: v.color_value?.hex_code || v.color_hex || null,
+        image_path: v.image_path || null,
+        additional_images: v.additional_images || []
+    }));
 
-    const totalVariantStock = allVariants.reduce((s, v) => s + (v.stock || 0), 0);
+    // Add base product as an option if product has variants and base stock
+    const variants = hasOriginalVariants && baseStock > 0 ? [
+        {
+            id: 'base',
+            size: 'Regular',
+            color: '',
+            weight: '',
+            stock: baseStock,
+            price_override: null,
+            color_hex: null,
+            image_path: product.image_path || null,
+            additional_images: product.additional_images || []
+        },
+        ...variantOptions
+    ] : variantOptions;
 
-    const findVariant = (sizeId, colorId) =>
-        allVariants.find(v =>
-            (sizeId  ? v.size_value_id  === sizeId  : !v.size_value_id)  &&
-            (colorId ? v.color_value_id === colorId : !v.color_value_id)
-        );
-
-    const stockForColor = (colorId) => {
-        if (selectedSize) {
-            const v = findVariant(selectedSize.id, colorId);
-            return v ? v.stock : 0;
-        }
-        return allVariants
-            .filter(v => v.color_value_id === colorId)
-            .reduce((s, v) => s + (v.stock || 0), 0);
-    };
-
-    const stockForSize = (sizeId) => {
-        if (selectedColor) {
-            const v = findVariant(sizeId, selectedColor.id);
-            return v ? v.stock : 0;
-        }
-        return allVariants
-            .filter(v => v.size_value_id === sizeId)
-            .reduce((s, v) => s + (v.stock || 0), 0);
-    };
-
-    const activeCombo = hasVariants
-        ? findVariant(
-            hasSizes  ? selectedSize?.id  : undefined,
-            hasColors ? selectedColor?.id : undefined
-          )
-        : null;
-
-    const currentPrice = activeCombo?.price_override || product.sell_price;
-
-    let currentStock;
-    if (!hasVariants) {
-        currentStock = product.inventory?.current_stock || 0;
-    } else if (activeCombo) {
-        currentStock = activeCombo.stock;
-    } else if (selectedColor && !hasSizes) {
-        currentStock = stockForColor(selectedColor.id);
-    } else if (selectedSize && !hasColors) {
-        currentStock = stockForSize(selectedSize.id);
-    } else {
-        currentStock = totalVariantStock;
-    }
-
+    const hasVariants = variants.length > 0;
+    const currentPrice = selectedVariant?.price_override || product.sell_price;
+    
+    // If variant selected, show variant stock. If no variant selected but has variants, show base stock
+    const currentStock = hasVariants 
+        ? (selectedVariant ? Number(selectedVariant.stock || 0) : Number(baseStock || 0))
+        : Number(baseStock || 0);
+    
     const isOutOfStock = currentStock <= 0;
-    const isLowStock   = currentStock > 0 && currentStock <= 5;
-    const subtotal     = currentPrice * qty;
+    const subtotal = currentPrice * qty;
+    // Can add if: (1) in stock AND (2) either no variants OR variant selected OR base stock available
+    const canAdd = !isOutOfStock && (!hasVariants || selectedVariant || baseStock > 0);
 
-    const needsSize  = hasSizes  && !selectedSize;
-    const needsColor = hasColors && !selectedColor;
-    const selectionComplete = !needsSize && !needsColor;
-    const canAdd = selectionComplete && !isOutOfStock && (!hasVariants || activeCombo);
+    const handleVariantChange = (variant, options) => {
+        // Only reset gallery if variant actually changes to a different one
+        if (selectedVariant?.id !== variant?.id) {
+            setActiveGalleryImage(null);
+        }
+        // Handle base product selection
+        setSelectedVariant(variant.id === 'base' ? null : variant);
+        setSelectedOptions(options);
+    };
 
     const handleAddToCart = () => {
         if (!canAdd) return;
         onAddToCart(product, {
             qty,
-            variants: { Size: selectedSize, Color: selectedColor },
+            variants: selectedOptions,
             price: currentPrice,
-            variant_id: activeCombo?.id,
+            variant_id: selectedVariant?.id,
             isUpdate: !!product.cartId
         });
         onClose();
     };
 
+    // --- Image Gallery Logic --- //
+    const mainImage = selectedVariant ? (selectedVariant.image_path || product.image_path) : product.image_path;
+    const additionalImages = selectedVariant ? (selectedVariant.additional_images || []) : (product.additional_images || []);
+    const allImages = [mainImage, ...additionalImages].filter(Boolean);
+    const displayImage = activeGalleryImage || mainImage;
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Product Specification" size="lg" hideFooter>
-            <div className="pdm-wrap">
-                {/* Image Section */}
-                <div className="pdm-left">
-                    <div className="pdm-img-main">
-                        {product.image_path
-                            ? <img src={`/storage/${product.image_path}`} alt={product.name} />
-                            : <div className="pdm-img-fallback">🛠️</div>}
-                    </div>
-                </div>
-
-                {/* Details Section */}
-                <div className="pdm-right">
-                    <div style={{ marginBottom: '2rem' }}>
-                        <div className="pdm-category">{product.category?.name || 'Supply'}</div>
-                        <h1 className="pdm-name">{product.name}</h1>
-                        <div className="pdm-price">₱{Number(currentPrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                    </div>
-
-                    <div className="pdm-stock-status">
-                        {selectionComplete ? (
-                            isOutOfStock ? (
-                                <span className="status-badge status-out">Out of Stock</span>
-                            ) : (
-                                <span className="status-badge status-in">{currentStock} Units in Stock</span>
-                            )
+        <Modal isOpen={isOpen} onClose={onClose} title="Product Details" size="lg" hideFooter>
+            <div className="grid grid-cols-1 md:grid-cols-[1.2fr,1fr] gap-0">
+                {/* Left Side - Image & Gallery */}
+                <div className="bg-secondary/10 p-6 flex flex-col items-center border-r border-border">
+                    {/* Main Image Box - FIXED SIZE */}
+                    <div className="w-full aspect-square relative rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center overflow-hidden mb-6">
+                        {displayImage ? (
+                            <img 
+                                src={`/storage/${displayImage}`} 
+                                alt={product.name} 
+                                className="w-full h-full object-contain p-4" 
+                            />
                         ) : (
-                            <span className="status-badge status-neutral">Select variant for availability</span>
+                            <div className="text-8xl opacity-10">🛠️</div>
                         )}
                     </div>
 
+                    {/* Thumbnails Row */}
+                    {allImages.length > 1 && (
+                        <div className="flex flex-wrap justify-center gap-3">
+                            {allImages.map((img, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setActiveGalleryImage(img)}
+                                    className={`w-16 h-16 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${
+                                        displayImage === img 
+                                            ? 'border-orange-500 shadow-md ring-2 ring-orange-100' 
+                                            : 'border-border hover:border-orange-200'
+                                    }`}
+                                >
+                                    <img src={`/storage/${img}`} alt="" className="w-full h-full object-contain" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Right Side - Details */}
+                <div className="p-6 flex flex-col">
+                    {/* Category & Title */}
+                    <div className="mb-4">
+                        <div className="text-xs font-bold uppercase tracking-wider text-orange-500 mb-1">
+                            {product.category?.name || 'SUPPLIES'}
+                        </div>
+                        <h2 className="text-2xl font-bold text-foreground mb-2 leading-tight">
+                            {product.name}
+                        </h2>
+                    </div>
+
+                    {/* Description */}
                     {product.description && (
-                        <div className="pdm-section">
-                            <label>Description</label>
-                            <p className="pdm-desc">{product.description}</p>
+                        <div className="mb-4">
+                            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">DESCRIPTION</div>
+                            <p className="text-sm text-foreground leading-relaxed">{product.description}</p>
                         </div>
                     )}
 
-                    {/* Variants */}
-                    {hasColors && (
-                        <div className="pdm-section">
-                            <label>Finish / Color</label>
-                            <div className="pdm-variant-options">
-                                {availableColors.map(color => (
-                                    <button
-                                        key={color.id}
-                                        onClick={() => setSelectedColor(prev => prev?.id === color.id ? null : color)}
-                                        className={`opt-btn ${selectedColor?.id === color.id ? 'active' : ''} ${stockForColor(color.id) <= 0 ? 'disabled' : ''}`}
-                                    >
-                                        {color.label}
-                                    </button>
-                                ))}
-                            </div>
+                    {/* Stock Badge */}
+                    <div className="mb-4">
+                        <Badge variant={isOutOfStock ? "destructive" : "success"} className="text-sm px-3 py-1">
+                            {isOutOfStock ? 'Out of Stock' : `${Math.round(currentStock)} units in stock`}
+                        </Badge>
+                    </div>
+
+                    {/* Price */}
+                    <div className="mb-4">
+                        <div className="text-3xl font-bold text-orange-500">
+                            ₱{Number(currentPrice).toFixed(2)}
+                        </div>
+                    </div>
+
+                    {/* SKU */}
+                    {product.sku && (
+                        <div className="mb-4 text-sm">
+                            <span className="text-muted-foreground font-semibold">SKU:</span>{' '}
+                            <span className="font-mono text-foreground">{product.sku}</span>
                         </div>
                     )}
 
-                    {hasSizes && (
-                        <div className="pdm-section">
-                            <label>Dimension / Size</label>
-                            <div className="pdm-variant-options">
-                                {availableSizes.map(size => (
-                                    <button
-                                        key={size.id}
-                                        onClick={() => setSelectedSize(prev => prev?.id === size.id ? null : size)}
-                                        className={`opt-btn ${selectedSize?.id === size.id ? 'active' : ''} ${stockForSize(size.id) <= 0 ? 'disabled' : ''}`}
-                                    >
-                                        {size.label}
-                                    </button>
-                                ))}
-                            </div>
+                    {/* Variants - New Modern UI */}
+                    {hasVariants && (
+                        <div className="mb-6">
+                            <VariantSelector
+                                variants={variants}
+                                onVariantChange={handleVariantChange}
+                                selectedVariant={selectedVariant}
+                                showStock={false}
+                                showPrice={false}
+                            />
                         </div>
                     )}
 
                     {/* Quantity & Add to Cart */}
-                    <div className="pdm-footer">
-                        <div className="pdm-qty-picker">
-                            <button onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
-                            <input type="number" readOnly value={qty} />
-                            <button onClick={() => setQty(q => Math.min(q + 1, currentStock))}>+</button>
+                    <div className="mt-auto pt-4 border-t border-border">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <button
+                                    onClick={() => setQty(q => Math.max(1, q - 1))}
+                                    className="px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold"
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    value={qty}
+                                    onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
+                                    className="w-16 text-center border-x-2 border-gray-300 py-2 font-bold text-lg focus:outline-none"
+                                    readOnly
+                                />
+                                <button
+                                    onClick={() => setQty(q => Math.min(q + 1, currentStock))}
+                                    className="px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold"
+                                >
+                                    +
+                                </button>
+                            </div>
+                            <span className="text-sm text-muted-foreground">{Math.round(currentStock)} units in stock</span>
                         </div>
-                        <button
-                            disabled={!canAdd}
+                        <Button
+                            className="w-full h-12 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/30"
                             onClick={handleAddToCart}
-                            className={`pdm-primary-btn ${!canAdd ? 'disabled' : ''}`}
+                            disabled={!canAdd}
                         >
-                            {isOutOfStock ? 'Sold Out' : `Add to Cart • ₱${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-                        </button>
+                            🛒 {isOutOfStock ? 'Sold Out' : `Order (₱${subtotal.toFixed(2)})`}
+                        </Button>
+                    </div>
+
+                    {/* Footer Buttons */}
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
+                        <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                        <Button variant="outline">View Full Specs</Button>
                     </div>
                 </div>
             </div>
 
-            <style>{`
-                .pdm-wrap {
-                    display: grid;
-                    grid-template-columns: 1.1fr 1fr;
-                    gap: 0;
-                    background: #fff;
-                }
-                @media (max-width: 768px) {
-                    .pdm-wrap { grid-template-columns: 1fr; }
-                }
-
-                .pdm-left {
-                    padding: 2rem;
-                    background: #fdfdfd;
-                    border-right: 1px solid #f1f5f9;
-                    display: flex; align-items: center; justify-content: center;
-                }
-                .pdm-img-main {
-                    width: 100%;
-                    aspect-ratio: 1;
-                    display: flex; align-items: center; justify-content: center;
-                }
-                .pdm-img-main img {
-                    max-width: 100%; max-height: 100%; object-fit: contain;
-                }
-                .pdm-img-fallback { font-size: 6rem; opacity: 0.2; }
-
-                .pdm-right {
-                    padding: 2.5rem;
-                    display: flex; flex-direction: column;
-                }
-
-                .pdm-category {
-                    color: #FF6B35; font-weight: 800; font-size: 0.8rem;
-                    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
-                }
-                .pdm-name {
-                    font-size: 1.75rem; font-weight: 900; color: #111827;
-                    margin-bottom: 0.75rem; line-height: 1.2; letter-spacing: -0.02em;
-                }
-                .pdm-price {
-                    font-size: 2rem; font-weight: 900; color: #111827;
-                }
-
-                .pdm-stock-status { margin-bottom: 2rem; }
-                .status-badge {
-                    padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;
-                }
-                .status-in { background: #dcfce7; color: #166534; }
-                .status-out { background: #fee2e2; color: #991b1b; }
-                .status-neutral { background: #f1f5f9; color: #475569; }
-
-                .pdm-section { margin-bottom: 2rem; }
-                .pdm-section label {
-                    display: block; font-size: 0.85rem; font-weight: 800;
-                    text-transform: uppercase; color: #94a3b8; margin-bottom: 1rem;
-                    letter-spacing: 0.05em;
-                }
-                .pdm-desc { color: #475569; line-height: 1.6; font-size: 0.95rem; }
-
-                .pdm-variant-options { display: flex; flex-wrap: wrap; gap: 10px; }
-                .opt-btn {
-                    padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0;
-                    background: #fff; font-weight: 700; color: #475569; cursor: pointer;
-                    transition: all 0.2s;
-                }
-                .opt-btn:hover:not(.disabled) { border-color: #cbd5e1; color: #111827; }
-                .opt-btn.active { border-color: #111827; background: #111827; color: #fff; }
-                .opt-btn.disabled { opacity: 0.3; cursor: not-allowed; }
-
-                .pdm-footer {
-                    margin-top: auto; display: flex; gap: 1.5rem; padding-top: 2.5rem;
-                    border-top: 1px solid #f1f5f9;
-                }
-                .pdm-qty-picker {
-                    display: flex; align-items: center; background: #f8fafc;
-                    border: 2px solid #e2e8f0; border-radius: 16px; overflow: hidden;
-                }
-                .pdm-qty-picker button {
-                    width: 42px; height: 46px; border: none; background: transparent;
-                    font-size: 1.25rem; color: #111827; cursor: pointer; transition: background 0.2s;
-                }
-                .pdm-qty-picker button:hover { background: #e2e8f0; }
-                .pdm-qty-picker input {
-                    width: 44px; text-align: center; border: none; background: transparent;
-                    font-weight: 800; font-size: 1.1rem; color: #111827;
-                }
-
-                .pdm-primary-btn {
-                    flex: 1; height: 46px; border: none; border-radius: 14px;
-                    background: #111827; color: #fff; font-weight: 800; font-size: 1rem;
-                    cursor: pointer; transition: all 0.3s;
-                }
-                .pdm-primary-btn:hover:not(.disabled) {
-                    background: #FF6B35; transform: translateY(-2px);
-                    box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
-                }
-                .pdm-primary-btn.disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
-            `}</style>
         </Modal>
     );
 }

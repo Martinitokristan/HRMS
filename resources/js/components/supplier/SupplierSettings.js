@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Trash2 } from 'lucide-react';
+import { Trash2, User, FolderOpen, Lock, Bell, Ruler, Palette, Weight, ArrowLeftRight, RefreshCw } from 'lucide-react';
+import SupplierVariantSettings from './SupplierVariantSettings';
+import SupplierUnitSettings from './SupplierUnitSettings';
 
 export default function SupplierSettings() {
     const { supplier, logout } = useSupplierAuth();
@@ -62,10 +65,15 @@ export default function SupplierSettings() {
     };
 
     const tabs = [
-        { id: 'profile', label: 'Profile', icon: '👤' },
-        { id: 'categories', label: 'Categories', icon: '📂' },
-        { id: 'security', label: 'Security', icon: '🔒' },
-        { id: 'notifications', label: 'Notifications', icon: '🔔' },
+        { id: 'profile', label: 'Profile', Icon: User },
+        { id: 'categories', label: 'Categories', Icon: FolderOpen },
+        { id: 'sizes', label: 'Sizes', Icon: Ruler },
+        { id: 'colors', label: 'Colors', Icon: Palette },
+        { id: 'weights', label: 'Grams & Weights', Icon: Weight },
+        { id: 'variants', label: 'Variant Types', Icon: ArrowLeftRight, isSystem: true },
+        { id: 'units', label: 'Unit Conversions', Icon: RefreshCw, isSystem: true },
+        { id: 'security', label: 'Security', Icon: Lock },
+        { id: 'notifications', label: 'Notifications', Icon: Bell },
     ];
 
     const [categories, setCategories] = useState([]);
@@ -113,20 +121,35 @@ export default function SupplierSettings() {
         <div className="flex gap-6">
             {/* Sidebar */}
             <div className="w-56 shrink-0">
-                <nav className="space-y-1">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                                activeTab === tab.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                            }`}
-                            onClick={() => setActiveTab(tab.id)}
-                        >
-                            <span>{tab.icon}</span>
-                            {tab.label}
-                        </button>
-                    ))}
-                </nav>
+                <Card className="p-3">
+                    <nav className="space-y-1">
+                        {tabs.filter(t => !t.isSystem).map(tab => (
+                            <button
+                                key={tab.id}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
+                                    activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                }`}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                <tab.Icon className="h-4 w-4 shrink-0" />
+                                {tab.label}
+                            </button>
+                        ))}
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-3 pt-4 pb-1">System</div>
+                        {tabs.filter(t => t.isSystem).map(tab => (
+                            <button
+                                key={tab.id}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
+                                    activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                }`}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                <tab.Icon className="h-4 w-4 shrink-0" />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
+                </Card>
             </div>
 
             {/* Content */}
@@ -237,6 +260,57 @@ export default function SupplierSettings() {
                             </div>
                         </form>
                     </>
+                )}
+
+                {(activeTab === 'sizes' || activeTab === 'colors' || activeTab === 'weights') && (
+                    <SupplierVariantSettings initialTab={activeTab} />
+                )}
+
+                {activeTab === 'variants' && (
+                    <>
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-foreground">Variant Types</h2>
+                            <p className="text-sm text-muted-foreground mt-1">Manage the types of variants available for your products</p>
+                        </div>
+                        <Card className="p-6">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                                    <div className="flex items-center gap-3">
+                                        <Ruler className="h-5 w-5 text-primary" />
+                                        <div>
+                                            <div className="font-semibold text-foreground">Size</div>
+                                            <div className="text-sm text-muted-foreground">Product dimensions and sizes</div>
+                                        </div>
+                                    </div>
+                                    <Badge>Active</Badge>
+                                </div>
+                                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                                    <div className="flex items-center gap-3">
+                                        <Palette className="h-5 w-5 text-primary" />
+                                        <div>
+                                            <div className="font-semibold text-foreground">Color</div>
+                                            <div className="text-sm text-muted-foreground">Product color options</div>
+                                        </div>
+                                    </div>
+                                    <Badge>Active</Badge>
+                                </div>
+                                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                                    <div className="flex items-center gap-3">
+                                        <Weight className="h-5 w-5 text-primary" />
+                                        <div>
+                                            <div className="font-semibold text-foreground">Weight</div>
+                                            <div className="text-sm text-muted-foreground">Product weight specifications</div>
+                                        </div>
+                                    </div>
+                                    <Badge>Active</Badge>
+                                </div>
+                            </div>
+                        </Card>
+                    </>
+                )}
+
+                {activeTab === 'units' && (
+                    <SupplierUnitSettings />
                 )}
 
                 {activeTab === 'notifications' && (

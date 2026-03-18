@@ -13,6 +13,7 @@ class CreateInventoryTable extends Migration
             $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('cascade');
             $table->foreignId('product_variant_id')->nullable()->constrained('product_variants')->onDelete('cascade');
             $table->foreignId('supplier_product_id')->nullable()->constrained('supplier_products')->onDelete('set null');
+            $table->foreignId('supplier_product_variant_id')->nullable()->constrained('supplier_product_variants')->onDelete('set null');
             $table->decimal('current_stock', 10, 2)->default(0);
             $table->decimal('warehouse_stock', 10, 2)->default(0)->comment('Stock received from POs, not yet pushed to storefront');
             $table->decimal('reorder_threshold', 10, 2)->default(10);

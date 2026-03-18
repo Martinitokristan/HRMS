@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Building2, Eye, Trash2, Plus } from 'lucide-react';
+import { Building2, Eye, Trash2, Plus, Package, ShoppingCart, Handshake, CheckCircle, Star } from 'lucide-react';
 
 const SupplierStatusBadge = ({ status }) => {
     const config = {
@@ -130,10 +130,10 @@ export default function Suppliers() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <StatCard label="Total Suppliers" value={stats.total} icon="🏢" accentColor="accent" />
-                <StatCard label="Active Partners" value={stats.active} icon="✓" accentColor="green" />
-                <StatCard label="Preferred Suppliers" value={stats.preferred} icon="★" accentColor="blue" />
-                <StatCard label="With Products" value={stats.withProducts} icon="📦" accentColor="purple" />
+                <StatCard label="Total Suppliers" value={stats.total} icon={Handshake} accentColor="accent" />
+                <StatCard label="Active Partners" value={stats.active} icon={CheckCircle} accentColor="green" />
+                <StatCard label="Preferred Suppliers" value={stats.preferred} icon={Star} accentColor="blue" />
+                <StatCard label="With Products" value={stats.withProducts} icon={Package} accentColor="purple" />
             </div>
 
             {/* Filters & Controls */}
@@ -189,7 +189,7 @@ export default function Suppliers() {
                         ) : suppliers.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-16">
-                                    <div className="text-4xl mb-2 opacity-50">🏢</div>
+                                    <Building2 className="h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground" />
                                     <h3 className="text-base font-semibold text-foreground mb-1">No suppliers found</h3>
                                     <p className="text-sm text-muted-foreground mb-4">{search || statusFilter !== 'all' ? 'Try adjusting your filters or search terms' : 'Add your first supplier to get started with vendor management'}</p>
                                     <Button onClick={handleAdd} className="gap-2">
@@ -218,11 +218,11 @@ export default function Suppliers() {
                                         <div className="text-sm text-muted-foreground">{supplier.phone || '-'}</div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3">
-                                        <div className="text-sm text-foreground">
-                                            📦 <span className="font-semibold">{supplier.products_count || 0}</span> Products
+                                        <div className="text-sm text-foreground flex items-center gap-1">
+                                            <Package className="h-3.5 w-3.5 text-muted-foreground" /> <span className="font-semibold">{supplier.products_count || 0}</span> Products
                                         </div>
-                                        <div className="text-sm text-muted-foreground">
-                                            🛒 <span className="font-semibold">{supplier.purchase_orders_count || 0}</span> Orders
+                                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                            <ShoppingCart className="h-3.5 w-3.5" /> <span className="font-semibold">{supplier.purchase_orders_count || 0}</span> Orders
                                         </div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3">

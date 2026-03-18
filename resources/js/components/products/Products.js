@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Package } from 'lucide-react';
 
 export default function Products() {
     const [products, setProducts] = useState({ data: [], total: 0, current_page: 1 });
@@ -152,39 +153,56 @@ export default function Products() {
                             <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">No products found.</TableCell></TableRow>
                         ) : products.data.map(p => {
                             const margin = p.sell_price > 0 ? ((p.sell_price - p.purchase_price) / p.sell_price * 100).toFixed(1) : 0;
+                            const firstImg = p.image_path || p.product_variants?.find(v => v.image_path)?.image_path;
+                            const imgSrc = firstImg ? `/storage/${firstImg}` : null;
+                            
                             return (
-                                <TableRow key={p.id}>
+                                <TableRow key={p.id} className="hover:bg-secondary/30 transition-colors">
                                     <TableCell className="px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            {(() => {
-                                                const firstImg = p.product_variants?.find(v => v.image_path)?.image_path;
-                                                return firstImg
-                                                    ? <img src={`/storage/${firstImg}`} alt={p.name} className="h-10 w-10 rounded-lg object-cover border border-border" />
-                                                    : <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-lg">📦</div>;
-                                            })()}
-                                            <span className="text-[13px] font-semibold text-foreground">{p.sku}</span>
+                                            <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-secondary border-2 border-border flex-shrink-0">
+                                                {imgSrc ? (
+                                                    <img 
+                                                        src={imgSrc} 
+                                                        alt={p.name} 
+                                                        className="h-full w-full object-cover"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            e.target.nextElementSibling.style.display = 'flex';
+                                                        }}
+                                                    />
+                                                ) : null}
+                                                <div className={`absolute inset-0 flex items-center justify-center ${imgSrc ? 'hidden' : 'flex'}`}>
+                                                    <Package className="h-5 w-5 text-muted-foreground opacity-40" />
+                                                </div>
+                                            </div>
+                                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{p.barcode}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3">
-                                        <div className="font-semibold text-foreground">{p.name}</div>
-                                        <div className="text-[12px] text-muted-foreground">{p.supplier?.name}</div>
+                                        <div className="font-bold text-foreground">{p.name}</div>
+                                        <div className="text-xs text-muted-foreground mt-0.5">{p.supplier?.name || 'In-house'}</div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3">
-                                        <Badge variant="secondary">{p.category?.name}</Badge>
+                                        <Badge variant="secondary" className="font-semibold">{p.category?.name || 'Uncategorized'}</Badge>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-right text-muted-foreground font-medium">₱{Number(p.purchase_price).toFixed(2)}</TableCell>
-                                    <TableCell className="px-4 py-3 text-right font-bold text-primary">₱{Number(p.sell_price).toFixed(2)}</TableCell>
+                                    <TableCell className="px-4 py-3 text-right">
+                                        <div className="text-sm text-muted-foreground font-medium">₱{Number(p.purchase_price).toFixed(2)}</div>
+                                    </TableCell>
+                                    <TableCell className="px-4 py-3 text-right">
+                                        <div className="text-base font-black text-foreground">₱{Number(p.sell_price).toFixed(2)}</div>
+                                    </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
-                                        <Badge variant="outline" className={margin > 20 ? 'border-success/30 bg-success-light text-success-foreground' : 'border-warning/30 bg-warning-light text-warning-foreground'}>
+                                        <Badge variant="outline" className={`font-bold ${margin > 20 ? 'border-success/30 bg-success-light text-success-foreground' : 'border-warning/30 bg-warning-light text-warning-foreground'}`}>
                                             {margin}%
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
-                                        <div className="font-semibold text-foreground">
+                                        <div className="font-bold text-foreground">
                                             {p.product_variants?.length > 0 ? (
                                                 <>
                                                     {p.product_variants.reduce((sum, v) => sum + (v.stock || 0), 0)} pcs 
-                                                    <div className="text-[11px] text-muted-foreground">({p.product_variants.length} variants)</div>
+                                                    <div className="text-[10px] text-muted-foreground font-semibold">({p.product_variants.length} variants)</div>
                                                 </>
                                             ) : (
                                                 `${p.inventory?.current_stock || 0} pcs`
@@ -193,8 +211,8 @@ export default function Products() {
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
                                         <div className="flex items-center justify-center gap-2">
-                                            <Button variant="outline" size="sm" onClick={() => openEdit(p)}>Edit</Button>
-                                            <Button variant="destructive" size="sm" onClick={() => setDeleteId(p.id)}>Delete</Button>
+                                            <Button variant="outline" size="sm" className="font-semibold" onClick={() => openEdit(p)}>Edit</Button>
+                                            <Button variant="destructive" size="sm" className="font-semibold" onClick={() => setDeleteId(p.id)}>Delete</Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>

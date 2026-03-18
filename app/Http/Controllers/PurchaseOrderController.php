@@ -73,6 +73,32 @@ class PurchaseOrderController extends Controller
                     'unit_cost'                   => $item['unit_cost'],
                     'subtotal'                    => $subtotal,
                 ]);
+
+                // CRITICAL FIX: Reserve/decrease supplier stock when admin ORDERS
+                if (!empty($item['supplier_product_id'])) {
+                    $supplierProduct = \App\Models\SupplierProduct::with('variants')->find($item['supplier_product_id']);
+                    if ($supplierProduct) {
+                        if (!empty($item['supplier_product_variant_id'])) {
+                            // PATH A: Decrease specific variant stock (variant's own stock, independent of base)
+                            $supplierVariant = \App\Models\SupplierProductVariant::find($item['supplier_product_variant_id']);
+                            if (!$supplierVariant) {
+                                throw new \Exception("Variant not found.");
+                            }
+                            if ($supplierVariant->stock < $item['quantity']) {
+                                throw new \Exception("Insufficient stock for variant '{$supplierVariant->size}{$supplierVariant->color}{$supplierVariant->weight}'. Available: {$supplierVariant->stock}, Requested: {$item['quantity']}");
+                            }
+                            $supplierVariant->decrement('stock', $item['quantity']);
+                            // NOTE: We do NOT sync total_stock here — base stock is independent from variant stocks.
+                        } else {
+                            // PATH B: No variant selected = ordering the Regular/base product
+                            // Deduct from total_stock (the base product's own stock)
+                            if ($supplierProduct->total_stock < $item['quantity']) {
+                                throw new \Exception("Insufficient stock for '{$supplierProduct->name}' (Regular). Available: {$supplierProduct->total_stock}, Requested: {$item['quantity']}");
+                            }
+                            $supplierProduct->decrement('total_stock', $item['quantity']);
+                        }
+                    }
+                }
             }
 
             $po->update(['total_cost' => $total]);
@@ -123,17 +149,42 @@ class PurchaseOrderController extends Controller
 
     public function decline($id)
     {
-        $po = PurchaseOrder::findOrFail($id);
+        $po = PurchaseOrder::with('items')->findOrFail($id);
 
         if ($po->status !== 'pending') {
             return response()->json(['message' => 'Only pending POs can be declined.', 'status' => 'error'], 422);
         }
 
-        $po->update(['status' => 'cancelled']);
+        DB::transaction(function () use ($po) {
+            // CRITICAL FIX: Restore supplier stock when admin cancels order
+            foreach ($po->items as $item) {
+                if ($item->supplier_product_id) {
+                    $supplierProduct = \App\Models\SupplierProduct::find($item->supplier_product_id);
+                    if ($supplierProduct) {
+                        if ($item->supplier_product_variant_id) {
+                            // Restore variant stock
+                            $supplierVariant = \App\Models\SupplierProductVariant::find($item->supplier_product_variant_id);
+                            if ($supplierVariant) {
+                                $supplierVariant->increment('stock', $item->quantity);
+                                
+                                // Sync total_stock
+                                $totalVariantStock = \App\Models\SupplierProductVariant::where('supplier_product_id', $supplierProduct->id)->sum('stock');
+                                $supplierProduct->update(['total_stock' => $totalVariantStock]);
+                            }
+                        } else {
+                            // Restore base product stock
+                            $supplierProduct->increment('total_stock', $item->quantity);
+                        }
+                    }
+                }
+            }
+
+            $po->update(['status' => 'cancelled']);
+        });
 
         return response()->json([
             'data'    => $po,
-            'message' => 'Purchase order has been declined.',
+            'message' => 'Purchase order has been declined. Stock has been restored.',
             'status'  => 'success',
         ]);
     }
@@ -146,37 +197,10 @@ class PurchaseOrderController extends Controller
             ->where('status', 'pending_supplier')
             ->findOrFail($id);
 
-        DB::transaction(function () use ($po) {
-            $po->update([
-                'status'      => 'accepted',
-                'accepted_at' => now(),
-            ]);
-
-            // Automatically increment inventory upon acceptance (Direct to Inventory)
-            foreach ($po->items as $item) {
-                $search = [
-                    'product_id'         => $item->product_id,
-                    'product_variant_id' => $item->product_variant_id,
-                ];
-
-                if (!$item->product_id) {
-                    $search['supplier_product_id'] = $item->supplier_product_id;
-                }
-
-                $inv = \App\Models\Inventory::firstOrCreate(
-                    $search,
-                    [
-                        'current_stock'     => 0,
-                        'warehouse_stock'   => 0,
-                        'reorder_threshold' => 10,
-                    ]
-                );
-
-                $inv->increment('warehouse_stock', $item->quantity);
-                $inv->last_adjusted_at = now();
-                $inv->save();
-            }
-        });
+        $po->update([
+            'status'      => 'accepted',
+            'accepted_at' => now(),
+        ]);
 
         // Notify Admin(s)
         $admins = User::where('role', 'admin')->get();
@@ -184,7 +208,7 @@ class PurchaseOrderController extends Controller
 
         return response()->json([
             'data'    => $po->fresh()->load(['supplier', 'items.product']),
-            'message' => 'Purchase order accepted. You can now mark it as delivered when ready.',
+            'message' => 'Purchase order accepted. Awaiting delivery confirmation.',
             'status'  => 'success',
         ]);
     }
@@ -201,14 +225,39 @@ class PurchaseOrderController extends Controller
             ->where('status', 'pending_supplier')
             ->findOrFail($id);
 
-        $po->update([
-            'status'           => 'rejected',
-            'rejection_reason' => $data['rejection_reason'],
-        ]);
+        DB::transaction(function () use ($po, $data) {
+            // CRITICAL FIX: Restore supplier stock when order is rejected
+            foreach ($po->items as $item) {
+                if ($item->supplier_product_id) {
+                    $supplierProduct = \App\Models\SupplierProduct::find($item->supplier_product_id);
+                    if ($supplierProduct) {
+                        if ($item->supplier_product_variant_id) {
+                            // Restore variant stock
+                            $supplierVariant = \App\Models\SupplierProductVariant::find($item->supplier_product_variant_id);
+                            if ($supplierVariant) {
+                                $supplierVariant->increment('stock', $item->quantity);
+                                
+                                // Sync total_stock
+                                $totalVariantStock = \App\Models\SupplierProductVariant::where('supplier_product_id', $supplierProduct->id)->sum('stock');
+                                $supplierProduct->update(['total_stock' => $totalVariantStock]);
+                            }
+                        } else {
+                            // Restore base product stock
+                            $supplierProduct->increment('total_stock', $item->quantity);
+                        }
+                    }
+                }
+            }
+
+            $po->update([
+                'status'           => 'rejected',
+                'rejection_reason' => $data['rejection_reason'],
+            ]);
+        });
 
         return response()->json([
             'data'    => $po->fresh()->load(['supplier', 'items.product']),
-            'message' => 'Purchase order rejected. The admin has been notified.',
+            'message' => 'Purchase order rejected. Stock has been restored.',
             'status'  => 'success',
         ]);
     }
@@ -226,24 +275,46 @@ class PurchaseOrderController extends Controller
 
         DB::transaction(function () use ($po) {
             foreach ($po->items as $item) {
-                // Determine search criteria for existing inventory
-                $search = [
-                    'product_id'         => $item->product_id,
-                    'product_variant_id' => $item->product_variant_id,
-                ];
+                $inv = null;
 
-                if (!$item->product_id) {
-                    $search['supplier_product_id'] = $item->supplier_product_id;
+                // CASE 1: Item has supplier_product_variant_id - check if it's already linked to an existing inventory
+                if ($item->supplier_product_variant_id) {
+                    $inv = Inventory::where('supplier_product_variant_id', $item->supplier_product_variant_id)->first();
                 }
 
-                $inv = Inventory::firstOrCreate(
-                    $search,
-                    [
-                        'current_stock'     => 0,
-                        'warehouse_stock'   => 0,
-                        'reorder_threshold' => 10,
-                    ]
-                );
+                // CASE 2: If no existing inventory found via supplier variant, check by product + variant
+                if (!$inv && $item->product_id) {
+                    $inv = Inventory::where('product_id', $item->product_id)
+                        ->where('product_variant_id', $item->product_variant_id)
+                        ->first();
+                }
+
+                // CASE 3: If still no inventory found and it's a supplier product (orphan), check by supplier_product_id
+                if (!$inv && $item->supplier_product_id) {
+                    // For base products, look for inventory with supplier_product_id and no variant
+                    if (!$item->supplier_product_variant_id) {
+                        $inv = Inventory::where('supplier_product_id', $item->supplier_product_id)
+                            ->whereNull('supplier_product_variant_id')
+                            ->first();
+                    }
+                    // For variants, look for inventory with supplier_product_variant_id
+                    else {
+                        $inv = Inventory::where('supplier_product_variant_id', $item->supplier_product_variant_id)->first();
+                    }
+                }
+
+                // CASE 4: Create new inventory if none exists
+                if (!$inv) {
+                    $inv = Inventory::create([
+                        'product_id'                  => $item->product_id,
+                        'product_variant_id'          => $item->product_variant_id,
+                        'supplier_product_id'         => $item->supplier_product_id,
+                        'supplier_product_variant_id' => $item->supplier_product_variant_id,
+                        'current_stock'               => 0,
+                        'warehouse_stock'             => 0,
+                        'reorder_threshold'           => 10,
+                    ]);
+                }
 
                 $inv->increment('warehouse_stock', $item->quantity);
                 $inv->last_adjusted_at = now();

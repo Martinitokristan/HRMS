@@ -12,6 +12,7 @@ class Inventory extends Model
         'product_id',
         'product_variant_id',
         'supplier_product_id',
+        'supplier_product_variant_id',
         'current_stock',
         'warehouse_stock',
         'reorder_threshold',
@@ -33,6 +34,11 @@ class Inventory extends Model
     public function supplierProduct()
     {
         return $this->belongsTo(SupplierProduct::class, 'supplier_product_id');
+    }
+
+    public function supplierProductVariant()
+    {
+        return $this->belongsTo(SupplierProductVariant::class, 'supplier_product_variant_id');
     }
 
     public function isLowStock(): bool

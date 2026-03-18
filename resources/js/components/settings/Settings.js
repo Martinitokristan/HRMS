@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Settings2, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Settings2, Plus, Pencil, Trash2, Feather, Package, Weight, Truck, Mail, Smartphone } from 'lucide-react';
 
 const TABS = [
     { id: 'general', label: 'General', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
@@ -507,16 +507,6 @@ export default function Settings() {
                                 </TableBody>
                             </Table>
                         </Card>
-                        <h5 className="text-sm font-bold text-foreground mb-3">Weight Classes (Visual Guide)</h5>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {[{icon: '🍂', title: 'Light', desc: 'Under 5 kg'}, {icon: '📦', title: 'Medium', desc: '5 - 25 kg'}, {icon: '�️', title: 'Heavy', desc: '25 - 100 kg'}, {icon: '🚚', title: 'Bulk', desc: 'Over 100 kg'}].map(w => (
-                                <Card key={w.title} className="p-4 text-center">
-                                    <div className="text-2xl mb-2">{w.icon}</div>
-                                    <h5 className="font-semibold text-foreground text-sm">{w.title}</h5>
-                                    <p className="text-[12px] text-muted-foreground">{w.desc}</p>
-                                </Card>
-                            ))}
-                        </div>
                     </div>
                 )}
 
@@ -555,7 +545,7 @@ export default function Settings() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Card className="p-4">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h5 className="text-sm font-semibold text-foreground">📧 Email</h5>
+                                    <h5 className="text-sm font-semibold text-foreground flex items-center gap-2"><Mail className="h-4 w-4" /> Email</h5>
                                     <Switch checked={settings.notifications?.email_enabled === '1'} onCheckedChange={checked => handleChange('email_enabled', checked ? '1' : '0')} />
                                 </div>
                                 <div className="space-y-1.5">
@@ -565,7 +555,7 @@ export default function Settings() {
                             </Card>
                             <Card className="p-4">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h5 className="text-sm font-semibold text-foreground">📱 SMS</h5>
+                                    <h5 className="text-sm font-semibold text-foreground flex items-center gap-2"><Smartphone className="h-4 w-4" /> SMS</h5>
                                     <Switch checked={settings.notifications?.sms_enabled === '1'} onCheckedChange={checked => handleChange('sms_enabled', checked ? '1' : '0')} />
                                 </div>
                                 <div className="space-y-1.5">

@@ -7,7 +7,7 @@ import L from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, RefreshCw, MapIcon, Smartphone, Phone, Navigation, CheckCircle2, XCircle } from 'lucide-react';
+import { LogOut, RefreshCw, MapIcon, Smartphone, Phone, Navigation, CheckCircle2, XCircle, PhilippinePeso, Truck, Package, MapPin } from 'lucide-react';
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -160,7 +160,7 @@ export default function RiderApp() {
             <div className="min-h-screen flex items-center justify-center p-8 bg-secondary/30">
                 <Card className="max-w-md w-full p-8 text-center">
                     <div className="text-lg font-black text-foreground mb-6">HRMS <span className="text-primary">Pro</span></div>
-                    <div className="text-5xl mb-4">{user.status === 'pending' ? '⏳' : '📅'}</div>
+                    <div className="mb-4">{user.status === 'pending' ? <Clock className="h-14 w-14 mx-auto text-amber-400" /> : <CheckCircle2 className="h-14 w-14 mx-auto text-green-400" />}</div>
                     <h1 className="text-xl font-bold text-foreground capitalize mb-3">Account {user.status.replace('_', ' ')}</h1>
                     <p className="text-muted-foreground leading-relaxed mb-6 max-w-sm mx-auto">
                         {user.status === 'pending'
@@ -204,7 +204,7 @@ export default function RiderApp() {
                     <div className="dashboard-inner-container">
                         {/* Stats Header */}
                         <Card className="m-3 p-4 bg-foreground text-white border-0">
-                            <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-3">📅 TODAY — {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}</div>
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-3">TODAY — {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}</div>
                             <div className="grid grid-cols-4 gap-2 mb-4">
                                 <div className="text-center bg-white/10 rounded-xl py-2">
                                     <div className="text-xl font-black">{stats.total}</div>
@@ -226,7 +226,7 @@ export default function RiderApp() {
 
                             <div className="bg-white/10 rounded-xl p-3">
                                 <div className="flex justify-between text-xs font-bold mb-2">
-                                    <span>💰 COD QUOTA</span>
+                                    <span className="flex items-center gap-1"><PhilippinePeso className="h-3 w-3" /> COD QUOTA</span>
                                     <span>₱{Number(stats.collected).toLocaleString()} / ₱{Number(stats.quota).toLocaleString()}</span>
                                 </div>
                                 <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
@@ -242,13 +242,13 @@ export default function RiderApp() {
                 {/* Main Tabs */}
                 <div className="flex border-b border-border mx-3">
                     <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'nearby' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('nearby')}>
-                        📍 Nearby
+                        <MapPin className="inline h-3.5 w-3.5 mr-1" /> Nearby
                     </button>
                     <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'my_jobs' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('my_jobs')}>
-                        🚚 My Jobs
+                        <Truck className="inline h-3.5 w-3.5 mr-1" /> My Jobs
                     </button>
                     <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'completed' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('completed')}>
-                        ✅ Done
+                        <CheckCircle2 className="inline h-3.5 w-3.5 mr-1" /> Done
                     </button>
                 </div>
 
@@ -257,12 +257,12 @@ export default function RiderApp() {
                     {activeTab === 'nearby' && (
                         <div className="p-3 space-y-3">
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">📍 {nearby.length} orders near you</span>
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1"><MapPin className="h-3 w-3" /> {nearby.length} orders near you</span>
                                 <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={triggerRefresh}><RefreshCw className="h-3 w-3" /> Refresh</Button>
                             </div>
                             {nearby.length === 0 && (
                                 <Card className="text-center py-10 px-6">
-                                    <div className="text-3xl mb-2">📍</div>
+                                    <MapPin className="text-3xl mb-2" />
                                     <h3 className="font-bold text-foreground mb-1">No Nearby Orders</h3>
                                     <p className="text-sm text-muted-foreground">We'll notify you when new orders arrive in your current zone.</p>
                                 </Card>
@@ -271,15 +271,14 @@ export default function RiderApp() {
                                 <Card key={order.id} className="p-4">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-bold text-foreground">#{order.sale?.order_number}</span>
-                                        <Badge variant="secondary" className="text-[10px] font-bold">⚡ {order.distance} AWAY</Badge>
+                                        <Badge variant="secondary" className="text-[10px] font-bold">{order.distance} AWAY</Badge>
                                         <span className="text-sm font-black text-primary">₱{Number(order.sale?.total_amount).toLocaleString()}</span>
                                     </div>
                                     <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
-                                    <div className="text-xs text-muted-foreground mb-1">📍 {order.address}</div>
+                                    <div className="text-xs text-muted-foreground mb-1">{order.address}</div>
                                     <div className="text-[10px] text-muted-foreground mb-3 line-clamp-1">{order.sale?.items?.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}</div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-[10px] text-muted-foreground">PLACED {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase()}</span>
-                                        <span className="text-[10px] text-muted-foreground">⏱️ {order.eta || 'N/A'}</span>
+                                        <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Truck className="h-3 w-3" /> {order.distance} — 4 min drive</span>
                                         <Button size="sm" className="h-7 text-xs font-bold" onClick={() => handleAction(order.id, 'assigned', 'Order accepted!')}>ACCEPT →</Button>
                                     </div>
                                 </Card>
@@ -291,7 +290,7 @@ export default function RiderApp() {
                         <div className="p-3 space-y-3">
                             {myJobs.length === 0 && (
                                 <Card className="text-center py-10 px-6">
-                                    <div className="text-3xl mb-2">🚚</div>
+                                    <Truck className="h-10 w-10 mx-auto mb-2 text-muted-foreground opacity-30" />
                                     <h3 className="font-bold text-foreground mb-1">No Active Jobs</h3>
                                     <p className="text-sm text-muted-foreground">Ready for more? Check the "Nearby" tab to accept a new delivery.</p>
                                 </Card>
@@ -300,11 +299,11 @@ export default function RiderApp() {
                                 <Card key={order.id} className={`p-4 ${order.status === 'in_progress' ? 'border-primary/50 bg-primary/5' : ''}`}>
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-bold text-foreground">#{order.sale?.order_number}</span>
-                                        <Badge variant="outline" className="text-[10px] capitalize">🚚 {order.status.replace('_', ' ')}</Badge>
+                                        <Badge variant="outline" className="text-[10px] capitalize flex items-center gap-1"><Truck className="h-3 w-3" /> {order.status.replace('_', ' ')}</Badge>
                                         <span className="text-sm font-black text-primary">₱{Number(order.sale?.total_amount).toLocaleString()}</span>
                                     </div>
                                     <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
-                                    <div className="text-xs text-muted-foreground mb-3">📍 {order.address}</div>
+                                    <div className="text-xs text-muted-foreground mb-3 flex items-center gap-1"><MapPin className="h-3 w-3 shrink-0" /> {order.address}</div>
                                     <div className="flex items-center gap-2">
                                         {order.status === 'pending' ? (
                                             <Button size="sm" className="flex-1 h-8 text-xs font-bold" onClick={() => handleAction(order.id, 'in_progress', 'Delivery started')}>START DELIVERY</Button>
@@ -335,7 +334,7 @@ export default function RiderApp() {
                                     <div>
                                         <div className="text-xs font-bold text-foreground">#{order.sale?.order_number}</div>
                                         <div className="text-[10px] font-bold mt-0.5">
-                                            {order.status === 'delivered' ? <span className="text-green-600">✅ DELIVERED</span> : <span className="text-destructive">❌ FAILED</span>}
+                                            {order.status === 'delivered' ? <span className="text-green-600 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> DELIVERED</span> : <span className="text-destructive flex items-center gap-1"><XCircle className="h-3 w-3" /> FAILED</span>}
                                         </div>
                                     </div>
                                     <div className="text-right">
@@ -355,7 +354,7 @@ export default function RiderApp() {
             <div className="rider-map-area">
                 <div className="absolute top-0 left-0 right-0 z-10 p-3">
                     <Card className="px-4 py-2.5 flex items-center justify-between bg-white/95 backdrop-blur-sm">
-                        <span className="text-xs font-bold text-foreground">📍 Delivery Map — Davao City Zone</span>
+                        <span className="text-xs font-bold text-foreground flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> Delivery Map — Davao City Zone</span>
                         <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium">
                             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" /> You</span>
                             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Nearby</span>
@@ -378,7 +377,7 @@ export default function RiderApp() {
                         {/* Rider Marker */}
                         <Marker position={riderPos} icon={riderIcon}>
                             <Popup>
-                                <div className="font-extrabold">🚲 YOU (REAL LOCATION)</div>
+                                <div className="font-extrabold">YOU (REAL LOCATION)</div>
                                 <div className="text-[11px] text-muted-foreground">{hasGeo ? 'GPS Signal: Strong' : 'Waiting for GPS...'}</div>
                             </Popup>
                         </Marker>
@@ -394,7 +393,7 @@ export default function RiderApp() {
                                 }}
                             >
                                 <Popup>
-                                    <div className="font-black text-green-700">📦 NEW ORDER #{job.sale?.order_number}</div>
+                                    <div className="font-black text-green-700 flex items-center gap-1"><Package className="h-3.5 w-3.5" /> NEW ORDER #{job.sale?.order_number}</div>
                                     <div className="text-xs my-1">{job.address}</div>
                                     <div className="text-[11px] font-bold text-orange-500">COD: ₱{Number(job.sale?.total_amount).toLocaleString()}</div>
                                 </Popup>
@@ -408,7 +407,7 @@ export default function RiderApp() {
                 <div className="absolute bottom-0 left-0 right-0 z-10 p-3 space-y-2">
                     {/* GPS Status Bar */}
                     <Card className="px-4 py-2 flex items-center justify-between bg-white/95 backdrop-blur-sm">
-                        <span className="text-[10px] font-medium text-muted-foreground">📡 {hasGeo ? `ACCURATE: ${riderPos[0].toFixed(5)}, ${riderPos[1].toFixed(5)}` : 'SCANNING GPS...'}</span>
+                        <span className="text-[10px] font-medium text-muted-foreground">{hasGeo ? `GPS: ${riderPos[0].toFixed(5)}, ${riderPos[1].toFixed(5)}` : 'SCANNING GPS...'}</span>
                         <Button variant="ghost" size="sm" className="h-6 text-[10px] font-bold" onClick={() => setRefresh(r => r + 1)}>RE-CENTER</Button>
                     </Card>
 
@@ -421,7 +420,7 @@ export default function RiderApp() {
                             </div>
                             <div className="text-xs text-muted-foreground mb-1">{nearby[0].address}</div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] text-muted-foreground">🚗 {nearby[0].distance} — 4 min drive</span>
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Truck className="h-3 w-3" /> {nearby[0].distance} — 4 min drive</span>
                                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1"><Navigation className="h-3 w-3" /> Navigate</Button>
                             </div>
                         </Card>

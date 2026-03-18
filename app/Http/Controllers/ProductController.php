@@ -15,9 +15,10 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::with(['category', 'unitType', 'supplier', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])
+            ->where('is_active', true) // Only show active products in customer shop
             ->when($request->search, function($q) use ($request) {
                 return $q->where('name', 'like', "%{$request->search}%")
-                         ->orWhere('sku', 'like', "%{$request->search}%");
+                         ->orWhere('barcode', 'like', "%{$request->search}%");
             })
             ->when($request->category_id, function($q) use ($request) {
                 return $q->where('category_id', $request->category_id);
@@ -41,7 +42,7 @@ class ProductController extends Controller
         // Products should be created via InventoryController@transferToStore from warehouse stock.
         
         $data = $request->validate([
-            'sku'               => 'required|string|max:50|unique:products,sku',
+            'barcode'           => 'required|string|max:50|unique:products,barcode',
             'name'              => 'required|string|max:150',
             'category_id'       => 'required|exists:categories,id',
             'unit_type_id'      => 'required|exists:unit_types,id',
@@ -57,10 +58,10 @@ class ProductController extends Controller
         $product = DB::transaction(function () use ($data, $request) {
             $product = Product::create($data);
 
-            // Check for orphaned warehouse stock (Warehouse Only) with matching SKU
+            // Check for orphaned warehouse stock (Warehouse Only) with matching barcode
             $orphan = Inventory::whereNull('product_id')
                 ->whereHas('supplierProduct', function ($q) use ($data) {
-                    $q->where('sku', $data['sku']);
+                    $q->where('barcode', $data['barcode']);
                 })->first();
 
             if ($orphan) {
@@ -102,7 +103,7 @@ class ProductController extends Controller
                             'weight_value_id' => $v['weight_value_id'] ?? null,
                             'stock'           => $v['stock'] ?? 0,
                             'price_override'  => $priceOverride,
-                            'sku_suffix'      => $v['sku_suffix'] !== '' ? ($v['sku_suffix'] ?? null) : null,
+                            'barcode_suffix'  => $v['barcode_suffix'] !== '' ? ($v['barcode_suffix'] ?? null) : null,
                             'image_path'      => $imagePath,
                         ]);
                     }
@@ -131,7 +132,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         $data = $request->validate([
-            'sku'            => "required|string|max:50|unique:products,sku,{$id}",
+            'barcode'        => "required|string|max:50|unique:products,barcode,{$id}",
             'name'           => 'required|string|max:150',
             'category_id'    => 'required|exists:categories,id',
             'unit_type_id'   => 'required|exists:unit_types,id',
@@ -169,7 +170,7 @@ class ProductController extends Controller
                         'weight_value_id' => $v['weight_value_id'] ?? null,
                         'stock'           => $v['stock'] ?? 0,
                         'price_override'  => $priceOverride,
-                        'sku_suffix'      => $v['sku_suffix'] !== '' ? ($v['sku_suffix'] ?? null) : null,
+                        'barcode_suffix'  => $v['barcode_suffix'] !== '' ? ($v['barcode_suffix'] ?? null) : null,
                         'image_path'      => $imagePath,
                     ]);
                 }

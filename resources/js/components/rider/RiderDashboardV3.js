@@ -1,17 +1,66 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import RiderSettings from './RiderSettings';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { MapPin, Settings, Bell } from 'lucide-react';
 
-// Fix Leaflet default icons
+// Add custom CSS for markers
+const markerStyles = `
+    .rider-marker {
+        background: #ef4444;
+        border: 3px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .customer-marker {
+        background: #3b82f6;
+        border: 2px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = markerStyles;
+    document.head.appendChild(styleSheet);
+}
+
+// Fix Leaflet default icons with proper sizing
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+// Create custom icons
+const riderIcon = L.divIcon({
+    html: '🏍️',
+    iconSize: [30, 30],
+    className: 'rider-marker'
+});
+
+const customerIcon = L.divIcon({
+    html: '📍',
+    iconSize: [25, 25],
+    className: 'customer-marker'
 });
 
 const RiderDashboardV3 = () => {
@@ -21,6 +70,7 @@ const RiderDashboardV3 = () => {
     const [riderPosition, setRiderPosition] = useState([7.0707, 125.6080]);
     const [stats, setStats] = useState({ active: 0, done: 0, total: 0, earnings: 0 });
     const [deliveries, setDeliveries] = useState([]);
+    const [nearbyOrders, setNearbyOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -28,24 +78,80 @@ const RiderDashboardV3 = () => {
     const [uploadingProof, setUploadingProof] = useState(null);
     const fileInputRef = useRef(null);
     const mapRef = useRef(null);
+    const [assigningOrder, setAssigningOrder] = useState(null);
+    const [decliningOrder, setDecliningOrder] = useState(null);
+    const [declineNote, setDeclineNote] = useState('');
+    const [showDeclineModal, setShowDeclineModal] = useState(false);
+    const [roadRoutes, setRoadRoutes] = useState({});
+    
+    // Refs for preventing memory leaks
+    const isMountedRef = useRef(true);
+    const routeCacheRef = useRef(new Map());
 
-    // GPS Watch
+    // Cleanup on unmount
     useEffect(() => {
-        if (!navigator.geolocation) return;
-        const watchId = navigator.geolocation.watchPosition(
-            (pos) => setRiderPosition([pos.coords.latitude, pos.coords.longitude]),
-            (err) => console.warn(err),
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-        );
-        return () => navigator.geolocation.clearWatch(watchId);
+        return () => {
+            isMountedRef.current = false;
+        };
     }, []);
 
-    // Fetch data
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('/riders/me/dashboard');
-                const { stats: dashStats, my_jobs } = response.data.data;
+    // Get real road route using backend proxy
+    const getRoadRoute = useCallback(async (startLat, startLon, endLat, endLon) => {
+        // Convert coordinates to numbers in case they're strings
+        const startLatNum = parseFloat(startLat);
+        const startLonNum = parseFloat(startLon);
+        const endLatNum = parseFloat(endLat);
+        const endLonNum = parseFloat(endLon);
+        
+        const cacheKey = `${startLatNum.toFixed(6)},${startLonNum.toFixed(6)}-${endLatNum.toFixed(6)},${endLonNum.toFixed(6)}`;
+        
+        if (routeCacheRef.current.has(cacheKey)) {
+            return routeCacheRef.current.get(cacheKey);
+        }
+        
+        try {
+            console.log('Fetching road route from', startLatNum, startLonNum, 'to', endLatNum, endLonNum);
+            
+            // Use backend proxy to avoid CORS issues
+            const response = await axios.post('/route', {
+                start_lat: startLatNum,
+                start_lon: startLonNum,
+                end_lat: endLatNum,
+                end_lon: endLonNum
+            });
+            
+            const data = response.data;
+            console.log('Route API response:', data);
+            
+            if (data.features && data.features.length > 0) {
+                const route = data.features[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+                const routeData = {
+                    coordinates: route,
+                    distance: data.features[0].properties.segments[0].distance,
+                    duration: data.features[0].properties.segments[0].duration
+                };
+                
+                console.log('Road route found with', route.length, 'points');
+                routeCacheRef.current.set(cacheKey, routeData);
+                return routeData;
+            } else {
+                console.warn('No route features found in response');
+            }
+            return null;
+        } catch (error) {
+            console.error('Failed to get road route, falling back to straight line:', error);
+            return null;
+        }
+    }, []);
+
+    const fetchData = useCallback(async () => {
+        if (!isMountedRef.current) return;
+        
+        try {
+            const response = await axios.get('/riders/me/dashboard');
+            const { stats: dashStats, my_jobs, nearby } = response.data.data;
+            
+            if (isMountedRef.current) {
                 setStats({
                     active: dashStats.active || 0,
                     done: dashStats.done || 0,
@@ -53,87 +159,215 @@ const RiderDashboardV3 = () => {
                     earnings: dashStats.collected || 0
                 });
                 setDeliveries(Array.isArray(my_jobs) ? my_jobs : []);
+                setNearbyOrders(Array.isArray(nearby) ? nearby : []);
                 
                 const notifRes = await axios.get('/riders/me/notifications');
-                setNotifications(notifRes.data.data);
-                setUnreadCount(notifRes.data.unread_count);
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-            } finally {
+                if (isMountedRef.current) {
+                    setNotifications(notifRes.data.data);
+                    setUnreadCount(notifRes.data.unread_count);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        } finally {
+            if (isMountedRef.current) {
                 setLoading(false);
             }
-        };
+        }
+    }, []);
+
+    // GPS Watch with real-time broadcasting
+    useEffect(() => {
+        if (!navigator.geolocation) return;
+        const watchId = navigator.geolocation.watchPosition(
+            async (pos) => {
+                const { latitude, longitude } = pos.coords;
+                setRiderPosition([latitude, longitude]);
+                try {
+                    await axios.post('/riders/me/update-location', {
+                        latitude,
+                        longitude,
+                        broadcast: true
+                    });
+                } catch (err) {
+                    console.warn('Failed to update location:', err);
+                }
+            },
+            (err) => console.warn(err),
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+        );
+        return () => navigator.geolocation.clearWatch(watchId);
+    }, []);
+
+    useEffect(() => {
         fetchData();
         const interval = setInterval(fetchData, 30000);
         return () => clearInterval(interval);
+    }, [fetchData]);
+
+    const fetchRoadRoutes = useCallback(async () => {
+        if (!isMountedRef.current || !riderPosition) return;
+        
+        console.log('Fetching road routes for', deliveries.length + nearbyOrders.length, 'orders');
+        console.log('Current rider position:', riderPosition);
+        
+        const allOrders = [...deliveries, ...nearbyOrders];
+        const newRoutes = {};
+        const routePromises = [];
+        
+        for (const order of allOrders) {
+            if (order.customer_latitude && order.customer_longitude) {
+                const routeKey = `route-${order.id}`;
+                console.log('Processing order', order.id, 'with customer location:', order.customer_latitude, order.customer_longitude);
+                
+                if (!roadRoutes[routeKey]) {
+                    console.log('Fetching new route for order', order.id);
+                    const promise = getRoadRoute(
+                        riderPosition[0], riderPosition[1],
+                        order.customer_latitude, order.customer_longitude
+                    ).then(route => {
+                        if (route && isMountedRef.current) {
+                            console.log('Route fetched for order', order.id, 'with', route.coordinates.length, 'points');
+                            newRoutes[routeKey] = route;
+                        } else {
+                            console.log('No route found for order', order.id);
+                        }
+                    });
+                    routePromises.push(promise);
+                } else {
+                    console.log('Route already cached for order', order.id);
+                }
+            } else {
+                console.log('Order', order.id, 'missing customer coordinates');
+            }
+        }
+        
+        await Promise.all(routePromises);
+        
+        if (isMountedRef.current && Object.keys(newRoutes).length > 0) {
+            console.log('Adding', Object.keys(newRoutes).length, 'new routes to state');
+            setRoadRoutes(prev => ({ ...prev, ...newRoutes }));
+        } else {
+            console.log('No new routes to add');
+        }
+    }, [deliveries, nearbyOrders, riderPosition, roadRoutes, getRoadRoute]);
+
+    useEffect(() => {
+        if (deliveries.length > 0 || nearbyOrders.length > 0) {
+            fetchRoadRoutes();
+        }
+    }, [fetchRoadRoutes]);
+
+    const handleMarkNotificationsRead = useCallback(() => {
+        if (unreadCount > 0) {
+            axios.post('/riders/me/notifications/read').then(() => {
+                if (isMountedRef.current) {
+                    setUnreadCount(0);
+                    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+                }
+            });
+        }
+    }, [unreadCount]);
+
+    const handleSelfAssign = useCallback(async (deliveryId) => {
+        setAssigningOrder(deliveryId);
+        try {
+            await axios.post(`/deliveries/${deliveryId}/self-assign`);
+            await fetchData();
+            alert('Order assigned successfully!');
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to assign order');
+        } finally {
+            if (isMountedRef.current) {
+                setAssigningOrder(null);
+            }
+        }
+    }, [fetchData]);
+
+    const handleDecline = useCallback((deliveryId) => {
+        setDecliningOrder(deliveryId);
+        setShowDeclineModal(true);
     }, []);
 
-    const handleMarkNotificationsRead = async () => {
-        try {
-            await axios.post('/riders/me/notifications/read');
-            setUnreadCount(0);
-        } catch (error) {
-            console.error('Failed to mark notifications read:', error);
+    const confirmDecline = useCallback(async () => {
+        if (!declineNote.trim()) {
+            alert('Please provide a reason for declining');
+            return;
         }
-    };
+        try {
+            await axios.post(`/deliveries/${decliningOrder}/decline`, { note: declineNote });
+            await fetchData();
+            setShowDeclineModal(false);
+            setDeclineNote('');
+            setDecliningOrder(null);
+            alert('Order declined successfully');
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to decline order');
+        }
+    }, [declineNote, decliningOrder, fetchData]);
 
-    const formatCurrency = (amount) => {
+    const formatCurrency = useCallback((amount) => {
         return new Intl.NumberFormat('en-PH', {
             style: 'currency',
             currency: 'PHP'
         }).format(amount || 0);
-    };
+    }, []);
 
-    const handleStatusChange = async (deliveryId, newStatus) => {
+    const handleStatusChange = useCallback(async (deliveryId, newStatus) => {
         try {
             await axios.put(`/deliveries/${deliveryId}/status`, { status: newStatus });
-            const updated = deliveries.map(d => 
-                d.id === deliveryId ? { ...d, status: newStatus } : d
-            );
-            setDeliveries(updated);
-            
-            if (newStatus === 'delivered') {
-                setUploadingProof(deliveryId);
-                setTimeout(() => fileInputRef.current?.click(), 100);
+            if (isMountedRef.current) {
+                const updated = deliveries.map(d => 
+                    d.id === deliveryId ? { ...d, status: newStatus } : d
+                );
+                setDeliveries(updated);
+                if (newStatus === 'delivered') {
+                    setUploadingProof(deliveryId);
+                    setTimeout(() => fileInputRef.current?.click(), 100);
+                }
             }
         } catch (error) {
             console.error('Failed to update status:', error);
         }
-    };
+    }, [deliveries]);
 
-    const handlePhotoUpload = async (deliveryId, file) => {
+    const handlePhotoUpload = useCallback(async (deliveryId, file) => {
         const formData = new FormData();
         formData.append('photo', file);
         try {
             await axios.post(`/deliveries/${deliveryId}/upload-proof`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            const updated = deliveries.filter(d => d.id !== deliveryId);
-            setDeliveries(updated);
-            setStats(prev => ({ 
-                ...prev, 
-                active: Math.max(0, prev.active - 1), 
-                done: prev.done + 1 
-            }));
+            if (isMountedRef.current) {
+                const updated = deliveries.filter(d => d.id !== deliveryId);
+                setDeliveries(updated);
+                setStats(prev => ({ 
+                    ...prev, 
+                    active: Math.max(0, prev.active - 1), 
+                    done: prev.done + 1 
+                }));
+            }
         } catch (error) {
             console.error('Failed to upload proof:', error);
         } finally {
-            setUploadingProof(null);
+            if (isMountedRef.current) {
+                setUploadingProof(null);
+            }
         }
-    };
+    }, [deliveries]);
+
+    const getPhotoUrl = useCallback(() => {
+        if (user?.photo) {
+            return user.photo.startsWith('http') ? user.photo : `/storage/${user.photo}`;
+        }
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Rider')}&background=111827&color=fff&size=48`;
+    }, [user]);
 
     if (loading) return <div className="loading-page"><div className="spinner" /></div>;
     
     if (view === 'settings') {
         return <RiderSettings onBack={() => setView('dashboard')} />;
     }
-
-    const getPhotoUrl = () => {
-        if (user?.photo) {
-            return user.photo.startsWith('http') ? user.photo : `/storage/${user.photo}`;
-        }
-        return `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Rider')}&background=111827&color=fff&size=48`;
-    };
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#fff', color: '#111827', fontFamily: "'Inter', sans-serif" }}>
@@ -148,13 +382,60 @@ const RiderDashboardV3 = () => {
                             ✕ Close map
                         </button>
                     </div>
-                    <MapContainer center={riderPosition} zoom={15} style={{ height: '100%', width: '100%' }} ref={mapRef}>
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        <Marker position={riderPosition}><Popup>You are here</Popup></Marker>
-                        {deliveries.map(d => (
-                            d.customer_latitude && (
-                                <Marker key={d.id} position={[d.customer_latitude, d.customer_longitude]}>
-                                    <Popup>Order #{d.order_id}<br/>{d.customer_address}</Popup>
+                    <MapContainer 
+                        center={riderPosition} 
+                        zoom={15} 
+                        style={{ height: '100%', width: '100%' }} 
+                        zoomControl={true}
+                    >
+                        <TileLayer 
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        />
+                        <Marker position={riderPosition} icon={riderIcon}>
+                            <Popup>You are here</Popup>
+                        </Marker>
+                        
+                        {[...deliveries, ...nearbyOrders].map(d => {
+                            const routeKey = `route-${d.id}`;
+                            const roadRoute = roadRoutes[routeKey];
+                            if (!d.customer_latitude || !d.customer_longitude) return null;
+                            const positions = roadRoute ? roadRoute.coordinates : [
+                                riderPosition,
+                                [d.customer_latitude, d.customer_longitude]
+                            ];
+                            return (
+                                <Polyline
+                                    key={routeKey}
+                                    positions={positions}
+                                    color={roadRoute ? "#10b981" : "#3b82f6"}
+                                    weight={roadRoute ? 4 : 3}
+                                    opacity={0.8}
+                                    dashArray={roadRoute ? null : "10, 10"}
+                                />
+                            );
+                        })}
+                        
+                        {[...deliveries, ...nearbyOrders].map(d => (
+                            d.customer_latitude && d.customer_longitude && (
+                                <Marker 
+                                    key={d.id} 
+                                    position={[d.customer_latitude, d.customer_longitude]}
+                                    icon={customerIcon}
+                                >
+                                    <Popup>
+                                        <div>
+                                            <strong>Order #{d.tracking_number || d.order_id}</strong><br/>
+                                            {d.customer_address}<br/>
+                                            <small>Distance: {d.distance}</small><br/>
+                                            <small>ETA: {d.eta}</small><br/>
+                                            {roadRoutes[`route-${d.id}`] && (
+                                                <small style={{ color: '#10b981', fontWeight: 'bold' }}>
+                                                    🛣️ Road Route Available
+                                                </small>
+                                            )}
+                                        </div>
+                                    </Popup>
                                 </Marker>
                             )
                         ))}
@@ -184,7 +465,7 @@ const RiderDashboardV3 = () => {
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                                     }}
                                 >
-                                    📍 SHOW MAP
+                                    <MapPin style={{ display: 'inline', width: '14px', height: '14px', marginRight: '4px' }} /> SHOW MAP
                                 </button>
                                 <button 
                                     onClick={() => setView('settings')}
@@ -195,210 +476,259 @@ const RiderDashboardV3 = () => {
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                                     }}
                                 >
-                                    ⚙️ SETTINGS
+                                    <Settings style={{ display: 'inline', width: '14px', height: '14px', marginRight: '4px' }} /> SETTINGS
                                 </button>
                             </div>
                         </div>
                     </div>
-                        <nav style={{ display: 'flex', gap: '0.75rem', position: 'relative' }}>
-                            <div style={{ position: 'relative' }}>
-                                <button
-                                    aria-label="Notifications"
-                                    style={{ 
-                                        background: '#fff', 
-                                        color: '#1a1a1a', 
-                                        border: '1px solid #e5e5e5',
-                                        padding: '0.6rem',
-                                        borderRadius: '12px',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '1.25rem'
-                                    }}
-                                    onClick={() => {
-                                        setShowNotifications(!showNotifications);
-                                        if (!showNotifications) handleMarkNotificationsRead();
-                                    }}
-                                >
-                                    🔔
-                                    {unreadCount > 0 && (
-                                        <span style={{ 
-                                            position: 'absolute', top: -4, right: -4, 
-                                            background: '#ef4444', color: '#fff', 
-                                            fontSize: '0.7rem', padding: '2px 6px', 
-                                            borderRadius: '10px', fontWeight: 800,
-                                            border: '2px solid #fff' 
-                                        }}>
-                                            {unreadCount > 9 ? '9+' : unreadCount}
-                                        </span>
-                                    )}
-                                </button>
-                                
-                                {showNotifications && (
-                                    <div style={{ 
-                                        position: 'absolute', top: '120%', right: 0, 
-                                        width: '320px', backgroundColor: '#fff', 
-                                        borderRadius: '20px', border: '1px solid #f0f0f0', 
-                                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 1000,
-                                        maxHeight: '400px', overflowY: 'auto'
-                                    }}>
-                                        <div style={{ padding: '1rem', borderBottom: '1px solid #f9fafb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontWeight: 700 }}>Notifications</span>
-                                            <button onClick={() => setShowNotifications(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>✕</button>
-                                        </div>
-                                        {notifications.length === 0 ? (
-                                            <div style={{ padding: '2rem', textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>
-                                                No notifications yet
-                                            </div>
-                                        ) : (
-                                            notifications.map(notif => (
-                                                <div key={notif.id} style={{ 
-                                                    padding: '1rem', borderBottom: '1px solid #f9fafb', 
-                                                    backgroundColor: notif.read_at ? '#fff' : '#f0f7ff',
-                                                    transition: 'background-color 0.2s ease'
-                                                }}>
-                                                    <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '4px' }}>{notif.data.title}</div>
-                                                    <div style={{ fontSize: '0.85rem', color: '#444' }}>{notif.data.message}</div>
-                                                    <div style={{ fontSize: '0.7rem', color: '#999', marginTop: '6px' }}>
-                                                        {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                    <nav style={{ display: 'flex', gap: '0.75rem', position: 'relative' }}>
+                        <div style={{ position: 'relative' }}>
                             <button
-                                aria-label="Sign Out"
+                                aria-label="Notifications"
                                 style={{ 
-                                    background: '#fff', 
-                                    color: '#ef4444', 
-                                    border: '1px solid #fee2e2',
-                                    padding: '0.6rem 1rem',
-                                    borderRadius: '12px',
-                                    fontSize: '0.875rem',
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    transition: 'all 0.2s ease'
+                                    background: '#fff', color: '#1a1a1a', border: '1px solid #e5e5e5',
+                                    padding: '0.6rem', borderRadius: '12px', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem'
                                 }}
-                                onClick={logout}
+                                onClick={() => {
+                                    setShowNotifications(!showNotifications);
+                                    if (!showNotifications) handleMarkNotificationsRead();
+                                }}
                             >
-                                <span>🚪</span> Sign Out
-                            </button>
-                        </nav>
-                    </header>
-
-                    {/* Stats Grid */}
-                    <section aria-label="Daily Statistics" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2.5rem' }}>
-                        {[
-                            { label: 'Active', value: stats.active || 0, color: '#6366f1', bg: '#eef2ff' },
-                            { label: 'Earnings', value: formatCurrency(stats.earnings), color: '#059669', bg: '#ecfdf5' },
-                            { label: 'Done', value: stats.done || 0, color: '#d97706', bg: '#fffbeb' },
-                            { label: 'Total', value: stats.total || 0, color: '#4b5563', bg: '#f9fafb' },
-                        ].map((stat, idx) => (
-                            <div key={idx} style={{
-                                backgroundColor: '#fff',
-                                borderRadius: 20, padding: '1.25rem', 
-                                border: '1px solid #f0f0f0',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                            }}>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: stat.color }}>{stat.value}</div>
-                            </div>
-                        ))}
-                    </section>
-
-                    {/* Deliveries */}
-                    <section aria-label="Active Deliveries">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Active Deliveries</h2>
-                            {deliveries.length > 0 && <span style={{ fontSize: '0.875rem', color: '#666', backgroundColor: '#f0f0f0', padding: '2px 8px', borderRadius: '6px', fontWeight: 600 }}>{deliveries.length} tasks</span>}
-                        </div>
-
-                        {(!deliveries || deliveries.length === 0) ? (
-                            <div style={{
-                                backgroundColor: '#fff', borderRadius: 24, padding: '4rem 2rem', textAlign: 'center',
-                                border: '1px solid #f0f0f0', color: '#666'
-                            }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</div>
-                                <h3 style={{ margin: '0 0 0.5rem 0', color: '#1a1a1a', fontWeight: 700 }}>All clear!</h3>
-                                <p style={{ margin: 0, fontSize: '0.925rem' }}>No active deliveries at the moment.</p>
-                            </div>
-                        ) : (
-                            <div style={{ display: 'grid', gap: '1rem' }}>
-                                {(deliveries || []).map(delivery => (
-                                    <div key={delivery.id} style={{
-                                        backgroundColor: '#fff',
-                                        borderRadius: 24, padding: '1.5rem', 
-                                        border: '1px solid #f0f0f0',
-                                        boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                                        transition: 'transform 0.2s ease'
+                                <Bell style={{ width: '18px', height: '18px' }} />
+                                {unreadCount > 0 && (
+                                    <span style={{ 
+                                        position: 'absolute', top: -4, right: -4, 
+                                        background: '#ef4444', color: '#fff', 
+                                        fontSize: '0.7rem', padding: '2px 6px', 
+                                        borderRadius: '10px', fontWeight: 800,
+                                        border: '2px solid #fff' 
                                     }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.25rem' }}>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#f3f4f6', color: '#374151', padding: '4px 10px', borderRadius: 20 }}>
-                                                        #{delivery.order_id}
-                                                    </span>
-                                                    <span style={{ 
-                                                        fontSize: '0.75rem', fontWeight: 700, 
-                                                        backgroundColor: (delivery.status === 'pending' || delivery.status === 'assigned') ? '#fff7ed' : '#f0fdf4', 
-                                                        color: (delivery.status === 'pending' || delivery.status === 'assigned') ? '#c2410c' : '#15803d', 
-                                                        padding: '4px 10px', borderRadius: 20,
-                                                        textTransform: 'capitalize'
-                                                    }}>
-                                                        {delivery.status.replace('_', ' ')}
-                                                    </span>
-                                                </div>
-                                                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>{delivery.customer_name}</h3>
-                                                <p style={{ color: '#666', fontSize: '0.9rem', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <span aria-hidden="true">📍</span> {delivery.customer_address}
-                                                </p>
-                                            </div>
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
+                            </button>
+                            
+                            {showNotifications && (
+                                <div style={{ 
+                                    position: 'absolute', top: '120%', right: 0, 
+                                    width: '320px', backgroundColor: '#fff', 
+                                    borderRadius: '20px', border: '1px solid #f0f0f0', 
+                                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 1000,
+                                    maxHeight: '400px', overflowY: 'auto'
+                                }}>
+                                    <div style={{ padding: '1rem', borderBottom: '1px solid #f9fafb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ fontWeight: 700 }}>Notifications</span>
+                                        <button onClick={() => setShowNotifications(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>✕</button>
+                                    </div>
+                                    {notifications.length === 0 ? (
+                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>
+                                            No notifications yet
                                         </div>
-                                        <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                            {(delivery.status === 'pending' || delivery.status === 'assigned') && (
+                                    ) : (
+                                        notifications.map(notif => (
+                                            <div key={notif.id} style={{ 
+                                                padding: '1rem', borderBottom: '1px solid #f9fafb', 
+                                                backgroundColor: notif.read_at ? '#fff' : '#f0f7ff',
+                                                transition: 'background-color 0.2s ease'
+                                            }}>
+                                                <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '4px' }}>{notif.data.title}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#444' }}>{notif.data.message}</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#999', marginTop: '6px' }}>
+                                                    {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            aria-label="Sign Out"
+                            style={{ 
+                                background: '#fff', color: '#ef4444', border: '1px solid #fee2e2',
+                                padding: '0.6rem 1rem', borderRadius: '12px', fontSize: '0.875rem',
+                                fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                gap: '0.5rem', transition: 'all 0.2s ease'
+                            }}
+                            onClick={logout}
+                        >
+                            <span>🚪</span> Sign Out
+                        </button>
+                    </nav>
+                </header>
+
+                {/* Stats Grid */}
+                <section aria-label="Daily Statistics" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2.5rem' }}>
+                    {[
+                        { label: 'Active', value: stats.active || 0, color: '#6366f1', bg: '#eef2ff' },
+                        { label: 'Earnings', value: formatCurrency(stats.earnings), color: '#059669', bg: '#ecfdf5' },
+                        { label: 'Done', value: stats.done || 0, color: '#d97706', bg: '#fffbeb' },
+                        { label: 'Total', value: stats.total || 0, color: '#4b5563', bg: '#f9fafb' },
+                    ].map((stat, idx) => (
+                        <div key={idx} style={{
+                            backgroundColor: '#fff', borderRadius: 20, padding: '1.25rem', 
+                            border: '1px solid #f0f0f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                        }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: stat.color }}>{stat.value}</div>
+                        </div>
+                    ))}
+                </section>
+
+                {/* Nearby Orders */}
+                {nearbyOrders && nearbyOrders.length > 0 && (
+                    <section aria-label="Nearby Orders" style={{ marginBottom: '2.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>📍 Nearby Orders</h2>
+                            <span style={{ fontSize: '0.875rem', color: '#666', backgroundColor: '#fef3c7', padding: '2px 8px', borderRadius: '6px', fontWeight: 600 }}>{nearbyOrders.length} available</span>
+                        </div>
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            {nearbyOrders.map(order => (
+                                <div key={order.id} style={{
+                                    backgroundColor: '#fff', borderRadius: 24, padding: '1.5rem', 
+                                    border: '2px solid #fbbf24', boxShadow: '0 4px 12px rgba(251, 191, 36, 0.1)',
+                                    transition: 'transform 0.2s ease'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#fef3c7', color: '#92400e', padding: '4px 10px', borderRadius: 20 }}>
+                                                    #{order.tracking_number}
+                                                </span>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#dcfce7', color: '#166534', padding: '4px 10px', borderRadius: 20 }}>
+                                                    {order.distance}
+                                                </span>
+                                            </div>
+                                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>{order.customer_name}</h3>
+                                            <p style={{ color: '#666', fontSize: '0.9rem', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <MapPin style={{ display: 'inline', width: '14px', height: '14px', marginRight: '2px' }} /> {order.customer_address}
+                                            </p>
+                                            <p style={{ color: '#92400e', fontSize: '0.8rem', margin: '4px 0 0 0', fontWeight: 600 }}>
+                                                ETA: {order.eta}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                        <button
+                                            style={{ 
+                                                flex: 1, background: '#f59e0b', color: '#fff', border: 'none', 
+                                                padding: '0.875rem', borderRadius: 14, fontWeight: 700, cursor: 'pointer',
+                                                fontSize: '0.925rem', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.2)'
+                                            }}
+                                            onClick={() => handleSelfAssign(order.id)}
+                                            disabled={assigningOrder === order.id}
+                                        >
+                                            {assigningOrder === order.id ? 'Assigning...' : '🚀 Accept Order'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Active Deliveries */}
+                <section aria-label="Active Deliveries">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Active Deliveries</h2>
+                        {deliveries.length > 0 && (
+                            <span style={{ fontSize: '0.875rem', color: '#666', backgroundColor: '#f0f0f0', padding: '2px 8px', borderRadius: '6px', fontWeight: 600 }}>
+                                {deliveries.length} tasks
+                            </span>
+                        )}
+                    </div>
+
+                    {(!deliveries || deliveries.length === 0) ? (
+                        <div style={{
+                            backgroundColor: '#fff', borderRadius: 24, padding: '4rem 2rem', textAlign: 'center',
+                            border: '1px solid #f0f0f0', color: '#666'
+                        }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</div>
+                            <h3 style={{ margin: '0 0 0.5rem 0', color: '#1a1a1a', fontWeight: 700 }}>All clear!</h3>
+                            <p style={{ margin: 0, fontSize: '0.925rem' }}>No active deliveries at the moment.</p>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            {deliveries.map(delivery => (
+                                <div key={delivery.id} style={{
+                                    backgroundColor: '#fff', borderRadius: 24, padding: '1.5rem', 
+                                    border: '1px solid #f0f0f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                                    transition: 'transform 0.2s ease'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.25rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#f3f4f6', color: '#374151', padding: '4px 10px', borderRadius: 20 }}>
+                                                    #{delivery.order_id}
+                                                </span>
+                                                <span style={{ 
+                                                    fontSize: '0.75rem', fontWeight: 700, 
+                                                    backgroundColor: (delivery.status === 'pending' || delivery.status === 'assigned') ? '#fff7ed' : '#f0fdf4', 
+                                                    color: (delivery.status === 'pending' || delivery.status === 'assigned') ? '#c2410c' : '#15803d', 
+                                                    padding: '4px 10px', borderRadius: 20, textTransform: 'capitalize'
+                                                }}>
+                                                    {delivery.status.replace('_', ' ')}
+                                                </span>
+                                            </div>
+                                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>{delivery.customer_name}</h3>
+                                            <p style={{ color: '#666', fontSize: '0.9rem', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <MapPin style={{ display: 'inline', width: '14px', height: '14px', marginRight: '2px' }} /> {delivery.customer_address}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                        {(delivery.status === 'pending' || delivery.status === 'assigned') && (
+                                            <>
                                                 <button
                                                     style={{ 
-                                                        flex: 1, background: '#1a1a1a', color: '#fff', border: 'none', 
+                                                        flex: 1, background: '#10b981', color: '#fff', border: 'none', 
                                                         padding: '0.875rem', borderRadius: 14, fontWeight: 700, cursor: 'pointer',
                                                         fontSize: '0.925rem'
                                                     }}
                                                     onClick={() => handleStatusChange(delivery.id, 'in_progress')}
                                                 >
-                                                    Accept Delivery
+                                                    ✅ Accept
                                                 </button>
-                                            )}
-                                            {(delivery.status === 'in_progress' || delivery.status === 'accepted') && (
                                                 <button
                                                     style={{ 
-                                                        flex: 1, background: '#6366f1', color: '#fff', border: 'none', 
+                                                        flex: 1, background: '#ef4444', color: '#fff', border: 'none', 
                                                         padding: '0.875rem', borderRadius: 14, fontWeight: 700, cursor: 'pointer',
-                                                        fontSize: '0.925rem', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
+                                                        fontSize: '0.925rem'
                                                     }}
-                                                    onClick={() => handleStatusChange(delivery.id, 'delivered')}
+                                                    onClick={() => handleDecline(delivery.id)}
                                                 >
-                                                    Mark as Delivered
+                                                    ❌ Decline
                                                 </button>
-                                            )}
-                                            <button 
-                                                aria-label="View Details"
-                                                style={{ width: '48px', height: '48px', background: '#f9fafb', border: '1px solid #f0f0f0', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', cursor: 'pointer' }}
+                                            </>
+                                        )}
+                                        {(delivery.status === 'in_progress' || delivery.status === 'accepted') && (
+                                            <button
+                                                style={{ 
+                                                    flex: 1, background: '#6366f1', color: '#fff', border: 'none', 
+                                                    padding: '0.875rem', borderRadius: 14, fontWeight: 700, cursor: 'pointer',
+                                                    fontSize: '0.925rem', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
+                                                }}
+                                                onClick={() => handleStatusChange(delivery.id, 'delivered')}
                                             >
-                                                📄
+                                                Mark as Delivered
                                             </button>
-                                        </div>
+                                        )}
+                                        <button 
+                                            aria-label="View Details"
+                                            style={{ width: '48px', height: '48px', background: '#f9fafb', border: '1px solid #f0f0f0', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', cursor: 'pointer' }}
+                                        >
+                                            📄
+                                        </button>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </section>
-                </div>
-                <input
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
+            </div>
+
+            <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
@@ -411,6 +741,57 @@ const RiderDashboardV3 = () => {
                     }
                 }}
             />
+
+            {/* Decline Modal */}
+            {showDeclineModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10000,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+                }} onClick={() => setShowDeclineModal(false)}>
+                    <div style={{
+                        backgroundColor: '#fff', borderRadius: 20, padding: '2rem',
+                        maxWidth: '400px', width: '100%', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+                    }} onClick={(e) => e.stopPropagation()}>
+                        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontWeight: 700 }}>Decline Order</h3>
+                        <p style={{ margin: '0 0 1.5rem 0', color: '#666', fontSize: '0.9rem' }}>
+                            Please provide a reason for declining this order:
+                        </p>
+                        <textarea
+                            value={declineNote}
+                            onChange={(e) => setDeclineNote(e.target.value)}
+                            placeholder="Enter reason for declining..."
+                            style={{
+                                width: '100%', minHeight: '100px', padding: '0.75rem',
+                                border: '1px solid #e5e7eb', borderRadius: 12, fontSize: '0.9rem',
+                                resize: 'vertical', marginBottom: '1.5rem'
+                            }}
+                        />
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button
+                                style={{
+                                    flex: 1, padding: '0.75rem', border: '1px solid #e5e7eb',
+                                    backgroundColor: '#fff', color: '#374151', borderRadius: 12,
+                                    fontWeight: 600, cursor: 'pointer'
+                                }}
+                                onClick={() => setShowDeclineModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                style={{
+                                    flex: 1, padding: '0.75rem', border: 'none',
+                                    backgroundColor: '#ef4444', color: '#fff', borderRadius: 12,
+                                    fontWeight: 600, cursor: 'pointer'
+                                }}
+                                onClick={confirmDecline}
+                            >
+                                Decline Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 };

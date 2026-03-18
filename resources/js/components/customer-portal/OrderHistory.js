@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Package, Phone, Star, XCircle } from 'lucide-react';
+import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User } from 'lucide-react';
+import CustomerOrderTracking from './CustomerOrderTracking';
 
 export default function OrderHistory() {
     const navigate = useNavigate();
@@ -150,7 +151,7 @@ export default function OrderHistory() {
                                                 <div className="text-2xl font-black text-foreground">₱{Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                                                 <div className="text-xs text-muted-foreground">{order.items?.length} Items Total</div>
                                                 <div className="text-[10px] text-muted-foreground mt-0.5 uppercase">
-                                                    {order.payment_method === 'cod' ? '💵 COD' : order.payment_method === 'gcash' ? '📱 GCash' : order.payment_method === 'bank_transfer' ? '🏦 Bank' : '💳 Cash'}
+                                                    {order.payment_method === 'cod' ? 'COD' : order.payment_method === 'gcash' ? 'GCash' : order.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'Cash'}
                                                 </div>
                                             </div>
                                         </div>
@@ -196,25 +197,27 @@ export default function OrderHistory() {
                                                 <div className="relative">
                                                     <img
                                                         src={order.delivery.rider.photo ? (order.delivery.rider.photo.startsWith('http') ? order.delivery.rider.photo : `/storage/${order.delivery.rider.photo}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(order.delivery.rider.name)}&background=6366f1&color=fff&size=80`}
-                                                        alt="" className="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow"
+                                                        alt={order.delivery.rider.name}
+                                                        className="w-16 h-16 rounded-full object-cover border-3 border-white shadow-lg"
                                                     />
-                                                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-[3px] border-white rounded-full" />
+                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
                                                 </div>
                                                 <div className="flex-1">
-                                                    <div className="text-[10px] font-extrabold text-primary uppercase tracking-wider mb-0.5">
-                                                        {order.status === 'out_for_delivery' ? '🚀 Out for Delivery' : '👤 Assigned Rider'}
-                                                    </div>
-                                                    <div className="text-base font-extrabold text-foreground">{order.delivery.rider.name}</div>
-                                                    {order.delivery.rider.phone && (
-                                                        <div className="text-sm text-muted-foreground font-semibold flex items-center gap-1 mt-0.5">
-                                                            <Phone className="h-3 w-3" /> {order.delivery.rider.phone}
-                                                        </div>
-                                                    )}
+                                                    <div className="font-bold text-primary text-sm">{order.delivery.rider.name}</div>
+                                                    <div className="text-xs text-muted-foreground">Your delivery rider</div>
                                                 </div>
-                                                <Button size="icon" className="h-12 w-12 rounded-2xl" asChild>
-                                                    <a href={`tel:${order.delivery.rider.phone}`}>📱</a>
-                                                </Button>
+                                                <div className="flex gap-2">
+                                                    <a href={`tel:${order.delivery.rider.phone}`} className="bg-primary text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1">
+                                                        <Phone className="h-3 w-3" />
+                                                        Call
+                                                    </a>
+                                                </div>
                                             </Card>
+                                        )}
+
+                                        {/* Live Order Tracking */}
+                                        {order.delivery && ['pending', 'in_progress'].includes(order.delivery.status) && (
+                                            <CustomerOrderTracking delivery={order.delivery} />
                                         )}
 
                                         {/* Rating Display (already rated) */}

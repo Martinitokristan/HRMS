@@ -21,8 +21,9 @@ return new class extends Migration
             $table->foreignId('weight_value_id')->nullable()->constrained('variant_values')->onDelete('set null');
             $table->integer('stock')->default(0);
             $table->decimal('price_override', 10, 2)->nullable();
-            $table->string('sku_suffix')->nullable();
+            $table->string('barcode_suffix')->nullable();
             $table->string('image_path')->nullable();
+            $table->json('additional_images')->nullable();
             $table->timestamps();
         });
     }

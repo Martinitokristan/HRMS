@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
@@ -31,9 +31,112 @@ export default function StockTab() {
 
     const [unitTypes, setUnitTypes] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
-    const [transferModal, setTransferModal] = useState({ show: false, item: null, qty: '1' });
+    const [transferModal, setTransferModal] = useState({ show: false, item: null, qty: '1', allVariants: [] });
+    const [transferForm, setTransferForm] = useState({ name: '', barcode: '', category_id: '', unit_type_id: 1, sell_price: '', description: '', purchase_price: 0 });
+    const [selectedVariantId, setSelectedVariantId] = useState('');
     const [transferLoading, setTransferLoading] = useState(false);
-    const [transferForm, setTransferForm] = useState({ name: '', sku: '', category_id: '', unit_type_id: '', sell_price: '', description: '' });
+    const [expandedProducts, setExpandedProducts] = useState(new Set());
+
+    // Memoize grouped inventory data to prevent unnecessary recalculations
+    const groupedInventory = useMemo(() => {
+        if (!inventory.data || inventory.data.length === 0) return [];
+        
+        const grouped = [];
+        const productMap = new Map();
+        const processedIds = new Set();
+
+        inventory.data.forEach(item => {
+            if (processedIds.has(item.id)) return;
+
+            if (item.product_id && !item.is_orphan) {
+                const productKey = item.product_id;
+
+                if (item.is_variant) {
+                    // Variant row — ensure base exists in map first
+                    if (!productMap.has(productKey)) {
+                        // Look for the explicit base row (is_base_of_variants)
+                        const baseRow = inventory.data.find(i =>
+                            i.product_id === productKey && !i.is_variant && !i.is_orphan
+                        );
+                        productMap.set(productKey, {
+                            ...(baseRow || item),
+                            id: baseRow ? baseRow.id : `base-${productKey}`,
+                            product_id: productKey,
+                            is_variant: false,
+                            is_orphan: false,
+                            hasVariants: true,
+                            variants: [],
+                            // Preserve base's own warehouse/storefront stock
+                            warehouse_stock: baseRow ? (baseRow.warehouse_stock || 0) : 0,
+                            current_stock: baseRow ? (baseRow.current_stock || 0) : 0,
+                            raw_id: baseRow ? baseRow.raw_id : null,
+                        });
+                        if (baseRow) processedIds.add(baseRow.id);
+                    }
+                    productMap.get(productKey).variants.push(item);
+                    processedIds.add(item.id);
+
+                } else {
+                    // Base row (is_base_of_variants or standalone)
+                    const relatedVariants = inventory.data.filter(
+                        i => i.is_variant && i.product_id === productKey && !i.is_orphan
+                    );
+                    if (!productMap.has(productKey)) {
+                        productMap.set(productKey, {
+                            ...item,
+                            hasVariants: relatedVariants.length > 0,
+                            variants: relatedVariants,
+                            // Keep base's own warehouse_stock — table will aggregate variants separately
+                            warehouse_stock: item.warehouse_stock || 0,
+                        });
+                        processedIds.add(item.id);
+                        relatedVariants.forEach(v => processedIds.add(v.id));
+                    }
+                }
+
+            } else if (item.is_orphan) {
+                const nameKey = item.name.trim().toLowerCase();
+                const relatedOrphans = inventory.data.filter(
+                    i => i.is_orphan && i.name.trim().toLowerCase() === nameKey
+                );
+                if (!productMap.has(`name-${nameKey}`)) {
+                    const baseOrphan = relatedOrphans[0];
+                    productMap.set(`name-${nameKey}`, {
+                        ...baseOrphan,
+                        id: `name-base-${nameKey}`,
+                        is_variant: false,
+                        is_orphan: true,
+                        hasVariants: relatedOrphans.length > 1,
+                        variants: relatedOrphans.slice(1),
+                        warehouse_stock: relatedOrphans.reduce((s, i) => s + (i.warehouse_stock || 0), 0),
+                        current_stock: relatedOrphans.reduce((s, i) => s + (i.current_stock || 0), 0),
+                        total_sold: relatedOrphans.reduce((s, i) => s + (i.total_sold || 0), 0),
+                        total_imported: relatedOrphans.reduce((s, i) => s + (i.total_imported || 0), 0),
+                    });
+                    relatedOrphans.forEach(i => processedIds.add(i.id));
+                }
+
+            } else {
+                grouped.push({ ...item, variants: [], hasVariants: false });
+                processedIds.add(item.id);
+            }
+        });
+
+        productMap.forEach(product => grouped.push(product));
+        return grouped;
+    }, [inventory.data]);
+
+    const toggleExpand = (productId) => {
+        setExpandedProducts(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(productId)) {
+                newSet.delete(productId);
+            } else {
+                newSet.add(productId);
+            }
+            return newSet;
+        });
+    };
 
     useEffect(() => {
         axios.get('/settings').then(res => {
@@ -47,8 +150,9 @@ export default function StockTab() {
 
     useEffect(() => {
         let isMounted = true;
-        const fetchStock = () => {
-            if (!isMounted) return;
+        let debounce;
+
+        const fetch = async () => {
             setLoading(true);
             const params = { page, search };
             if (categoryFilter) params.category_id = categoryFilter;
@@ -59,6 +163,7 @@ export default function StockTab() {
                 .then(res => {
                     const paginated = res.data.data;
                     if (isMounted) {
+                        // Store raw data - grouping is handled by useMemo
                         setInventory({
                             data: paginated.data || [],
                             total: paginated.total || 0,
@@ -73,7 +178,10 @@ export default function StockTab() {
                     if (isMounted) setLoading(false);
                 });
         };
-        const debounce = setTimeout(fetchStock, 400);
+
+        // Debounce search to reduce API calls (500ms for better performance)
+        debounce = setTimeout(fetch, 500);
+
         return () => {
             clearTimeout(debounce);
             isMounted = false;
@@ -81,24 +189,43 @@ export default function StockTab() {
     }, [page, search, categoryFilter, sizeFilter, colorFilter, weightFilter, refreshTrigger]);
 
     const handleTransfer = async () => {
-        const qty = Number(transferModal.qty);
-        const available = Number(transferModal.item.warehouse_stock);
+        const qty = parseFloat(transferModal.qty);
+        const available = parseFloat(transferModal.item.warehouse_stock);
 
         if (!transferModal.item || isNaN(qty) || qty < 1 || qty > available) {
             showToast('Invalid transfer quantity', 'error');
             return;
         }
 
+        if (!transferForm.unit_type_id) {
+            showToast('Please select a unit type', 'error');
+            return;
+        }
+
+        if (!transferForm.sell_price || parseFloat(transferForm.sell_price) <= 0) {
+            showToast('Please enter a valid retail price', 'error');
+            return;
+        }
+
         setTransferLoading(true);
         try {
-            const isOrphan = !transferModal.item.product_id && !transferModal.item.is_variant;
+            // Always send product_data so admin edits (name, price, unit, category) are applied
             await axios.post('/inventory/transfer', {
                 inventory_id: transferModal.item.raw_id,
                 quantity: qty,
-                product_data: isOrphan ? transferForm : null
+                product_data: {
+                    name: transferForm.name,
+                    barcode: transferForm.barcode,
+                    category_id: transferForm.category_id,
+                    unit_type_id: transferForm.unit_type_id,
+                    sell_price: parseFloat(transferForm.sell_price),
+                    description: transferForm.description,
+                    purchase_price: transferForm.purchase_price,
+                },
             });
             showToast('Stock transferred to storefront successfully!');
-            setTransferModal({ show: false, item: null, qty: '1' });
+            setTransferModal({ show: false, item: null, qty: '1', allVariants: [] });
+            setSelectedVariantId('');
             triggerRefresh();
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to transfer stock', 'error');
@@ -107,22 +234,59 @@ export default function StockTab() {
         }
     };
 
-    const openTransferModal = (item) => {
-        const isOrphan = !item.product_id && !item.is_variant;
-        if (isOrphan) {
-            setTransferForm({
-                name: (item.name || '').replace(' (Warehouse Only)', ''),
-                sku: item.sku || '',
-                category_id: item.category_id || '',
-                unit_type_id: item.unit_type_id || 1,
-                sell_price: (item.purchase_price || 0) * 1.2,
-                description: item.description || ''
-            });
+    const openTransferModal = async (item) => {
+        // Always allow admin to edit product details for retail markup
+        setTransferForm({
+            name: (item.name || '').replace(' (Warehouse Only)', ''),
+            barcode: item.barcode || '',
+            category_id: item.category_id || '',
+            unit_type_id: item.unit_type_id || 1,
+            sell_price: item.sell_price || parseFloat(((item.purchase_price || 0) * 1.3).toFixed(2)), // 30% markup default
+            description: item.description || '',
+            purchase_price: item.purchase_price || 0,
+        });
+
+        let allVariants = [];
+
+        if (item.product_id && !item.is_variant) {
+            // Case 1: Already-tracked product with local product_id — fetch storefront variants
+            try {
+                const res = await axios.get(`/inventory?product_id=${item.product_id}`);
+                const inventoryData = res.data.data.data || [];
+                allVariants = inventoryData.filter(inv => 
+                    inv.product_id === item.product_id && 
+                    inv.is_variant && 
+                    inv.warehouse_stock > 0
+                );
+            } catch (err) {
+                console.error('Failed to fetch variants:', err);
+            }
+        } else if (item.is_orphan && item.supplier_product_id) {
+            // Case 2: Warehouse-Only orphan — fetch supplier product variants via API
+            try {
+                const res = await axios.get(`/supplier-catalog/${item.supplier_product_id}`);
+                const spVariants = res.data.data?.variants || [];
+                allVariants = spVariants
+                    .filter(v => (v.stock || 0) > 0)
+                    .map(v => ({
+                        raw_id: `spv-${v.id}`,           // prefix so the transfer logic knows it's a supplier variant
+                        supplier_variant_id: v.id,
+                        size: v.size || '',
+                        color: v.color || '',
+                        weight: v.weight || '',
+                        warehouse_stock: v.stock || 0,
+                        purchase_price: v.price_override || item.purchase_price || 0,
+                    }));
+            } catch (err) {
+                console.error('Failed to fetch supplier variants:', err);
+            }
         }
-        setTransferModal({ show: true, item, qty: '1' });
+
+        setTransferModal({ show: true, item, qty: '1', allVariants });
+        setSelectedVariantId('');
     };
 
-    const formatNum = (num) => Number(num || 0).toLocaleString();
+    const formatNum = (num) => Math.round(Number(num || 0)).toLocaleString();
 
     return (
         <div>
@@ -136,27 +300,6 @@ export default function StockTab() {
                             ...categories.map(c => ({ value: c.id, label: c.name }))
                         ]
                     },
-                    ...(variantMeta.sizes?.length > 0 ? [{
-                        value: sizeFilter, onChange: v => { setSizeFilter(v); setPage(1); },
-                        options: [
-                            { value: '', label: 'All Sizes' },
-                            ...variantMeta.sizes.map(s => ({ value: s, label: s }))
-                        ]
-                    }] : []),
-                    ...(variantMeta.colors?.length > 0 ? [{
-                        value: colorFilter, onChange: v => { setColorFilter(v); setPage(1); },
-                        options: [
-                            { value: '', label: 'All Colors' },
-                            ...variantMeta.colors.map(c => ({ value: c, label: c }))
-                        ]
-                    }] : []),
-                    ...(variantMeta.weights?.length > 0 ? [{
-                        value: weightFilter, onChange: v => { setWeightFilter(v); setPage(1); },
-                        options: [
-                            { value: '', label: 'All Weights' },
-                            ...variantMeta.weights.map(w => ({ value: w, label: w }))
-                        ]
-                    }] : []),
                 ]}
             />
 
@@ -164,7 +307,7 @@ export default function StockTab() {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-                            <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4 text-center">SKU</TableHead>
+                            <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4 text-center">Barcode</TableHead>
                             <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Product Name</TableHead>
                             <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4 text-center">Variant</TableHead>
                             <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4 text-center">Warehouse</TableHead>
@@ -180,51 +323,148 @@ export default function StockTab() {
                     <TableBody>
                         {loading ? (
                             <TableRow><TableCell colSpan={11} className="text-center py-10"><div className="spinner mx-auto" /></TableCell></TableRow>
-                        ) : inventory.data.length === 0 ? (
+                        ) : groupedInventory.length === 0 ? (
                             <TableRow><TableCell colSpan={11} className="text-center py-10 text-muted-foreground">No inventory found</TableCell></TableRow>
-                        ) : inventory.data.map(item => {
-                            const isLow = item.current_stock <= item.reorder_threshold;
-                            const variantParts = [];
-                            if (item.size && item.size !== '-') variantParts.push(item.size);
-                            if (item.color && item.color !== '-') variantParts.push(item.color);
-                            if (item.weight && item.weight !== '-') variantParts.push(item.weight);
-                            const variantLabel = item.is_variant ? (variantParts.join(' / ') || '-') : 'Base Product';
+                        ) : groupedInventory.map(item => {
+                            const isExpanded = expandedProducts.has(item.product_id || item.id);
+                            const hasVariants = item.hasVariants && item.variants && item.variants.length > 0;
+
+                            // Base's OWN stock (what the Transfer button acts on)
+                            const baseWarehouse = Number(item.warehouse_stock || 0);
+                            const baseStorefront = Number(item.current_stock || 0);
+
+                            // Aggregated totals for display in the summary row
+                            const variantWarehouse = hasVariants ? item.variants.reduce((s, v) => s + Number(v.warehouse_stock || 0), 0) : 0;
+                            const variantStorefront = hasVariants ? item.variants.reduce((s, v) => s + Number(v.current_stock || 0), 0) : 0;
+                            const totalSold = hasVariants
+                                ? item.variants.reduce((s, v) => s + (v.total_sold || 0), 0)
+                                : (item.total_sold || 0);
+                            const totalImported = hasVariants
+                                ? item.variants.reduce((s, v) => s + (v.total_imported || 0), 0)
+                                : (item.total_imported || 0);
+
+                            // For the warehouse column: show base own + variant sum
+                            const displayWarehouse = baseWarehouse + variantWarehouse;
+                            const displayStorefront = baseStorefront + variantStorefront;
+
+                            const isLow = hasVariants
+                                ? item.variants.some(v => (v.current_stock || 0) <= (v.reorder_threshold || 10))
+                                : (item.current_stock || 0) <= (item.reorder_threshold || 10);
 
                             return (
-                                <TableRow key={item.id}>
-                                    <TableCell className="px-4 py-3 text-center text-[13px] font-semibold text-foreground">{item.sku}</TableCell>
-                                    <TableCell className="px-4 py-3">
-                                        <div className="font-semibold text-foreground">{item.name}</div>
-                                        <div className="text-[12px] text-muted-foreground">{item.supplier}</div>
-                                    </TableCell>
-                                    <TableCell className="px-4 py-3 text-center text-muted-foreground">{variantLabel}</TableCell>
-                                    <TableCell className="px-4 py-3 text-center font-bold text-primary">{formatNum(item.warehouse_stock)}</TableCell>
-                                    <TableCell className="px-4 py-3 text-center font-bold text-[15px] text-foreground">{formatNum(item.current_stock)}</TableCell>
-                                    <TableCell className="px-4 py-3 text-center">
-                                        <span className={`font-semibold ${item.total_sold > 0 ? 'text-success-foreground' : 'text-muted-foreground'}`}>
-                                            {formatNum(item.total_sold)}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="px-4 py-3 text-center">
-                                        <span className={`font-semibold ${item.total_imported > 0 ? 'text-info' : 'text-muted-foreground'}`}>
-                                            {formatNum(item.total_imported)}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="px-4 py-3 text-center text-muted-foreground">{item.unit}</TableCell>
-                                    <TableCell className="px-4 py-3 text-center font-semibold">{formatNum(item.reorder_threshold)}</TableCell>
-                                    <TableCell className="px-4 py-3 text-center">
-                                        {isLow
-                                            ? <Badge variant="outline" className="border-destructive/30 bg-danger-light text-destructive">Low Stock</Badge>
-                                            : <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground">Optimal</Badge>}
-                                    </TableCell>
-                                    <TableCell className="px-4 py-3 text-center">
-                                        {item.warehouse_stock > 0 && (
-                                            <Button size="sm" onClick={() => openTransferModal(item)}>
-                                                Transfer
-                                            </Button>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
+                                <React.Fragment key={item.id}>
+                                    {/* Base Product Row */}
+                                    <TableRow className={hasVariants ? 'cursor-pointer hover:bg-secondary/30' : ''}>
+                                        <TableCell className="px-4 py-3 text-center text-[13px] font-semibold text-foreground">{item.barcode}</TableCell>
+                                        <TableCell className="px-4 py-3" onClick={() => hasVariants && toggleExpand(item.product_id || item.id)}>
+                                            <div className="flex items-center gap-2">
+                                                {hasVariants && (
+                                                    <span className="text-orange-500 font-bold text-lg mr-2">
+                                                        {isExpanded ? '▼' : '▶'}
+                                                    </span>
+                                                )}
+                                                <div>
+                                                    <div className="font-semibold text-foreground">{item.name}</div>
+                                                    <div className="text-[12px] text-muted-foreground">{item.supplier}</div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-center text-muted-foreground">
+                                            {hasVariants ? (
+                                                <Badge variant="secondary" className="font-semibold">{item.variants.length} Variant{item.variants.length !== 1 ? 's' : ''}</Badge>
+                                            ) : item.is_orphan && item.supplier_variant_count > 0 ? (
+                                                `Base (${item.supplier_variant_count} variants)`
+                                            ) : (
+                                                'Base Product'
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-center font-bold text-primary">
+                                            {formatNum(displayWarehouse)}
+                                            {hasVariants && baseWarehouse > 0 && (
+                                                <div className="text-[10px] text-muted-foreground font-normal">base: {formatNum(baseWarehouse)}</div>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-center font-bold text-[15px] text-foreground">{formatNum(displayStorefront)}</TableCell>
+                                        <TableCell className="px-4 py-3 text-center">
+                                            <span className={`font-semibold ${totalSold > 0 ? 'text-success-foreground' : 'text-muted-foreground'}`}>
+                                                {formatNum(totalSold)}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-center">
+                                            <span className={`font-semibold ${totalImported > 0 ? 'text-info' : 'text-muted-foreground'}`}>
+                                                {formatNum(totalImported)}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-center text-muted-foreground">{item.unit}</TableCell>
+                                        <TableCell className="px-4 py-3 text-center font-semibold">{formatNum(item.reorder_threshold)}</TableCell>
+                                        <TableCell className="px-4 py-3 text-center">
+                                            {isLow
+                                                ? <Badge variant="outline" className="border-destructive/30 bg-danger-light text-destructive">Low Stock</Badge>
+                                                : <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground">Optimal</Badge>}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-center">
+                                            {/* Base Transfer: only shown when the base product itself has warehouse stock */}
+                                            {baseWarehouse > 0 && (
+                                                <Button size="sm" onClick={() => openTransferModal(item)}>
+                                                    Transfer
+                                                </Button>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+
+                                    {/* Variant Rows (Expandable) */}
+                                    {hasVariants && isExpanded && item.variants.map(variant => {
+                                        const variantParts = [];
+                                        if (variant.size && variant.size !== '-') variantParts.push(variant.size);
+                                        if (variant.color && variant.color !== '-') variantParts.push(variant.color);
+                                        if (variant.weight && variant.weight !== '-') variantParts.push(variant.weight);
+                
+                                        const variantDetails = variantParts.join(' / ') || '';
+                                        const variantFullName = variantDetails ? `${item.name} (${variantDetails})` : item.name;
+                                        const variantLow = variant.current_stock <= variant.reorder_threshold;
+
+                                        return (
+                                            <TableRow key={variant.id} className="bg-secondary/10">
+                                                <TableCell className="px-4 py-3 text-center text-[13px] font-semibold text-foreground">{variant.barcode}</TableCell>
+                                                <TableCell className="px-4 py-3">
+                                                    <div className="flex items-center gap-2 ml-6">
+                                                        <div>
+                                                            <div className="font-semibold text-foreground">{variantFullName}</div>
+                                                            <div className="text-[12px] text-muted-foreground">{variant.supplier}</div>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="px-4 py-3 text-center text-muted-foreground">Variant</TableCell>
+                                                <TableCell className="px-4 py-3 text-center font-bold text-primary">{formatNum(variant.warehouse_stock)}</TableCell>
+                                                <TableCell className="px-4 py-3 text-center font-bold text-[15px] text-foreground">{formatNum(variant.current_stock)}</TableCell>
+                                                <TableCell className="px-4 py-3 text-center">
+                                                    <span className={`font-semibold ${variant.total_sold > 0 ? 'text-success-foreground' : 'text-muted-foreground'}`}>
+                                                        {formatNum(variant.total_sold)}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="px-4 py-3 text-center">
+                                                    <span className={`font-semibold ${variant.total_imported > 0 ? 'text-info' : 'text-muted-foreground'}`}>
+                                                        {formatNum(variant.total_imported)}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="px-4 py-3 text-center text-muted-foreground">{variant.unit}</TableCell>
+                                                <TableCell className="px-4 py-3 text-center font-semibold">{formatNum(variant.reorder_threshold)}</TableCell>
+                                                <TableCell className="px-4 py-3 text-center">
+                                                    {variantLow
+                                                        ? <Badge variant="outline" className="border-destructive/30 bg-danger-light text-destructive">Low Stock</Badge>
+                                                        : <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground">Optimal</Badge>}
+                                                </TableCell>
+                                                <TableCell className="px-4 py-3 text-center">
+                                                    {variant.warehouse_stock > 0 && (
+                                                        <Button size="sm" onClick={() => openTransferModal(variant)}>
+                                                            Transfer
+                                                        </Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </React.Fragment>
                             );
                         })}
                     </TableBody>
@@ -233,117 +473,191 @@ export default function StockTab() {
 
             <Pagination page={page} total={inventory.total} perPage={15} onChange={setPage} />
 
-            <Modal 
-                isOpen={transferModal.show} 
-                onClose={() => setTransferModal({ show: false, item: null, qty: '1' })} 
+            <Modal
+                isOpen={transferModal.show}
+                onClose={() => setTransferModal({ show: false, item: null, qty: '1', allVariants: [] })}
                 title="Transfer to Storefront"
-                size="lg"
+                size="xl"
             >
-                {transferModal.item && (
-                    <div className="space-y-6">
-                        {/* Header Info */}
-                        <div className="text-center space-y-2">
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                Moving stock for <strong className="text-primary">{transferModal.item.name}</strong> 
-                                {transferModal.item.is_variant ? ` (${transferModal.item.size}/${transferModal.item.color})` : ''} 
-                                from Warehouse to Storefront.
-                            </p>
-                        </div>
-                        
-                        {/* Stock and Transfer Info */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card className="bg-secondary/50 p-5">
-                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Available in Warehouse</Label>
-                                <div className="text-2xl font-bold text-foreground mt-2">{formatNum(transferModal.item.warehouse_stock)} <span className="text-sm font-medium text-muted-foreground">{transferModal.item.unit}</span></div>
-                            </Card>
+                {transferModal.item && (() => {
+                    const item = transferModal.item;
+                    const isVariant = item.is_variant;
+                    const variantParts = [];
+                    if (isVariant) {
+                        if (item.size && item.size !== '-') variantParts.push(item.size);
+                        if (item.color && item.color !== '-') variantParts.push(item.color);
+                        if (item.weight && item.weight !== '-') variantParts.push(item.weight);
+                    }
+                    const variantLabel = variantParts.join(' / ');
+                    const profitPct = transferForm.sell_price > 0 && transferForm.purchase_price > 0
+                        ? (((transferForm.sell_price - transferForm.purchase_price) / transferForm.sell_price) * 100).toFixed(1)
+                        : '0';
 
-                            <div className="space-y-2">
-                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Quantity to Transfer</Label>
-                                <Input 
-                                    type="number" 
-                                    className="h-14 text-xl font-bold text-center"
-                                    min="1" 
-                                    max={transferModal.item.warehouse_stock}
-                                    value={transferModal.qty}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        if (val === '') {
-                                            setTransferModal({ ...transferModal, qty: '' });
-                                        } else {
-                                            const num = parseInt(val);
-                                            setTransferModal({ ...transferModal, qty: isNaN(num) ? '1' : num.toString() });
-                                        }
-                                    }}
-                                    onBlur={() => {
-                                        if (transferModal.qty === '' || parseInt(transferModal.qty) < 1) {
-                                            setTransferModal({ ...transferModal, qty: '1' });
-                                        }
-                                    }}
-                                />
+                    return (
+                        <div className="space-y-5">
+                        {/* ── Item Identity Banner ── */}
+                        <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/40 border border-border">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-bold text-foreground text-base">{item.name.replace(' (Warehouse Only)', '')}</span>
+                                    {isVariant && variantLabel && (
+                                        <Badge variant="secondary" className="text-xs font-semibold">{variantLabel}</Badge>
+                                    )}
+                                    {isVariant
+                                        ? <Badge className="bg-blue-100 text-blue-700 text-[10px] font-bold">Variant</Badge>
+                                        : <Badge className="bg-orange-100 text-orange-700 text-[10px] font-bold">Base Product</Badge>
+                                    }
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">{item.supplier !== '-' ? item.supplier : ''}</div>
+                            </div>
+                            <div className="text-right shrink-0">
+                                <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">In Warehouse</div>
+                                <div className="text-2xl font-black text-primary">{formatNum(item.warehouse_stock)}</div>
+                                <div className="text-xs text-muted-foreground">{item.unit || 'units'}</div>
                             </div>
                         </div>
 
-                        {/* Product Setup Form */}
-                        {(!transferModal.item.product_id && !transferModal.item.is_variant) && (
-                            <Card className="bg-secondary/30 p-6 space-y-4">
-                                <h4 className="text-base font-bold text-foreground pb-3 border-b border-border">Setup Storefront Product Details</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Store Name</Label>
-                                        <Input value={transferForm.name} onChange={e => setTransferForm({...transferForm, name: e.target.value})} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>SKU</Label>
-                                        <Input value={transferForm.sku} onChange={e => setTransferForm({...transferForm, sku: e.target.value})} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Category</Label>
-                                        <select className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={transferForm.category_id}
-                                            onChange={e => setTransferForm({...transferForm, category_id: e.target.value})}>
-                                            <option value="">Select Category</option>
-                                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Unit Type</Label>
-                                        <select className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={transferForm.unit_type_id}
-                                            onChange={e => setTransferForm({...transferForm, unit_type_id: e.target.value})}>
-                                            <option value="">Select Unit</option>
-                                            {unitTypes.map(u => <option key={u.id} value={u.id}>{u.purchase_unit} / {u.sell_unit}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Selling Price (₱)</Label>
-                                        <Input type="number" step="0.01" value={transferForm.sell_price} onChange={e => setTransferForm({...transferForm, sell_price: e.target.value})} />
-                                    </div>
-                                    <div className="md:col-span-2 space-y-2">
-                                        <Label>Description</Label>
-                                        <Textarea rows={3} value={transferForm.description} onChange={e => setTransferForm({...transferForm, description: e.target.value})} />
-                                    </div>
+                        {/* ── Quantity + Pricing Row ── */}
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                                <Label className="text-[11px] uppercase tracking-widest font-bold text-muted-foreground">Qty to Transfer</Label>
+                                <Input
+                                    type="number"
+                                    min="1"
+                                    max={item.warehouse_stock}
+                                    value={transferModal.qty}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (val === '') { setTransferModal({ ...transferModal, qty: '' }); return; }
+                                        const num = parseInt(val);
+                                        setTransferModal({ ...transferModal, qty: isNaN(num) ? '1' : num.toString() });
+                                    }}
+                                    onBlur={() => {
+                                        if (!transferModal.qty || parseInt(transferModal.qty) < 1)
+                                            setTransferModal({ ...transferModal, qty: '1' });
+                                    }}
+                                    className="h-12 text-xl font-bold text-center border-2 focus:border-primary"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-[11px] uppercase tracking-widest font-bold text-orange-600">Retail Price (₱) *</Label>
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={transferForm.sell_price}
+                                    onChange={e => setTransferForm({ ...transferForm, sell_price: e.target.value })}
+                                    className="h-12 text-xl font-bold text-center border-2 border-orange-300 focus:border-orange-500"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-[11px] uppercase tracking-widest font-bold text-green-700">Profit Margin</Label>
+                                <div className={`h-12 flex items-center justify-center rounded-md border-2 font-black text-xl ${parseFloat(profitPct) >= 0 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                                    {profitPct}%
                                 </div>
-                            </Card>
-                        )}
+                            </div>
+                        </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-4 pt-4">
-                            <Button 
+                        {/* ── Purchase price info ── */}
+                        <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-600">
+                            <span>Cost Price:</span>
+                            <span className="font-bold text-gray-900">₱{Number(transferForm.purchase_price || 0).toFixed(2)}</span>
+                            <span className="ml-auto text-xs text-muted-foreground">Set retail price ≥ cost to make profit</span>
+                        </div>
+
+                        {/* ── Retail Storefront Settings ── */}
+                        <div className="rounded-xl border-2 border-orange-100 overflow-hidden">
+                            <div className="flex items-center justify-between px-5 py-3 bg-orange-50 border-b border-orange-100">
+                                <h4 className="font-bold text-gray-900 text-sm">Retail Storefront Settings</h4>
+                                <Badge className="bg-orange-500 text-white text-[10px] font-bold px-2">Admin Control</Badge>
+                            </div>
+                            <div className="p-5 bg-white grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <Label className="text-xs font-bold text-gray-700">Product Name</Label>
+                                    <Input
+                                        value={transferForm.name}
+                                        onChange={e => setTransferForm({ ...transferForm, name: e.target.value })}
+                                        placeholder="Display name in store"
+                                        className="h-10 border-gray-300 focus:border-orange-500"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-xs font-bold text-gray-700">Barcode</Label>
+                                    <Input
+                                        value={transferForm.barcode}
+                                        onChange={e => setTransferForm({ ...transferForm, barcode: e.target.value })}
+                                        placeholder="SKU / Barcode"
+                                        className="h-10 border-gray-300 focus:border-orange-500"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-xs font-bold text-gray-700">Category</Label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                        value={transferForm.category_id}
+                                        onChange={e => setTransferForm({ ...transferForm, category_id: e.target.value })}
+                                    >
+                                        <option value="">Select Category</option>
+                                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-xs font-bold text-gray-700">Unit Type</Label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                        value={transferForm.unit_type_id}
+                                        onChange={e => setTransferForm({ ...transferForm, unit_type_id: e.target.value })}
+                                    >
+                                        <option value="">Select Unit</option>
+                                        {unitTypes.map(u => <option key={u.id} value={u.id}>{u.purchase_unit} / {u.sell_unit}</option>)}
+                                    </select>
+                                </div>
+                                <div className="md:col-span-2 space-y-1">
+                                    <Label className="text-xs font-bold text-gray-700">Product Description</Label>
+                                    <Textarea
+                                        rows={3}
+                                        value={transferForm.description}
+                                        onChange={e => setTransferForm({ ...transferForm, description: e.target.value })}
+                                        placeholder="Add details for customers..."
+                                        className="border-gray-300 focus:border-orange-500 resize-none"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-muted-foreground">
+                            <strong>Note:</strong> You can edit product details and set retail pricing before transferring to the customer storefront.
+                        </p>
+
+                        {/* ── Action Buttons ── */}
+                        <div className="flex gap-3 pt-1">
+                            <Button
                                 variant="outline"
-                                className="flex-1 h-12 font-semibold"
-                                onClick={() => setTransferModal({ show: false, item: null, qty: '1' })}
+                                className="flex-1 h-12 font-semibold border-2"
+                                onClick={() => setTransferModal({ show: false, item: null, qty: '1', allVariants: [] })}
                                 disabled={transferLoading}
                             >
                                 Cancel
                             </Button>
-                            <Button 
-                                className="flex-1 h-12 font-semibold"
+                            <Button
+                                className="flex-1 h-12 font-semibold bg-orange-500 hover:bg-orange-600 text-white"
                                 onClick={handleTransfer}
-                                disabled={transferLoading || !transferModal.qty}
+                                disabled={
+                                    transferLoading ||
+                                    !transferModal.qty ||
+                                    parseInt(transferModal.qty) < 1 ||
+                                    parseInt(transferModal.qty) > item.warehouse_stock ||
+                                    !transferForm.unit_type_id ||
+                                    !transferForm.sell_price ||
+                                    parseFloat(transferForm.sell_price) <= 0
+                                }
                             >
-                                {transferLoading ? 'Transferring...' : 'Confirm Transfer'}
+                                {transferLoading ? 'Transferring...' : `Transfer ${transferModal.qty || 0} to Storefront`}
                             </Button>
                         </div>
                     </div>
-                )}
+                    );
+                })()}
             </Modal>
         </div>
     );

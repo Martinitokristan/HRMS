@@ -1,11 +1,12 @@
 import React from 'react';
+import { BarChart3 } from 'lucide-react';
 
 const LineChart = ({ data, maxValue, formatValue, title = "Trend", totalValueLabel = "Total", color = '#3b82f6', hideHeader = false }) => {
     if (!data || data.length === 0) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
                 <div className="text-center">
-                    <div className="text-4xl mb-2 opacity-30">📊</div>
+                    <BarChart3 className="h-10 w-10 mx-auto mb-2 opacity-30" />
                     <p className="text-sm">No data available</p>
                 </div>
             </div>

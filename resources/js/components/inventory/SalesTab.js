@@ -196,7 +196,7 @@ export default function SalesTab() {
                                     <TableBody>
                                         {viewOrder.items?.map(i => (
                                             <TableRow key={i.id}>
-                                                <TableCell className="px-4 py-3 text-foreground">{i.product?.name} <span className="text-[12px] text-muted-foreground">({i.product?.sku})</span></TableCell>
+                                                <TableCell className="px-4 py-3 text-foreground">{i.product?.name} <span className="text-[12px] text-muted-foreground">({i.product?.barcode})</span></TableCell>
                                                 <TableCell className="px-4 py-3 text-center font-bold">{i.quantity}</TableCell>
                                                 <TableCell className="px-4 py-3 text-right text-muted-foreground">₱{Number(i.unit_price).toFixed(2)}</TableCell>
                                                 <TableCell className="px-4 py-3 text-right font-semibold text-foreground">₱{Number(i.subtotal).toFixed(2)}</TableCell>

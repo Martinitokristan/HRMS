@@ -6,6 +6,7 @@ import StatCard from '../shared/StatCard';
 import LineChart from '../shared/LineChart';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { PhilippinePeso, ShoppingBag, AlertTriangle, Bike } from 'lucide-react';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
@@ -130,7 +131,7 @@ export default function Dashboard() {
                             label="Today's Revenue" 
                             value={stats?.total_revenue ? formatCurr(stats.total_revenue) : '₱0'} 
                             trend="Live" trendUp={true} 
-                            icon="💰" accentColor="green" 
+                            icon={PhilippinePeso} accentColor="green" 
                         />
                     </div>
                     
@@ -140,7 +141,7 @@ export default function Dashboard() {
                             label="Orders Today" 
                             value={stats?.orders_today || 0} 
                             trend="New" trendUp={true} 
-                            icon="🏷️" accentColor="blue" 
+                            icon={ShoppingBag} accentColor="blue" 
                         />
                     </div>
 
@@ -150,7 +151,7 @@ export default function Dashboard() {
                             label="Low Stock Items" 
                             value={stats?.low_stock_count || 0} 
                             trend="Required" trendUp={false} 
-                            icon="⚠️" accentColor="amber" 
+                            icon={AlertTriangle} accentColor="amber" 
                         />
                     </div>
 
@@ -160,7 +161,7 @@ export default function Dashboard() {
                             label="Active Riders" 
                             value={stats?.active_riders || 0} 
                             trend="Available" trendUp={true} 
-                            icon="🛵" accentColor="accent" 
+                            icon={Bike} accentColor="accent" 
                         />
                     </div>
 
