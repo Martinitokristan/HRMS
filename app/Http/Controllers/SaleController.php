@@ -102,7 +102,7 @@ class SaleController extends Controller
                     $variant = \App\Models\ProductVariant::find($item['product_variant_id']);
                     if ($variant) {
                         $variant->decrement('stock', $item['quantity']);
-                        $product->syncStockWithVariants();
+                        // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
                     }
                 } else {
                     $inv = Inventory::where('product_id', $item['product_id'])->first();
@@ -207,6 +207,7 @@ class SaleController extends Controller
                 'customer_id' => $sale->customer_id,
                 'delivery_id' => $sale->delivery->id ?? null,
                 'type' => 'confirmed',
+                'title' => 'Order Confirmed',
                 'message' => "Your order #{$sale->order_number} has been confirmed and is being prepared!",
                 'is_read' => false,
             ]);
@@ -230,7 +231,7 @@ class SaleController extends Controller
                 $variant = \App\Models\ProductVariant::find($item->product_variant_id);
                 if ($variant) {
                     $variant->increment('stock', $item->quantity);
-                    $item->product->syncStockWithVariants();
+                    // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
                 }
             } else {
                 $inv = Inventory::where('product_id', $item->product_id)->first();
@@ -271,7 +272,7 @@ class SaleController extends Controller
                     $variant = \App\Models\ProductVariant::find($item->product_variant_id);
                     if ($variant) {
                         $variant->increment('stock', $item->quantity);
-                        $item->product->syncStockWithVariants();
+                        // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
                     }
                 } else {
                     $inv = Inventory::where('product_id', $item->product_id)->first();

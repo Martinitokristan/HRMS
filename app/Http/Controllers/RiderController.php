@@ -68,6 +68,44 @@ class RiderController extends Controller
         return response()->json(['data' => $deliveries, 'status' => 'success']);
     }
 
+    public function getRatingStats(Request $request)
+    {
+        $riderId = $request->user()->id;
+        
+        $ratings = Delivery::where('rider_id', $riderId)
+            ->whereNotNull('rating')
+            ->get(['rating', 'rating_comment', 'rated_at']);
+        
+        $averageRating = $ratings->avg('rating') ? round($ratings->avg('rating'), 2) : 0;
+        $totalRatings = $ratings->count();
+        $ratingDistribution = $ratings->countBy('rating');
+        $recentRating = $ratings->last()->rating ?? null;
+        $recentComment = $ratings->last()->rating_comment ?? null;
+        $recentDate = $ratings->last()->rated_at ?? null;
+        
+        // Calculate rating percentages
+        $ratingPercentages = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $count = $ratingDistribution[$i] ?? 0;
+            $ratingPercentages[$i] = $totalRatings > 0 ? round(($count / $totalRatings) * 100, 1) : 0;
+        }
+        
+        $ratingStats = [
+            'average_rating' => $averageRating,
+            'total_ratings' => $totalRatings,
+            'rating_distribution' => $ratingDistribution,
+            'recent_rating' => $recentRating,
+            'recent_comment' => $recentComment,
+            'recent_date' => $recentDate,
+            'rating_percentages' => $ratingPercentages,
+        ];
+        
+        return response()->json([
+            'data' => $ratingStats,
+            'status' => 'success'
+        ]);
+    }
+
     public function toggleStatus(Request $request)
     {
         $profile = RiderProfile::where('user_id', $request->user()->id)->first();

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import RiderSettings from './RiderSettings';
+import RatingStatsCard from './RatingStatsCard';
+import RatingNotificationsPanel from './RatingNotificationsPanel';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -576,6 +578,16 @@ const RiderDashboardV3 = () => {
                     ))}
                 </section>
 
+                {/* Rating Statistics */}
+                <section aria-label="Rating Statistics" style={{ marginBottom: '2.5rem' }}>
+                    <RatingStatsCard />
+                </section>
+
+                {/* Rating Notifications */}
+                <section aria-label="Rating Notifications" style={{ marginBottom: '2.5rem' }}>
+                    <RatingNotificationsPanel />
+                </section>
+
                 {/* Nearby Orders */}
                 {nearbyOrders && nearbyOrders.length > 0 && (
                     <section aria-label="Nearby Orders" style={{ marginBottom: '2.5rem' }}>
@@ -651,7 +663,7 @@ const RiderDashboardV3 = () => {
                     ) : (
                         <div style={{ display: 'grid', gap: '1rem' }}>
                             {deliveries.map(delivery => (
-                                <div key={delivery.id} style={{
+                                <div key={delivery.id} data-delivery-id={delivery.id} style={{
                                     backgroundColor: '#fff', borderRadius: 24, padding: '1.5rem', 
                                     border: '1px solid #f0f0f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
                                     transition: 'transform 0.2s ease'
@@ -672,9 +684,59 @@ const RiderDashboardV3 = () => {
                                                 </span>
                                             </div>
                                             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>{delivery.customer_name}</h3>
-                                            <p style={{ color: '#666', fontSize: '0.9rem', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <p style={{ color: '#666', fontSize: '0.9rem', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <MapPin style={{ display: 'inline', width: '14px', height: '14px', marginRight: '2px' }} /> {delivery.customer_address}
                                             </p>
+                                            
+                                            {/* Rating Display */}
+                                            {delivery.rating && (
+                                                <div style={{ 
+                                                    backgroundColor: '#fef3c7', 
+                                                    border: '1px solid #fbbf24', 
+                                                    borderRadius: 12, 
+                                                    padding: '0.75rem', 
+                                                    marginBottom: '0.75rem'
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                                        <span style={{ fontWeight: 700, color: '#92400e', fontSize: '0.85rem' }}>
+                                                            Customer Rating:
+                                                        </span>
+                                                        <div style={{ display: 'flex', gap: '2px' }}>
+                                                            {[1, 2, 3, 4, 5].map(star => (
+                                                                <span 
+                                                                    key={star} 
+                                                                    style={{ 
+                                                                        fontSize: '1rem', 
+                                                                        color: star <= delivery.rating ? '#f59e0b' : '#d1d5db',
+                                                                        textShadow: star <= delivery.rating ? '0 1px 2px rgba(245, 158, 11, 0.3)' : 'none'
+                                                                    }}
+                                                                >
+                                                                    ★
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                        <span style={{ 
+                                                            fontWeight: 700, 
+                                                            color: '#92400e', 
+                                                            fontSize: '0.9rem',
+                                                            marginLeft: '0.25rem'
+                                                        }}>
+                                                            {delivery.rating}/5
+                                                        </span>
+                                                    </div>
+                                                    {delivery.rating_comment && (
+                                                        <div style={{ 
+                                                            fontStyle: 'italic', 
+                                                            color: '#78350f', 
+                                                            fontSize: '0.8rem',
+                                                            marginTop: '0.25rem',
+                                                            lineHeight: '1.4'
+                                                        }}>
+                                                            "{delivery.rating_comment}"
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '0.75rem' }}>

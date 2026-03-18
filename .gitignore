@@ -20,8 +20,12 @@ yarn-error.log
 /.test_crash.php
 /.analysis_results.md
 
+
 # Log files
 *.log
 error_*.txt
 last_log.txt
 build_error.log
+
+# Documentation folder
+/documentation/

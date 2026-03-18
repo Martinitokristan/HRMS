@@ -277,34 +277,64 @@ class PurchaseOrderController extends Controller
             foreach ($po->items as $item) {
                 $inv = null;
 
-                // CASE 1: Item has supplier_product_variant_id - check if it's already linked to an existing inventory
-                if ($item->supplier_product_variant_id) {
-                    $inv = Inventory::where('supplier_product_variant_id', $item->supplier_product_variant_id)->first();
-                }
+                // DEBUG: Log what we're working with
+                \Log::info('Processing PO Item:', [
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'supplier_product_id' => $item->supplier_product_id,
+                    'supplier_product_variant_id' => $item->supplier_product_variant_id,
+                    'quantity' => $item->quantity,
+                    'product_name' => $item->product ? $item->product->name : 'N/A',
+                    'variant_info' => $item->productVariant ? $item->productVariant->size_value . $item->productVariant->color_value . $item->productVariant->weight_value : 'Base Product'
+                ]);
 
-                // CASE 2: If no existing inventory found via supplier variant, check by product + variant
-                if (!$inv && $item->product_id) {
+                // FIXED: Improved lookup logic with proper base vs variant distinction
+                
+                // CASE 1: For BASE PRODUCTS (product_variant_id is null)
+                if (is_null($item->product_variant_id)) {
+                    \Log::info('Looking for BASE PRODUCT inventory');
+                    
+                    // Look for base product inventory (product_variant_id must be null)
+                    $inv = Inventory::where('product_id', $item->product_id)
+                        ->whereNull('product_variant_id')
+                        ->first();
+                    
+                    \Log::info('Base product inventory found:', $inv ? ['id' => $inv->id, 'warehouse_stock' => $inv->warehouse_stock] : 'No');
+                }
+                // CASE 2: For VARIANTS (product_variant_id is not null)
+                else {
+                    \Log::info('Looking for VARIANT inventory');
+                    
+                    // Look for variant inventory (product_variant_id must match)
                     $inv = Inventory::where('product_id', $item->product_id)
                         ->where('product_variant_id', $item->product_variant_id)
                         ->first();
+                    
+                    \Log::info('Variant inventory found:', $inv ? ['id' => $inv->id, 'warehouse_stock' => $inv->warehouse_stock] : 'No');
                 }
 
-                // CASE 3: If still no inventory found and it's a supplier product (orphan), check by supplier_product_id
+                // CASE 3: If no inventory found via product, check by supplier references
+                if (!$inv && $item->supplier_product_variant_id) {
+                    \Log::info('Checking by supplier variant');
+                    $inv = Inventory::where('supplier_product_variant_id', $item->supplier_product_variant_id)->first();
+                }
+
                 if (!$inv && $item->supplier_product_id) {
-                    // For base products, look for inventory with supplier_product_id and no variant
-                    if (!$item->supplier_product_variant_id) {
+                    \Log::info('Checking by supplier product');
+                    if (is_null($item->product_variant_id)) {
+                        // Base product
                         $inv = Inventory::where('supplier_product_id', $item->supplier_product_id)
                             ->whereNull('supplier_product_variant_id')
                             ->first();
-                    }
-                    // For variants, look for inventory with supplier_product_variant_id
-                    else {
+                    } else {
+                        // Variant
                         $inv = Inventory::where('supplier_product_variant_id', $item->supplier_product_variant_id)->first();
                     }
                 }
 
-                // CASE 4: Create new inventory if none exists
+                // CASE 4: Create new inventory ONLY if absolutely no existing record found
                 if (!$inv) {
+                    \Log::info('Creating new inventory record');
                     $inv = Inventory::create([
                         'product_id'                  => $item->product_id,
                         'product_variant_id'          => $item->product_variant_id,
@@ -316,9 +346,53 @@ class PurchaseOrderController extends Controller
                     ]);
                 }
 
+                // Update warehouse stock
+                $oldStock = $inv->warehouse_stock;
                 $inv->increment('warehouse_stock', $item->quantity);
                 $inv->last_adjusted_at = now();
                 $inv->save();
+
+                \Log::info('Stock updated:', [
+                    'inventory_id' => $inv->id,
+                    'old_stock' => $oldStock,
+                    'added_quantity' => $item->quantity,
+                    'new_stock' => $inv->warehouse_stock,
+                    'is_base_product' => is_null($item->product_variant_id)
+                ]);
+
+                // FIXED: For base products, also update current_stock immediately
+                // This ensures base products show stock right away without requiring transfer
+                if (is_null($item->product_variant_id)) {
+                    $inv->increment('current_stock', $item->quantity);
+                    \Log::info('Base product current_stock also updated:', [
+                        'inventory_id' => $inv->id,
+                        'new_current_stock' => $inv->fresh()->current_stock
+                    ]);
+                }
+
+                // FIXED: If this is a variant, also update the base product's warehouse stock
+                if ($item->product_id && !is_null($item->product_variant_id)) {
+                    $baseInventory = Inventory::where('product_id', $item->product_id)
+                        ->whereNull('product_variant_id')
+                        ->first();
+                    
+                    if ($baseInventory) {
+                        // Calculate total warehouse stock from all variants
+                        $totalVariantWarehouseStock = Inventory::where('product_id', $item->product_id)
+                            ->whereNotNull('product_variant_id')
+                            ->sum('warehouse_stock');
+                        
+                        $baseInventory->update([
+                            'warehouse_stock' => $totalVariantWarehouseStock,
+                            'last_adjusted_at' => now()
+                        ]);
+                        
+                        \Log::info('Base product warehouse stock synchronized:', [
+                            'base_inventory_id' => $baseInventory->id,
+                            'total_variant_stock' => $totalVariantWarehouseStock
+                        ]);
+                    }
+                }
             }
             $po->update(['status' => 'received']);
         });

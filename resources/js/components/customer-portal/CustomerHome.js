@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -6,7 +6,151 @@ import ProductDetailModal from './ProductDetailModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, Search, X, Package, ClipboardList, LogOut, Bell } from 'lucide-react';
+import { ShoppingCart, Search, X, Package, ClipboardList, LogOut, Bell, Percent } from 'lucide-react';
+import { getProductSaleInfo } from '../../utils/priceCalculations';
+
+// Optimized: Memoized product card to prevent unnecessary re-renders
+const ProductCard = React.memo(({ product, onAddToCart, setSelectedProduct }) => {
+    const allVariants = product.product_variants || [];
+    const hasVariants = allVariants.length > 0;
+    const totalVariantStock = allVariants.reduce((s, v) => s + Number(v.stock || 0), 0);
+    const baseStock = Number(product.inventory?.current_stock || 0);
+    
+    const inStock = hasVariants ? (totalVariantStock > 0 || baseStock > 0) : baseStock > 0;
+    const imgSrc = product.image_path ? `/storage/${product.image_path}` : null;
+
+    // Calculate sale information
+    const saleInfo = getProductSaleInfo(product);
+
+    const colorMap = {};
+    allVariants.forEach(v => { if (v.color_value) colorMap[v.color_value_id] = v.color_value; });
+    const colors = Object.values(colorMap);
+
+    const sizeMap = {};
+    allVariants.forEach(v => { if (v.size_value) sizeMap[v.size_value_id] = v.size_value; });
+    const sizes = Object.values(sizeMap);
+
+    const handleAddToCart = (e) => {
+        e.stopPropagation();
+        console.log('Button clicked:', product.name, 'hasVariants:', hasVariants);
+        if (hasVariants) {
+            console.log('Setting selectedProduct from button:', product.name);
+            setSelectedProduct(product);
+        } else {
+            onAddToCart(product, {
+                qty: 1,
+                variants: {},
+                price: saleInfo.isOnSale ? saleInfo.salePrice : product.sell_price,
+                saleInfo: saleInfo,
+                variant_id: null,
+                isUpdate: !!product.cartId
+            });
+        }
+    };
+
+    return (
+        <div 
+            className="pcard group bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg"
+            onClick={() => {
+                console.log('DIV clicked:', product.name);
+                if (hasVariants) {
+                    console.log('Setting selectedProduct:', product.name);
+                    setSelectedProduct(product);
+                } else {
+                    onAddToCart(product, {
+                        qty: 1,
+                        variants: {},
+                        price: saleInfo.isOnSale ? saleInfo.salePrice : product.sell_price,
+                        saleInfo: saleInfo,
+                        variant_id: null,
+                        isUpdate: !!product.cartId
+                    });
+                }
+            }}
+        >
+            {/* Product Image */}
+            <div className="pcard__img relative aspect-square bg-gray-50 overflow-hidden">
+                {imgSrc
+                    ? <img src={imgSrc} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center"><Package className="h-16 w-16 text-gray-300 opacity-40" /></div>
+                }
+                {!inStock && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">Coming Soon</span>
+                    </div>
+                )}
+                {product.category?.name && (
+                    <div className="absolute top-2 left-2">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide bg-white/95 text-gray-700 px-2 py-1 rounded shadow-sm">
+                            {product.category.name}
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {/* Product Info */}
+            <div className="p-4">
+                <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-tight">{product.name}</h3>
+
+                {product.description && (
+                    <p className="text-xs text-gray-500 line-clamp-2 mb-2 leading-relaxed">{product.description}</p>
+                )}
+
+                {/* Stock */}
+                <div className="text-xs text-gray-600 mb-2">
+                    {inStock ? (
+                        <span className="text-green-600 font-medium">
+                            Stock: {hasVariants ? `${totalVariantStock} units (variants)` : `${baseStock} units`}
+                        </span>
+                    ) : (
+                        <span className="text-red-600 font-medium">Out of Stock</span>
+                    )}
+                </div>
+
+                {/* Price with Sale Display */}
+                <div className="mb-4">
+                    {saleInfo.isOnSale ? (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Badge variant="destructive" className="text-xs px-2 py-1 bg-red-500 hover:bg-red-600">
+                                    <Percent className="w-3 h-3 mr-1" />
+                                    SALE
+                                </Badge>
+                                <span className="text-xs text-red-600 font-semibold">
+                                    -{saleInfo.salePercentage}%
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg font-bold text-red-600">
+                                    ₱{saleInfo.salePrice.toFixed(2)}
+                                </span>
+                                <span className="text-sm text-gray-400 line-through">
+                                    ₱{saleInfo.originalPrice.toFixed(2)}
+                                </span>
+                            </div>
+                            <div className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded inline-block">
+                                Save ₱{saleInfo.savings.toFixed(2)}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-lg font-bold text-gray-900">
+                            ₱{saleInfo.originalPrice.toFixed(2)}
+                        </div>
+                    )}
+                </div>
+
+                {/* Add to Cart Button */}
+                <button
+                    className="w-full h-9 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    disabled={!inStock}
+                    onClick={handleAddToCart}
+                >
+                    🛒 {hasVariants ? 'View Options' : 'Add to Cart'}
+                </button>
+            </div>
+        </div>
+    );
+});
 
 export default function CustomerHome() {
     const { user, logout } = useAuth();
@@ -68,7 +212,14 @@ export default function CustomerHome() {
 
         const fetch = () => {
             setLoading(true);
-            const params = { page: 1, per_page: 40 };
+            // Add aggressive cache-busting with timestamp and random string
+            const params = { 
+                page: 1, 
+                per_page: 20, 
+                _: Date.now(), 
+                v: '1.2', 
+                r: Math.random().toString(36).substring(7)
+            };
             if (search) params.search = search;
             if (categoryFilter) params.category_id = categoryFilter;
             axios.get('/products', { params })
@@ -273,105 +424,26 @@ export default function CustomerHome() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                        {products.map(p => {
-                            const allVariants = p.product_variants || [];
-                            const hasVariants = allVariants.length > 0;
-                            const totalVariantStock = allVariants.reduce((s, v) => s + Number(v.stock || 0), 0);
-                            const baseStock = Number(p.inventory?.current_stock || 0);
-                            // Product is in stock if either base has stock OR any variant has stock
-                            const inStock = hasVariants ? (totalVariantStock > 0 || baseStock > 0) : baseStock > 0;
-                            const imgSrc = p.image_path ? `/storage/${p.image_path}` : null;
-
-                            const colorMap = {};
-                            allVariants.forEach(v => { if (v.color_value) colorMap[v.color_value_id] = v.color_value; });
-                            const colors = Object.values(colorMap);
-
-                            const sizeMap = {};
-                            allVariants.forEach(v => { if (v.size_value) sizeMap[v.size_value_id] = v.size_value; });
-                            const sizes = Object.values(sizeMap);
-
-                            return (
-                                <div
-                                    key={p.id}
-                                    className="pcard group bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg"
-                                    onClick={() => setSelectedProduct(p)}
-                                >
-                                    {/* Product Image */}
-                                    <div className="pcard__img relative aspect-square bg-gray-50 overflow-hidden">
-                                        {imgSrc
-                                            ? <img src={imgSrc} alt={p.name} loading="lazy" className="w-full h-full object-cover" />
-                                            : <div className="w-full h-full flex items-center justify-center"><Package className="h-16 w-16 text-gray-300 opacity-40" /></div>
-                                        }
-                                        {!inStock && (
-                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                                <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">Coming Soon</span>
-                                            </div>
-                                        )}
-                                        {p.category?.name && (
-                                            <div className="absolute top-2 left-2">
-                                                <span className="text-[10px] font-semibold uppercase tracking-wide bg-white/95 text-gray-700 px-2 py-1 rounded shadow-sm">
-                                                    {p.category.name}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Product Info */}
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-tight">{p.name}</h3>
-
-                                        {p.description && (
-                                            <p className="text-xs text-gray-500 line-clamp-2 mb-2 leading-relaxed">{p.description}</p>
-                                        )}
-
-                                        {/* Stock */}
-                                        <div className="text-xs text-gray-600 mb-2">
-                                            {inStock ? (
-                                                <span className="text-green-600 font-medium">
-                                                    Stock: {baseStock} units
-                                                </span>
-                                            ) : (
-                                                <span className="text-red-600 font-medium">Out of Stock</span>
-                                            )}
-                                        </div>
-
-                                        {/* Price */}
-                                        <div className="text-lg font-bold text-gray-900 mb-3">₱{Number(p.sell_price).toFixed(2)}</div>
-
-                                        {/* Add to Cart Button */}
-                                        <button
-                                            className="w-full h-9 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
-                                            disabled={!inStock}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (hasVariants) {
-                                                    setSelectedProduct(p);
-                                                } else {
-                                                    const imgEl = e.currentTarget.closest('.pcard').querySelector('.pcard__img');
-                                                    const cartBtn = document.getElementById('cart-icon-btn');
-                                                    if (imgEl && cartBtn) {
-                                                        const s = imgEl.getBoundingClientRect();
-                                                        const d = cartBtn.getBoundingClientRect();
-                                                        setFlyingItem({ id: p.id, img: imgSrc, startX: s.left + s.width / 2, startY: s.top + s.height / 2, endX: d.left + d.width / 2, endY: d.top + d.height / 2 });
-                                                        setTimeout(() => setFlyingItem(null), 800);
-                                                    }
-                                                    addToCart(p);
-                                                }
-                                            }}
-                                        >
-                                            🛒 Add to Cart
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                        {products.map(p => (
+                            <ProductCard
+                                key={p.id}
+                                product={p}
+                                onAddToCart={addToCart}
+                                setSelectedProduct={setSelectedProduct}
+                            />
+                        ))}
                     </div>
                 )}
             </main>
 
+            {/* Add a simple debug log to see if modal is being called */}
             <ProductDetailModal
+                key={selectedProduct?.id || 'modal'}
                 isOpen={!!selectedProduct}
-                onClose={() => setSelectedProduct(null)}
+                onClose={() => {
+                    console.log('Modal closing, selectedProduct:', selectedProduct?.name);
+                    setSelectedProduct(null);
+                }}
                 product={selectedProduct}
                 onAddToCart={addToCart}
             />

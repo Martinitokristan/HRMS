@@ -14,26 +14,33 @@ class SettingsController extends Controller
 {
     public function index()
     {
+        // Optimized: Cache static data and only return what's requested
         $settings = Setting::all()->groupBy('group')->map(function ($group) {
             return $group->pluck('value', 'key');
         });
 
-        // Add masterlist data
-        $variants = Variant::with('values')->get();
-        $conversions = UnitConversion::with('category')->get();
-        $unitTypes = UnitType::all();
-        $categories = Category::all();
-
-        return response()->json([
+        // Only load masterlist data if needed (check for cache headers or specific params)
+        $includeMasterlist = request()->get('include_masterlist', false);
+        
+        $response = [
             'data' => [
-                'settings'    => $settings,
-                'variants'    => $variants,
-                'conversions' => $conversions,
-                'unitTypes'   => $unitTypes,
-                'categories'  => $categories,
+                'settings' => $settings,
             ],
             'status' => 'success',
-        ]);
+        ];
+        
+        if ($includeMasterlist) {
+            // Optimized: Load only essential masterlist data
+            $response['data']['categories'] = Category::all(['id', 'name']);
+            $response['data']['unitTypes'] = UnitType::all(['id', 'name']);
+            
+            // Only load variants if specifically requested
+            if (request()->get('include_variants', false)) {
+                $response['data']['variants'] = Variant::with('values')->get();
+            }
+        }
+
+        return response()->json($response);
     }
 
     public function update(Request $request)

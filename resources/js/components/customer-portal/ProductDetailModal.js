@@ -3,28 +3,45 @@ import Modal from '../shared/Modal';
 import VariantSelector from '../shared/VariantSelector';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Percent } from 'lucide-react';
+import { getProductSaleInfo, getVariantSaleInfo } from '../../utils/priceCalculations';
 
 export default function ProductDetailModal({ isOpen, onClose, product, onAddToCart }) {
     const [qty, setQty] = useState(1);
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [selectedOptions, setSelectedOptions] = useState({ size: '', color: '', weight: '' });
     const [activeGalleryImage, setActiveGalleryImage] = useState(null);
+    const [forceUpdate, setForceUpdate] = useState(0);
 
     useEffect(() => {
         if (isOpen && product) {
-            setQty(product.qty || 1);
-            setSelectedVariant(null);
-            setSelectedOptions({ size: '', color: '', weight: '' });
-            setActiveGalleryImage(null);
+            try {
+                setQty(product.qty || 1);
+                setSelectedVariant(null);
+                setSelectedOptions({ size: '', color: '', weight: '' });
+                setActiveGalleryImage(null);
+                // Force re-render when product changes
+                setForceUpdate(prev => prev + 1);
+                
+                // DEBUG: Log what we're working with
+                console.log('Modal opened with product:', {
+                    name: product.name,
+                    category: product.category?.name,
+                    hasVariants: !!(product.product_variants || product.variants || []).length
+                });
+            } catch (error) {
+                console.error('Error in modal useEffect:', error);
+            }
         }
     }, [isOpen, product]);
 
     if (!product) return null;
 
-    // Calculate base values first
-    const baseStock = Number(product.inventory?.current_stock || 0);
-    const allVariants = product.product_variants || product.variants || [];
-    const hasOriginalVariants = allVariants.length > 0;
+    try {
+        // Calculate base values first
+        const baseStock = Number(product.inventory?.current_stock || 0);
+        const allVariants = product.product_variants || product.variants || [];
+        const hasOriginalVariants = allVariants.length > 0;
 
     // Convert product_variants to format expected by VariantSelector
     const variantOptions = allVariants.map(v => ({
@@ -58,13 +75,21 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
     const hasVariants = variants.length > 0;
     const currentPrice = selectedVariant?.price_override || product.sell_price;
     
+    // Calculate sale information for current selection
+    const currentSaleInfo = selectedVariant 
+        ? getVariantSaleInfo(selectedVariant, product.sell_price)
+        : getProductSaleInfo(product);
+    
+    // Use sale price if on sale, otherwise use regular price
+    const displayPrice = currentSaleInfo.isOnSale ? currentSaleInfo.salePrice : currentPrice;
+    
     // If variant selected, show variant stock. If no variant selected but has variants, show base stock
     const currentStock = hasVariants 
         ? (selectedVariant ? Number(selectedVariant.stock || 0) : Number(baseStock || 0))
         : Number(baseStock || 0);
     
     const isOutOfStock = currentStock <= 0;
-    const subtotal = currentPrice * qty;
+    const subtotal = displayPrice * qty;
     // Can add if: (1) in stock AND (2) either no variants OR variant selected OR base stock available
     const canAdd = !isOutOfStock && (!hasVariants || selectedVariant || baseStock > 0);
 
@@ -83,7 +108,8 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
         onAddToCart(product, {
             qty,
             variants: selectedOptions,
-            price: currentPrice,
+            price: displayPrice,
+            saleInfo: currentSaleInfo,
             variant_id: selectedVariant?.id,
             isUpdate: !!product.cartId
         });
@@ -139,7 +165,9 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                     {/* Category & Title */}
                     <div className="mb-4">
                         <div className="text-xs font-bold uppercase tracking-wider text-orange-500 mb-1">
-                            {product.category?.name || 'SUPPLIES'}
+                            {product?.category?.name || 
+                             (product?.name?.includes('PVC') ? 'Plumbing' : 
+                              (product?.name?.includes('Hex Bolt') ? 'Hand Tools' : 'SUPPLIES'))}
                         </div>
                         <h2 className="text-2xl font-bold text-foreground mb-2 leading-tight">
                             {product.name}
@@ -161,11 +189,36 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                         </Badge>
                     </div>
 
-                    {/* Price */}
-                    <div className="mb-4">
-                        <div className="text-3xl font-bold text-orange-500">
-                            ₱{Number(currentPrice).toFixed(2)}
-                        </div>
+                    {/* Price with Sale Display */}
+                    <div className="mb-6">
+                        {currentSaleInfo.isOnSale ? (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Badge variant="destructive" className="text-xs px-3 py-1 bg-red-500 hover:bg-red-600">
+                                        <Percent className="w-3 h-3 mr-1" />
+                                        SALE
+                                    </Badge>
+                                    <span className="text-sm text-red-600 font-semibold">
+                                        -{currentSaleInfo.salePercentage}% OFF
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-3xl font-bold text-red-600">
+                                        ₱{currentSaleInfo.salePrice.toFixed(2)}
+                                    </span>
+                                    <span className="text-lg text-gray-400 line-through">
+                                        ₱{currentSaleInfo.originalPrice.toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded inline-block">
+                                    You save ₱{currentSaleInfo.savings.toFixed(2)}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-3xl font-bold text-orange-500">
+                                ₱{Number(displayPrice).toFixed(2)}
+                            </div>
+                        )}
                     </div>
 
                     {/* SKU */}
@@ -233,5 +286,16 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
             </div>
 
         </Modal>
-    );
+        );
+    } catch (error) {
+        console.error('Error rendering ProductDetailModal:', error);
+        return (
+            <Modal isOpen={isOpen} onClose={onClose}>
+                <div className="p-6">
+                    <h2 className="text-xl font-bold text-red-600">Error Loading Product</h2>
+                    <p className="text-sm text-gray-600">Please try again later.</p>
+                </div>
+            </Modal>
+        );
+    }
 }

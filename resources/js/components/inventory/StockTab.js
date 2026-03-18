@@ -100,18 +100,22 @@ export default function StockTab() {
                     i => i.is_orphan && i.name.trim().toLowerCase() === nameKey
                 );
                 if (!productMap.has(`name-${nameKey}`)) {
-                    const baseOrphan = relatedOrphans[0];
+                    // Separate base and variants
+                    const baseOrphan = relatedOrphans.find(i => !i.is_variant);
+                    const variantOrphans = relatedOrphans.filter(i => i.is_variant);
+                    
                     productMap.set(`name-${nameKey}`, {
                         ...baseOrphan,
                         id: `name-base-${nameKey}`,
                         is_variant: false,
                         is_orphan: true,
-                        hasVariants: relatedOrphans.length > 1,
-                        variants: relatedOrphans.slice(1),
-                        warehouse_stock: relatedOrphans.reduce((s, i) => s + (i.warehouse_stock || 0), 0),
-                        current_stock: relatedOrphans.reduce((s, i) => s + (i.current_stock || 0), 0),
-                        total_sold: relatedOrphans.reduce((s, i) => s + (i.total_sold || 0), 0),
-                        total_imported: relatedOrphans.reduce((s, i) => s + (i.total_imported || 0), 0),
+                        hasVariants: variantOrphans.length > 0,
+                        variants: variantOrphans,
+                        // Base should only include its own stock, not variants
+                        warehouse_stock: baseOrphan ? Number(baseOrphan.warehouse_stock || 0) : 0,
+                        current_stock: baseOrphan ? Number(baseOrphan.current_stock || 0) : 0,
+                        total_sold: relatedOrphans.reduce((s, i) => s + Number(i.total_sold || 0), 0),
+                        total_imported: relatedOrphans.reduce((s, i) => s + Number(i.total_imported || 0), 0),
                     });
                     relatedOrphans.forEach(i => processedIds.add(i.id));
                 }
@@ -159,6 +163,8 @@ export default function StockTab() {
             if (sizeFilter) params.size = sizeFilter;
             if (colorFilter) params.color = colorFilter;
             if (weightFilter) params.weight = weightFilter;
+            // Add cache-busting timestamp to force fresh data
+            params._t = Date.now();
             axios.get('/inventory', { params })
                 .then(res => {
                     const paginated = res.data.data;
@@ -235,12 +241,51 @@ export default function StockTab() {
     };
 
     const openTransferModal = async (item) => {
+        // Ensure categories and unit types are loaded
+        if (categories.length === 0 || unitTypes.length === 0) {
+            try {
+                const [categoriesRes, unitTypesRes] = await Promise.all([
+                    axios.get('/categories'),
+                    axios.get('/settings/unit-types')
+                ]);
+                
+                const fetchedCategories = categoriesRes.data.data || [];
+                const fetchedUnitTypes = unitTypesRes.data.data || [];
+                
+                // Wait for state to update
+                await new Promise(resolve => {
+                    setCategories(fetchedCategories);
+                    setUnitTypes(fetchedUnitTypes);
+                    setTimeout(resolve, 100); // Small delay for state update
+                });
+            } catch (err) {
+                console.error('Failed to load categories/unit types:', err);
+            }
+        }
+        
+        // For variants, ensure we inherit category and unit from parent product
+        let category_id = item.category_id || '';
+        let unit_type_id = item.unit_type_id || 1;
+        
+        // If this is a variant and missing category/unit, fetch from parent product
+        if (item.is_variant && (!category_id || !unit_type_id)) {
+            try {
+                const productRes = await axios.get(`/products/${item.product_id}`);
+                const product = productRes.data.data;
+                
+                if (!category_id) category_id = product.category_id || '';
+                if (!unit_type_id) unit_type_id = product.unit_type_id || 1;
+            } catch (err) {
+                console.error('Failed to fetch parent product for variant:', err);
+            }
+        }
+        
         // Always allow admin to edit product details for retail markup
         setTransferForm({
             name: (item.name || '').replace(' (Warehouse Only)', ''),
             barcode: item.barcode || '',
-            category_id: item.category_id || '',
-            unit_type_id: item.unit_type_id || 1,
+            category_id: category_id,
+            unit_type_id: unit_type_id,
             sell_price: item.sell_price || parseFloat(((item.purchase_price || 0) * 1.3).toFixed(2)), // 30% markup default
             description: item.description || '',
             purchase_price: item.purchase_price || 0,
@@ -264,8 +309,39 @@ export default function StockTab() {
         } else if (item.is_orphan && item.supplier_product_id) {
             // Case 2: Warehouse-Only orphan — fetch supplier product variants via API
             try {
+                // Ensure categories are loaded
+                let fetchedCategories = categories;
+                let fetchedUnitTypes = unitTypes;
+                
+                if (categories.length === 0) {
+                    // Fetch categories from /categories API
+                    const [categoriesRes, unitTypesRes] = await Promise.all([
+                        axios.get('/categories'),
+                        axios.get('/settings/unit-types')
+                    ]);
+                    
+                    fetchedCategories = categoriesRes.data.data || [];
+                    fetchedUnitTypes = unitTypesRes.data.data || [];
+                    
+                    setCategories(fetchedCategories);
+                    setUnitTypes(fetchedUnitTypes);
+                }
+                
                 const res = await axios.get(`/supplier-catalog/${item.supplier_product_id}`);
-                const spVariants = res.data.data?.variants || [];
+                const supplierProduct = res.data.data;
+                const spVariants = supplierProduct?.variants || [];
+                
+                // Use supplier product data for transfer form
+                setTransferForm({
+                    name: supplierProduct?.name || (item.name || '').replace(' (Warehouse Only)', ''),
+                    barcode: supplierProduct?.barcode || item.barcode || '',
+                    category_id: supplierProduct?.category_id || item.category_id || '',
+                    unit_type_id: supplierProduct?.unit_type_id || item.unit_type_id || 1,
+                    sell_price: parseFloat(((supplierProduct?.price || item.purchase_price || 0) * 1.3).toFixed(2)), // 30% markup default
+                    description: supplierProduct?.description || item.description || '',
+                    purchase_price: supplierProduct?.price || item.purchase_price || 0,
+                });
+                
                 allVariants = spVariants
                     .filter(v => (v.stock || 0) > 0)
                     .map(v => ({
@@ -275,10 +351,11 @@ export default function StockTab() {
                         color: v.color || '',
                         weight: v.weight || '',
                         warehouse_stock: v.stock || 0,
-                        purchase_price: v.price_override || item.purchase_price || 0,
+                        purchase_price: v.price_override || supplierProduct?.price || 0,
                     }));
             } catch (err) {
                 console.error('Failed to fetch supplier variants:', err);
+                console.error('Error details:', err.response?.data || err.message);
             }
         }
 
@@ -337,19 +414,20 @@ export default function StockTab() {
                             const variantWarehouse = hasVariants ? item.variants.reduce((s, v) => s + Number(v.warehouse_stock || 0), 0) : 0;
                             const variantStorefront = hasVariants ? item.variants.reduce((s, v) => s + Number(v.current_stock || 0), 0) : 0;
                             const totalSold = hasVariants
-                                ? item.variants.reduce((s, v) => s + (v.total_sold || 0), 0)
-                                : (item.total_sold || 0);
+                                ? item.variants.reduce((s, v) => s + Number(v.total_sold || 0), 0)
+                                : Number(item.total_sold || 0);
                             const totalImported = hasVariants
-                                ? item.variants.reduce((s, v) => s + (v.total_imported || 0), 0)
-                                : (item.total_imported || 0);
+                                ? item.variants.reduce((s, v) => s + Number(v.total_imported || 0), 0)
+                                : Number(item.total_imported || 0);
 
-                            // For the warehouse column: show base own + variant sum
-                            const displayWarehouse = baseWarehouse + variantWarehouse;
-                            const displayStorefront = baseStorefront + variantStorefront;
+                            // For the warehouse column: show ONLY base own stock (variants shown separately)
+                            const displayWarehouse = baseWarehouse;
+                            // For storefront: show ONLY base stock (variants shown separately)
+                            const displayStorefront = baseStorefront;
 
                             const isLow = hasVariants
-                                ? item.variants.some(v => (v.current_stock || 0) <= (v.reorder_threshold || 10))
-                                : (item.current_stock || 0) <= (item.reorder_threshold || 10);
+                                ? item.variants.some(v => Number(v.current_stock || 0) <= Number(v.reorder_threshold || 10))
+                                : Number(item.current_stock || 0) <= Number(item.reorder_threshold || 10);
 
                             return (
                                 <React.Fragment key={item.id}>

@@ -29,6 +29,7 @@ import Users from './components/users/Users';
 import Customers from './components/users/Customers';
 import Riders from './components/users/Riders';
 import Suppliers from './components/suppliers/Suppliers';
+import RatingAnalytics from './components/admin/RatingAnalytics';
 
 // Customer Portal
 import CustomerHome from './components/customer-portal/CustomerHome';
@@ -110,6 +111,7 @@ export default function AppRouter() {
                 <Route path="/inventory/purchase" element={<Inventory tab="purchase" />} />
                 <Route path="/delivery" element={<Delivery />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/reports/rating-analytics" element={<RatingAnalytics />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/users/customers" element={<Customers />} />

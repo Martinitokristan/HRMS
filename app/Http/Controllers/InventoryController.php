@@ -14,11 +14,11 @@ class InventoryController extends Controller
 {
     public function index(Request $request)
     {
-        // Query local storefront products
-        $pQuery = Product::with(['category', 'unitType', 'supplier', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue']);
+        // Optimized: Load only essential relationships for list view
+        $pQuery = Product::with(['category', 'inventory']);
         
-        // Query warehouse-only items (not yet in storefront)
-        $wQuery = Inventory::with(['supplierProduct.category', 'supplierProduct.supplier', 'supplierProduct.variants'])
+        // Query warehouse-only items (not yet in storefront) - optimized loading
+        $wQuery = Inventory::with(['supplierProduct.category', 'supplierProduct.supplier'])
             ->whereNull('product_id')
             ->whereNotNull('supplier_product_id');
 
@@ -82,7 +82,7 @@ class InventoryController extends Controller
                     'category'                    => $sp->category ? $sp->category->name : '-',
                     'category_id'                 => $sp->category_id,
                     'unit'                        => 'Units',
-                    'current_stock'               => 0,
+                    'current_stock'               => $baseInv ? $baseInv->current_stock : 0, // FIXED: Show actual current_stock
                     'warehouse_stock'             => $baseWarehouseStock,
                     'reorder_threshold'           => $baseInv ? $baseInv->reorder_threshold : 10,
                     'purchase_price'              => $sp->price,
@@ -119,7 +119,7 @@ class InventoryController extends Controller
                         'category'                    => $sp->category ? $sp->category->name : '-',
                         'category_id'                 => $sp->category_id,
                         'unit'                        => 'Units',
-                        'current_stock'               => 0,
+                        'current_stock'               => $invForVariant ? $invForVariant->current_stock : 0, // FIXED: Show actual current_stock
                         'warehouse_stock'             => $warehouseStock,
                         'reorder_threshold'           => $invForVariant ? $invForVariant->reorder_threshold : 10,
                         'purchase_price'              => $sv->price_override ?? $sp->price,
@@ -129,10 +129,9 @@ class InventoryController extends Controller
                         'size'                        => $sv->size ?? '-',
                         'color'                       => $sv->color ?? '-',
                         'weight'                      => $sv->weight ?? '-',
-                        'barcode_suffix'              => $sv->barcode_suffix,
+                        'barcode_suffix'              => $sv->barcode_suffix ?? '',
                         'is_variant'                  => true,
                         'is_orphan'                   => true,
-                        'supplier_variant_count'      => 0,
                         'total_sold'                  => 0,
                         'total_imported'              => $warehouseStock,
                     ];
@@ -154,7 +153,7 @@ class InventoryController extends Controller
                     'category'               => $sp->category ? $sp->category->name : '-',
                     'category_id'            => $sp->category_id,
                     'unit'                   => 'Units',
-                    'current_stock'          => 0,
+                    'current_stock'          => $baseInv ? $baseInv->current_stock : 0, // FIXED: Show actual current_stock
                     'warehouse_stock'        => $baseInv->warehouse_stock,
                     'reorder_threshold'      => $baseInv->reorder_threshold,
                     'purchase_price'         => $sp->price,
@@ -305,7 +304,7 @@ class InventoryController extends Controller
                 } else {
                     $variant->update(['stock' => $data['quantity']]);
                 }
-                $product->syncStockWithVariants();
+                // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
             } else {
                 $inventory = Inventory::where('product_id', $product->id)->firstOrFail();
                 if ($data['type'] === 'add') {
@@ -374,6 +373,49 @@ class InventoryController extends Controller
             'message' => 'Reorder PO created successfully',
             'status'  => 'success',
         ], 201);
+    }
+
+    public function testInventoryState($productId)
+    {
+        // DEBUG: Test endpoint to check inventory state for a product
+        $baseInventory = Inventory::where('product_id', $productId)
+            ->whereNull('product_variant_id')
+            ->first();
+            
+        $variantInventories = Inventory::where('product_id', $productId)
+            ->whereNotNull('product_variant_id')
+            ->with('productVariant')
+            ->get();
+            
+        $totalVariantWarehouseStock = $variantInventories->sum('warehouse_stock');
+        
+        return response()->json([
+            'data' => [
+                'base_product' => [
+                    'exists' => !!$baseInventory,
+                    'warehouse_stock' => $baseInventory ? $baseInventory->warehouse_stock : 0,
+                    'current_stock' => $baseInventory ? $baseInventory->current_stock : 0,
+                    'inventory_id' => $baseInventory ? $baseInventory->id : null,
+                ],
+                'variants' => $variantInventories->map(function($inv) {
+                    return [
+                        'inventory_id' => $inv->id,
+                        'product_variant_id' => $inv->product_variant_id,
+                        'variant_info' => $inv->productVariant ? 
+                            ($inv->productVariant->size_value ?? '') . 
+                            ($inv->productVariant->color_value ?? '') . 
+                            ($inv->productVariant->weight_value ?? '') : 'Unknown',
+                        'warehouse_stock' => $inv->warehouse_stock,
+                        'current_stock' => $inv->current_stock,
+                    ];
+                }),
+                'summary' => [
+                    'total_variant_warehouse_stock' => $totalVariantWarehouseStock,
+                    'base_product_should_show_variant_stock' => $totalVariantWarehouseStock,
+                ]
+            ],
+            'status' => 'success',
+        ]);
     }
 
     public function transferToStore(Request $request)
@@ -469,7 +511,7 @@ class InventoryController extends Controller
                         'purchase_price' => !empty($pd['purchase_price']) ? $pd['purchase_price'] : $sp->price,
                         'sell_price'     => !empty($pd['sell_price']) ? $pd['sell_price'] : ($sp->price * 1.3),
                         'image_path'     => $sp->image_path,
-                        'is_active'      => false, 
+                        'is_active'      => true,  // FIXED: Products should be active after transfer
                     ]);
                     $productId = $product->id;
                 }
@@ -546,10 +588,7 @@ class InventoryController extends Controller
             if ($inv->product_variant_id) {
                 $variant = \App\Models\ProductVariant::findOrFail($inv->product_variant_id);
                 $variant->increment('stock', $data['quantity']);
-                $product = Product::find($inv->product_id);
-                if ($product) {
-                    $product->syncStockWithVariants();
-                }
+                // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
             } else {
                 // Ensure inventory record exists for base product
                 $baseInventory = \App\Models\Inventory::where('product_id', $productId)
@@ -646,11 +685,19 @@ class InventoryController extends Controller
                         } else {
                             // Create product from supplier product
                             $sp = $inv->supplierProduct;
-                            $unitTypeId = !empty($baseProductData['unit_type_id']) ? $baseProductData['unit_type_id'] : 1;
+                            $baseProductData = $data['base_product_data'] ?? [];
+                            
+                            // Ensure unit_type_id has a valid value
+                            $unitTypeId = 1; // Default fallback
+                            if (!empty($baseProductData['unit_type_id'])) {
+                                $unitTypeId = $baseProductData['unit_type_id'];
+                            } elseif (\App\Models\UnitType::count() > 0) {
+                                $unitTypeId = \App\Models\UnitType::first()->id;
+                            }
                             
                             $product = Product::create([
                                 'name'           => !empty($baseProductData['name']) ? $baseProductData['name'] : $sp->name,
-                                'barcode'        => !empty($baseProductData['barcode']) ? $baseProductData['barcode'] : ($sp->barcode ?? ('BARCODE-' . str_pad(Product::count() + 1, 6, '0', STR_PAD_LEFT))),
+                                'barcode'        => !empty($baseProductData['barcode']) ? $baseProductData['barcode'] : $sp->barcode,
                                 'description'    => !empty($baseProductData['description']) ? $baseProductData['description'] : $sp->description,
                                 'category_id'    => !empty($baseProductData['category_id']) ? $baseProductData['category_id'] : $sp->category_id,
                                 'supplier_id'    => $sp->supplier_id,
@@ -658,13 +705,11 @@ class InventoryController extends Controller
                                 'purchase_price' => !empty($baseProductData['purchase_price']) ? $baseProductData['purchase_price'] : $sp->price,
                                 'sell_price'     => !empty($baseProductData['sell_price']) ? $baseProductData['sell_price'] : ($sp->price * 1.3),
                                 'image_path'     => $sp->image_path,
-                                'is_active'      => false,
+                                'is_active'      => true,  // FIXED: Products should be active after transfer
                             ]);
                             
                             $productId = $product->id;
                         }
-                    } else {
-                        $productId = $inv->product_id;
                     }
                 }
 
@@ -724,8 +769,8 @@ class InventoryController extends Controller
                         $variant->update(['price_override' => $transfer['product_data']['sell_price']]);
                     }
                     
-                    // Sync product stock with all variants
-                    $inv->product->syncStockWithVariants();
+                    // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
+                    // Base product and variants should have separate stock management
                 } else {
                     $inv->increment('current_stock', $transfer['quantity']);
                 }

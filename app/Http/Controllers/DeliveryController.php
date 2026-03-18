@@ -192,6 +192,12 @@ class DeliveryController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $delivery = Delivery::findOrFail($id);
+        
+        // Verify this delivery belongs to the authenticated rider
+        if ($delivery->rider_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized - You can only update your own deliveries'], 403);
+        }
+        
         $request->validate(['status' => 'required|in:pending,in_progress,delivered,failed']);
 
         $updates = ['status' => $request->status];
@@ -225,6 +231,7 @@ class DeliveryController extends Controller
                     'customer_id' => $delivery->sale->customer_id,
                     'delivery_id' => $delivery->id,
                     'type' => 'delivered',
+                    'title' => 'Order Delivered',
                     'message' => 'Your order has been delivered! Please rate your experience.',
                     'is_read' => false,
                 ]);

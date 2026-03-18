@@ -585,4 +585,228 @@ class ReportController extends Controller
 
         return $html;
     }
+
+    public function ratingAnalytics(Request $request)
+    {
+        $period = $request->get('period', 'month');
+        $from = now();
+        $to = now();
+
+        if ($period === 'week') {
+            $from = now()->subDays(7);
+        } elseif ($period === 'year') {
+            $from = now()->subYear();
+        } else { // month
+            $from = now()->subDays(30);
+        }
+
+        // Overall rating statistics
+        $overallStats = [
+            'total_ratings' => DB::table('deliveries')
+                ->whereNotNull('rating')
+                ->whereBetween('rated_at', [$from, $to])
+                ->count(),
+            'average_rating' => DB::table('deliveries')
+                ->whereNotNull('rating')
+                ->whereBetween('rated_at', [$from, $to])
+                ->avg('rating'),
+            'rating_distribution' => DB::table('deliveries')
+                ->whereNotNull('rating')
+                ->whereBetween('rated_at', [$from, $to])
+                ->selectRaw('rating, COUNT(*) as count')
+                ->groupBy('rating')
+                ->pluck('count', 'rating')
+                ->toArray(),
+        ];
+
+        // Round average rating
+        $overallStats['average_rating'] = round($overallStats['average_rating'], 2);
+
+        // Calculate rating percentages
+        $totalRated = $overallStats['total_ratings'];
+        $overallStats['rating_percentages'] = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $count = $overallStats['rating_distribution'][$i] ?? 0;
+            $overallStats['rating_percentages'][$i] = $totalRated > 0 ? round(($count / $totalRated) * 100, 1) : 0;
+        }
+
+        // Rider rankings
+        $riderRankings = DB::table('deliveries')
+            ->join('users', 'deliveries.rider_id', '=', 'users.id')
+            ->whereNotNull('deliveries.rating')
+            ->whereBetween('deliveries.rated_at', [$from, $to])
+            ->selectRaw('
+                users.id as rider_id,
+                users.name as rider_name,
+                AVG(deliveries.rating) as average_rating,
+                COUNT(deliveries.rating) as total_ratings,
+                SUM(CASE WHEN deliveries.rating >= 4 THEN 1 ELSE 0 END) as positive_ratings,
+                SUM(CASE WHEN deliveries.rating <= 2 THEN 1 ELSE 0 END) as negative_ratings
+            ')
+            ->groupBy('users.id', 'users.name')
+            ->orderBy('average_rating', 'desc')
+            ->orderBy('total_ratings', 'desc')
+            ->get()
+            ->map(function ($rider) {
+                $rider->average_rating = round($rider->average_rating, 2);
+                $rider->positive_rate = $rider->total_ratings > 0 
+                    ? round(($rider->positive_ratings / $rider->total_ratings) * 100, 1) 
+                    : 0;
+                return $rider;
+            });
+
+        // Top performers (5+ ratings, 4.0+ average)
+        $topPerformers = $riderRankings->filter(function ($rider) {
+            return $rider->total_ratings >= 5 && $rider->average_rating >= 4.0;
+        })->take(10);
+
+        // Needs improvement (5+ ratings, below 3.0 average)
+        $needsImprovement = $riderRankings->filter(function ($rider) {
+            return $rider->total_ratings >= 5 && $rider->average_rating < 3.0;
+        })->take(10);
+
+        // Rating trends over time
+        $ratingTrends = DB::table('deliveries')
+            ->whereNotNull('rating')
+            ->whereBetween('rated_at', [$from, $to])
+            ->selectRaw('DATE(rated_at) as date, AVG(rating) as average_rating, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(function ($trend) {
+                $trend->average_rating = round($trend->average_rating, 2);
+                return $trend;
+            });
+
+        // Recent feedback
+        $recentFeedback = DB::table('deliveries')
+            ->join('users as riders', 'deliveries.rider_id', '=', 'riders.id')
+            ->join('sales', 'deliveries.sale_id', '=', 'sales.id')
+            ->join('users as customers', 'sales.customer_id', '=', 'customers.id')
+            ->whereNotNull('deliveries.rating')
+            ->whereBetween('deliveries.rated_at', [$from, $to])
+            ->selectRaw('
+                deliveries.id,
+                deliveries.rating,
+                deliveries.rating_comment,
+                deliveries.rated_at,
+                riders.name as rider_name,
+                customers.name as customer_name,
+                deliveries.tracking_number
+            ')
+            ->orderBy('deliveries.rated_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'overall_stats' => $overallStats,
+                'rider_rankings' => $riderRankings,
+                'top_performers' => $topPerformers,
+                'needs_improvement' => $needsImprovement,
+                'rating_trends' => $ratingTrends,
+                'recent_feedback' => $recentFeedback,
+                'period' => $period,
+                'date_range' => [
+                    'from' => $from->toDateString(),
+                    'to' => $to->toDateString()
+                ]
+            ],
+            'status' => 'success'
+        ]);
+    }
+
+    public function ratingAnalyticsRankings(Request $request)
+    {
+        $period = $request->get('period', 'month');
+        $from = now();
+        $to = now();
+
+        if ($period === 'week') {
+            $from = now()->subDays(7);
+        } elseif ($period === 'year') {
+            $from = now()->subYear();
+        } else { // month
+            $from = now()->subDays(30);
+        }
+
+        $query = DB::table('deliveries')
+            ->join('users', 'deliveries.rider_id', '=', 'users.id')
+            ->whereNotNull('deliveries.rating')
+            ->whereBetween('deliveries.rated_at', [$from, $to])
+            ->selectRaw('
+                users.id as rider_id,
+                users.name as rider_name,
+                AVG(deliveries.rating) as average_rating,
+                COUNT(deliveries.rating) as total_ratings,
+                SUM(CASE WHEN deliveries.rating >= 4 THEN 1 ELSE 0 END) as positive_ratings,
+                SUM(CASE WHEN deliveries.rating <= 2 THEN 1 ELSE 0 END) as negative_ratings
+            ')
+            ->groupBy('users.id', 'users.name')
+            ->orderBy('average_rating', 'desc')
+            ->orderBy('total_ratings', 'desc');
+
+        // Apply search if provided
+        if ($request->search) {
+            $query->where('users.name', 'like', "%{$request->search}%");
+        }
+
+        $rankings = $query->paginate($request->get('per_page', 15));
+
+        // Calculate positive rate for each rider
+        $rankings->getCollection()->transform(function ($rider) {
+            $rider->average_rating = round($rider->average_rating, 2);
+            $rider->positive_rate = $rider->total_ratings > 0 
+                ? round(($rider->positive_ratings / $rider->total_ratings) * 100, 1) 
+                : 0;
+            return $rider;
+        });
+
+        return response()->json($rankings);
+    }
+
+    public function ratingAnalyticsFeedback(Request $request)
+    {
+        $period = $request->get('period', 'month');
+        $from = now();
+        $to = now();
+
+        if ($period === 'week') {
+            $from = now()->subDays(7);
+        } elseif ($period === 'year') {
+            $from = now()->subYear();
+        } else { // month
+            $from = now()->subDays(30);
+        }
+
+        $query = DB::table('deliveries')
+            ->join('users as riders', 'deliveries.rider_id', '=', 'riders.id')
+            ->join('sales', 'deliveries.sale_id', '=', 'sales.id')
+            ->join('users as customers', 'sales.customer_id', '=', 'customers.id')
+            ->whereNotNull('deliveries.rating')
+            ->whereBetween('deliveries.rated_at', [$from, $to])
+            ->selectRaw('
+                deliveries.id,
+                deliveries.rating,
+                deliveries.rating_comment,
+                deliveries.rated_at,
+                riders.name as rider_name,
+                customers.name as customer_name,
+                deliveries.tracking_number
+            ')
+            ->orderBy('deliveries.rated_at', 'desc');
+
+        // Apply search if provided
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('customers.name', 'like', "%{$request->search}%")
+                  ->orWhere('riders.name', 'like', "%{$request->search}%")
+                  ->orWhere('deliveries.tracking_number', 'like', "%{$request->search}%");
+            });
+        }
+
+        $feedback = $query->paginate($request->get('per_page', 15));
+
+        return response()->json($feedback);
+    }
 }

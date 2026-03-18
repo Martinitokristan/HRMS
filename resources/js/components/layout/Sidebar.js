@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, Package, Warehouse, Truck, Handshake,
     Store, BarChart3, Users, Settings, ChevronDown,
-    ShoppingBag, UserCheck, Bike, ExternalLink,
+    ShoppingBag, UserCheck, Bike, ExternalLink, Star,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -84,6 +84,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
                     <SectionLabel>Analytics</SectionLabel>
                     <NavItem to="/reports" icon={BarChart3}>Reports</NavItem>
+                    <NavItem to="/reports/rating-analytics" icon={Star}>Rating Analytics</NavItem>
 
                     <SectionLabel>System</SectionLabel>
 

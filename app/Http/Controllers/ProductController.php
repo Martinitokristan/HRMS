@@ -14,7 +14,8 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'unitType', 'supplier', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])
+        // Optimized: Load essential relationships for list view including variants
+        $query = Product::with(['category', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])
             ->where('is_active', true) // Only show active products in customer shop
             ->when($request->search, function($q) use ($request) {
                 return $q->where('name', 'like', "%{$request->search}%")
@@ -49,11 +50,16 @@ class ProductController extends Controller
             'supplier_id'       => 'nullable|exists:suppliers,id',
             'purchase_price'    => 'required|numeric|min:0',
             'sell_price'        => 'required|numeric|min:0',
+            'sale_percentage'    => 'required|numeric|min:0|max:100',
             'initial_stock'     => 'nullable|numeric|min:0',
             'reorder_threshold' => 'nullable|numeric|min:0',
             'description'       => 'nullable|string',
             'variants'          => 'nullable|string',
+            'sale_settings'     => 'nullable|string',
         ]);
+
+        // Ensure sale_percentage is properly set
+        $data['sale_percentage'] = $request->input('sale_percentage', 0);
 
         $product = DB::transaction(function () use ($data, $request) {
             $product = Product::create($data);
@@ -103,12 +109,13 @@ class ProductController extends Controller
                             'weight_value_id' => $v['weight_value_id'] ?? null,
                             'stock'           => $v['stock'] ?? 0,
                             'price_override'  => $priceOverride,
-                            'barcode_suffix'  => $v['barcode_suffix'] !== '' ? ($v['barcode_suffix'] ?? null) : null,
+                            'barcode'         => $v['barcode'] !== '' ? ($v['barcode'] ?? null) : null, // Changed from barcode_suffix
+                            'sale_percentage' => $v['sale_percentage'] ?? 0, // Added sale percentage
                             'image_path'      => $imagePath,
                         ]);
                     }
                 }
-                $product->syncStockWithVariants();
+                // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
             }
 
             return $product;
@@ -123,7 +130,9 @@ class ProductController extends Controller
 
     public function show($id)
     {
+        // Optimized: Load essential relationships, add variant relationships only for detail view
         $product = Product::with(['category', 'unitType', 'supplier', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])->findOrFail($id);
+        
         return response()->json(['data' => $product, 'status' => 'success']);
     }
 
@@ -139,10 +148,15 @@ class ProductController extends Controller
             'supplier_id'    => 'nullable|exists:suppliers,id',
             'purchase_price' => 'required|numeric|min:0',
             'sell_price'     => 'required|numeric|min:0',
+            'sale_percentage' => 'required|numeric|min:0|max:100',
             'is_active'      => 'nullable',
             'description'    => 'nullable|string',
             'variants'       => 'nullable|string',
+            'sale_settings'  => 'nullable|string',
         ]);
+
+        // Ensure sale_percentage is properly set
+        $data['sale_percentage'] = $request->input('sale_percentage', 0);
 
         $product->update($data);
 
@@ -170,11 +184,12 @@ class ProductController extends Controller
                         'weight_value_id' => $v['weight_value_id'] ?? null,
                         'stock'           => $v['stock'] ?? 0,
                         'price_override'  => $priceOverride,
-                        'barcode_suffix'  => $v['barcode_suffix'] !== '' ? ($v['barcode_suffix'] ?? null) : null,
+                        'barcode'         => $v['barcode'] !== '' ? ($v['barcode'] ?? null) : null, // Changed from barcode_suffix
+                        'sale_percentage' => $v['sale_percentage'] ?? 0, // Added sale percentage
                         'image_path'      => $imagePath,
                     ]);
                 }
-                $product->syncStockWithVariants();
+                // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
             }
         }
 

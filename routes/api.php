@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::post('/inventory/transfer', [InventoryController::class, 'transferToStore']);
     Route::post('/inventory/transfer-multiple', [InventoryController::class, 'transferMultipleToStore']);
+    Route::get('/inventory/test/{productId}', [InventoryController::class, 'testInventoryState']);
     Route::post('/categories', [CategoryController::class, 'store']);
 
     // Suppliers & Unit Types
@@ -93,12 +94,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/inventory', [ReportController::class, 'inventory']);
     Route::get('/reports/top-products', [ReportController::class, 'topProducts']);
     Route::get('/reports/export', [ReportController::class, 'export']);
+    Route::get('/reports/rating-analytics', [ReportController::class, 'ratingAnalytics']);
+    Route::get('/reports/rating-analytics/rankings', [ReportController::class, 'ratingAnalyticsRankings']);
+    Route::get('/reports/rating-analytics/feedback', [ReportController::class, 'ratingAnalyticsFeedback']);
 
     // Users
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);
     Route::put('/users/{id}', [UserController::class, 'update']);
-    Route::put('/users/{id}/suspend', [UserController::class, 'suspend']);
     Route::put('/users/{id}/restore', [UserController::class, 'restore']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
@@ -124,6 +127,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/riders/me/security', [RiderController::class, 'updateSecurity']);
     Route::get('/riders/me/notifications', [RiderController::class, 'getNotifications']);
     Route::post('/riders/me/notifications/read', [RiderController::class, 'markNotificationsRead']);
+    Route::get('/riders/me/rating-stats', [RiderController::class, 'getRatingStats']);
 
     // Rider proximity notification
     Route::post('/deliveries/{id}/proximity', [DeliveryController::class, 'riderProximityUpdate']);

@@ -18,6 +18,7 @@ class CreateProductsTable extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->nullOnDelete();
             $table->decimal('purchase_price', 10, 2);
             $table->decimal('sell_price', 10, 2);
+            $table->decimal('sale_percentage', 5, 2)->default(0); // Added sale percentage field
             $table->string('image_path', 255)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
