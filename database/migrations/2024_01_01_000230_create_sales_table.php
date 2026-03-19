@@ -18,6 +18,10 @@ class CreateSalesTable extends Migration
             $table->enum('payment_method', ['cod', 'gcash', 'bank_transfer']);
             $table->enum('status', ['pending', 'confirmed', 'out_for_delivery', 'delivered', 'returned', 'cancelled'])->default('pending');
             $table->text('notes')->nullable();
+            $table->string('cancellation_reason')->nullable();
+            $table->text('cancellation_notes')->nullable();
+            $table->foreignId('cancelled_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
         });
     }

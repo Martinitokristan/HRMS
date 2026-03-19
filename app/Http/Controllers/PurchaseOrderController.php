@@ -332,18 +332,101 @@ class PurchaseOrderController extends Controller
                     }
                 }
 
-                // CASE 4: Create new inventory ONLY if absolutely no existing record found
+                // CASE 4: Create products from supplier data if they don't exist
                 if (!$inv) {
+                    \Log::info('Creating products from supplier data');
+                    
+                    $productId = $item->product_id;
+                    $variantId = $item->product_variant_id;
+                    
+                    // If we have supplier product but no product, create the product
+                    if (!$productId && $item->supplier_product_id) {
+                        \Log::info('Creating new product from supplier product');
+                        $supplierProduct = SupplierProduct::find($item->supplier_product_id);
+                        
+                        if ($supplierProduct) {
+                            $newProduct = Product::create([
+                                'name' => $supplierProduct->name,
+                                'description' => $supplierProduct->description,
+                                'category_id' => $supplierProduct->category_id,
+                                'unit_type_id' => 1, // Default unit type
+                                'supplier_id' => 1, // Default supplier
+                                'purchase_price' => $supplierProduct->price,
+                                'sell_price' => $supplierProduct->price * 1.3, // 30% markup
+                                'barcode' => $supplierProduct->barcode,
+                                'image_path' => $supplierProduct->image_path, // Copy image from supplier
+                                'is_active' => 1, // Active product
+                            ]);
+                            $productId = $newProduct->id;
+                            \Log::info('Created new product', ['product_id' => $productId, 'name' => $newProduct->name]);
+                        }
+                    }
+                    
+                    // If we have supplier variant but no variant, create the variant
+                    if (!$variantId && $item->supplier_product_variant_id && $productId) {
+                        \Log::info('Creating new variant from supplier variant');
+                        $supplierVariant = \App\Models\SupplierProductVariant::find($item->supplier_product_variant_id);
+                        
+                        if ($supplierVariant) {
+                            // Find or create appropriate variant values
+                            $sizeValueId = null;
+                            $colorValueId = null;
+                            $weightValueId = null;
+                            
+                            // Handle size value - extract from supplier variant if possible
+                            if ($supplierVariant->size) {
+                                $existingSize = DB::table('variant_values')
+                                    ->where('label', $supplierVariant->size)
+                                    ->first();
+                                
+                                if ($existingSize) {
+                                    $sizeValueId = $existingSize->id;
+                                } else {
+                                    // Create new size value
+                                    $sizeValueId = DB::table('variant_values')->insertGetId([
+                                        'variant_id' => 1, // Default variant group
+                                        'label' => $supplierVariant->size,
+                                        'category' => 'size',
+                                        'created_at' => now(),
+                                        'updated_at' => now(),
+                                    ]);
+                                }
+                            }
+                            
+                            $newVariant = ProductVariant::create([
+                                'product_id' => $productId,
+                                'size_value_id' => $sizeValueId,
+                                'color_value_id' => $colorValueId,
+                                'weight_value_id' => $weightValueId,
+                                'stock' => 0,
+                                'price_override' => $supplierVariant->price_override,
+                                'barcode' => $supplierVariant->barcode_suffix,
+                                'image_path' => $supplierVariant->image_path, // Copy image from supplier variant
+                                'additional_images' => $supplierVariant->additional_images, // Copy additional images
+                            ]);
+                            $variantId = $newVariant->id;
+                            \Log::info('Created new variant', ['variant_id' => $variantId, 'product_id' => $productId]);
+                        }
+                    }
+                    
+                    // Now create the inventory record with the proper IDs
                     \Log::info('Creating new inventory record');
                     $inv = Inventory::create([
-                        'product_id'                  => $item->product_id,
-                        'product_variant_id'          => $item->product_variant_id,
+                        'product_id'                  => $productId,
+                        'product_variant_id'          => $variantId,
                         'supplier_product_id'         => $item->supplier_product_id,
                         'supplier_product_variant_id' => $item->supplier_product_variant_id,
                         'current_stock'               => 0,
                         'warehouse_stock'             => 0,
                         'reorder_threshold'           => 10,
                     ]);
+                    
+                    // Update the PO item to reference the newly created product/variant
+                    $item->update([
+                        'product_id' => $productId,
+                        'product_variant_id' => $variantId,
+                    ]);
+                    \Log::info('Updated PO item with new product/variant IDs');
                 }
 
                 // Update warehouse stock

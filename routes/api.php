@@ -18,6 +18,9 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierAuthController;
 use App\Http\Controllers\SupplierProductController;
 use App\Http\Controllers\RouteController;
+use App\Http\Controllers\ReturnController;
+use App\Http\Controllers\CartReservationController;
+use App\Http\Controllers\ProductReviewController;
 
 // Auth (public)
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -32,6 +35,9 @@ Route::post('/supplier/auth/verify-email', [SupplierAuthController::class, 'veri
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
+
+// Public Product Reviews
+Route::get('/products/{id}/reviews', [ProductReviewController::class, 'productReviews']);
 
 // Route API proxy (public - no auth needed)
 Route::middleware(['throttle:60,1'])->post('/route', [RouteController::class, 'getRoute']);
@@ -70,6 +76,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/sales/{id}/status', [SaleController::class, 'updateStatus']);
     Route::post('/sales/{id}/return', [SaleController::class, 'processReturn']);
 
+    // Returns Management (Admin)
+    Route::get('/returns', [ReturnController::class, 'index']);
+    Route::get('/returns/{id}', [ReturnController::class, 'show']);
+    Route::post('/returns/{id}/approve', [ReturnController::class, 'approve']);
+    Route::post('/returns/{id}/reject', [ReturnController::class, 'reject']);
+    Route::post('/returns/{id}/complete', [ReturnController::class, 'complete']);
+
     // Purchase Orders
     Route::get('/purchase-orders', [PurchaseOrderController::class, 'index']);
     Route::post('/purchase-orders', [PurchaseOrderController::class, 'store']);
@@ -97,6 +110,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/rating-analytics', [ReportController::class, 'ratingAnalytics']);
     Route::get('/reports/rating-analytics/rankings', [ReportController::class, 'ratingAnalyticsRankings']);
     Route::get('/reports/rating-analytics/feedback', [ReportController::class, 'ratingAnalyticsFeedback']);
+    
+    // Advanced Analytics
+    Route::get('/analytics/customer-behavior', [ReportController::class, 'customerBehavior']);
+    Route::get('/analytics/inventory-forecast', [ReportController::class, 'inventoryForecast']);
+    Route::get('/analytics/profit-margins', [ReportController::class, 'profitMargins']);
 
     // Users
     Route::get('/users', [UserController::class, 'index']);
@@ -111,6 +129,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/profile', [CustomerController::class, 'myProfile']);
     Route::put('/customer/profile', [CustomerController::class, 'updateProfile']);
     Route::post('/customer/orders/{id}/cancel', [SaleController::class, 'cancelOrder']);
+    Route::get('/customer/orders/{id}/cancellation-policy', [SaleController::class, 'cancellationPolicy']);
+    Route::post('/customer/returns', [ReturnController::class, 'store']);
+    Route::get('/customer/returns', [ReturnController::class, 'customerReturns']);
+
+    // Cart Reservations
+    Route::post('/cart/reserve', [CartReservationController::class, 'reserve']);
+    Route::delete('/cart/release/{id}', [CartReservationController::class, 'release']);
+    Route::delete('/cart/release-all', [CartReservationController::class, 'releaseAll']);
+    Route::post('/cart/check-availability', [CartReservationController::class, 'checkAvailability']);
+    Route::get('/cart/reservations', [CartReservationController::class, 'myReservations']);
+
+    // Product Reviews (Customer)
+    Route::post('/products/{id}/reviews', [ProductReviewController::class, 'store']);
+    Route::post('/reviews/{id}/helpful', [ProductReviewController::class, 'markHelpful']);
+
+    // Product Reviews (Admin)
+    Route::get('/reviews', [ProductReviewController::class, 'index']);
+    Route::post('/reviews/{id}/respond', [ProductReviewController::class, 'respond']);
+    Route::put('/reviews/{id}/status', [ProductReviewController::class, 'updateStatus']);
+    Route::delete('/reviews/{id}', [ProductReviewController::class, 'destroy']);
+
+    // Admin cancel (same controller method, role checked inside)
+    Route::post('/sales/{id}/cancel', [SaleController::class, 'cancelOrder']);
 
     // Riders
     Route::get('/riders', [RiderController::class, 'index']);

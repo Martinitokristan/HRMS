@@ -12,6 +12,7 @@ class Product extends Model
     ];
 
     protected $casts = ['is_active' => 'boolean'];
+    protected $appends = ['available_stock'];
 
     public function category()
     {
@@ -46,6 +47,14 @@ class Product extends Model
     public function productVariants()
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    /**
+     * Get the available stock (storefront stock) for the product.
+     */
+    public function getAvailableStockAttribute()
+    {
+        return $this->inventory ? $this->inventory->current_stock : 0;
     }
 
     /**

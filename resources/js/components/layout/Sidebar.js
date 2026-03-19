@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, Package, Warehouse, Truck, Handshake,
     Store, BarChart3, Users, Settings, ChevronDown,
-    ShoppingBag, UserCheck, Bike, ExternalLink, Star,
+    ShoppingBag, UserCheck, Bike, ExternalLink, Star, RotateCcw,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -81,6 +81,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     <NavItem to="/delivery" icon={Truck}>Delivery</NavItem>
                     <NavItem to="/suppliers" icon={Handshake}>Suppliers</NavItem>
                     <NavItem to="/supplier-catalog" icon={Store}>Supplier Catalog</NavItem>
+                    <NavItem to="/returns" icon={RotateCcw}>Returns</NavItem>
 
                     <SectionLabel>Analytics</SectionLabel>
                     <NavItem to="/reports" icon={BarChart3}>Reports</NavItem>

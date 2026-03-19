@@ -13,7 +13,7 @@ export default function Modal({ isOpen, onClose, title, children, footer, size =
     
     return (
         <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-            <DialogContent className={`${sizeClasses[size] || sizeClasses.md} max-h-[90vh] overflow-y-auto`}>
+            <DialogContent className={`${sizeClasses[size] || sizeClasses.md}`}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription className="sr-only">{title}</DialogDescription>

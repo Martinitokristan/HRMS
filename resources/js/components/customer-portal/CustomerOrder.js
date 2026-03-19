@@ -129,8 +129,36 @@ export default function CustomerOrder() {
 
         setLoading(true);
 
+        // Debug: Check if user is logged in
+        console.log('User:', user);
+        console.log('Token:', localStorage.getItem('hrms_token'));
+        console.log('Order data:', {
+            address: address.trim(),
+            payment_method: payment,
+            customer_id: user?.id,
+            items: cart.map((i) => ({
+                product_id: i.id,
+                product_variant_id: i.variant_id || null,
+                quantity: i.qty,
+                price: i.sell_price,
+                variants: i.selectedVariants || {},
+            })),
+        });
+
+        // Test API call first
         try {
-            await axios.post("/sales", {
+            const testResponse = await axios.get('/auth/me');
+            console.log('Auth test successful:', testResponse.data);
+        } catch (testErr) {
+            console.error('Auth test failed:', testErr);
+            showToast('Authentication error. Please log in again.', 'error');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            console.log('Sending order request...');
+            const orderResponse = await axios.post("/sales", {
                 address: address.trim(),
                 payment_method: payment,
                 customer_id: user?.id,
@@ -143,6 +171,9 @@ export default function CustomerOrder() {
                 })),
             });
 
+            console.log('Order placed successfully!', orderResponse.data);
+            // Dispatch event to refresh product list on home page
+            window.dispatchEvent(new CustomEvent('orderPlaced', { detail: { items: cart } }));
             // Remove placed items from localStorage cart
             const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
             const cartIdsToRemove = cart.map(i => i.cartId);
@@ -155,6 +186,10 @@ export default function CustomerOrder() {
             }
             setOrderSuccess(true);
         } catch (err) {
+            console.error('Order error:', err);
+            console.error('Error response:', err.response);
+            console.error('Error status:', err.response?.status);
+            console.error('Error data:', err.response?.data);
             showToast(
                 err.response?.data?.message || "Failed to place order. Please try again.",
                 "error",

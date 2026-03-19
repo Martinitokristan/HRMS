@@ -6,8 +6,27 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User } from 'lucide-react';
+import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw } from 'lucide-react';
 import CustomerOrderTracking from './CustomerOrderTracking';
+
+const CANCEL_REASONS = [
+    { value: 'changed_mind', label: 'Changed my mind' },
+    { value: 'wrong_item', label: 'Ordered wrong item' },
+    { value: 'duplicate_order', label: 'Duplicate order' },
+    { value: 'price_issue', label: 'Price issue' },
+    { value: 'found_better', label: 'Found better alternative' },
+    { value: 'too_long', label: 'Taking too long' },
+    { value: 'other', label: 'Other' },
+];
+
+const RETURN_REASONS = [
+    { value: 'defective', label: 'Defective Product' },
+    { value: 'wrong_item', label: 'Wrong Item Received' },
+    { value: 'damaged', label: 'Damaged in Transit' },
+    { value: 'not_as_described', label: 'Not as Described' },
+    { value: 'missing_parts', label: 'Missing Parts' },
+    { value: 'other', label: 'Other' },
+];
 
 export default function OrderHistory() {
     const navigate = useNavigate();
@@ -19,6 +38,14 @@ export default function OrderHistory() {
     const [ratingComment, setRatingComment] = useState("");
     const [submittingRating, setSubmittingRating] = useState(false);
     const [cancellingId, setCancellingId] = useState(null);
+    const [cancelModal, setCancelModal] = useState({ show: false, order: null });
+    const [cancelReason, setCancelReason] = useState('');
+    const [cancelNotes, setCancelNotes] = useState('');
+    const [returnModal, setReturnModal] = useState({ show: false, order: null });
+    const [returnReason, setReturnReason] = useState('');
+    const [returnDetails, setReturnDetails] = useState('');
+    const [returnItems, setReturnItems] = useState([]);
+    const [submittingReturn, setSubmittingReturn] = useState(false);
 
     useEffect(() => {
         fetchOrders();
@@ -32,16 +59,76 @@ export default function OrderHistory() {
             .finally(() => setLoading(false));
     };
 
-    const handleCancelOrder = async (orderId) => {
-        if (!window.confirm("Are you sure you want to cancel this order?")) return;
+    const openCancelModal = (order) => {
+        setCancelModal({ show: true, order });
+        setCancelReason('');
+        setCancelNotes('');
+    };
+
+    const closeCancelModal = () => {
+        setCancelModal({ show: false, order: null });
+        setCancelReason('');
+        setCancelNotes('');
+    };
+
+    const handleCancelOrder = async () => {
+        if (!cancelModal.order || !cancelReason) return;
+        const orderId = cancelModal.order.id;
         setCancellingId(orderId);
         try {
-            await axios.post(`/customer/orders/${orderId}/cancel`);
-            setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'cancelled' } : o));
+            await axios.post(`/customer/orders/${orderId}/cancel`, {
+                reason: cancelReason,
+                notes: cancelNotes || null,
+            });
+            setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'cancelled', cancellation_reason: cancelReason } : o));
+            closeCancelModal();
         } catch (err) {
             alert(err.response?.data?.message || "Failed to cancel order");
         } finally {
             setCancellingId(null);
+        }
+    };
+
+    const openReturnModal = (order) => {
+        setReturnModal({ show: true, order });
+        setReturnReason('');
+        setReturnDetails('');
+        setReturnItems((order.items || []).map(item => ({
+            sale_item_id: item.id,
+            product_name: item.product?.name || 'Product',
+            quantity: item.quantity,
+            max_quantity: item.quantity,
+            selected: true,
+        })));
+    };
+
+    const closeReturnModal = () => {
+        setReturnModal({ show: false, order: null });
+        setReturnReason('');
+        setReturnDetails('');
+        setReturnItems([]);
+    };
+
+    const handleSubmitReturn = async () => {
+        if (!returnModal.order || !returnReason) return;
+        const selectedItems = returnItems.filter(i => i.selected && i.quantity > 0);
+        if (selectedItems.length === 0) { alert('Please select at least one item to return'); return; }
+
+        setSubmittingReturn(true);
+        try {
+            await axios.post('/customer/returns', {
+                sale_id: returnModal.order.id,
+                reason: returnReason,
+                reason_details: returnDetails || null,
+                items: selectedItems.map(i => ({ sale_item_id: i.sale_item_id, quantity: i.quantity })),
+            });
+            setOrders(prev => prev.map(o => o.id === returnModal.order.id ? { ...o, has_return: true } : o));
+            closeReturnModal();
+            alert('Return request submitted successfully! You will be notified when it is reviewed.');
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to submit return request');
+        } finally {
+            setSubmittingReturn(false);
         }
     };
 
@@ -186,7 +273,17 @@ export default function OrderHistory() {
                                                 <XCircle className="h-6 w-6 text-destructive shrink-0" />
                                                 <div>
                                                     <div className="font-bold text-destructive text-sm">Order Cancelled</div>
-                                                    <div className="text-xs text-muted-foreground">This order has been cancelled and stock has been restored.</div>
+                                                    {order.cancellation_reason && (
+                                                        <div className="text-xs text-muted-foreground">
+                                                            Reason: {CANCEL_REASONS.find(r => r.value === order.cancellation_reason)?.label || order.cancellation_reason}
+                                                        </div>
+                                                    )}
+                                                    {order.cancellation_notes && (
+                                                        <div className="text-xs text-muted-foreground italic mt-0.5">"{order.cancellation_notes}"</div>
+                                                    )}
+                                                    {!order.cancellation_reason && (
+                                                        <div className="text-xs text-muted-foreground">This order has been cancelled and stock has been restored.</div>
+                                                    )}
                                                 </div>
                                             </Card>
                                         )}
@@ -276,12 +373,48 @@ export default function OrderHistory() {
                                                 <Button
                                                     variant="outline"
                                                     className="border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive font-bold"
-                                                    onClick={() => handleCancelOrder(order.id)}
+                                                    onClick={() => openCancelModal(order)}
                                                     disabled={cancellingId === order.id}
                                                 >
-                                                    {cancellingId === order.id ? "Cancelling..." : "Cancel Order"}
+                                                    Cancel Order
                                                 </Button>
                                             </div>
+                                        )}
+
+                                        {/* Return Button for delivered orders */}
+                                        {isDelivered && !order.has_return && (
+                                            <div className="mt-5 text-center">
+                                                <Button
+                                                    variant="outline"
+                                                    className="border-amber-400/50 text-amber-700 hover:bg-amber-50 hover:text-amber-800 font-bold"
+                                                    onClick={() => openReturnModal(order)}
+                                                >
+                                                    <RotateCcw className="h-4 w-4 mr-2" />
+                                                    Request Return
+                                                </Button>
+                                            </div>
+                                        )}
+
+                                        {/* Return Submitted Banner */}
+                                        {order.has_return && order.status !== 'returned' && (
+                                            <Card className="bg-amber-50 border-amber-200 p-4 mt-5 flex items-center gap-3">
+                                                <RotateCcw className="h-5 w-5 text-amber-600 shrink-0" />
+                                                <div>
+                                                    <div className="font-bold text-amber-800 text-sm">Return Requested</div>
+                                                    <div className="text-xs text-muted-foreground">Your return request is being reviewed by our team.</div>
+                                                </div>
+                                            </Card>
+                                        )}
+
+                                        {/* Returned Banner */}
+                                        {order.status === 'returned' && (
+                                            <Card className="bg-orange-50 border-orange-200 p-4 mt-5 flex items-center gap-3">
+                                                <RotateCcw className="h-5 w-5 text-orange-600 shrink-0" />
+                                                <div>
+                                                    <div className="font-bold text-orange-800 text-sm">Order Returned</div>
+                                                    <div className="text-xs text-muted-foreground">This order has been returned. Check your notifications for refund details.</div>
+                                                </div>
+                                            </Card>
                                         )}
                                     </div>
                                 </Card>
@@ -332,6 +465,193 @@ export default function OrderHistory() {
                             <Button variant="outline" className="flex-1" onClick={() => setRatingOrder(null)}>Cancel</Button>
                             <Button className="flex-1" onClick={handleSubmitRating} disabled={ratingValue === 0 || submittingRating}>
                                 {submittingRating ? "Submitting..." : "Submit Rating"}
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+            {/* Cancel Order Modal */}
+            {cancelModal.show && cancelModal.order && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closeCancelModal}>
+                    <Card className="max-w-md w-full p-8 rounded-3xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="text-center mb-6">
+                            <AlertTriangle className="h-12 w-12 mx-auto text-destructive mb-3" />
+                            <h3 className="text-xl font-extrabold text-foreground mb-1">Cancel Order</h3>
+                            <p className="text-muted-foreground text-sm">Order #{cancelModal.order.order_number}</p>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="text-sm font-bold text-foreground block mb-2">Why are you cancelling? <span className="text-destructive">*</span></label>
+                            <div className="space-y-2">
+                                {CANCEL_REASONS.map((reason) => (
+                                    <label
+                                        key={reason.value}
+                                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                                            cancelReason === reason.value
+                                                ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                                                : 'border-border hover:border-primary/30 hover:bg-secondary/30'
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="cancel_reason"
+                                            value={reason.value}
+                                            checked={cancelReason === reason.value}
+                                            onChange={(e) => setCancelReason(e.target.value)}
+                                            className="accent-primary"
+                                        />
+                                        <span className="text-sm font-medium text-foreground">{reason.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {cancelReason === 'other' && (
+                            <div className="mb-4">
+                                <label className="text-sm font-bold text-foreground block mb-2">Additional details</label>
+                                <Textarea
+                                    value={cancelNotes}
+                                    onChange={(e) => setCancelNotes(e.target.value)}
+                                    placeholder="Please tell us more about why you're cancelling..."
+                                    rows={3}
+                                    className="resize-none"
+                                />
+                            </div>
+                        )}
+
+                        <Card className="bg-amber-50 border-amber-200 p-3 mb-6">
+                            <p className="text-xs text-amber-800">
+                                <span className="font-bold">Note:</span> Cancelling this order will restore the stock and you will not be charged. This action cannot be undone.
+                            </p>
+                        </Card>
+
+                        <div className="flex gap-3">
+                            <Button variant="outline" className="flex-1" onClick={closeCancelModal}>
+                                Keep Order
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                className="flex-1 font-bold"
+                                onClick={handleCancelOrder}
+                                disabled={!cancelReason || cancellingId === cancelModal.order.id}
+                            >
+                                {cancellingId === cancelModal.order.id ? "Cancelling..." : "Confirm Cancel"}
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+            {/* Return Request Modal */}
+            {returnModal.show && returnModal.order && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closeReturnModal}>
+                    <Card className="max-w-lg w-full p-8 rounded-3xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="text-center mb-6">
+                            <RotateCcw className="h-12 w-12 mx-auto text-amber-500 mb-3" />
+                            <h3 className="text-xl font-extrabold text-foreground mb-1">Request Return</h3>
+                            <p className="text-muted-foreground text-sm">Order #{returnModal.order.order_number}</p>
+                        </div>
+
+                        {/* Select items to return */}
+                        <div className="mb-4">
+                            <label className="text-sm font-bold text-foreground block mb-2">Items to Return</label>
+                            <div className="space-y-2">
+                                {returnItems.map((item, idx) => (
+                                    <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                                        item.selected ? 'border-primary bg-primary/5' : 'border-border'
+                                    }`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={item.selected}
+                                            onChange={(e) => {
+                                                const updated = [...returnItems];
+                                                updated[idx].selected = e.target.checked;
+                                                setReturnItems(updated);
+                                            }}
+                                            className="accent-primary"
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <span className="text-sm font-medium text-foreground truncate block">{item.product_name}</span>
+                                        </div>
+                                        {item.selected && (
+                                            <div className="flex items-center gap-1">
+                                                <label className="text-xs text-muted-foreground">Qty:</label>
+                                                <select
+                                                    value={item.quantity}
+                                                    onChange={(e) => {
+                                                        const updated = [...returnItems];
+                                                        updated[idx].quantity = parseInt(e.target.value);
+                                                        setReturnItems(updated);
+                                                    }}
+                                                    className="w-16 rounded border border-input bg-background px-2 py-1 text-xs"
+                                                >
+                                                    {Array.from({ length: item.max_quantity }, (_, i) => i + 1).map(q => (
+                                                        <option key={q} value={q}>{q}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Reason */}
+                        <div className="mb-4">
+                            <label className="text-sm font-bold text-foreground block mb-2">Reason for Return <span className="text-destructive">*</span></label>
+                            <div className="space-y-2">
+                                {RETURN_REASONS.map((reason) => (
+                                    <label
+                                        key={reason.value}
+                                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                                            returnReason === reason.value
+                                                ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-200'
+                                                : 'border-border hover:border-amber-300 hover:bg-secondary/30'
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="return_reason"
+                                            value={reason.value}
+                                            checked={returnReason === reason.value}
+                                            onChange={(e) => setReturnReason(e.target.value)}
+                                            className="accent-amber-500"
+                                        />
+                                        <span className="text-sm font-medium text-foreground">{reason.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Details */}
+                        <div className="mb-4">
+                            <label className="text-sm font-bold text-foreground block mb-2">Additional Details</label>
+                            <Textarea
+                                value={returnDetails}
+                                onChange={(e) => setReturnDetails(e.target.value)}
+                                placeholder="Describe the issue in detail..."
+                                rows={3}
+                                className="resize-none"
+                            />
+                        </div>
+
+                        <Card className="bg-blue-50 border-blue-200 p-3 mb-6">
+                            <p className="text-xs text-blue-800">
+                                <span className="font-bold">Note:</span> Your return request will be reviewed by our team. You will receive a notification once it is approved or rejected. If approved, a refund will be processed.
+                            </p>
+                        </Card>
+
+                        <div className="flex gap-3">
+                            <Button variant="outline" className="flex-1" onClick={closeReturnModal}>
+                                Cancel
+                            </Button>
+                            <Button
+                                className="flex-1 font-bold bg-amber-500 hover:bg-amber-600 text-white"
+                                onClick={handleSubmitReturn}
+                                disabled={!returnReason || returnItems.filter(i => i.selected).length === 0 || submittingReturn}
+                            >
+                                {submittingReturn ? "Submitting..." : "Submit Return Request"}
                             </Button>
                         </div>
                     </Card>

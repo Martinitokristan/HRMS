@@ -9,15 +9,15 @@ import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search, X, Package, ClipboardList, LogOut, Bell, Percent } from 'lucide-react';
 import { getProductSaleInfo } from '../../utils/priceCalculations';
 
-// Optimized: Memoized product card to prevent unnecessary re-renders
-const ProductCard = React.memo(({ product, onAddToCart, setSelectedProduct }) => {
+// Product card component (removed memo to allow stock updates)
+const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
     const allVariants = product.product_variants || [];
     const hasVariants = allVariants.length > 0;
-    const totalVariantStock = allVariants.reduce((s, v) => s + Number(v.stock || 0), 0);
-    const baseStock = Number(product.inventory?.current_stock || 0);
-    
+    const totalVariantStock = allVariants.reduce((s, v) => s + Number(v.available_stock || v.stock || 0), 0);
+    const baseStock = Number(product.available_stock || product.inventory?.current_stock || 0);
     const inStock = hasVariants ? (totalVariantStock > 0 || baseStock > 0) : baseStock > 0;
     const imgSrc = product.image_path ? `/storage/${product.image_path}` : null;
+    const [addingToCart, setAddingToCart] = useState(false);
 
     // Calculate sale information
     const saleInfo = getProductSaleInfo(product);
@@ -30,14 +30,11 @@ const ProductCard = React.memo(({ product, onAddToCart, setSelectedProduct }) =>
     allVariants.forEach(v => { if (v.size_value) sizeMap[v.size_value_id] = v.size_value; });
     const sizes = Object.values(sizeMap);
 
-    const handleAddToCart = (e) => {
+    const handleAddToCart = async (e) => {
         e.stopPropagation();
-        console.log('Button clicked:', product.name, 'hasVariants:', hasVariants);
-        if (hasVariants) {
-            console.log('Setting selectedProduct from button:', product.name);
-            setSelectedProduct(product);
-        } else {
-            onAddToCart(product, {
+        setAddingToCart(true);
+        try {
+            await onAddToCart(product, {
                 qty: 1,
                 variants: {},
                 price: saleInfo.isOnSale ? saleInfo.salePrice : product.sell_price,
@@ -45,6 +42,10 @@ const ProductCard = React.memo(({ product, onAddToCart, setSelectedProduct }) =>
                 variant_id: null,
                 isUpdate: !!product.cartId
             });
+        } catch (error) {
+            // Error is handled in parent component
+        } finally {
+            setAddingToCart(false);
         }
     };
 
@@ -52,9 +53,7 @@ const ProductCard = React.memo(({ product, onAddToCart, setSelectedProduct }) =>
         <div 
             className="pcard group bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg"
             onClick={() => {
-                console.log('DIV clicked:', product.name);
                 if (hasVariants) {
-                    console.log('Setting selectedProduct:', product.name);
                     setSelectedProduct(product);
                 } else {
                     onAddToCart(product, {
@@ -68,72 +67,57 @@ const ProductCard = React.memo(({ product, onAddToCart, setSelectedProduct }) =>
                 }
             }}
         >
-            {/* Product Image */}
-            <div className="pcard__img relative aspect-square bg-gray-50 overflow-hidden">
+            {/* Product Image - Smaller */}
+            <div className="pcard__img relative aspect-[4/3] bg-gray-50 overflow-hidden">
                 {imgSrc
                     ? <img src={imgSrc} alt={product.name} loading="lazy" className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center"><Package className="h-16 w-16 text-gray-300 opacity-40" /></div>
+                    : <div className="w-full h-full flex items-center justify-center"><Package className="h-12 w-12 text-gray-300 opacity-40" /></div>
                 }
-                {!inStock && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">Coming Soon</span>
+                
+                {/* Sale Badge - Top Right */}
+                {saleInfo.isOnSale && (
+                    <div className="absolute top-2 right-2">
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md">
+                            -{saleInfo.salePercentage}%
+                        </span>
                     </div>
                 )}
-                {product.category?.name && (
-                    <div className="absolute top-2 left-2">
-                        <span className="text-[10px] font-semibold uppercase tracking-wide bg-white/95 text-gray-700 px-2 py-1 rounded shadow-sm">
-                            {product.category.name}
-                        </span>
+                
+                {!inStock && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">Out of Stock</span>
                     </div>
                 )}
             </div>
 
             {/* Product Info */}
-            <div className="p-4">
-                <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 leading-tight">{product.name}</h3>
-
-                {product.description && (
-                    <p className="text-xs text-gray-500 line-clamp-2 mb-2 leading-relaxed">{product.description}</p>
-                )}
+            <div className="p-3">
+                <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-1 leading-tight">{product.name}</h3>
 
                 {/* Stock */}
                 <div className="text-xs text-gray-600 mb-2">
                     {inStock ? (
                         <span className="text-green-600 font-medium">
-                            Stock: {hasVariants ? `${totalVariantStock} units (variants)` : `${baseStock} units`}
+                            {baseStock} units
                         </span>
                     ) : (
                         <span className="text-red-600 font-medium">Out of Stock</span>
                     )}
                 </div>
 
-                {/* Price with Sale Display */}
-                <div className="mb-4">
+                {/* Price */}
+                <div className="mb-3">
                     {saleInfo.isOnSale ? (
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                                <Badge variant="destructive" className="text-xs px-2 py-1 bg-red-500 hover:bg-red-600">
-                                    <Percent className="w-3 h-3 mr-1" />
-                                    SALE
-                                </Badge>
-                                <span className="text-xs text-red-600 font-semibold">
-                                    -{saleInfo.salePercentage}%
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-lg font-bold text-red-600">
-                                    ₱{saleInfo.salePrice.toFixed(2)}
-                                </span>
-                                <span className="text-sm text-gray-400 line-through">
-                                    ₱{saleInfo.originalPrice.toFixed(2)}
-                                </span>
-                            </div>
-                            <div className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded inline-block">
-                                Save ₱{saleInfo.savings.toFixed(2)}
-                            </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-base font-bold text-red-600">
+                                ₱{saleInfo.salePrice.toFixed(2)}
+                            </span>
+                            <span className="text-xs text-gray-400 line-through">
+                                ₱{saleInfo.originalPrice.toFixed(2)}
+                            </span>
                         </div>
                     ) : (
-                        <div className="text-lg font-bold text-gray-900">
+                        <div className="text-base font-bold text-gray-900">
                             ₱{saleInfo.originalPrice.toFixed(2)}
                         </div>
                     )}
@@ -141,16 +125,17 @@ const ProductCard = React.memo(({ product, onAddToCart, setSelectedProduct }) =>
 
                 {/* Add to Cart Button */}
                 <button
-                    className="w-full h-9 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
-                    disabled={!inStock}
+                    className="w-full h-8 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded transition-colors flex items-center justify-center gap-1 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    disabled={!inStock || addingToCart}
                     onClick={handleAddToCart}
                 >
-                    🛒 {hasVariants ? 'View Options' : 'Add to Cart'}
+                    <ShoppingCart className="h-3 w-3" />
+                    {addingToCart ? 'Adding...' : 'Add to Cart'}
                 </button>
             </div>
         </div>
     );
-});
+}
 
 export default function CustomerHome() {
     const { user, logout } = useAuth();
@@ -177,6 +162,38 @@ export default function CustomerHome() {
     }, []);
 
     useEffect(() => { localStorage.setItem('hrms_cart', JSON.stringify(cart)); }, [cart]);
+
+    // Listen for cart updates from other tabs
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'hrms_cart') {
+            loadCartFromStorage();
+        }
+    });
+
+    // Listen for order placement to refresh product list
+    window.addEventListener('orderPlaced', (e) => {
+        console.log('Order placed event received, refreshing products...');
+        // Force refresh of products to update stock
+        setLoading(true);
+        const params = { 
+            page: 1, 
+            per_page: 20, 
+            _: Date.now(), 
+            v: '1.2', 
+            r: Math.random().toString(36).substring(7)
+        };
+        if (search) params.search = search;
+        if (categoryFilter) params.category_id = categoryFilter;
+        
+        axios.get('/products', { params })
+            .then(r => { 
+                const d = r.data.data; 
+                setProducts(d.data ? d.data : d);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    });
 
     // Cart bump animation
     useEffect(() => {
@@ -261,7 +278,7 @@ export default function CustomerHome() {
         }
     };
 
-    const addToCart = (product, options = {}) => {
+    const addToCart = async (product, options = {}) => {
         const qty = options.qty || 1;
         const variants = options.variants || {};
         const price = options.price || product.sell_price;
@@ -271,6 +288,7 @@ export default function CustomerHome() {
         const variantString = variantLabels.join(', ');
         const cartId = variantString ? `${product.id}-${variantString}` : product.id;
 
+        // Add to cart without reservation
         setCart(prev => {
             if (isUpdate && product.cartId !== cartId) {
                 const filtered = prev.filter(i => i.cartId !== product.cartId);
@@ -282,6 +300,10 @@ export default function CustomerHome() {
             if (existing) return prev.map(i => i.cartId === cartId ? { ...i, qty: isUpdate ? qty : i.qty + qty, selectedVariants: variants, sell_price: price } : i);
             return [...prev, { ...product, sell_price: price, cartId, qty, variantString, selectedVariants: variants, variant_id }];
         });
+
+        // Trigger flying animation
+        setFlyingItem({ id: product.id, name: product.name });
+        setTimeout(() => setFlyingItem(null), 1000);
     };
 
     const cartCount = cart.reduce((s, i) => s + i.qty, 0);
@@ -403,14 +425,14 @@ export default function CustomerHome() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                        {[...Array(8)].map((_, i) => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                        {[...Array(12)].map((_, i) => (
                             <div key={i} className="bg-white border border-gray-200 rounded-lg overflow-hidden animate-pulse">
-                                <div className="aspect-square bg-gray-100" />
-                                <div className="p-4 space-y-3">
+                                <div className="aspect-[4/3] bg-gray-100" />
+                                <div className="p-3 space-y-2">
+                                    <div className="h-3 bg-gray-100 rounded w-4/5" />
                                     <div className="h-3 bg-gray-100 rounded w-2/5" />
-                                    <div className="h-4 bg-gray-100 rounded w-4/5" />
-                                    <div className="h-8 bg-gray-100 rounded" />
+                                    <div className="h-6 bg-gray-100 rounded" />
                                 </div>
                             </div>
                         ))}
@@ -423,10 +445,10 @@ export default function CustomerHome() {
                         <Button className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setSearch(''); setCategoryFilter(''); }}>Clear Filters</Button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                         {products.map(p => (
                             <ProductCard
-                                key={p.id}
+                                key={`${p.id}-${p.available_stock || p.inventory?.current_stock || 0}`}
                                 product={p}
                                 onAddToCart={addToCart}
                                 setSelectedProduct={setSelectedProduct}

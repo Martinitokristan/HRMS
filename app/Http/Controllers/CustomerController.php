@@ -43,7 +43,13 @@ class CustomerController extends Controller
         $orders = \App\Models\Sale::with(['items.product', 'delivery.rider.riderProfile'])
             ->where('customer_id', $request->user()->id)
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($order) {
+                $order->has_return = \App\Models\ReturnOrder::where('sale_id', $order->id)
+                    ->whereIn('status', ['pending', 'approved', 'completed'])
+                    ->exists();
+                return $order;
+            });
         return response()->json(['data' => $orders, 'status' => 'success']);
     }
 

@@ -3,7 +3,7 @@ import Modal from '../shared/Modal';
 import VariantSelector from '../shared/VariantSelector';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Percent } from 'lucide-react';
+import { Percent, ShoppingCart, Minus, Plus, X } from 'lucide-react';
 import { getProductSaleInfo, getVariantSaleInfo } from '../../utils/priceCalculations';
 
 export default function ProductDetailModal({ isOpen, onClose, product, onAddToCart }) {
@@ -16,19 +16,11 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
     useEffect(() => {
         if (isOpen && product) {
             try {
-                setQty(product.qty || 1);
+                setQty(1);
                 setSelectedVariant(null);
                 setSelectedOptions({ size: '', color: '', weight: '' });
                 setActiveGalleryImage(null);
-                // Force re-render when product changes
                 setForceUpdate(prev => prev + 1);
-                
-                // DEBUG: Log what we're working with
-                console.log('Modal opened with product:', {
-                    name: product.name,
-                    category: product.category?.name,
-                    hasVariants: !!(product.product_variants || product.variants || []).length
-                });
             } catch (error) {
                 console.error('Error in modal useEffect:', error);
             }
@@ -38,254 +30,260 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
     if (!product) return null;
 
     try {
-        // Calculate base values first
-        const baseStock = Number(product.inventory?.current_stock || 0);
+        const baseStock = Number(product.available_stock || product.inventory?.current_stock || 0);
         const allVariants = product.product_variants || product.variants || [];
         const hasOriginalVariants = allVariants.length > 0;
 
-    // Convert product_variants to format expected by VariantSelector
-    const variantOptions = allVariants.map(v => ({
-        id: v.id,
-        size: v.size_value?.label || v.size || '',
-        color: v.color_value?.label || v.color || '',
-        weight: v.weight_value?.label || v.weight || '',
-        stock: v.stock || 0,
-        price_override: v.price_override || null,
-        color_hex: v.color_value?.hex_code || v.color_hex || null,
-        image_path: v.image_path || null,
-        additional_images: v.additional_images || []
-    }));
+        const variantOptions = allVariants.map(v => ({
+            id: v.id,
+            size: v.size_value?.label || v.size || '',
+            color: v.color_value?.label || v.color || '',
+            weight: v.weight_value?.label || v.weight || '',
+            stock: v.available_stock || v.stock || 0,
+            price_override: v.price_override || null,
+            color_hex: v.color_value?.hex_code || v.color_hex || null,
+            image_path: v.image_path || null,
+            additional_images: v.additional_images || []
+        }));
 
-    // Add base product as an option if product has variants and base stock
-    const variants = hasOriginalVariants && baseStock > 0 ? [
-        {
-            id: 'base',
-            size: 'Regular',
-            color: '',
-            weight: '',
-            stock: baseStock,
-            price_override: null,
-            color_hex: null,
-            image_path: product.image_path || null,
-            additional_images: product.additional_images || []
-        },
-        ...variantOptions
-    ] : variantOptions;
+        const variants = hasOriginalVariants && baseStock > 0 ? [
+            {
+                id: 'base',
+                size: 'Regular',
+                color: '',
+                weight: '',
+                stock: baseStock,
+                price_override: null,
+                color_hex: null,
+                image_path: product.image_path || null,
+                additional_images: product.additional_images || []
+            },
+            ...variantOptions
+        ] : variantOptions;
 
-    const hasVariants = variants.length > 0;
-    const currentPrice = selectedVariant?.price_override || product.sell_price;
-    
-    // Calculate sale information for current selection
-    const currentSaleInfo = selectedVariant 
-        ? getVariantSaleInfo(selectedVariant, product.sell_price)
-        : getProductSaleInfo(product);
-    
-    // Use sale price if on sale, otherwise use regular price
-    const displayPrice = currentSaleInfo.isOnSale ? currentSaleInfo.salePrice : currentPrice;
-    
-    // If variant selected, show variant stock. If no variant selected but has variants, show base stock
-    const currentStock = hasVariants 
-        ? (selectedVariant ? Number(selectedVariant.stock || 0) : Number(baseStock || 0))
-        : Number(baseStock || 0);
-    
-    const isOutOfStock = currentStock <= 0;
-    const subtotal = displayPrice * qty;
-    // Can add if: (1) in stock AND (2) either no variants OR variant selected OR base stock available
-    const canAdd = !isOutOfStock && (!hasVariants || selectedVariant || baseStock > 0);
+        const hasVariants = variants.length > 0;
+        const currentPrice = selectedVariant?.price_override || product.sell_price;
 
-    const handleVariantChange = (variant, options) => {
-        // Only reset gallery if variant actually changes to a different one
-        if (selectedVariant?.id !== variant?.id) {
-            setActiveGalleryImage(null);
-        }
-        // Handle base product selection
-        setSelectedVariant(variant.id === 'base' ? null : variant);
-        setSelectedOptions(options);
-    };
+        const currentSaleInfo = selectedVariant
+            ? getVariantSaleInfo(selectedVariant, product.sell_price)
+            : getProductSaleInfo(product);
 
-    const handleAddToCart = () => {
-        if (!canAdd) return;
-        onAddToCart(product, {
-            qty,
-            variants: selectedOptions,
-            price: displayPrice,
-            saleInfo: currentSaleInfo,
-            variant_id: selectedVariant?.id,
-            isUpdate: !!product.cartId
-        });
-        onClose();
-    };
+        const displayPrice = Number(currentSaleInfo.isOnSale ? currentSaleInfo.salePrice : currentPrice) || 0;
 
-    // --- Image Gallery Logic --- //
-    const mainImage = selectedVariant ? (selectedVariant.image_path || product.image_path) : product.image_path;
-    const additionalImages = selectedVariant ? (selectedVariant.additional_images || []) : (product.additional_images || []);
-    const allImages = [mainImage, ...additionalImages].filter(Boolean);
-    const displayImage = activeGalleryImage || mainImage;
+        const currentStock = hasVariants
+            ? (selectedVariant ? Number(selectedVariant.stock || 0) : Number(baseStock || 0))
+            : Number(baseStock || 0);
 
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Product Details" size="lg" hideFooter>
-            <div className="grid grid-cols-1 md:grid-cols-[1.2fr,1fr] gap-0">
-                {/* Left Side - Image & Gallery */}
-                <div className="bg-secondary/10 p-6 flex flex-col items-center border-r border-border">
-                    {/* Main Image Box - FIXED SIZE */}
-                    <div className="w-full aspect-square relative rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center overflow-hidden mb-6">
-                        {displayImage ? (
-                            <img 
-                                src={`/storage/${displayImage}`} 
-                                alt={product.name} 
-                                className="w-full h-full object-contain p-4" 
-                            />
-                        ) : (
-                            <div className="text-8xl opacity-10">🛠️</div>
+        const isOutOfStock = currentStock <= 0;
+        const subtotal = displayPrice * qty;
+        const canAdd = !isOutOfStock && (!hasVariants || selectedVariant || baseStock > 0);
+
+        const handleVariantChange = (variant, options) => {
+            if (selectedVariant?.id !== variant?.id) {
+                setActiveGalleryImage(null);
+            }
+            setSelectedVariant(variant.id === 'base' ? null : variant);
+            setSelectedOptions(options);
+        };
+
+        const handleAddToCart = () => {
+            if (!canAdd) return;
+            onAddToCart(product, {
+                qty,
+                variants: selectedOptions,
+                price: displayPrice,
+                saleInfo: currentSaleInfo,
+                variant_id: selectedVariant?.id,
+                isUpdate: !!product.cartId
+            });
+            onClose();
+        };
+
+        const mainImage = selectedVariant ? (selectedVariant.image_path || product.image_path) : product.image_path;
+        const additionalImages = selectedVariant ? (selectedVariant.additional_images || []) : (product.additional_images || []);
+        const allImages = [mainImage, ...additionalImages].filter(Boolean);
+        const displayImage = activeGalleryImage || mainImage;
+
+        const categoryName = product?.category?.name ||
+            (product?.name?.includes('PVC') ? 'Plumbing' :
+            (product?.name?.includes('Hex Bolt') ? 'Hand Tools' : 'Supplies'));
+
+        return (
+            <Modal isOpen={isOpen} onClose={onClose} title="" size="lg" hideFooter hideTitle>
+                <div className="flex flex-col md:flex-row rounded-2xl overflow-hidden bg-white" style={{ minHeight: '480px' }}>
+
+                    {/* Close Button */}
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
+                    >
+                        <X className="w-4 h-4 text-gray-500" />
+                    </button>
+
+                    {/* Left - Image Panel */}
+                    <div className="md:w-[45%] bg-gray-50 flex flex-col items-center justify-center p-6 relative">
+                        {/* Sale Badge */}
+                        {currentSaleInfo.isOnSale && (
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">
+                                    SALE -{currentSaleInfo.salePercentage}% OFF
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Main Image */}
+                        <div className="w-full aspect-square flex items-center justify-center rounded-xl overflow-hidden mb-4">
+                            {displayImage ? (
+                                <img
+                                    src={`/storage/${displayImage}`}
+                                    alt={product.name}
+                                    className="w-full h-full object-contain"
+                                />
+                            ) : (
+                                <div className="text-8xl opacity-10">📦</div>
+                            )}
+                        </div>
+
+                        {/* Thumbnails */}
+                        {allImages.length > 1 && (
+                            <div className="flex gap-2 flex-wrap justify-center">
+                                {allImages.map((img, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setActiveGalleryImage(img)}
+                                        className={`w-14 h-14 rounded-lg border-2 overflow-hidden bg-white flex items-center justify-center p-1 transition-all ${
+                                            displayImage === img
+                                                ? 'border-orange-500 shadow ring-2 ring-orange-100'
+                                                : 'border-gray-200 hover:border-orange-300'
+                                        }`}
+                                    >
+                                        <img src={`/storage/${img}`} alt="" className="w-full h-full object-contain" />
+                                    </button>
+                                ))}
+                            </div>
                         )}
                     </div>
 
-                    {/* Thumbnails Row */}
-                    {allImages.length > 1 && (
-                        <div className="flex flex-wrap justify-center gap-3">
-                            {allImages.map((img, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setActiveGalleryImage(img)}
-                                    className={`w-16 h-16 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${
-                                        displayImage === img 
-                                            ? 'border-orange-500 shadow-md ring-2 ring-orange-100' 
-                                            : 'border-border hover:border-orange-200'
-                                    }`}
-                                >
-                                    <img src={`/storage/${img}`} alt="" className="w-full h-full object-contain" />
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                    {/* Right - Details Panel */}
+                    <div className="md:w-[55%] flex flex-col p-6 overflow-y-auto">
 
-                {/* Right Side - Details */}
-                <div className="p-6 flex flex-col">
-                    {/* Category & Title */}
-                    <div className="mb-4">
-                        <div className="text-xs font-bold uppercase tracking-wider text-orange-500 mb-1">
-                            {product?.category?.name || 
-                             (product?.name?.includes('PVC') ? 'Plumbing' : 
-                              (product?.name?.includes('Hex Bolt') ? 'Hand Tools' : 'SUPPLIES'))}
-                        </div>
-                        <h2 className="text-2xl font-bold text-foreground mb-2 leading-tight">
+                        {/* Category */}
+                        <p className="text-xs font-semibold text-orange-500 uppercase tracking-widest mb-1">
+                            {categoryName}
+                        </p>
+
+                        {/* Product Name */}
+                        <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
                             {product.name}
                         </h2>
-                    </div>
 
-                    {/* Description */}
-                    {product.description && (
-                        <div className="mb-4">
-                            <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">DESCRIPTION</div>
-                            <p className="text-sm text-foreground leading-relaxed">{product.description}</p>
+                        {/* Description */}
+                        {product.description && (
+                            <p className="text-sm text-gray-500 leading-relaxed mb-4">
+                                {product.description}
+                            </p>
+                        )}
+
+                        {/* Stock Status */}
+                        <div className="flex items-center gap-2 mb-4">
+                            {isOutOfStock ? (
+                                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-500">
+                                    <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+                                    Out of Stock
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                                    In Stock &nbsp;
+                                    <span className="font-bold text-green-700">{Math.round(currentStock)} units</span>
+                                </span>
+                            )}
                         </div>
-                    )}
 
-                    {/* Stock Badge */}
-                    <div className="mb-4">
-                        <Badge variant={isOutOfStock ? "destructive" : "success"} className="text-sm px-3 py-1">
-                            {isOutOfStock ? 'Out of Stock' : `${Math.round(currentStock)} units in stock`}
-                        </Badge>
-                    </div>
-
-                    {/* Price with Sale Display */}
-                    <div className="mb-6">
-                        {currentSaleInfo.isOnSale ? (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <Badge variant="destructive" className="text-xs px-3 py-1 bg-red-500 hover:bg-red-600">
-                                        <Percent className="w-3 h-3 mr-1" />
-                                        SALE
-                                    </Badge>
-                                    <span className="text-sm text-red-600 font-semibold">
-                                        -{currentSaleInfo.salePercentage}% OFF
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-3xl font-bold text-red-600">
+                        {/* Price */}
+                        <div className="mb-5">
+                            {currentSaleInfo.isOnSale ? (
+                                <div className="bg-orange-50 rounded-xl px-4 py-3 inline-flex items-center gap-4">
+                                    <span className="text-3xl font-bold text-orange-500">
                                         ₱{currentSaleInfo.salePrice.toFixed(2)}
                                     </span>
-                                    <span className="text-lg text-gray-400 line-through">
-                                        ₱{currentSaleInfo.originalPrice.toFixed(2)}
-                                    </span>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm text-gray-400 line-through">
+                                            ₱{currentSaleInfo.originalPrice.toFixed(2)}
+                                        </span>
+                                        <span className="text-xs text-green-600 font-semibold">
+                                            You save ₱{currentSaleInfo.savings.toFixed(2)}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded inline-block">
-                                    You save ₱{currentSaleInfo.savings.toFixed(2)}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="text-3xl font-bold text-orange-500">
-                                ₱{Number(displayPrice).toFixed(2)}
+                            ) : (
+                                <span className="text-3xl font-bold text-orange-500">
+                                    ₱{displayPrice.toFixed(2)}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* SKU */}
+                        {product.sku && (
+                            <p className="text-xs text-gray-400 mb-4">
+                                SKU: <span className="font-mono text-gray-600">{product.sku}</span>
+                            </p>
+                        )}
+
+                        {/* Variants */}
+                        {hasVariants && (
+                            <div className="mb-5">
+                                <VariantSelector
+                                    variants={variants}
+                                    onVariantChange={handleVariantChange}
+                                    selectedVariant={selectedVariant}
+                                    showStock={false}
+                                    showPrice={false}
+                                />
                             </div>
                         )}
-                    </div>
 
-                    {/* SKU */}
-                    {product.sku && (
-                        <div className="mb-4 text-sm">
-                            <span className="text-muted-foreground font-semibold">SKU:</span>{' '}
-                            <span className="font-mono text-foreground">{product.sku}</span>
-                        </div>
-                    )}
-
-                    {/* Variants - New Modern UI */}
-                    {hasVariants && (
-                        <div className="mb-6">
-                            <VariantSelector
-                                variants={variants}
-                                onVariantChange={handleVariantChange}
-                                selectedVariant={selectedVariant}
-                                showStock={false}
-                                showPrice={false}
-                            />
-                        </div>
-                    )}
-
-                    {/* Quantity & Add to Cart */}
-                    <div className="mt-auto pt-4 border-t border-border">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
-                                <button
-                                    onClick={() => setQty(q => Math.max(1, q - 1))}
-                                    className="px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold"
-                                >
-                                    −
-                                </button>
-                                <input
-                                    type="number"
-                                    value={qty}
-                                    onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-                                    className="w-16 text-center border-x-2 border-gray-300 py-2 font-bold text-lg focus:outline-none"
-                                    readOnly
-                                />
-                                <button
-                                    onClick={() => setQty(q => Math.min(q + 1, currentStock))}
-                                    className="px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold"
-                                >
-                                    +
-                                </button>
+                        {/* Quantity */}
+                        <div className="mb-5">
+                            <p className="text-sm font-semibold text-gray-700 mb-2">Quantity</p>
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
+                                    <button
+                                        onClick={() => setQty(q => Math.max(1, q - 1))}
+                                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                    >
+                                        <Minus className="w-4 h-4" />
+                                    </button>
+                                    <span className="w-12 text-center font-bold text-gray-900 text-base">
+                                        {qty}
+                                    </span>
+                                    <button
+                                        onClick={() => setQty(q => Math.min(q + 1, currentStock))}
+                                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <span className="text-sm text-gray-400">{Math.round(currentStock)} units available</span>
                             </div>
-                            <span className="text-sm text-muted-foreground">{Math.round(currentStock)} units in stock</span>
                         </div>
-                        <Button
-                            className="w-full h-12 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/30"
+
+                        {/* Add to Cart Button */}
+                        <button
                             onClick={handleAddToCart}
                             disabled={!canAdd}
+                            className={`w-full h-12 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md ${
+                                canAdd
+                                    ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-200'
+                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            }`}
                         >
-                            🛒 {isOutOfStock ? 'Sold Out' : `Order (₱${subtotal.toFixed(2)})`}
-                        </Button>
-                    </div>
-
-                    {/* Footer Buttons */}
-                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
-                        <Button variant="ghost" onClick={onClose}>Cancel</Button>
-                        <Button variant="outline">View Full Specs</Button>
+                            <ShoppingCart className="w-5 h-5" />
+                            {isOutOfStock ? 'Sold Out' : `Add to Cart — ₱${subtotal.toFixed(2)}`}
+                        </button>
                     </div>
                 </div>
-            </div>
-
-        </Modal>
+            </Modal>
         );
     } catch (error) {
         console.error('Error rendering ProductDetailModal:', error);

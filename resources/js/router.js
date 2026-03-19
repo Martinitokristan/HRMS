@@ -52,6 +52,9 @@ import SupplierLayout from './components/layout/SupplierLayout';
 // Admin: Supplier Catalog
 import SupplierCatalog from './components/suppliers/SupplierCatalog';
 
+// Admin: Returns
+import Returns from './components/admin/Returns';
+
 function ProtectedRoute({ children, roles }) {
     const { user, loading } = useAuth();
     if (loading) return <div className="loading-page"><div className="spinner" /></div>;
@@ -118,6 +121,7 @@ export default function AppRouter() {
                 <Route path="/users/riders" element={<Riders />} />
                 <Route path="/suppliers" element={<Suppliers />} />
                 <Route path="/supplier-catalog" element={<SupplierCatalog />} />
+                <Route path="/returns" element={<Returns />} />
             </Route>
 
             {/* Customer Portal */}

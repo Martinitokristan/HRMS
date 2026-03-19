@@ -31,6 +31,9 @@ class ProductController extends Controller
         $perPage = $request->get('per_page', 15);
         $products = $query->paginate($perPage);
 
+        // No need to calculate available_stock - just return current_stock
+        // Stock will only decrease when order is placed, not when added to cart
+
         return response()->json([
             'data'   => $products,
             'status' => 'success',

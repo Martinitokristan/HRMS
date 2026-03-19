@@ -809,4 +809,210 @@ class ReportController extends Controller
 
         return response()->json($feedback);
     }
+
+    public function customerBehavior(Request $request)
+    {
+        $period = $request->get('period', 'month');
+        $from = $period === 'week' ? now()->subDays(7) : ($period === 'year' ? now()->subYear() : now()->subDays(30));
+
+        // New vs Returning Customers
+        $newCustomers = DB::table('users')
+            ->where('role', 'customer')
+            ->whereBetween('created_at', [$from, now()])
+            ->count();
+
+        $returningCustomers = DB::table('sales')
+            ->select('customer_id')
+            ->whereBetween('created_at', [$from, now()])
+            ->groupBy('customer_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->get()
+            ->count();
+
+        // Customer Lifetime Value (Top 10)
+        $customerLTV = DB::table('sales')
+            ->join('users', 'sales.customer_id', '=', 'users.id')
+            ->select('users.id', 'users.name', 'users.email', DB::raw('SUM(sales.total_amount) as lifetime_value'), DB::raw('COUNT(sales.id) as total_orders'))
+            ->groupBy('users.id', 'users.name', 'users.email')
+            ->orderBy('lifetime_value', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Purchase Frequency
+        $purchaseFrequency = DB::table('sales')
+            ->whereBetween('created_at', [$from, now()])
+            ->selectRaw('COUNT(*) / COUNT(DISTINCT customer_id) as avg_orders_per_customer')
+            ->value('avg_orders_per_customer');
+
+        // Cart Abandonment Rate (using cart reservations)
+        $totalReservations = DB::table('cart_reservations')->whereBetween('created_at', [$from, now()])->count();
+        $convertedReservations = DB::table('cart_reservations')->where('status', 'converted')->whereBetween('created_at', [$from, now()])->count();
+        $abandonmentRate = $totalReservations > 0 ? round((($totalReservations - $convertedReservations) / $totalReservations) * 100, 1) : 0;
+
+        return response()->json([
+            'data' => [
+                'new_customers' => $newCustomers,
+                'returning_customers' => $returningCustomers,
+                'customer_ltv' => $customerLTV,
+                'avg_purchase_frequency' => round($purchaseFrequency ?? 0, 2),
+                'cart_abandonment_rate' => $abandonmentRate,
+                'period' => $period,
+            ],
+            'status' => 'success',
+        ]);
+    }
+
+    public function inventoryForecast(Request $request)
+    {
+        // Get sales velocity for last 30 days
+        $salesVelocity = DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->whereBetween('sales.created_at', [now()->subDays(30), now()])
+            ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
+            ->select(
+                'products.id',
+                'products.name',
+                DB::raw('SUM(sale_items.quantity) as units_sold_30d'),
+                DB::raw('SUM(sale_items.quantity) / 30 as daily_velocity')
+            )
+            ->groupBy('products.id', 'products.name')
+            ->get();
+
+        // Get current inventory and calculate stockout dates
+        $forecast = [];
+        foreach ($salesVelocity as $item) {
+            $inventory = DB::table('inventory')
+                ->where('product_id', $item->id)
+                ->whereNull('product_variant_id')
+                ->first();
+
+            $currentStock = $inventory ? $inventory->current_stock : 0;
+            $daysUntilStockout = $item->daily_velocity > 0 ? round($currentStock / $item->daily_velocity) : 999;
+
+            $forecast[] = [
+                'product_id' => $item->id,
+                'product_name' => $item->name,
+                'current_stock' => $currentStock,
+                'daily_velocity' => round($item->daily_velocity, 2),
+                'units_sold_30d' => $item->units_sold_30d,
+                'days_until_stockout' => $daysUntilStockout,
+                'predicted_stockout_date' => $daysUntilStockout < 999 ? now()->addDays($daysUntilStockout)->toDateString() : null,
+                'status' => $daysUntilStockout <= 7 ? 'critical' : ($daysUntilStockout <= 14 ? 'warning' : 'ok'),
+            ];
+        }
+
+        // Sort by urgency
+        usort($forecast, function($a, $b) {
+            return $a['days_until_stockout'] <=> $b['days_until_stockout'];
+        });
+
+        // Slow-moving inventory (less than 5 units sold in 30 days)
+        $salesData = DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->where('sales.created_at', '>=', now()->subDays(30))
+            ->select('product_id', DB::raw('SUM(quantity) as sold'))
+            ->groupBy('product_id');
+            
+        $slowMoving = DB::table('inventory')
+            ->join('products', 'inventory.product_id', '=', 'products.id')
+            ->leftJoinSub($salesData, 'sales_data', 'products.id', '=', 'sales_data.product_id')
+            ->select('products.id', 'products.name', 'inventory.current_stock', DB::raw('COALESCE(sales_data.sold, 0) as units_sold'))
+            ->whereNull('inventory.product_variant_id')
+            ->where('inventory.current_stock', '>', 0)
+            ->havingRaw('units_sold < 5')
+            ->orderBy('units_sold')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'forecast' => array_slice($forecast, 0, 20),
+                'slow_moving' => $slowMoving,
+                'critical_count' => count(array_filter($forecast, fn($f) => $f['status'] === 'critical')),
+                'warning_count' => count(array_filter($forecast, fn($f) => $f['status'] === 'warning')),
+            ],
+            'status' => 'success',
+        ]);
+    }
+
+    public function profitMargins(Request $request)
+    {
+        $period = $request->get('period', 'month');
+        $from = $period === 'week' ? now()->subDays(7) : ($period === 'year' ? now()->subYear() : now()->subDays(30));
+
+        // Profit by Product (Top 20)
+        $productProfit = DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->whereBetween('sales.created_at', [$from, now()])
+            ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
+            ->select(
+                'products.id',
+                'products.name',
+                DB::raw('SUM(sale_items.quantity) as units_sold'),
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
+                DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
+                DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
+            )
+            ->groupBy('products.id', 'products.name')
+            ->orderBy('profit', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(function($item) {
+                $item->profit_margin = round($item->profit_margin, 2);
+                $item->profit = round($item->profit, 2);
+                $item->revenue = round($item->revenue, 2);
+                $item->cogs = round($item->cogs, 2);
+                return $item;
+            });
+
+        // Profit by Category
+        $categoryProfit = DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->whereBetween('sales.created_at', [$from, now()])
+            ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
+            ->select(
+                'categories.id',
+                'categories.name',
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
+                DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
+                DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
+            )
+            ->groupBy('categories.id', 'categories.name')
+            ->orderBy('profit', 'desc')
+            ->get()
+            ->map(function($item) {
+                $item->profit_margin = round($item->profit_margin, 2);
+                $item->profit = round($item->profit, 2);
+                $item->revenue = round($item->revenue, 2);
+                $item->cogs = round($item->cogs, 2);
+                return $item;
+            });
+
+        // Overall Summary
+        $totalRevenue = $productProfit->sum('revenue');
+        $totalCOGS = $productProfit->sum('cogs');
+        $totalProfit = $totalRevenue - $totalCOGS;
+        $overallMargin = $totalRevenue > 0 ? round(($totalProfit / $totalRevenue) * 100, 2) : 0;
+
+        return response()->json([
+            'data' => [
+                'product_profit' => $productProfit,
+                'category_profit' => $categoryProfit,
+                'summary' => [
+                    'total_revenue' => round($totalRevenue, 2),
+                    'total_cogs' => round($totalCOGS, 2),
+                    'total_profit' => round($totalProfit, 2),
+                    'overall_margin' => $overallMargin,
+                ],
+                'period' => $period,
+            ],
+            'status' => 'success',
+        ]);
+    }
 }

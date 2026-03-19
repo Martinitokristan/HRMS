@@ -39,6 +39,7 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
+        \Log::info('=== SALE STORE METHOD CALLED ===');
         $data = $request->validate([
             'customer_id'    => 'required|exists:users,id',
             'items'          => 'required|array|min:1',
@@ -53,26 +54,36 @@ class SaleController extends Controller
             'address'        => 'nullable|string',
         ]);
 
-        // --- Stock validation before processing ---
+        // Debug: Log incoming order data
+        \Log::info('New order received:', $data);
+
+        // No expiration needed - reservations are only used during checkout
+
+        // --- Stock validation before processing (accounts for reservations by OTHER customers) ---
+        $customerId = $data['customer_id'];
         foreach ($data['items'] as $item) {
             $product = \App\Models\Product::findOrFail($item['product_id']);
-            if (!empty($item['product_variant_id'])) {
-                $variant = \App\Models\ProductVariant::find($item['product_variant_id']);
-                if (!$variant || $variant->stock < $item['quantity']) {
-                    return response()->json([
-                        'message' => "Insufficient stock for {$product->name}" . ($variant ? " (variant)" : "") . ". Available: " . ($variant->stock ?? 0),
-                        'status' => 'error',
-                    ], 422);
-                }
+            $variantId = $item['product_variant_id'] ?? null;
+
+            if (!empty($variantId)) {
+                $variant = \App\Models\ProductVariant::find($variantId);
+                $totalStock = $variant ? $variant->stock : 0;
             } else {
-                $inv = Inventory::where('product_id', $item['product_id'])->first();
-                $available = $inv ? $inv->current_stock : 0;
-                if ($available < $item['quantity']) {
-                    return response()->json([
-                        'message' => "Insufficient stock for {$product->name}. Available: {$available}",
-                        'status' => 'error',
-                    ], 422);
-                }
+                $inv = Inventory::where('product_id', $item['product_id'])->whereNull('product_variant_id')->first();
+                $totalStock = $inv ? $inv->current_stock : 0;
+            }
+
+            // Subtract reservations by OTHER customers (this customer's reservation is theirs to use)
+            $othersReserved = \App\Models\CartReservation::getReservedQuantity(
+                $item['product_id'], $variantId, $customerId
+            );
+            $available = max(0, $totalStock - $othersReserved);
+
+            if ($item['quantity'] > $available) {
+                return response()->json([
+                    'message' => "Insufficient stock for {$product->name}. Available: {$available}",
+                    'status' => 'error',
+                ], 422);
             }
         }
 
@@ -101,13 +112,17 @@ class SaleController extends Controller
                 if (!empty($item['product_variant_id'])) {
                     $variant = \App\Models\ProductVariant::find($item['product_variant_id']);
                     if ($variant) {
+                        $oldStock = $variant->stock;
                         $variant->decrement('stock', $item['quantity']);
+                        \Log::info("Stock deducted for variant {$item['product_variant_id']}: {$oldStock} - {$item['quantity']} = " . ($oldStock - $item['quantity']));
                         // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
                     }
                 } else {
                     $inv = Inventory::where('product_id', $item['product_id'])->first();
                     if ($inv) {
+                        $oldStock = $inv->current_stock;
                         $inv->decrement('current_stock', $item['quantity']);
+                        \Log::info("Stock deducted for product {$item['product_id']}: {$oldStock} - {$item['quantity']} = " . ($oldStock - $item['quantity']));
                     }
                 }
             }
@@ -152,6 +167,11 @@ class SaleController extends Controller
                 'latitude'        => $customerProfile->latitude ?? null,
                 'longitude'       => $customerProfile->longitude ?? null,
             ]);
+
+            // Convert all active reservations for this customer to 'converted'
+            \App\Models\CartReservation::where('customer_id', $data['customer_id'])
+                ->where('status', 'active')
+                ->update(['status' => 'converted']);
 
             return $sale;
         });
@@ -251,49 +271,107 @@ class SaleController extends Controller
     public function cancelOrder(Request $request, $id)
     {
         $sale = Sale::with(['items', 'delivery'])->findOrFail($id);
+        $user = $request->user();
+        $isAdmin = in_array($user->role, ['admin', 'manager']);
+        $isOwner = $sale->customer_id === $user->id;
 
-        // Verify the customer owns this order
-        if ($sale->customer_id !== $request->user()->id) {
+        // Authorization: must be owner or admin
+        if (!$isOwner && !$isAdmin) {
             return response()->json(['message' => 'Unauthorized', 'status' => 'error'], 403);
         }
 
-        // Only pending orders can be cancelled
-        if ($sale->status !== 'pending') {
-            return response()->json([
-                'message' => 'Only pending orders can be cancelled.',
-                'status' => 'error',
-            ], 422);
+        $request->validate([
+            'reason' => 'required|string|in:changed_mind,wrong_item,duplicate_order,price_issue,found_better,too_long,other',
+            'notes'  => 'nullable|string|max:500',
+        ]);
+
+        // Cancellation rules based on status and role
+        $cancellableByCustomer = ['pending'];
+        $cancellableByAdmin = ['pending', 'confirmed'];
+
+        $allowedStatuses = $isAdmin ? $cancellableByAdmin : $cancellableByCustomer;
+
+        if (!in_array($sale->status, $allowedStatuses)) {
+            $msg = $isAdmin
+                ? 'Only pending or confirmed orders can be cancelled.'
+                : 'Only pending orders can be cancelled. Contact support for confirmed orders.';
+            return response()->json(['message' => $msg, 'status' => 'error'], 422);
         }
 
-        DB::transaction(function () use ($sale) {
+        DB::transaction(function () use ($sale, $request, $user) {
             // Restore stock
             foreach ($sale->items as $item) {
                 if ($item->product_variant_id) {
                     $variant = \App\Models\ProductVariant::find($item->product_variant_id);
                     if ($variant) {
                         $variant->increment('stock', $item->quantity);
-                        // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
                     }
                 } else {
-                    $inv = Inventory::where('product_id', $item->product_id)->first();
+                    $inv = Inventory::where('product_id', $item->product_id)
+                        ->whereNull('product_variant_id')
+                        ->first();
                     if ($inv) {
                         $inv->increment('current_stock', $item->quantity);
                     }
                 }
             }
 
-            $sale->update(['status' => 'cancelled']);
+            $sale->update([
+                'status'              => 'cancelled',
+                'cancellation_reason' => $request->reason,
+                'cancellation_notes'  => $request->notes,
+                'cancelled_by'        => $user->id,
+                'cancelled_at'        => now(),
+            ]);
 
             // Cancel associated delivery
             if ($sale->delivery) {
                 $sale->delivery->update(['status' => 'failed']);
             }
+
+            // Notify customer
+            \App\Models\CustomerNotification::create([
+                'customer_id' => $sale->customer_id,
+                'delivery_id' => $sale->delivery->id ?? null,
+                'type'        => 'cancelled',
+                'title'       => 'Order Cancelled',
+                'message'     => "Your order #{$sale->order_number} has been cancelled. Reason: " . str_replace('_', ' ', ucfirst($request->reason)),
+                'is_read'     => false,
+            ]);
         });
 
         return response()->json([
             'data'    => $sale->fresh()->load(['items.product', 'delivery']),
             'message' => 'Order cancelled successfully. Stock has been restored.',
             'status'  => 'success',
+        ]);
+    }
+
+    public function cancellationPolicy($id)
+    {
+        $sale = Sale::findOrFail($id);
+
+        $cancellable = in_array($sale->status, ['pending', 'confirmed']);
+        $customerCanCancel = $sale->status === 'pending';
+        $needsAdminApproval = $sale->status === 'confirmed';
+
+        return response()->json([
+            'data' => [
+                'cancellable'          => $cancellable,
+                'customer_can_cancel'  => $customerCanCancel,
+                'needs_admin_approval' => $needsAdminApproval,
+                'current_status'       => $sale->status,
+                'reasons' => [
+                    ['value' => 'changed_mind',  'label' => 'Changed my mind'],
+                    ['value' => 'wrong_item',    'label' => 'Ordered wrong item'],
+                    ['value' => 'duplicate_order','label' => 'Duplicate order'],
+                    ['value' => 'price_issue',   'label' => 'Price issue'],
+                    ['value' => 'found_better',  'label' => 'Found better alternative'],
+                    ['value' => 'too_long',      'label' => 'Taking too long'],
+                    ['value' => 'other',         'label' => 'Other'],
+                ],
+            ],
+            'status' => 'success',
         ]);
     }
 

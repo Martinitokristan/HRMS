@@ -9,6 +9,11 @@ class Sale extends Model
     protected $fillable = [
         'order_number', 'customer_id', 'processed_by', 'discount_pct',
         'total_amount', 'payment_method', 'status', 'notes',
+        'cancellation_reason', 'cancellation_notes', 'cancelled_by', 'cancelled_at',
+    ];
+
+    protected $casts = [
+        'cancelled_at' => 'datetime',
     ];
 
     public function customer()
