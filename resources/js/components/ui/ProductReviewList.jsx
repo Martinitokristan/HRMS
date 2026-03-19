@@ -3,24 +3,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import RatingStars from '@/components/ui/RatingStars';
 import { ThumbsUp, MessageSquare, Filter, CheckCircle, Star } from 'lucide-react';
 
-const ProductReviewList = ({ productId }) => {
+const ProductReviewList = ({ productId, variantId, productVariants }) => {
   const [reviews, setReviews] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('recent');
   const [helpfulVotes, setHelpfulVotes] = useState({});
+  const [selectedVariant, setSelectedVariant] = useState(variantId || 'all');
 
   useEffect(() => {
     fetchReviews();
-  }, [productId, sortBy]);
+  }, [productId, selectedVariant, sortBy]);
 
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/products/${productId}/reviews?sort=${sortBy}`);
+      const url = selectedVariant && selectedVariant !== 'all'
+        ? `/api/products/${productId}/reviews?variant=${selectedVariant}&sort=${sortBy}`
+        : `/api/products/${productId}/reviews?sort=${sortBy}`;
+      const response = await fetch(url);
       const data = await response.json();
       
       if (response.ok) {
@@ -162,6 +167,29 @@ const ProductReviewList = ({ productId }) => {
           </select>
         </div>
       </div>
+
+      {/* Variant Filter */}
+      {productVariants && productVariants.length > 0 && (
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-gray-700">Filter by variant:</span>
+          <Select value={selectedVariant} onValueChange={setSelectedVariant}>
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="Select variant" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Reviews</SelectItem>
+              <SelectItem value="base">Base Product Only</SelectItem>
+              {productVariants.map(variant => (
+                <SelectItem key={variant.id} value={variant.id.toString()}>
+                  {variant.size_value?.label || ''} 
+                  {variant.color_value?.label ? ` - ${variant.color_value.label}` : ''}
+                  {variant.weight_value?.label ? ` - ${variant.weight_value.label}` : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* Reviews List */}
       <div className="space-y-4">

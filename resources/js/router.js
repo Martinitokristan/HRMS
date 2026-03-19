@@ -36,6 +36,7 @@ import CustomerHome from './components/customer-portal/CustomerHome';
 import CustomerOrder from './components/customer-portal/CustomerOrder';
 import CartPage from './components/customer-portal/CartPage';
 import OrderHistory from './components/customer-portal/OrderHistory';
+import ProductReviewsPage from './components/customer-portal/ProductReviewsPage';
 
 // Rider App
 import RiderApp from './components/rider/RiderApp';
@@ -134,6 +135,7 @@ export default function AppRouter() {
                 <Route path="/shop/cart" element={<CartPage />} />
                 <Route path="/shop/order" element={<CustomerOrder />} />
                 <Route path="/shop/history" element={<OrderHistory />} />
+                <Route path="/shop/products/:id/reviews" element={<ProductReviewsPage />} />
             </Route>
 
             {/* Rider App */}

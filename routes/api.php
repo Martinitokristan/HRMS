@@ -143,6 +143,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Product Reviews (Customer)
     Route::post('/products/{id}/reviews', [ProductReviewController::class, 'store']);
     Route::post('/reviews/{id}/helpful', [ProductReviewController::class, 'markHelpful']);
+    Route::get('/customers/{customerId}/can-review/{productId}', [ProductReviewController::class, 'checkEligibility']);
 
     // Product Reviews (Admin)
     Route::get('/reviews', [ProductReviewController::class, 'index']);

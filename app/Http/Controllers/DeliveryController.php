@@ -441,6 +441,18 @@ class DeliveryController extends Controller
             'proof_photo' => $path,
         ]);
 
+        // Notify customer that proof photo has been uploaded
+        if ($delivery->sale && $delivery->sale->customer_id) {
+            CustomerNotification::create([
+                'customer_id' => $delivery->sale->customer_id,
+                'delivery_id' => $delivery->id,
+                'type' => 'proof_uploaded',
+                'title' => 'Delivery Proof Uploaded',
+                'message' => 'Your rider has uploaded a proof photo for your delivery.',
+                'is_read' => false,
+            ]);
+        }
+
         return response()->json([
             'data' => ['photo_url' => asset('storage/' . $path)],
             'status' => 'success',

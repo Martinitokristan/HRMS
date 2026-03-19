@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
+import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import { useAuth } from '../../context/AuthContext';
+import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -66,7 +67,12 @@ if (typeof document !== 'undefined') {
 }
 
 const CustomerOrderTracking = ({ delivery }) => {
-    const [riderLocation, setRiderLocation] = useState(null);
+    const { user } = useAuth();
+    const [riderLocation, setRiderLocation] = useState({
+        latitude: 7.0543,
+        longitude: 125.5947,
+        updated_at: new Date().toISOString()
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -92,7 +98,7 @@ const CustomerOrderTracking = ({ delivery }) => {
 
         // WebSocket for real-time updates (if available)
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws/customer.${delivery.user_id}`;
+        const wsUrl = `${protocol}//${window.location.host}/ws/customer.${user?.id || 'guest'}`;
         
         const ws = new WebSocket(wsUrl);
         

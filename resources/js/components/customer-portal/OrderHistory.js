@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw } from 'lucide-react';
 import CustomerOrderTracking from './CustomerOrderTracking';
+import { useToast } from '../../context/ToastContext';
 
 const CANCEL_REASONS = [
     { value: 'changed_mind', label: 'Changed my mind' },
@@ -30,6 +31,7 @@ const RETURN_REASONS = [
 
 export default function OrderHistory() {
     const navigate = useNavigate();
+    const { toast } = useToast();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [ratingOrder, setRatingOrder] = useState(null);
@@ -83,7 +85,7 @@ export default function OrderHistory() {
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'cancelled', cancellation_reason: cancelReason } : o));
             closeCancelModal();
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to cancel order");
+            toast.error(err.response?.data?.message || "Failed to cancel order");
         } finally {
             setCancellingId(null);
         }
@@ -112,7 +114,7 @@ export default function OrderHistory() {
     const handleSubmitReturn = async () => {
         if (!returnModal.order || !returnReason) return;
         const selectedItems = returnItems.filter(i => i.selected && i.quantity > 0);
-        if (selectedItems.length === 0) { alert('Please select at least one item to return'); return; }
+        if (selectedItems.length === 0) { toast.error('Please select at least one item to return'); return; }
 
         setSubmittingReturn(true);
         try {
@@ -124,9 +126,9 @@ export default function OrderHistory() {
             });
             setOrders(prev => prev.map(o => o.id === returnModal.order.id ? { ...o, has_return: true } : o));
             closeReturnModal();
-            alert('Return request submitted successfully! You will be notified when it is reviewed.');
+            toast.success('Return request submitted successfully! You will be notified when it is reviewed.');
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to submit return request');
+            toast.error(err.response?.data?.message || 'Failed to submit return request');
         } finally {
             setSubmittingReturn(false);
         }
@@ -151,7 +153,7 @@ export default function OrderHistory() {
             setRatingValue(0);
             setRatingComment("");
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to submit rating");
+            toast.error(err.response?.data?.message || "Failed to submit rating");
         } finally {
             setSubmittingRating(false);
         }
@@ -391,6 +393,29 @@ export default function OrderHistory() {
                                                 >
                                                     <RotateCcw className="h-4 w-4 mr-2" />
                                                     Request Return
+                                                </Button>
+                                            </div>
+                                        )}
+
+                                        {/* Write Review Button for delivered orders */}
+                                        {isDelivered && (
+                                            <div className="mt-3 text-center">
+                                                <Button
+                                                    variant="outline"
+                                                    className="border-blue-400/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 font-bold"
+                                                    onClick={() => {
+                                                        // Navigate to reviews page for the first product in the order
+                                                        if (order.items && order.items.length > 0) {
+                                                            const firstItem = order.items[0];
+                                                            const url = firstItem.product_variant_id
+                                                                ? `/shop/products/${firstItem.product_id}/reviews#write?variant=${firstItem.product_variant_id}`
+                                                                : `/shop/products/${firstItem.product_id}/reviews#write`;
+                                                            window.location.href = url;
+                                                        }
+                                                    }}
+                                                >
+                                                    <Star className="h-4 w-4 mr-2" />
+                                                    Write Review
                                                 </Button>
                                             </div>
                                         )}

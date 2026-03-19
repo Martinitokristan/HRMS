@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import RatingStars from '@/components/ui/RatingStars';
 import { Star, MessageSquare, Upload } from 'lucide-react';
 
-const ProductReviewForm = ({ productId, onReviewSubmitted, onCancel }) => {
+const ProductReviewForm = ({ productId, productVariantId, onReviewSubmitted, onCancel }) => {
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState('');
   const [reviewText, setReviewText] = useState('');
@@ -24,21 +24,31 @@ const ProductReviewForm = ({ productId, onReviewSubmitted, onCancel }) => {
 
     setSubmitting(true);
 
-    try {
-      const formData = new FormData();
-      formData.append('product_id', productId);
-      formData.append('rating', rating);
-      if (title) formData.append('title', title);
-      if (reviewText) formData.append('review_text', reviewText);
-      
-      images.forEach((image, index) => {
-        formData.append(`images[${index}]`, image);
-      });
+    const formData = new FormData();
+    formData.append('rating', rating);
+    formData.append('title', title);
+    formData.append('review_text', reviewText);
+    
+    // Add variant ID if provided
+    if (productVariantId) {
+      formData.append('product_variant_id', productVariantId);
+    }
+    
+    // Add images if any
+    images.forEach((image, index) => {
+      formData.append(`images[${index}]`, image);
+    });
 
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    try {
       const response = await fetch(`/api/products/${productId}/reviews`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('hrms_token')}`,
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json',
         },
         body: formData,
       });

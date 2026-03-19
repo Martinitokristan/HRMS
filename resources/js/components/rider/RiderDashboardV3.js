@@ -7,7 +7,17 @@ import RatingNotificationsPanel from './RatingNotificationsPanel';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Settings, Bell } from 'lucide-react';
+import { 
+    MapPin, 
+    Settings, 
+    Bell, 
+    Home,
+    Package,
+    Star,
+    LogOut,
+    Menu,
+    X
+} from 'lucide-react';
 
 // Add custom CSS for markers
 const markerStyles = `
@@ -15,76 +25,66 @@ const markerStyles = `
         background: #ef4444;
         border: 3px solid white;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        width: 20px;
+        height: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     .customer-marker {
         background: #3b82f6;
-        border: 2px solid white;
+        border: 3px solid white;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        width: 16px;
+        height: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 `;
 
-// Inject styles
 if (typeof document !== 'undefined') {
     const styleSheet = document.createElement('style');
     styleSheet.textContent = markerStyles;
     document.head.appendChild(styleSheet);
 }
 
-// Fix Leaflet default icons with proper sizing
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
-
-// Create custom icons
+// Custom icons
 const riderIcon = L.divIcon({
-    html: '🏍️',
-    iconSize: [30, 30],
-    className: 'rider-marker'
+    className: 'rider-marker',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
 });
 
 const customerIcon = L.divIcon({
-    html: '📍',
-    iconSize: [25, 25],
-    className: 'customer-marker'
+    className: 'customer-marker',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
 });
 
-const RiderDashboardV3 = () => {
+export default function RiderDashboardV3() {
     const { user, logout } = useAuth();
     const [view, setView] = useState('dashboard');
     const [showMap, setShowMap] = useState(false);
-    const [riderPosition, setRiderPosition] = useState([7.0707, 125.6080]);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    
+    // State for dashboard data
+    const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ active: 0, done: 0, total: 0, earnings: 0 });
     const [deliveries, setDeliveries] = useState([]);
     const [nearbyOrders, setNearbyOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState([]);
-    const [showNotifications, setShowNotifications] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [uploadingProof, setUploadingProof] = useState(null);
-    const fileInputRef = useRef(null);
-    const mapRef = useRef(null);
+    const [riderPosition, setRiderPosition] = useState([7.0707, 125.608]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    
+    // State for order management
     const [assigningOrder, setAssigningOrder] = useState(null);
     const [decliningOrder, setDecliningOrder] = useState(null);
     const [declineNote, setDeclineNote] = useState('');
     const [showDeclineModal, setShowDeclineModal] = useState(false);
+    const [uploadingProof, setUploadingProof] = useState(null);
+    
+    // Map and routing state
     const [roadRoutes, setRoadRoutes] = useState({});
+    const fileInputRef = useRef(null);
+    const mapRef = useRef(null);
     
     // Refs for preventing memory leaks
     const isMountedRef = useRef(true);
@@ -99,7 +99,6 @@ const RiderDashboardV3 = () => {
 
     // Get real road route using backend proxy
     const getRoadRoute = useCallback(async (startLat, startLon, endLat, endLon) => {
-        // Convert coordinates to numbers in case they're strings
         const startLatNum = parseFloat(startLat);
         const startLonNum = parseFloat(startLon);
         const endLatNum = parseFloat(endLat);
@@ -112,9 +111,6 @@ const RiderDashboardV3 = () => {
         }
         
         try {
-            console.log('Fetching road route from', startLatNum, startLonNum, 'to', endLatNum, endLonNum);
-            
-            // Use backend proxy to avoid CORS issues
             const response = await axios.post('/route', {
                 start_lat: startLatNum,
                 start_lon: startLonNum,
@@ -123,7 +119,6 @@ const RiderDashboardV3 = () => {
             });
             
             const data = response.data;
-            console.log('Route API response:', data);
             
             if (data.features && data.features.length > 0) {
                 const route = data.features[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
@@ -133,19 +128,17 @@ const RiderDashboardV3 = () => {
                     duration: data.features[0].properties.segments[0].duration
                 };
                 
-                console.log('Road route found with', route.length, 'points');
                 routeCacheRef.current.set(cacheKey, routeData);
                 return routeData;
-            } else {
-                console.warn('No route features found in response');
             }
             return null;
         } catch (error) {
-            console.error('Failed to get road route, falling back to straight line:', error);
+            console.error('Failed to get road route:', error);
             return null;
         }
     }, []);
 
+    // Fetch dashboard data
     const fetchData = useCallback(async () => {
         if (!isMountedRef.current) return;
         
@@ -162,15 +155,9 @@ const RiderDashboardV3 = () => {
                 });
                 setDeliveries(Array.isArray(my_jobs) ? my_jobs : []);
                 setNearbyOrders(Array.isArray(nearby) ? nearby : []);
-                
-                const notifRes = await axios.get('/riders/me/notifications');
-                if (isMountedRef.current) {
-                    setNotifications(notifRes.data.data);
-                    setUnreadCount(notifRes.data.unread_count);
-                }
             }
         } catch (error) {
-            console.error('Failed to fetch data:', error);
+            console.error('Failed to fetch dashboard data:', error);
         } finally {
             if (isMountedRef.current) {
                 setLoading(false);
@@ -178,21 +165,42 @@ const RiderDashboardV3 = () => {
         }
     }, []);
 
-    // GPS Watch with real-time broadcasting
+    // Fetch notifications
+    const fetchNotifications = useCallback(async () => {
+        try {
+            const response = await axios.get('/riders/me/notifications');
+            if (isMountedRef.current) {
+                setNotifications(response.data.data || []);
+                setUnreadCount(response.data.data?.filter(n => !n.read_at).length || 0);
+            }
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+        }
+    }, []);
+
+    // Initialize data
     useEffect(() => {
-        if (!navigator.geolocation) return;
+        fetchData();
+        fetchNotifications();
+        const interval = setInterval(fetchData, 30000);
+        return () => clearInterval(interval);
+    }, [fetchData, fetchNotifications]);
+
+    // Get rider location
+    useEffect(() => {
         const watchId = navigator.geolocation.watchPosition(
-            async (pos) => {
-                const { latitude, longitude } = pos.coords;
+            (position) => {
+                const { latitude, longitude } = position.coords;
                 setRiderPosition([latitude, longitude]);
-                try {
-                    await axios.post('/riders/me/update-location', {
+                
+                // Broadcast location to WebSocket
+                if (window.riderWs && window.riderWs.readyState === WebSocket.OPEN) {
+                    window.riderWs.send(JSON.stringify({
+                        type: 'location',
                         latitude,
                         longitude,
                         broadcast: true
-                    });
-                } catch (err) {
-                    console.warn('Failed to update location:', err);
+                    }));
                 }
             },
             (err) => console.warn(err),
@@ -201,17 +209,9 @@ const RiderDashboardV3 = () => {
         return () => navigator.geolocation.clearWatch(watchId);
     }, []);
 
-    useEffect(() => {
-        fetchData();
-        const interval = setInterval(fetchData, 30000);
-        return () => clearInterval(interval);
-    }, [fetchData]);
-
+    // Fetch road routes
     const fetchRoadRoutes = useCallback(async () => {
         if (!isMountedRef.current || !riderPosition) return;
-        
-        console.log('Fetching road routes for', deliveries.length + nearbyOrders.length, 'orders');
-        console.log('Current rider position:', riderPosition);
         
         const allOrders = [...deliveries, ...nearbyOrders];
         const newRoutes = {};
@@ -220,37 +220,25 @@ const RiderDashboardV3 = () => {
         for (const order of allOrders) {
             if (order.customer_latitude && order.customer_longitude) {
                 const routeKey = `route-${order.id}`;
-                console.log('Processing order', order.id, 'with customer location:', order.customer_latitude, order.customer_longitude);
                 
                 if (!roadRoutes[routeKey]) {
-                    console.log('Fetching new route for order', order.id);
                     const promise = getRoadRoute(
                         riderPosition[0], riderPosition[1],
                         order.customer_latitude, order.customer_longitude
                     ).then(route => {
                         if (route && isMountedRef.current) {
-                            console.log('Route fetched for order', order.id, 'with', route.coordinates.length, 'points');
                             newRoutes[routeKey] = route;
-                        } else {
-                            console.log('No route found for order', order.id);
                         }
                     });
                     routePromises.push(promise);
-                } else {
-                    console.log('Route already cached for order', order.id);
                 }
-            } else {
-                console.log('Order', order.id, 'missing customer coordinates');
             }
         }
         
         await Promise.all(routePromises);
         
         if (isMountedRef.current && Object.keys(newRoutes).length > 0) {
-            console.log('Adding', Object.keys(newRoutes).length, 'new routes to state');
             setRoadRoutes(prev => ({ ...prev, ...newRoutes }));
-        } else {
-            console.log('No new routes to add');
         }
     }, [deliveries, nearbyOrders, riderPosition, roadRoutes, getRoadRoute]);
 
@@ -260,6 +248,15 @@ const RiderDashboardV3 = () => {
         }
     }, [fetchRoadRoutes]);
 
+    // Format currency
+    const formatCurrency = useCallback((amount) => {
+        return new Intl.NumberFormat('en-PH', {
+            style: 'currency',
+            currency: 'PHP'
+        }).format(amount || 0);
+    }, []);
+
+    // Handle mark notifications read
     const handleMarkNotificationsRead = useCallback(() => {
         if (unreadCount > 0) {
             axios.post('/riders/me/notifications/read').then(() => {
@@ -271,6 +268,7 @@ const RiderDashboardV3 = () => {
         }
     }, [unreadCount]);
 
+    // Handle self assign
     const handleSelfAssign = useCallback(async (deliveryId) => {
         setAssigningOrder(deliveryId);
         try {
@@ -286,6 +284,7 @@ const RiderDashboardV3 = () => {
         }
     }, [fetchData]);
 
+    // Handle decline
     const handleDecline = useCallback((deliveryId) => {
         setDecliningOrder(deliveryId);
         setShowDeclineModal(true);
@@ -308,13 +307,7 @@ const RiderDashboardV3 = () => {
         }
     }, [declineNote, decliningOrder, fetchData]);
 
-    const formatCurrency = useCallback((amount) => {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(amount || 0);
-    }, []);
-
+    // Handle status change
     const handleStatusChange = useCallback(async (deliveryId, newStatus) => {
         try {
             await axios.put(`/deliveries/${deliveryId}/status`, { status: newStatus });
@@ -333,6 +326,7 @@ const RiderDashboardV3 = () => {
         }
     }, [deliveries]);
 
+    // Handle photo upload
     const handlePhotoUpload = useCallback(async (deliveryId, file) => {
         const formData = new FormData();
         formData.append('photo', file);
@@ -358,6 +352,7 @@ const RiderDashboardV3 = () => {
         }
     }, [deliveries]);
 
+    // Get photo URL
     const getPhotoUrl = useCallback(() => {
         if (user?.photo) {
             return user.photo.startsWith('http') ? user.photo : `/storage/${user.photo}`;
@@ -371,22 +366,473 @@ const RiderDashboardV3 = () => {
         return <RiderSettings onBack={() => setView('dashboard')} />;
     }
 
+    // Sidebar menu items
+    const menuItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: Home },
+        { id: 'deliveries', label: 'Active Deliveries', icon: Package },
+        { id: 'ratings', label: 'Ratings', icon: Star },
+    ];
+
     return (
-        <main style={{ minHeight: '100vh', backgroundColor: '#fff', color: '#111827', fontFamily: "'Inter', sans-serif" }}>
-            {showMap && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10000, backgroundColor: '#fff' }}>
-                    <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10001 }}>
-                        <button 
-                            className="btn" 
-                            style={{ background: '#111827', color: '#fff', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: 700, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
-                            onClick={() => setShowMap(false)}
+        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f3f4f6' }}>
+            {/* Sidebar */}
+            <div style={{
+                width: sidebarOpen ? '260px' : '60px',
+                backgroundColor: '#1f2937',
+                color: '#fff',
+                transition: 'width 0.3s ease',
+                position: 'fixed',
+                height: '100vh',
+                zIndex: 1000,
+                overflow: 'hidden'
+            }}>
+                {/* Sidebar Header */}
+                <div style={{ 
+                    padding: '1.5rem', 
+                    borderBottom: '1px solid #374151',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: sidebarOpen ? 'space-between' : 'center'
+                }}>
+                    {sidebarOpen && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <img 
+                                src={getPhotoUrl()} 
+                                alt="" 
+                                style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }} 
+                            />
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{user?.name || 'Rider'}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Rider</div>
+                            </div>
+                        </div>
+                    )}
+                    <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#374151'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                    >
+                        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+                </div>
+
+                {/* Navigation */}
+                <nav style={{ padding: '1rem 0' }}>
+                    {menuItems.map(item => {
+                        const Icon = item.icon;
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => setView(item.id)}
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    padding: '0.875rem 1.5rem',
+                                    backgroundColor: view === item.id ? '#374151' : 'transparent',
+                                    color: '#fff',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s',
+                                    fontSize: '0.9rem'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (view !== item.id) e.target.style.backgroundColor = '#374151';
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (view !== item.id) e.target.style.backgroundColor = 'transparent';
+                                }}
+                            >
+                                <Icon size={20} style={{ flexShrink: 0 }} />
+                                {sidebarOpen && <span>{item.label}</span>}
+                            </button>
+                        );
+                    })}
+                </nav>
+
+                {/* Map Button */}
+                {sidebarOpen && (
+                    <div style={{ padding: '1rem 1.5rem', marginTop: 'auto' }}>
+                        <button
+                            onClick={() => setShowMap(true)}
+                            style={{
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                padding: '0.875rem',
+                                backgroundColor: '#10b981',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '10px',
+                                cursor: 'pointer',
+                                fontWeight: 600,
+                                transition: 'background 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
                         >
-                            ✕ Close map
+                            <MapPin size={20} />
+                            <span>Show Map</span>
+                        </button>
+                    </div>
+                )}
+
+                {/* Logout */}
+                <div style={{ padding: '1rem 1.5rem', marginTop: 'auto' }}>
+                    <button
+                        onClick={logout}
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            padding: '0.875rem',
+                            backgroundColor: '#ef4444',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#dc2626'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#ef4444'}
+                    >
+                        <LogOut size={20} />
+                        {sidebarOpen && <span>Sign Out</span>}
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div style={{ 
+                flex: 1, 
+                marginLeft: sidebarOpen ? '260px' : '60px',
+                transition: 'margin-left 0.3s ease',
+                padding: '2rem'
+            }}>
+                {/* Dashboard View */}
+                {view === 'dashboard' && (
+                    <div>
+                        <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '2rem', color: '#111827' }}>
+                            Dashboard
+                        </h1>
+
+                        {/* Stats Grid */}
+                        <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+                            gap: '1.5rem', 
+                            marginBottom: '2rem' 
+                        }}>
+                            {[
+                                { label: 'Active Orders', value: stats.active || 0, color: '#3b82f6', bg: '#eff6ff' },
+                                { label: 'Completed', value: stats.done || 0, color: '#10b981', bg: '#ecfdf5' },
+                                { label: 'Total Earnings', value: formatCurrency(stats.earnings), color: '#f59e0b', bg: '#fffbeb' },
+                                { label: 'Total Orders', value: stats.total || 0, color: '#6b7280', bg: '#f9fafb' },
+                            ].map((stat, idx) => (
+                                <div key={idx} style={{
+                                    backgroundColor: '#fff',
+                                    borderRadius: '16px',
+                                    padding: '1.5rem',
+                                    border: '1px solid #e5e7eb',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                                }}>
+                                    <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                                        {stat.label}
+                                    </div>
+                                    <div style={{ fontSize: '2rem', fontWeight: 800, color: stat.color }}>
+                                        {stat.value}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Active Deliveries */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: '#111827' }}>
+                                Active Deliveries
+                            </h2>
+                            {deliveries.length === 0 ? (
+                                <div style={{ 
+                                    backgroundColor: '#fff', 
+                                    borderRadius: '12px', 
+                                    padding: '3rem', 
+                                    textAlign: 'center',
+                                    border: '1px solid #e5e7eb'
+                                }}>
+                                    <Package size={48} style={{ color: '#9ca3af', margin: '0 auto 1rem' }} />
+                                    <p style={{ color: '#6b7280' }}>No active deliveries</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'grid', gap: '1rem' }}>
+                                    {deliveries.map(delivery => (
+                                        <div key={delivery.id} style={{
+                                            backgroundColor: '#fff',
+                                            borderRadius: '12px',
+                                            padding: '1.5rem',
+                                            border: '1px solid #e5e7eb',
+                                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                                        }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                                        <span style={{ 
+                                                            fontSize: '0.875rem', 
+                                                            fontWeight: 700, 
+                                                            backgroundColor: '#dbeafe', 
+                                                            color: '#1e40af', 
+                                                            padding: '0.25rem 0.75rem', 
+                                                            borderRadius: '20px' 
+                                                        }}>
+                                                            #{delivery.tracking_number}
+                                                        </span>
+                                                        <span style={{ 
+                                                            fontSize: '0.875rem', 
+                                                            fontWeight: 600, 
+                                                            color: '#6b7280' 
+                                                        }}>
+                                                            {delivery.distance}
+                                                        </span>
+                                                    </div>
+                                                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                                                        {delivery.customer_name}
+                                                    </h3>
+                                                    <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                                                        {delivery.customer_address}
+                                                    </p>
+                                                    <p style={{ color: '#059669', fontSize: '0.875rem', fontWeight: 600 }}>
+                                                        ETA: {delivery.eta}
+                                                    </p>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <button
+                                                        onClick={() => handleStatusChange(delivery.id, 'delivered')}
+                                                        style={{
+                                                            padding: '0.5rem 1rem',
+                                                            backgroundColor: '#10b981',
+                                                            color: '#fff',
+                                                            border: 'none',
+                                                            borderRadius: '8px',
+                                                            fontWeight: 600,
+                                                            cursor: 'pointer',
+                                                            fontSize: '0.875rem'
+                                                        }}
+                                                    >
+                                                        Mark Delivered
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Nearby Orders */}
+                        {nearbyOrders && nearbyOrders.length > 0 && (
+                            <div>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: '#111827' }}>
+                                    Nearby Orders
+                                </h2>
+                                <div style={{ display: 'grid', gap: '1rem' }}>
+                                    {nearbyOrders.map(order => (
+                                        <div key={order.id} style={{
+                                            backgroundColor: '#fff',
+                                            borderRadius: '12px',
+                                            padding: '1.5rem',
+                                            border: '2px solid #fbbf24',
+                                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                                        }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                                        <span style={{ 
+                                                            fontSize: '0.875rem', 
+                                                            fontWeight: 700, 
+                                                            backgroundColor: '#fef3c7', 
+                                                            color: '#92400e', 
+                                                            padding: '0.25rem 0.75rem', 
+                                                            borderRadius: '20px' 
+                                                        }}>
+                                                            #{order.tracking_number}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                                                            {order.distance}
+                                                        </span>
+                                                    </div>
+                                                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                                                        {order.customer_name}
+                                                    </h3>
+                                                    <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                                                        {order.customer_address}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleSelfAssign(order.id)}
+                                                    disabled={assigningOrder === order.id}
+                                                    style={{
+                                                        padding: '0.75rem 1.5rem',
+                                                        backgroundColor: '#f59e0b',
+                                                        color: '#fff',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        fontWeight: 600,
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.875rem',
+                                                        opacity: assigningOrder === order.id ? 0.7 : 1
+                                                    }}
+                                                >
+                                                    {assigningOrder === order.id ? 'Assigning...' : 'Accept'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Deliveries View */}
+                {view === 'deliveries' && (
+                    <div>
+                        <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '2rem', color: '#111827' }}>
+                            Active Deliveries
+                        </h1>
+                        {deliveries.length === 0 ? (
+                            <div style={{ 
+                                backgroundColor: '#fff', 
+                                borderRadius: '12px', 
+                                padding: '3rem', 
+                                textAlign: 'center',
+                                border: '1px solid #e5e7eb'
+                            }}>
+                                <Package size={48} style={{ color: '#9ca3af', margin: '0 auto 1rem' }} />
+                                <p style={{ color: '#6b7280' }}>No active deliveries</p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'grid', gap: '1rem' }}>
+                                {deliveries.map(delivery => (
+                                    <div key={delivery.id} style={{
+                                        backgroundColor: '#fff',
+                                        borderRadius: '12px',
+                                        padding: '1.5rem',
+                                        border: '1px solid #e5e7eb',
+                                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                                    <span style={{ 
+                                                        fontSize: '0.875rem', 
+                                                        fontWeight: 700, 
+                                                        backgroundColor: '#dbeafe', 
+                                                        color: '#1e40af', 
+                                                        padding: '0.25rem 0.75rem', 
+                                                        borderRadius: '20px' 
+                                                    }}>
+                                                        #{delivery.tracking_number}
+                                                    </span>
+                                                    <span style={{ 
+                                                        fontSize: '0.875rem', 
+                                                        fontWeight: 600, 
+                                                        color: '#6b7280' 
+                                                    }}>
+                                                        {delivery.distance}
+                                                    </span>
+                                                </div>
+                                                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                                                    {delivery.customer_name}
+                                                </h3>
+                                                <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                                                    {delivery.customer_address}
+                                                </p>
+                                                <p style={{ color: '#059669', fontSize: '0.875rem', fontWeight: 600 }}>
+                                                    ETA: {delivery.eta}
+                                                </p>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={() => handleStatusChange(delivery.id, 'delivered')}
+                                                    style={{
+                                                        padding: '0.5rem 1rem',
+                                                        backgroundColor: '#10b981',
+                                                        color: '#fff',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        fontWeight: 600,
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.875rem'
+                                                    }}
+                                                >
+                                                    Mark Delivered
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Ratings View */}
+                {view === 'ratings' && (
+                    <div>
+                        <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '2rem', color: '#111827' }}>
+                            Ratings & Reviews
+                        </h1>
+                        <RatingStatsCard />
+                        <div style={{ marginTop: '2rem' }}>
+                            <RatingNotificationsPanel />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Map Modal */}
+            {showMap && (
+                <div style={{ 
+                    position: 'fixed', 
+                    top: 0, 
+                    left: 0, 
+                    right: 0, 
+                    bottom: 0, 
+                    zIndex: 2000, 
+                    backgroundColor: '#fff' 
+                }}>
+                    <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 2001 }}>
+                        <button 
+                            onClick={() => setShowMap(false)}
+                            style={{ 
+                                background: '#111827', 
+                                color: '#fff', 
+                                border: 'none', 
+                                padding: '0.75rem 1.5rem', 
+                                borderRadius: '10px', 
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                            }}
+                        >
+                            ✕ Close Map
                         </button>
                     </div>
                     <MapContainer 
                         center={riderPosition} 
-                        zoom={15} 
+                        zoom={13} 
                         style={{ height: '100%', width: '100%' }} 
                         zoomControl={true}
                     >
@@ -402,400 +848,44 @@ const RiderDashboardV3 = () => {
                             const routeKey = `route-${d.id}`;
                             const roadRoute = roadRoutes[routeKey];
                             if (!d.customer_latitude || !d.customer_longitude) return null;
+                            
                             const positions = roadRoute ? roadRoute.coordinates : [
                                 riderPosition,
                                 [d.customer_latitude, d.customer_longitude]
                             ];
                             return (
-                                <Polyline
-                                    key={routeKey}
-                                    positions={positions}
-                                    color={roadRoute ? "#10b981" : "#3b82f6"}
-                                    weight={roadRoute ? 4 : 3}
-                                    opacity={0.8}
-                                    dashArray={roadRoute ? null : "10, 10"}
-                                />
+                                <React.Fragment key={routeKey}>
+                                    <Polyline
+                                        positions={positions}
+                                        color={roadRoute ? "#10b981" : "#3b82f6"}
+                                        weight={3}
+                                        opacity={0.8}
+                                    />
+                                    <Marker 
+                                        position={[d.customer_latitude, d.customer_longitude]}
+                                        icon={customerIcon}
+                                    >
+                                        <Popup>
+                                            <div>
+                                                <strong>Order #{d.tracking_number || d.order_id}</strong><br/>
+                                                {d.customer_address}<br/>
+                                                <small>Distance: {d.distance}</small><br/>
+                                                <small>ETA: {d.eta}</small>
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                </React.Fragment>
                             );
                         })}
-                        
-                        {[...deliveries, ...nearbyOrders].map(d => (
-                            d.customer_latitude && d.customer_longitude && (
-                                <Marker 
-                                    key={d.id} 
-                                    position={[d.customer_latitude, d.customer_longitude]}
-                                    icon={customerIcon}
-                                >
-                                    <Popup>
-                                        <div>
-                                            <strong>Order #{d.tracking_number || d.order_id}</strong><br/>
-                                            {d.customer_address}<br/>
-                                            <small>Distance: {d.distance}</small><br/>
-                                            <small>ETA: {d.eta}</small><br/>
-                                            {roadRoutes[`route-${d.id}`] && (
-                                                <small style={{ color: '#10b981', fontWeight: 'bold' }}>
-                                                    🛣️ Road Route Available
-                                                </small>
-                                            )}
-                                        </div>
-                                    </Popup>
-                                </Marker>
-                            )
-                        ))}
                     </MapContainer>
                 </div>
             )}
 
-            <div style={{ padding: '2rem 1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-                {/* Header */}
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <img 
-                            src={getPhotoUrl()} 
-                            alt="" 
-                            onClick={() => setView('settings')}
-                            style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'cover', cursor: 'pointer' }} 
-                        />
-                        <div>
-                            <h1 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0 }}>{user?.name || 'Rider'}</h1>
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                <button 
-                                    onClick={() => setShowMap(true)}
-                                    style={{ 
-                                        background: '#fff', color: '#111827', border: '1px solid #e5e7eb', 
-                                        fontSize: '0.75rem', padding: '6px 14px', borderRadius: '10px', 
-                                        fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                                    }}
-                                >
-                                    <MapPin style={{ display: 'inline', width: '14px', height: '14px', marginRight: '4px' }} /> SHOW MAP
-                                </button>
-                                <button 
-                                    onClick={() => setView('settings')}
-                                    style={{ 
-                                        background: '#fff', color: '#111827', border: '1px solid #e5e7eb', 
-                                        fontSize: '0.75rem', padding: '6px 14px', borderRadius: '10px', 
-                                        fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                                    }}
-                                >
-                                    <Settings style={{ display: 'inline', width: '14px', height: '14px', marginRight: '4px' }} /> SETTINGS
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <nav style={{ display: 'flex', gap: '0.75rem', position: 'relative' }}>
-                        <div style={{ position: 'relative' }}>
-                            <button
-                                aria-label="Notifications"
-                                style={{ 
-                                    background: '#fff', color: '#1a1a1a', border: '1px solid #e5e5e5',
-                                    padding: '0.6rem', borderRadius: '12px', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem'
-                                }}
-                                onClick={() => {
-                                    setShowNotifications(!showNotifications);
-                                    if (!showNotifications) handleMarkNotificationsRead();
-                                }}
-                            >
-                                <Bell style={{ width: '18px', height: '18px' }} />
-                                {unreadCount > 0 && (
-                                    <span style={{ 
-                                        position: 'absolute', top: -4, right: -4, 
-                                        background: '#ef4444', color: '#fff', 
-                                        fontSize: '0.7rem', padding: '2px 6px', 
-                                        borderRadius: '10px', fontWeight: 800,
-                                        border: '2px solid #fff' 
-                                    }}>
-                                        {unreadCount > 9 ? '9+' : unreadCount}
-                                    </span>
-                                )}
-                            </button>
-                            
-                            {showNotifications && (
-                                <div style={{ 
-                                    position: 'absolute', top: '120%', right: 0, 
-                                    width: '320px', backgroundColor: '#fff', 
-                                    borderRadius: '20px', border: '1px solid #f0f0f0', 
-                                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 1000,
-                                    maxHeight: '400px', overflowY: 'auto'
-                                }}>
-                                    <div style={{ padding: '1rem', borderBottom: '1px solid #f9fafb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ fontWeight: 700 }}>Notifications</span>
-                                        <button onClick={() => setShowNotifications(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>✕</button>
-                                    </div>
-                                    {notifications.length === 0 ? (
-                                        <div style={{ padding: '2rem', textAlign: 'center', color: '#999', fontSize: '0.9rem' }}>
-                                            No notifications yet
-                                        </div>
-                                    ) : (
-                                        notifications.map(notif => (
-                                            <div key={notif.id} style={{ 
-                                                padding: '1rem', borderBottom: '1px solid #f9fafb', 
-                                                backgroundColor: notif.read_at ? '#fff' : '#f0f7ff',
-                                                transition: 'background-color 0.2s ease'
-                                            }}>
-                                                <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '4px' }}>{notif.data.title}</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#444' }}>{notif.data.message}</div>
-                                                <div style={{ fontSize: '0.7rem', color: '#999', marginTop: '6px' }}>
-                                                    {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                        <button
-                            aria-label="Sign Out"
-                            style={{ 
-                                background: '#fff', color: '#ef4444', border: '1px solid #fee2e2',
-                                padding: '0.6rem 1rem', borderRadius: '12px', fontSize: '0.875rem',
-                                fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center',
-                                gap: '0.5rem', transition: 'all 0.2s ease'
-                            }}
-                            onClick={logout}
-                        >
-                            <span>🚪</span> Sign Out
-                        </button>
-                    </nav>
-                </header>
-
-                {/* Stats Grid */}
-                <section aria-label="Daily Statistics" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2.5rem' }}>
-                    {[
-                        { label: 'Active', value: stats.active || 0, color: '#6366f1', bg: '#eef2ff' },
-                        { label: 'Earnings', value: formatCurrency(stats.earnings), color: '#059669', bg: '#ecfdf5' },
-                        { label: 'Done', value: stats.done || 0, color: '#d97706', bg: '#fffbeb' },
-                        { label: 'Total', value: stats.total || 0, color: '#4b5563', bg: '#f9fafb' },
-                    ].map((stat, idx) => (
-                        <div key={idx} style={{
-                            backgroundColor: '#fff', borderRadius: 20, padding: '1.25rem', 
-                            border: '1px solid #f0f0f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                        }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: stat.color }}>{stat.value}</div>
-                        </div>
-                    ))}
-                </section>
-
-                {/* Rating Statistics */}
-                <section aria-label="Rating Statistics" style={{ marginBottom: '2.5rem' }}>
-                    <RatingStatsCard />
-                </section>
-
-                {/* Rating Notifications */}
-                <section aria-label="Rating Notifications" style={{ marginBottom: '2.5rem' }}>
-                    <RatingNotificationsPanel />
-                </section>
-
-                {/* Nearby Orders */}
-                {nearbyOrders && nearbyOrders.length > 0 && (
-                    <section aria-label="Nearby Orders" style={{ marginBottom: '2.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>📍 Nearby Orders</h2>
-                            <span style={{ fontSize: '0.875rem', color: '#666', backgroundColor: '#fef3c7', padding: '2px 8px', borderRadius: '6px', fontWeight: 600 }}>{nearbyOrders.length} available</span>
-                        </div>
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {nearbyOrders.map(order => (
-                                <div key={order.id} style={{
-                                    backgroundColor: '#fff', borderRadius: 24, padding: '1.5rem', 
-                                    border: '2px solid #fbbf24', boxShadow: '0 4px 12px rgba(251, 191, 36, 0.1)',
-                                    transition: 'transform 0.2s ease'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#fef3c7', color: '#92400e', padding: '4px 10px', borderRadius: 20 }}>
-                                                    #{order.tracking_number}
-                                                </span>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#dcfce7', color: '#166534', padding: '4px 10px', borderRadius: 20 }}>
-                                                    {order.distance}
-                                                </span>
-                                            </div>
-                                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>{order.customer_name}</h3>
-                                            <p style={{ color: '#666', fontSize: '0.9rem', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <MapPin style={{ display: 'inline', width: '14px', height: '14px', marginRight: '2px' }} /> {order.customer_address}
-                                            </p>
-                                            <p style={{ color: '#92400e', fontSize: '0.8rem', margin: '4px 0 0 0', fontWeight: 600 }}>
-                                                ETA: {order.eta}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                        <button
-                                            style={{ 
-                                                flex: 1, background: '#f59e0b', color: '#fff', border: 'none', 
-                                                padding: '0.875rem', borderRadius: 14, fontWeight: 700, cursor: 'pointer',
-                                                fontSize: '0.925rem', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.2)'
-                                            }}
-                                            onClick={() => handleSelfAssign(order.id)}
-                                            disabled={assigningOrder === order.id}
-                                        >
-                                            {assigningOrder === order.id ? 'Assigning...' : '🚀 Accept Order'}
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* Active Deliveries */}
-                <section aria-label="Active Deliveries">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Active Deliveries</h2>
-                        {deliveries.length > 0 && (
-                            <span style={{ fontSize: '0.875rem', color: '#666', backgroundColor: '#f0f0f0', padding: '2px 8px', borderRadius: '6px', fontWeight: 600 }}>
-                                {deliveries.length} tasks
-                            </span>
-                        )}
-                    </div>
-
-                    {(!deliveries || deliveries.length === 0) ? (
-                        <div style={{
-                            backgroundColor: '#fff', borderRadius: 24, padding: '4rem 2rem', textAlign: 'center',
-                            border: '1px solid #f0f0f0', color: '#666'
-                        }}>
-                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</div>
-                            <h3 style={{ margin: '0 0 0.5rem 0', color: '#1a1a1a', fontWeight: 700 }}>All clear!</h3>
-                            <p style={{ margin: 0, fontSize: '0.925rem' }}>No active deliveries at the moment.</p>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {deliveries.map(delivery => (
-                                <div key={delivery.id} data-delivery-id={delivery.id} style={{
-                                    backgroundColor: '#fff', borderRadius: 24, padding: '1.5rem', 
-                                    border: '1px solid #f0f0f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                                    transition: 'transform 0.2s ease'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.25rem' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#f3f4f6', color: '#374151', padding: '4px 10px', borderRadius: 20 }}>
-                                                    #{delivery.order_id}
-                                                </span>
-                                                <span style={{ 
-                                                    fontSize: '0.75rem', fontWeight: 700, 
-                                                    backgroundColor: (delivery.status === 'pending' || delivery.status === 'assigned') ? '#fff7ed' : '#f0fdf4', 
-                                                    color: (delivery.status === 'pending' || delivery.status === 'assigned') ? '#c2410c' : '#15803d', 
-                                                    padding: '4px 10px', borderRadius: 20, textTransform: 'capitalize'
-                                                }}>
-                                                    {delivery.status.replace('_', ' ')}
-                                                </span>
-                                            </div>
-                                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>{delivery.customer_name}</h3>
-                                            <p style={{ color: '#666', fontSize: '0.9rem', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <MapPin style={{ display: 'inline', width: '14px', height: '14px', marginRight: '2px' }} /> {delivery.customer_address}
-                                            </p>
-                                            
-                                            {/* Rating Display */}
-                                            {delivery.rating && (
-                                                <div style={{ 
-                                                    backgroundColor: '#fef3c7', 
-                                                    border: '1px solid #fbbf24', 
-                                                    borderRadius: 12, 
-                                                    padding: '0.75rem', 
-                                                    marginBottom: '0.75rem'
-                                                }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                                        <span style={{ fontWeight: 700, color: '#92400e', fontSize: '0.85rem' }}>
-                                                            Customer Rating:
-                                                        </span>
-                                                        <div style={{ display: 'flex', gap: '2px' }}>
-                                                            {[1, 2, 3, 4, 5].map(star => (
-                                                                <span 
-                                                                    key={star} 
-                                                                    style={{ 
-                                                                        fontSize: '1rem', 
-                                                                        color: star <= delivery.rating ? '#f59e0b' : '#d1d5db',
-                                                                        textShadow: star <= delivery.rating ? '0 1px 2px rgba(245, 158, 11, 0.3)' : 'none'
-                                                                    }}
-                                                                >
-                                                                    ★
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                        <span style={{ 
-                                                            fontWeight: 700, 
-                                                            color: '#92400e', 
-                                                            fontSize: '0.9rem',
-                                                            marginLeft: '0.25rem'
-                                                        }}>
-                                                            {delivery.rating}/5
-                                                        </span>
-                                                    </div>
-                                                    {delivery.rating_comment && (
-                                                        <div style={{ 
-                                                            fontStyle: 'italic', 
-                                                            color: '#78350f', 
-                                                            fontSize: '0.8rem',
-                                                            marginTop: '0.25rem',
-                                                            lineHeight: '1.4'
-                                                        }}>
-                                                            "{delivery.rating_comment}"
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                        {(delivery.status === 'pending' || delivery.status === 'assigned') && (
-                                            <>
-                                                <button
-                                                    style={{ 
-                                                        flex: 1, background: '#10b981', color: '#fff', border: 'none', 
-                                                        padding: '0.875rem', borderRadius: 14, fontWeight: 700, cursor: 'pointer',
-                                                        fontSize: '0.925rem'
-                                                    }}
-                                                    onClick={() => handleStatusChange(delivery.id, 'in_progress')}
-                                                >
-                                                    ✅ Accept
-                                                </button>
-                                                <button
-                                                    style={{ 
-                                                        flex: 1, background: '#ef4444', color: '#fff', border: 'none', 
-                                                        padding: '0.875rem', borderRadius: 14, fontWeight: 700, cursor: 'pointer',
-                                                        fontSize: '0.925rem'
-                                                    }}
-                                                    onClick={() => handleDecline(delivery.id)}
-                                                >
-                                                    ❌ Decline
-                                                </button>
-                                            </>
-                                        )}
-                                        {(delivery.status === 'in_progress' || delivery.status === 'accepted') && (
-                                            <button
-                                                style={{ 
-                                                    flex: 1, background: '#6366f1', color: '#fff', border: 'none', 
-                                                    padding: '0.875rem', borderRadius: 14, fontWeight: 700, cursor: 'pointer',
-                                                    fontSize: '0.925rem', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
-                                                }}
-                                                onClick={() => handleStatusChange(delivery.id, 'delivered')}
-                                            >
-                                                Mark as Delivered
-                                            </button>
-                                        )}
-                                        <button 
-                                            aria-label="View Details"
-                                            style={{ width: '48px', height: '48px', background: '#f9fafb', border: '1px solid #f0f0f0', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', cursor: 'pointer' }}
-                                        >
-                                            📄
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </section>
-            </div>
-
+            {/* Hidden file input for photo upload */}
             <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
-                aria-hidden="true"
                 style={{ display: 'none' }}
                 onChange={(e) => {
                     if (e.target.files[0] && uploadingProof) {
@@ -807,55 +897,80 @@ const RiderDashboardV3 = () => {
             {/* Decline Modal */}
             {showDeclineModal && (
                 <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10000,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
-                }} onClick={() => setShowDeclineModal(false)}>
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 3000
+                }}>
                     <div style={{
-                        backgroundColor: '#fff', borderRadius: 20, padding: '2rem',
-                        maxWidth: '400px', width: '100%', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
-                    }} onClick={(e) => e.stopPropagation()}>
-                        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontWeight: 700 }}>Decline Order</h3>
-                        <p style={{ margin: '0 0 1.5rem 0', color: '#666', fontSize: '0.9rem' }}>
-                            Please provide a reason for declining this order:
-                        </p>
+                        backgroundColor: '#fff',
+                        borderRadius: '12px',
+                        padding: '2rem',
+                        width: '90%',
+                        maxWidth: '400px'
+                    }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>
+                            Decline Order
+                        </h3>
                         <textarea
                             value={declineNote}
                             onChange={(e) => setDeclineNote(e.target.value)}
-                            placeholder="Enter reason for declining..."
+                            placeholder="Please provide a reason for declining..."
                             style={{
-                                width: '100%', minHeight: '100px', padding: '0.75rem',
-                                border: '1px solid #e5e7eb', borderRadius: 12, fontSize: '0.9rem',
-                                resize: 'vertical', marginBottom: '1.5rem'
+                                width: '100%',
+                                minHeight: '100px',
+                                padding: '0.75rem',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '8px',
+                                resize: 'vertical',
+                                fontSize: '0.875rem'
                             }}
                         />
-                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
                             <button
-                                style={{
-                                    flex: 1, padding: '0.75rem', border: '1px solid #e5e7eb',
-                                    backgroundColor: '#fff', color: '#374151', borderRadius: 12,
-                                    fontWeight: 600, cursor: 'pointer'
+                                onClick={() => {
+                                    setShowDeclineModal(false);
+                                    setDeclineNote('');
+                                    setDecliningOrder(null);
                                 }}
-                                onClick={() => setShowDeclineModal(false)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem',
+                                    backgroundColor: '#f3f4f6',
+                                    color: '#111827',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                }}
                             >
                                 Cancel
                             </button>
                             <button
-                                style={{
-                                    flex: 1, padding: '0.75rem', border: 'none',
-                                    backgroundColor: '#ef4444', color: '#fff', borderRadius: 12,
-                                    fontWeight: 600, cursor: 'pointer'
-                                }}
                                 onClick={confirmDecline}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem',
+                                    backgroundColor: '#ef4444',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                }}
                             >
-                                Decline Order
+                                Decline
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-        </main>
+        </div>
     );
-};
-
-export default RiderDashboardV3;
+}

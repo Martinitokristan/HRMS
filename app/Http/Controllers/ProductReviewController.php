@@ -45,15 +45,16 @@ class ProductReviewController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $productId)
     {
         $data = $request->validate([
-            'product_id'         => 'required|exists:products,id',
             'product_variant_id' => 'nullable|exists:product_variants,id',
             'rating'             => 'required|integer|min:1|max:5',
             'title'              => 'nullable|string|max:100',
             'review_text'        => 'nullable|string|max:2000',
         ]);
+        
+        $data['product_id'] = $productId;
 
         $customerId = $request->user()->id;
 
@@ -121,6 +122,16 @@ class ProductReviewController extends Controller
             ->where('product_id', $productId)
             ->approved();
 
+        // Filter by variant if specified
+        if ($request->has('variant')) {
+            $variantId = $request->get('variant');
+            if ($variantId === 'base') {
+                $query->whereNull('product_variant_id');
+            } else {
+                $query->where('product_variant_id', $variantId);
+            }
+        }
+
         $sortBy = $request->get('sort', 'recent');
         if ($sortBy === 'helpful') {
             $query->orderBy('helpful_count', 'desc');
@@ -135,8 +146,20 @@ class ProductReviewController extends Controller
         $reviews = $query->paginate(10);
 
         // Rating summary
-        $summary = ProductReview::where('product_id', $productId)
-            ->approved()
+        $summaryQuery = ProductReview::where('product_id', $productId)
+            ->approved();
+            
+        // Apply same variant filter to summary
+        if ($request->has('variant')) {
+            $variantId = $request->get('variant');
+            if ($variantId === 'base') {
+                $summaryQuery->whereNull('product_variant_id');
+            } else {
+                $summaryQuery->where('product_variant_id', $variantId);
+            }
+        }
+
+        $summary = $summaryQuery
             ->select('rating', DB::raw('count(*) as count'))
             ->groupBy('rating')
             ->pluck('count', 'rating')
@@ -222,6 +245,29 @@ class ProductReviewController extends Controller
             'data'    => $review->fresh()->load(['customer', 'product']),
             'message' => "Review {$data['status']}.",
             'status'  => 'success',
+        ]);
+    }
+
+    public function checkEligibility($customerId, $productId)
+    {
+        // Check if customer has a delivered order with this product
+        $hasDeliveredOrder = Sale::where('customer_id', $customerId)
+            ->where('status', 'delivered')
+            ->whereHas('items', function ($q) use ($productId) {
+                $q->where('product_id', $productId);
+            })
+            ->exists();
+
+        // Check if customer already reviewed this product
+        $alreadyReviewed = ProductReview::where('customer_id', $customerId)
+            ->where('product_id', $productId)
+            ->exists();
+
+        return response()->json([
+            'can_review' => $hasDeliveredOrder && !$alreadyReviewed,
+            'has_delivered_order' => $hasDeliveredOrder,
+            'already_reviewed' => $alreadyReviewed,
+            'status' => 'success'
         ]);
     }
 

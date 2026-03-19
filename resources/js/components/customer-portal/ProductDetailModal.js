@@ -3,8 +3,9 @@ import Modal from '../shared/Modal';
 import VariantSelector from '../shared/VariantSelector';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Percent, ShoppingCart, Minus, Plus, X } from 'lucide-react';
+import { Percent, ShoppingCart, Minus, Plus, X, MessageSquare, Star } from 'lucide-react';
 import { getProductSaleInfo, getVariantSaleInfo } from '../../utils/priceCalculations';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ProductDetailModal({ isOpen, onClose, product, onAddToCart }) {
     const [qty, setQty] = useState(1);
@@ -12,6 +13,10 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
     const [selectedOptions, setSelectedOptions] = useState({ size: '', color: '', weight: '' });
     const [activeGalleryImage, setActiveGalleryImage] = useState(null);
     const [forceUpdate, setForceUpdate] = useState(0);
+    const [showReviews, setShowReviews] = useState(false);
+    const [canReview, setCanReview] = useState(false);
+    const [checkingEligibility, setCheckingEligibility] = useState(false);
+    const { user } = useAuth();
 
     useEffect(() => {
         if (isOpen && product) {
@@ -21,13 +26,100 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                 setSelectedOptions({ size: '', color: '', weight: '' });
                 setActiveGalleryImage(null);
                 setForceUpdate(prev => prev + 1);
+                setShowReviews(false);
+                
+                // Check review eligibility for logged-in users
+                if (user && product.id) {
+                    checkReviewEligibility();
+                } else {
+                    setCanReview(false);
+                }
             } catch (error) {
                 console.error('Error in modal useEffect:', error);
             }
         }
-    }, [isOpen, product]);
+    }, [isOpen, product, user]);
+
+    const checkReviewEligibility = async () => {
+        if (!user || !product.id) return;
+        
+        setCheckingEligibility(true);
+        try {
+            const response = await fetch(`/api/customers/${user.id}/can-review/${product.id}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                setCanReview(data.can_review);
+            }
+        } catch (error) {
+            console.error('Error checking review eligibility:', error);
+            setCanReview(false);
+        } finally {
+            setCheckingEligibility(false);
+        }
+    };
+
+    const handleReviewsClick = () => {
+        setShowReviews(true);
+    };
+
+    const handleBackToProduct = () => {
+        setShowReviews(false);
+    };
 
     if (!product) return null;
+
+    // Show reviews view
+    if (showReviews) {
+        return (
+            <Modal isOpen={isOpen} onClose={onClose}>
+                <div className="p-6 max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">Product Reviews</h2>
+                        <Button variant="ghost" onClick={handleBackToProduct}>
+                            <X className="w-5 h-5" />
+                        </Button>
+                    </div>
+                    
+                    <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
+                        <p className="text-sm text-gray-600">See what customers are saying about this product</p>
+                    </div>
+
+                    {/* Write Review Button (only for eligible customers) */}
+                    {user && canReview && (
+                        <div className="mb-6">
+                            <Button onClick={() => {
+                                const url = selectedVariant 
+                                    ? `/shop/products/${product.id}/reviews#write?variant=${selectedVariant.id}`
+                                    : `/shop/products/${product.id}/reviews#write`;
+                                window.location.href = url;
+                            }}>
+                                <Star className="w-4 h-4 mr-2" />
+                                Write a Review
+                            </Button>
+                        </div>
+                    )}
+
+                    {/* Reviews List Component would go here */}
+                    <div className="text-center py-8 text-gray-500">
+                        <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>Reviews component will be integrated here</p>
+                        <p className="text-sm mt-2">For now, please use the dedicated reviews page</p>
+                    </div>
+
+                    <div className="mt-6 flex justify-center">
+                        <Button variant="outline" onClick={handleBackToProduct}>
+                            Back to Product
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+        );
+    }
 
     try {
         const baseStock = Number(product.available_stock || product.inventory?.current_stock || 0);
@@ -281,6 +373,16 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                             <ShoppingCart className="w-5 h-5" />
                             {isOutOfStock ? 'Sold Out' : `Add to Cart — ₱${subtotal.toFixed(2)}`}
                         </button>
+
+                        {/* Reviews Button */}
+                        <Button
+                            variant="outline"
+                            onClick={handleReviewsClick}
+                            className="w-full h-10 rounded-xl font-medium text-sm flex items-center justify-center gap-2"
+                        >
+                            <MessageSquare className="w-4 h-4" />
+                            View Reviews
+                        </Button>
                     </div>
                 </div>
             </Modal>
