@@ -1,0 +1,31 @@
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+/.role_improvement_suggestions.md
+/.roles_and_permissions_guide.md
+/.REAL_TIME_DATABASE_SYNC.md
+/.STORAGE_STRUCTURE.md
+/.test_crash.php
+/.analysis_results.md
+
+
+# Log files
+*.log
+error_*.txt
+last_log.txt
+build_error.log
+
+# Documentation folder
+# /documentation/

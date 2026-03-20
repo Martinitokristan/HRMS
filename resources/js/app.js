@@ -1,0 +1,2 @@
+require('./bootstrap');
+require('./router');
