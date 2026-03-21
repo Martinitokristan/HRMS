@@ -1,6 +1,6 @@
 // SupplierOrders.js - Supplier PO Management
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
@@ -18,6 +18,8 @@ import { AlertTriangle } from 'lucide-react';
 export default function SupplierOrders() {
     const { showToast } = useToast();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const highlightId = searchParams.get('id');
     const [orders, setOrders] = useState({ data: [], total: 0 });
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -35,6 +37,15 @@ export default function SupplierOrders() {
         console.log("SupplierOrders component version: 1.0.1 (Accept/Reject Live)");
         fetchOrders();
     }, [page, statusFilter]);
+
+    useEffect(() => {
+        if (highlightId && orders.data?.length > 0 && !selectedOrder) {
+            const orderToOpen = orders.data.find(o => o.id == highlightId);
+            if (orderToOpen) {
+                setSelectedOrder(orderToOpen);
+            }
+        }
+    }, [highlightId, orders.data]);
 
     const fetchOrders = async () => {
         try {

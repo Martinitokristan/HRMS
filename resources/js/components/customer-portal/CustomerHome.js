@@ -16,7 +16,7 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
     const hasVariants = allVariants && allVariants.length > 0;
     const totalVariantStock = allVariants ? allVariants.reduce((s, v) => s + Number(v.available_stock || v.stock || 0), 0) : 0;
     const baseStock = Number(product.available_stock || product.inventory?.current_stock || 0);
-    const totalStock = hasVariants ? (baseStock + totalVariantStock) : baseStock;
+    const totalStock = baseStock;
     const inStock = totalStock > 0;
     const imgSrc = product.image_path ? `/storage/${product.image_path}` : null;
     const [addingToCart, setAddingToCart] = useState(false);
@@ -30,38 +30,44 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
     const sizes = allVariants ? [...new Set(allVariants.map(v => v.size_value?.label).filter(Boolean))] : [];
     const colors = allVariants ? [...new Set(allVariants.map(v => v.color_value?.label).filter(Boolean))] : [];
 
-    // Fetch product rating and sold count
+    // Fetch product rating and sold count (optimized - use prop data if exists)
     useEffect(() => {
         const fetchProductData = async () => {
             if (!product?.id) return;
-            
+
+            // Use existing rating data from prop to avoid loading if possible
+            if (product.average_rating !== undefined && product.total_reviews !== undefined && !productRating) {
+                setProductRating({
+                    average_rating: product.average_rating,
+                    total_reviews: product.total_reviews
+                });
+            }
+
             try {
-                // Fetch rating and sold count in parallel
-                const [ratingResponse, soldResponse] = await Promise.all([
-                    fetch(`/api/products/${product.id}/reviews`),
-                    fetch(`/api/products/${product.id}/sold-count`)
-                ]);
-                
-                // Set rating data
-                if (ratingResponse.ok) {
-                    const ratingData = await ratingResponse.json();
-                    if (ratingData.data?.summary) {
-                        setProductRating(ratingData.data.summary);
-                    }
-                }
-                
-                // Set sold count data
+                // Fetch sold count only if we don't have it (or always refresh metadata)
+                const soldResponse = await fetch(`/api/products/${product.id}/sold-count`);
                 if (soldResponse.ok) {
                     const soldData = await soldResponse.json();
                     if (soldData.status === 'success') {
                         setSoldCount(soldData.sold_count || 0);
                     }
                 }
+
+                // Refresh rating data in background if not already initialized
+                if (!productRating) {
+                    const ratingResponse = await fetch(`/api/products/${product.id}/reviews`);
+                    if (ratingResponse.ok) {
+                        const ratingData = await ratingResponse.json();
+                        if (ratingData.data?.summary) {
+                            setProductRating(ratingData.data.summary);
+                        }
+                    }
+                }
             } catch (error) {
-                console.error('Error fetching product data:', error);
+                console.error('Error fetching product metadata:', error);
             }
         };
-        
+
         fetchProductData();
     }, [product?.id]);
 
@@ -72,11 +78,11 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
             // For products with variants, add the first available variant or base product
             let selectedVariant = null;
             let selectedVariantOptions = {};
-            
+
             if (hasVariants) {
                 // Find the first available variant
                 const availableVariant = allVariants.find(v => (v.available_stock || v.stock || 0) > 0);
-                
+
                 if (availableVariant) {
                     selectedVariant = availableVariant;
                     selectedVariantOptions = {
@@ -94,12 +100,12 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                     }
                 }
             }
-            
+
             await onAddToCart(product, {
                 qty: 1,
                 variants: selectedVariantOptions,
-                price: selectedVariant ? 
-                    (selectedVariant.price_override || product.sell_price) : 
+                price: selectedVariant ?
+                    (selectedVariant.price_override || product.sell_price) :
                     (saleInfo.isOnSale ? saleInfo.salePrice : product.sell_price),
                 saleInfo: saleInfo,
                 variant_id: selectedVariant?.id || null,
@@ -114,17 +120,17 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
     };
 
     return (
-        <div 
+        <div
             className="pcard group bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg"
             onClick={() => setSelectedProduct(product)}
         >
             {/* Product Image - Smaller */}
             <div className="pcard__img relative aspect-[4/3] bg-gray-50 overflow-hidden">
                 {imgSrc ? (
-                    <img 
-                        src={imgSrc} 
-                        alt={product.name} 
-                        loading="lazy" 
+                    <img
+                        src={imgSrc}
+                        alt={product.name}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                         onError={(e) => {
                             console.log('❌ [ProductCard] Image failed to load:', imgSrc);
@@ -133,13 +139,13 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                         }}
                     />
                 ) : null}
-                <div 
-                    className="w-full h-full flex items-center justify-center" 
+                <div
+                    className="w-full h-full flex items-center justify-center"
                     style={{ display: imgSrc ? 'none' : 'flex' }}
                 >
                     <Package className="h-12 w-12 text-gray-300 opacity-40" />
                 </div>
-                
+
                 {/* Sale Badge - Top Right */}
                 {saleInfo.isOnSale && (
                     <div className="absolute top-2 right-2">
@@ -148,7 +154,7 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                         </span>
                     </div>
                 )}
-                
+
                 {!inStock && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">Out of Stock</span>
@@ -198,15 +204,13 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 </div>
 
                 {/* Rating and Sold Count */}
-                {productRating && productRating.total_reviews > 0 && (
+                {productRating && (
                     <div className="mb-3">
                         <div className="flex items-center gap-2">
-                            <RatingStars rating={productRating.average_rating} size="sm" />
-                            {soldCount !== null && soldCount > 0 && (
-                                <span className="text-xs text-gray-500">
-                                    ({soldCount} sold)
-                                </span>
-                            )}
+                            <RatingStars rating={productRating.average_rating || 0} size="sm" />
+                            <span className="text-xs text-gray-500">
+                                ({soldCount || 0} sold)
+                            </span>
                         </div>
                     </div>
                 )}
@@ -242,11 +246,14 @@ export default function CustomerHome() {
     // Notifications
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const [proofModalUrl, setProofModalUrl] = useState(null);
+    const notifRef = useRef(null);
 
     // Load cart from localStorage
     useEffect(() => {
         const saved = localStorage.getItem('hrms_cart');
-        if (saved) try { setCart(JSON.parse(saved)); } catch (e) {}
+        if (saved) try { setCart(JSON.parse(saved)); } catch (e) { }
     }, []);
 
     useEffect(() => { localStorage.setItem('hrms_cart', JSON.stringify(cart)); }, [cart]);
@@ -263,20 +270,20 @@ export default function CustomerHome() {
         console.log('Order placed event received, refreshing products...');
         // Force refresh of products to update stock
         setLoading(true);
-        const params = { 
-            page: 1, 
-            per_page: 20, 
-            _: Date.now(), 
-            v: '1.2', 
+        const params = {
+            page: 1,
+            per_page: 20,
+            _: Date.now(),
+            v: '1.2',
             r: Math.random().toString(36).substring(7)
         };
         if (search) params.search = search;
         if (categoryFilter) params.category_id = categoryFilter;
-        
+
         axios.get('/products', { params })
-            .then(r => { 
-                const d = r.data?.data; 
-                setProducts(d?.data ? d.data : d); 
+            .then(r => {
+                const d = r.data?.data;
+                setProducts(d?.data ? d.data : d);
             })
             .finally(() => {
                 setLoading(false);
@@ -297,13 +304,16 @@ export default function CustomerHome() {
     }, [flyingItem]);
 
     // Fetch categories
-    useEffect(() => { axios.get('/categories').then(r => setCategories(r.data?.data || [])).catch(() => {}); }, []);
+    useEffect(() => { axios.get('/categories').then(r => setCategories(r.data?.data || [])).catch(() => { }); }, []);
 
     // Close profile dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (profileRef.current && !profileRef.current.contains(e.target)) {
                 setProfileOpen(false);
+            }
+            if (notifRef.current && !notifRef.current.contains(e.target)) {
+                setNotifOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -318,22 +328,22 @@ export default function CustomerHome() {
         const fetch = () => {
             setLoading(true);
             // Add aggressive cache-busting with timestamp and random string
-            const params = { 
-                page: 1, 
-                per_page: 20, 
-                _: Date.now(), 
-                v: '1.2', 
+            const params = {
+                page: 1,
+                per_page: 20,
+                _: Date.now(),
+                v: '1.2',
                 r: Math.random().toString(36).substring(7)
             };
             if (search) params.search = search;
             if (categoryFilter) params.category_id = categoryFilter;
-            
+
             axios.get('/products', { params })
-                .then(r => { 
+                .then(r => {
                     if (isMounted) {
-                        const d = r.data?.data; 
+                        const d = r.data?.data;
                         const productsData = d?.data ? d.data : d;
-                        setProducts(productsData); 
+                        setProducts(productsData);
                     }
                 })
                 .catch(err => {
@@ -353,13 +363,18 @@ export default function CustomerHome() {
         };
     }, [search, categoryFilter]);
 
-    // Fetch notifications (optimized - only fetch when needed)
+    // Fetch notifications (optimized - real-time polling)
     useEffect(() => {
         if (!user) return;
-        axios.get('/customer/notifications').then(r => {
-            setNotifications(r.data?.data || []);
-            setUnreadCount(r.data?.unread || 0);
-        }).catch(() => {});
+        const fetchNotifs = () => {
+            axios.get('/customer/notifications').then(r => {
+                setNotifications(r.data?.data || []);
+                setUnreadCount(r.data?.unread || 0);
+            }).catch(() => { });
+        };
+        fetchNotifs();
+        const interval = setInterval(fetchNotifs, 5000);
+        return () => clearInterval(interval);
     }, [user]);
 
     const markRead = () => {
@@ -444,11 +459,69 @@ export default function CustomerHome() {
 
                         {user ? (
                             <>
+                                {/* Notifications Toggle */}
+                                <div ref={notifRef} className="relative">
+                                    <button
+                                        className="relative flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                                        onClick={() => {
+                                            setNotifOpen(!notifOpen);
+                                            if (!notifOpen && unreadCount > 0) markRead();
+                                        }}
+                                    >
+                                        <div className="relative">
+                                            <Bell className="h-5 w-5" />
+                                            {unreadCount > 0 && (
+                                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                                                    {unreadCount}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </button>
+
+                                    {notifOpen && (
+                                        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-xl py-2 z-50 max-h-96 overflow-y-auto">
+                                            <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0 z-10">
+                                                <span className="font-bold text-gray-900">Notifications</span>
+                                            </div>
+                                            {notifications.length === 0 ? (
+                                                <div className="px-4 py-8 text-center text-sm text-gray-500">
+                                                    No notifications yet
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col">
+                                                    {notifications.map((n, i) => (
+                                                        <div key={i} className={`px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-blue-50/50' : ''}`}>
+                                                            {/* HRMS | Time Format */}
+                                                            <div className="flex justify-between items-center mb-1">
+                                                                <span className="text-[10px] font-bold text-orange-500 tracking-wider uppercase">
+                                                                    {n.meta?.sender_name || 'HRMS'}
+                                                                </span>
+                                                                <span className="text-[10px] text-gray-400">{new Date(n.created_at).toLocaleString()}</span>
+                                                            </div>
+                                                            <div className="text-sm font-semibold text-gray-900 mb-1 leading-snug">{n.title}</div>
+                                                            <div className="text-xs text-gray-600 mb-2 leading-relaxed">{n.message}</div>
+
+                                                            {n.meta?.proof_url && (
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); setProofModalUrl(n.meta.proof_url); }}
+                                                                    className="mt-1 w-full flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold py-1.5 px-3 rounded-md transition-colors"
+                                                                >
+                                                                    <Package className="h-3 w-3" /> View Proof
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
                                 <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-medium hidden sm:flex" onClick={() => navigate('/shop/history')}>
                                     <ClipboardList className="h-5 w-5" /> My Orders
                                 </button>
                                 <div ref={profileRef} className="relative">
-                                    <div 
+                                    <div
                                         className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white text-sm font-bold cursor-pointer"
                                         onClick={() => setProfileOpen(!profileOpen)}
                                     >
@@ -482,11 +555,10 @@ export default function CustomerHome() {
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex gap-1 overflow-x-auto scrollbar-hide">
                         <button
-                            className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-                                !categoryFilter 
-                                    ? 'text-orange-500 border-b-2 border-orange-500' 
+                            className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${!categoryFilter
+                                    ? 'text-orange-500 border-b-2 border-orange-500'
                                     : 'text-gray-600 hover:text-gray-900'
-                            }`}
+                                }`}
                             onClick={() => setCategoryFilter('')}
                         >
                             All Products
@@ -494,11 +566,10 @@ export default function CustomerHome() {
                         {categories.map(c => (
                             <button
                                 key={c.id}
-                                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-                                    categoryFilter == c.id 
-                                        ? 'text-orange-500 border-b-2 border-orange-500' 
+                                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${categoryFilter == c.id
+                                        ? 'text-orange-500 border-b-2 border-orange-500'
                                         : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                                    }`}
                                 onClick={() => setCategoryFilter(c.id)}
                             >
                                 {c.name}
@@ -568,6 +639,33 @@ export default function CustomerHome() {
                     '--end-x': `${flyingItem.endX}px`, '--end-y': `${flyingItem.endY}px`,
                 }}>
                     {flyingItem.img ? <img src={flyingItem.img} alt="" /> : <Package className="h-8 w-8 text-primary" />}
+                </div>
+            )}
+
+            {/* Full Screen Proof Modal */}
+            {proofModalUrl && (
+                <div
+                    className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
+                    onClick={() => setProofModalUrl(null)}
+                >
+                    <div className="relative max-w-4xl max-h-[90vh] w-full bg-white rounded-xl overflow-hidden shadow-2xl flex flex-col pointer-events-auto" onClick={e => e.stopPropagation()}>
+                        <div className="p-4 border-b flex justify-between items-center bg-gray-50 shrink-0">
+                            <h3 className="font-bold text-gray-900 flex items-center gap-2 text-lg">
+                                <Package className="h-5 w-5 text-orange-500" /> Delivery Proof
+                            </h3>
+                            <button onClick={() => setProofModalUrl(null)} className="p-1.5 hover:bg-gray-200 rounded-full transition-colors bg-white border border-gray-200 shadow-sm">
+                                <X className="h-5 w-5 text-gray-700" />
+                            </button>
+                        </div>
+                        <div className="p-0 overflow-auto flex-1 bg-[#111] flex items-center justify-center min-h-[400px]">
+                            <img src={proofModalUrl} alt="Full Delivery Proof" className="max-w-full max-h-[75vh] object-contain shadow-lg" />
+                        </div>
+                        <div className="p-4 bg-white border-t flex justify-end shrink-0">
+                            <button onClick={() => setProofModalUrl(null)} className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition-colors">
+                                Close Overlay
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

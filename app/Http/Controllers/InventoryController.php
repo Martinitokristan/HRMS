@@ -17,10 +17,16 @@ class InventoryController extends Controller
         // Optimized: Load essential relationships for list view including variants
         $pQuery = Product::with(['category', 'inventory', 'inventory.supplierProduct.variants', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue']);
         
-        // Query warehouse-only items (not yet in storefront) - optimized loading
+        // Query warehouse-only items (orphans)
         $wQuery = Inventory::with(['supplierProduct.category', 'supplierProduct.supplier'])
             ->whereNull('product_id')
-            ->whereNotNull('supplier_product_id');
+            ->whereNotNull('supplier_product_id')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('inventory as inv2')
+                    ->whereColumn('inv2.supplier_product_id', 'inventory.supplier_product_id')
+                    ->whereNotNull('inv2.product_id');
+            });
 
         if ($request->filled('search')) {
             $s = $request->search;
@@ -38,8 +44,6 @@ class InventoryController extends Controller
             $wQuery->whereHas('supplierProduct', fn($q) => $q->where('supplier_id', $request->supplier_id));
         }
 
-        // Note: For simplicity, pagination is done on Products first, then Orphans are appended or merged.
-        // In a high-volume system, we'd use a Union. But for now, let's fetch matching Orphans.
         $perPage = $request->get('per_page', 15);
         $products = $pQuery->paginate($perPage);
         $orphans = $wQuery->get();
@@ -52,259 +56,98 @@ class InventoryController extends Controller
             ->get()
             ->keyBy(fn($item) => $item->product_id . '-' . ($item->product_variant_id ?: '0'));
 
+        $importedByProduct = \App\Models\POItem::whereIn('product_id', $productIds)
+            ->whereHas('purchaseOrder', function($q) {
+                $q->where('status', 'supplier_delivered')
+                  ->orWhere('status', 'received');
+            })
+            ->selectRaw('product_id, product_variant_id, SUM(quantity) as total_imported')
+            ->groupBy('product_id', 'product_variant_id')
+            ->get()
+            ->keyBy(fn($item) => $item->product_id . '-' . ($item->product_variant_id ?: '0'));
+
+        $spIds = $orphans->pluck('supplier_product_id')->unique()->toArray();
+        $importedBySupplierProduct = \App\Models\POItem::whereIn('supplier_product_id', $spIds)
+            ->whereNull('product_id')
+            ->whereHas('purchaseOrder', function($q) {
+                $q->where('status', 'supplier_delivered')
+                  ->orWhere('status', 'received');
+            })
+            ->selectRaw('supplier_product_id, supplier_product_variant_id, SUM(quantity) as total_imported')
+            ->groupBy('supplier_product_id', 'supplier_product_variant_id')
+            ->get()
+            ->keyBy(fn($item) => $item->supplier_product_id . '-' . ($item->supplier_product_variant_id ?: '0'));
+
         $flattened = [];
-        
-        // Group orphan inventory records by supplier_product_id to avoid duplicate variant rows
         $orphansBySupplier = $orphans->groupBy('supplier_product_id');
 
+        // Handle Orphans (Warehouse only items)
         foreach ($orphansBySupplier as $spId => $spOrphans) {
             $sp = $spOrphans->first()->supplierProduct;
+            $baseInv = $spOrphans->whereNull('supplier_product_variant_id')->first() ?? $spOrphans->first();
 
-            if ($sp->variants && $sp->variants->count() > 0) {
-                // Build a lookup: supplier_product_variant_id => inventory record
+            $flattened[] = $this->formatInventoryRow($baseInv, $sp, null, [
+                'is_orphan' => true, 
+                'is_base_of_variants' => $sp->variants->count() > 0,
+                'imported_key' => $sp->id . '-0',
+                'imported_by_product' => $importedBySupplierProduct
+            ]);
+
+            if ($sp->variants->count() > 0) {
                 $variantInvMap = $spOrphans->keyBy('supplier_product_variant_id');
-                
-                // First, emit the base product row
-                $baseInv = $spOrphans->whereNull('supplier_product_variant_id')->first()
-                        ?? $spOrphans->first();
-                $baseWarehouseStock = $baseInv ? $baseInv->warehouse_stock : 0;
-                
-                $flattened[] = [
-                    'id'                          => "o-{$baseInv->id}",
-                    'raw_id'                      => $baseInv ? $baseInv->id : null,
-                    'product_id'                  => null,
-                    'variant_id'                  => null,
-                    'supplier_product_id'         => $spId,
-                    'supplier_product_variant_id' => null,
-                    'barcode'                     => $sp->barcode ?? 'N/A',
-                    'name'                        => $sp->name,
-                    'supplier'                    => $sp->supplier ? $sp->supplier->name : '-',
-                    'category'                    => $sp->category ? $sp->category->name : '-',
-                    'category_id'                 => $sp->category_id,
-                    'unit'                        => 'Units',
-                    'current_stock'               => $baseInv ? $baseInv->current_stock : 0, // FIXED: Show actual current_stock
-                    'warehouse_stock'             => $baseWarehouseStock,
-                    'reorder_threshold'           => $baseInv ? $baseInv->reorder_threshold : 10,
-                    'purchase_price'              => $sp->price,
-                    'sell_price'                  => null,
-                    'description'                 => $sp->description,
-                    'unit_type_id'                => null,
-                    'size'                        => '-',
-                    'color'                       => '-',
-                    'weight'                      => '-',
-                            'barcode_suffix'              => '',
-                    'is_variant'                  => false,
-                    'is_base_of_variants'         => true, // ← ADDED: Show chevron for supplier products with variants
-                    'is_orphan'                   => true,
-                    'supplier_variant_count'      => $sp->variants->count(),
-                    'total_sold'                  => 0,
-                    'total_imported'              => $baseWarehouseStock,
-                ];
-
-                // Then emit all variant rows
                 foreach ($sp->variants as $sv) {
-                    // Use the variant-specific inventory record if it exists, else the base one
-                    $invForVariant = $variantInvMap->get($sv->id) ?? $baseInv;
-                    $warehouseStock = $invForVariant ? $invForVariant->warehouse_stock : ($sv->stock ?? 0);
-
-                    $flattened[] = [
-                        'id'                          => "sv-{$sv->id}",
-                        'raw_id'                      => $invForVariant ? $invForVariant->id : null,
-                        'product_id'                  => null,
-                        'variant_id'                  => null,
-                        'supplier_product_id'         => $spId,
-                        'supplier_product_variant_id' => $sv->id,
-                        'barcode'                     => $sp->barcode . ($sv->barcode_suffix ? "-{$sv->barcode_suffix}" : ""),
-                        'name'                        => $sp->name,
-                        'supplier'                    => $sp->supplier ? $sp->supplier->name : '-',
-                        'category'                    => $sp->category ? $sp->category->name : '-',
-                        'category_id'                 => $sp->category_id,
-                        'unit'                        => 'Units',
-                        'current_stock'               => $invForVariant ? $invForVariant->current_stock : 0, // FIXED: Show actual current_stock
-                        'warehouse_stock'             => $warehouseStock,
-                        'reorder_threshold'           => $invForVariant ? $invForVariant->reorder_threshold : 10,
-                        'purchase_price'              => $sv->price_override ?? $sp->price,
-                        'sell_price'                  => null,
-                        'description'                 => $sp->description,
-                        'unit_type_id'                => null,
-                        'size'                        => $sv->size ?? '-',
-                        'color'                       => $sv->color ?? '-',
-                        'weight'                      => $sv->weight ?? '-',
-                        'barcode_suffix'              => $sv->barcode_suffix ?? '',
-                        'is_variant'                  => true,
-                        'is_orphan'                   => true,
-                        'total_sold'                  => 0,
-                        'total_imported'              => $warehouseStock,
-                    ];
+                    $invForVariant = $variantInvMap->get($sv->id);
+                    $flattened[] = $this->formatInventoryRow($invForVariant ?: $baseInv, $sp, $sv, [
+                        'is_orphan' => true, 
+                        'is_variant' => true,
+                        'imported_key' => $sp->id . '-' . $sv->id,
+                        'imported_by_product' => $importedBySupplierProduct
+                    ]);
                 }
-            } else {
-                // No variants — use the base inventory record (no supplier_product_variant_id)
-                $baseInv = $spOrphans->whereNull('supplier_product_variant_id')->first()
-                        ?? $spOrphans->first();
-
-                $flattened[] = [
-                    'id'                     => "o-{$baseInv->id}",
-                    'raw_id'                 => $baseInv->id,
-                    'product_id'             => null,
-                    'variant_id'             => null,
-                    'supplier_product_id'    => $spId,
-                    'barcode'                => $sp->barcode ?? 'N/A',
-                    'name'                   => $sp->name,
-                    'supplier'               => $sp->supplier ? $sp->supplier->name : '-',
-                    'category'               => $sp->category ? $sp->category->name : '-',
-                    'category_id'            => $sp->category_id,
-                    'unit'                   => 'Units',
-                    'current_stock'          => $baseInv ? $baseInv->current_stock : 0, // FIXED: Show actual current_stock
-                    'warehouse_stock'        => $baseInv->warehouse_stock,
-                    'reorder_threshold'      => $baseInv->reorder_threshold,
-                    'purchase_price'         => $sp->price,
-                    'sell_price'             => null,
-                    'description'            => $sp->description,
-                    'unit_type_id'           => null,
-                    'size'                   => '-',
-                    'color'                  => '-',
-                    'weight'                 => '-',
-                    'is_variant'             => false,
-                    'is_orphan'              => true,
-                    'supplier_variant_count' => 0,
-                    'total_sold'             => 0,
-                    'total_imported'         => $baseInv->warehouse_stock,
-                ];
             }
         }
 
+        // Handle Real Products
         foreach ($products as $p) {
-            $hasRegularVariants = $p->productVariants->count() > 0;
-            $hasSupplierVariants = $p->inventory && $p->inventory->supplierProduct && $p->inventory->supplierProduct->variants && $p->inventory->supplierProduct->variants->count() > 0;
+            $baseInv = Inventory::where('product_id', $p->id)->whereNull('product_variant_id')->first();
+            $hasVariants = $p->productVariants->count() > 0 || ($p->inventory && $p->inventory->supplierProduct && $p->inventory->supplierProduct->variants->count() > 0);
             
-            if ($hasRegularVariants || $hasSupplierVariants) {
-                // Find base inventory (no variant) for this product
-                $baseInv = Inventory::where('product_id', $p->id)->whereNull('product_variant_id')->first();
-                $baseSoldKey = $p->id . '-0';
+            // Base product row
+            $flattened[] = $this->formatInventoryRow($baseInv, $p->inventory->supplierProduct ?? null, null, [
+                'product' => $p,
+                'is_base_of_variants' => $hasVariants,
+                'sold_key' => $p->id . '-0',
+                'sold_by_product' => $soldByProduct,
+                'imported_key' => $p->id . '-0',
+                'imported_by_product' => $importedByProduct
+            ]);
 
-                // Emit base product row so admin can transfer base stock independently
-                $flattened[] = [
-                    'id' => "p-{$p->id}",
-                    'raw_id' => $baseInv ? $baseInv->id : null,
-                    'product_id' => $p->id,
-                    'variant_id' => null,
-                    'barcode' => $p->barcode,
-                    'name' => $p->name,
-                    'supplier' => $p->supplier ? $p->supplier->name : '-',
-                    'category' => $p->category ? $p->category->name : '-',
-                    'category_id' => $p->category_id,
-                    'unit' => $p->unitType ? $p->unitType->sell_unit : '-',
-                    'unit_type_id' => $p->unit_type_id,
-                    'current_stock' => $baseInv ? $baseInv->current_stock : 0,
-                    'warehouse_stock' => $baseInv ? $baseInv->warehouse_stock : 0,
-                    'reorder_threshold' => $baseInv ? $baseInv->reorder_threshold : 10,
-                    'purchase_price' => $p->purchase_price,
-                    'sell_price' => $p->sell_price,
-                    'description' => $p->description,
-                    'size' => '-',
-                    'color' => '-',
-                    'weight' => '-',
-                    'is_variant' => false,
-                    'is_base_of_variants' => true,
-                    'total_sold' => isset($soldByProduct[$baseSoldKey]) ? (int) $soldByProduct[$baseSoldKey]->total_sold : 0,
-                    'total_imported' => 0,
-                ];
+            // Real variants
+            foreach ($p->productVariants as $v) {
+                $varInv = Inventory::where('product_id', $p->id)->where('product_variant_id', $v->id)->first();
+                $flattened[] = $this->formatInventoryRow($varInv, $p->inventory->supplierProduct ?? null, $v, [
+                    'product' => $p,
+                    'is_variant' => true,
+                    'sold_key' => $p->id . '-' . $v->id,
+                    'sold_by_product' => $soldByProduct,
+                    'imported_key' => $p->id . '-' . $v->id,
+                    'imported_by_product' => $importedByProduct
+                ]);
+            }
 
-                // Add regular product variants
-                foreach ($p->productVariants as $v) {
-                    $soldKey = $p->id . '-' . $v->id;
-                    $varInv = Inventory::where('product_id', $p->id)->where('product_variant_id', $v->id)->first();
-                    $flattened[] = [
-                        'id' => "v-{$v->id}",
-                        'raw_id' => $varInv ? $varInv->id : null,
-                        'product_id' => $p->id,
-                        'variant_id' => $v->id,
-                        'barcode' => $p->barcode . ($v->barcode_suffix ? "-{$v->barcode_suffix}" : ""),
-                        'name' => $p->name,
-                        'supplier' => $p->supplier ? $p->supplier->name : '-',
-                        'category' => $p->category ? $p->category->name : '-',
-                        'category_id' => $p->category_id,
-                        'unit' => $p->unitType ? $p->unitType->sell_unit : '-',
-                        'unit_type_id' => $p->unit_type_id,
-                        'current_stock' => $v->stock,
-                        'warehouse_stock' => $varInv ? $varInv->warehouse_stock : 0,
-                        'reorder_threshold' => $baseInv ? $baseInv->reorder_threshold : 10,
-                        'purchase_price' => $p->purchase_price,
-                        'sell_price' => $v->sell_price ?? $p->sell_price,
-                        'description' => $p->description,
-                        'size' => $v->sizeValue->label ?? '-',
-                        'color' => $v->colorValue->label ?? '-',
-                        'weight' => $v->weightValue->label ?? '-',
-                        'barcode_suffix' => $v->barcode_suffix ?? '',
+            // Virtual supplier variants
+            if ($p->inventory && $p->inventory->supplierProduct) {
+                foreach ($p->inventory->supplierProduct->variants as $sv) {
+                    $svInv = Inventory::where('supplier_product_variant_id', $sv->id)->first();
+                    if ($svInv && $svInv->product_variant_id) continue;
+                    
+                    $flattened[] = $this->formatInventoryRow($svInv, $p->inventory->supplierProduct, $sv, [
+                        'product' => $p,
                         'is_variant' => true,
-                        'total_sold' => isset($soldByProduct[$soldKey]) ? (int) $soldByProduct[$soldKey]->total_sold : 0,
-                        'total_imported' => 0,
-                    ];
+                        'imported_key' => $p->inventory->supplierProduct->id . '-' . $sv->id,
+                        'imported_by_product' => $importedBySupplierProduct
+                    ]);
                 }
-
-                // Add supplier variants if they exist
-                if ($hasSupplierVariants && $p->inventory && $p->inventory->supplierProduct) {
-                    foreach ($p->inventory->supplierProduct->variants as $sv) {
-                        // Find inventory for this supplier variant, or create a virtual one
-                        $svInv = Inventory::where('supplier_product_variant_id', $sv->id)->first();
-                        
-                        $flattened[] = [
-                            'id' => "sv-{$sv->id}",
-                            'raw_id' => $svInv ? $svInv->id : null,
-                            'product_id' => $p->id,
-                            'variant_id' => null,
-                            'supplier_product_id' => $p->inventory->supplierProduct->id,
-                            'supplier_product_variant_id' => $sv->id,
-                            'barcode' => ($p->inventory->supplierProduct->barcode ?? $p->barcode) . ($sv->barcode_suffix ? "-{$sv->barcode_suffix}" : ""),
-                            'name' => $p->name,
-                            'supplier' => $p->supplier ? $p->supplier->name : '-',
-                            'category' => $p->category ? $p->category->name : '-',
-                            'category_id' => $p->category_id,
-                            'unit' => $p->unitType ? $p->unitType->sell_unit : '-',
-                            'unit_type_id' => $p->unit_type_id,
-                            'current_stock' => $svInv ? $svInv->current_stock : 0,
-                            'warehouse_stock' => $svInv ? $svInv->warehouse_stock : 0,
-                            'reorder_threshold' => $baseInv ? $baseInv->reorder_threshold : 10,
-                            'purchase_price' => $sv->price_override ?? $p->inventory->supplierProduct->price ?? $p->purchase_price,
-                            'sell_price' => $p->sell_price,
-                            'description' => $p->description,
-                            'size' => $sv->size ?? '-',
-                            'color' => $sv->color ?? '-',
-                            'weight' => $sv->weight ?? '-',
-                            'barcode_suffix' => $sv->barcode_suffix ?? '',
-                            'is_variant' => true,
-                            'total_sold' => 0,
-                            'total_imported' => 0,
-                        ];
-                    }
-                }
-            } else {
-                $soldKey = $p->id . '-0';
-                $flattened[] = [
-                    'id' => "p-{$p->id}",
-                    'raw_id' => $p->inventory ? $p->inventory->id : null,
-                    'product_id' => $p->id,
-                    'variant_id' => null,
-                    'barcode' => $p->barcode,
-                    'name' => $p->name,
-                    'supplier' => $p->supplier ? $p->supplier->name : '-',
-                    'category' => $p->category ? $p->category->name : '-',
-                    'category_id' => $p->category_id,
-                    'unit' => $p->unitType ? $p->unitType->sell_unit : '-',
-                    'unit_type_id' => $p->unit_type_id,
-                    'current_stock' => $p->inventory ? $p->inventory->current_stock : 0,
-                    'warehouse_stock' => $p->inventory ? $p->inventory->warehouse_stock : 0,
-                    'reorder_threshold' => $p->inventory ? $p->inventory->reorder_threshold : 10,
-                    'purchase_price' => $p->purchase_price,
-                    'sell_price' => $p->sell_price,
-                    'description' => $p->description,
-                    'size' => '-',
-                    'color' => '-',
-                    'weight' => '-',
-                    'is_variant' => false,
-                    'total_sold' => isset($soldByProduct[$soldKey]) ? (int) $soldByProduct[$soldKey]->total_sold : 0,
-                    'total_imported' => 0,
-                ];
             }
         }
 
@@ -418,48 +261,6 @@ class InventoryController extends Controller
         ], 201);
     }
 
-    public function testInventoryState($productId)
-    {
-        // DEBUG: Test endpoint to check inventory state for a product
-        $baseInventory = Inventory::where('product_id', $productId)
-            ->whereNull('product_variant_id')
-            ->first();
-            
-        $variantInventories = Inventory::where('product_id', $productId)
-            ->whereNotNull('product_variant_id')
-            ->with('productVariant')
-            ->get();
-            
-        $totalVariantWarehouseStock = $variantInventories->sum('warehouse_stock');
-        
-        return response()->json([
-            'data' => [
-                'base_product' => [
-                    'exists' => !!$baseInventory,
-                    'warehouse_stock' => $baseInventory ? $baseInventory->warehouse_stock : 0,
-                    'current_stock' => $baseInventory ? $baseInventory->current_stock : 0,
-                    'inventory_id' => $baseInventory ? $baseInventory->id : null,
-                ],
-                'variants' => $variantInventories->map(function($inv) {
-                    return [
-                        'inventory_id' => $inv->id,
-                        'product_variant_id' => $inv->product_variant_id,
-                        'variant_info' => $inv->productVariant ? 
-                            ($inv->productVariant->size_value ?? '') . 
-                            ($inv->productVariant->color_value ?? '') . 
-                            ($inv->productVariant->weight_value ?? '') : 'Unknown',
-                        'warehouse_stock' => $inv->warehouse_stock,
-                        'current_stock' => $inv->current_stock,
-                    ];
-                }),
-                'summary' => [
-                    'total_variant_warehouse_stock' => $totalVariantWarehouseStock,
-                    'base_product_should_show_variant_stock' => $totalVariantWarehouseStock,
-                ]
-            ],
-            'status' => 'success',
-        ]);
-    }
 
     public function transferToStore(Request $request)
     {
@@ -689,29 +490,35 @@ class InventoryController extends Controller
 
             // Add to storefront
             $inv->refresh(); // ensure product_id / product_variant_id are up to date after save
+            
+            \Log::info('Stock Transfer Details', [
+                'inventory_id' => $inv->id,
+                'product_id' => $inv->product_id,
+                'product_variant_id' => $inv->product_variant_id,
+                'supplier_product_variant_id' => $inv->supplier_product_variant_id,
+                'quantity' => $data['quantity'],
+                'warehouse_stock_before' => $inv->warehouse_stock,
+                'current_stock_before' => $inv->current_stock,
+            ]);
+            
             if ($inv->product_variant_id) {
+                \Log::info('Transferring to variant', ['variant_id' => $inv->product_variant_id]);
                 $variant = \App\Models\ProductVariant::findOrFail($inv->product_variant_id);
                 $variant->increment('stock', $data['quantity']);
                 
-                // Also update the inventory current_stock for variants to maintain sync
-                $variantInventory = \App\Models\Inventory::where('product_id', $productId)
-                    ->where('product_variant_id', $inv->product_variant_id)
-                    ->first();
+                // Use the current inventory record for the variant (don't create a new one)
+                $inv->increment('current_stock', $data['quantity']);
                 
-                if ($variantInventory) {
-                    $variantInventory->increment('current_stock', $data['quantity']);
-                } else {
-                    // Create inventory record for variant if it doesn't exist
-                    \App\Models\Inventory::create([
-                        'product_id' => $productId,
-                        'product_variant_id' => $inv->product_variant_id,
-                        'current_stock' => $data['quantity'],
-                        'warehouse_stock' => 0,
-                        'reorder_threshold' => 10,
-                    ]);
-                }
+                \Log::info('Variant stock updated', [
+                    'variant_id' => $inv->product_variant_id,
+                    'variant_stock_after' => $variant->fresh()->stock,
+                    'inventory_current_stock_after' => $inv->fresh()->current_stock,
+                ]);
+                
                 // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
             } else {
+                \Log::info('Transferring to base product', ['product_id' => $inv->product_id]);
+                
                 // Ensure inventory record exists for base product
                 $baseInventory = \App\Models\Inventory::where('product_id', $productId)
                     ->whereNull('product_variant_id')
@@ -726,9 +533,15 @@ class InventoryController extends Controller
                         'warehouse_stock' => 0,
                         'reorder_threshold' => 10,
                     ]);
+                    \Log::info('Created base inventory record', ['base_inventory_id' => $baseInventory->id]);
                 }
                 
                 $baseInventory->increment('current_stock', $data['quantity']);
+                
+                \Log::info('Base product stock updated', [
+                    'base_inventory_id' => $baseInventory->id,
+                    'base_current_stock_after' => $baseInventory->fresh()->current_stock,
+                ]);
             }
 
             InventoryAdjustment::create([
@@ -891,8 +704,8 @@ class InventoryController extends Controller
                         $variant->update(['price_override' => $transfer['product_data']['sell_price']]);
                     }
                     
-                    // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
-                    // Base product and variants should have separate stock management
+                    // Increment the variant's inventory current_stock
+                    $inv->increment('current_stock', $transfer['quantity']);
                 } else {
                     $inv->increment('current_stock', $transfer['quantity']);
                 }
@@ -921,5 +734,79 @@ class InventoryController extends Controller
             'message' => "{$results['count']} variant(s) transferred to storefront successfully.",
             'status'  => 'success',
         ]);
+    }
+
+    /**
+     * Helper to format inventory rows consistently for the frontend
+     */
+    private function formatInventoryRow($inv, $sp, $variant = null, $options = [])
+    {
+        $isOrphan = $options['is_orphan'] ?? false;
+        $isVariant = $options['is_variant'] ?? false;
+        $product = $options['product'] ?? null;
+        $soldByProduct = $options['sold_by_product'] ?? null;
+        $soldKey = $options['sold_key'] ?? null;
+
+        $id = $isOrphan ? "o-{$inv->id}" : ($isVariant ? ($variant instanceof \App\Models\ProductVariant ? "v-{$variant->id}" : "sv-{$variant->id}") : "p-{$product->id}");
+
+        $warehouseStock = $inv ? $inv->warehouse_stock : 0;
+        $currentStock = $inv ? $inv->current_stock : (($variant instanceof \App\Models\ProductVariant) ? $variant->stock : 0);
+        
+        // Handle names
+        $name = $product ? $product->name : ($sp ? $sp->name : 'Unknown');
+        if ($isOrphan && $variant) {
+            $name .= " (" . ($variant->size ?? $variant->color ?? $variant->weight) . ")";
+        }
+
+        $importedByProduct = $options['imported_by_product'] ?? null;
+        $importedKey = $options['imported_key'] ?? null;
+
+        return [
+            'id'                          => $id,
+            'raw_id'                      => $inv ? $inv->id : null,
+            'product_id'                  => $product ? $product->id : null,
+            'variant_id'                  => ($variant instanceof \App\Models\ProductVariant) ? $variant->id : null,
+            'supplier_product_id'         => $sp ? $sp->id : ($inv ? $inv->supplier_product_id : null),
+            'supplier_product_variant_id' => $variant && !($variant instanceof \App\Models\ProductVariant) ? $variant->id : null,
+            'barcode'                     => $product ? $product->barcode : ($sp ? $sp->barcode : 'N/A'),
+            'name'                        => $name,
+            'supplier'                    => ($product && $product->supplier) ? $product->supplier->name : (($sp && $sp->supplier) ? $sp->supplier->name : '-'),
+            'category'                    => ($product && $product->category) ? $product->category->name : (($sp && $sp->category) ? $sp->category->name : '-'),
+            'category_id'                 => $product ? $product->category_id : ($sp ? $sp->category_id : null),
+            'unit'                        => ($product && $product->unitType) ? $product->unitType->sell_unit : 'Units',
+            'current_stock'               => $currentStock,
+            'warehouse_stock'             => $warehouseStock,
+            'reorder_threshold'           => $inv ? $inv->reorder_threshold : 10,
+            'purchase_price'              => $variant && isset($variant->price_override) ? $variant->price_override : ($product ? $product->purchase_price : ($sp ? $sp->price : 0)),
+            'sell_price'                  => $variant && isset($variant->sell_price) ? $variant->sell_price : ($product ? $product->sell_price : null),
+            'description'                 => $product ? $product->description : ($sp ? $sp->description : null),
+            'size'                        => $variant ? ($variant->size ?? ($variant->sizeValue->label ?? '-')) : '-',
+            'color'                       => $variant ? ($variant->color ?? ($variant->colorValue->label ?? '-')) : '-',
+            'weight'                      => $variant ? ($variant->weight ?? ($variant->weightValue->label ?? '-')) : '-',
+            'is_variant'                  => $isVariant,
+            'is_orphan'                   => $isOrphan,
+            'is_base_of_variants'         => $options['is_base_of_variants'] ?? false,
+            'total_sold'                  => $soldKey && isset($soldByProduct[$soldKey]) ? (int) $soldByProduct[$soldKey]->total_sold : 0,
+            'total_imported'              => $importedKey && isset($importedByProduct[$importedKey]) ? (int) $importedByProduct[$importedKey]->total_imported : 0,
+        ];
+    }
+
+    /**
+     * Shared helper to generate unique barcodes
+     */
+    private function generateUniqueBarcode($prefix = 'BARCODE-')
+    {
+        $maxId = \App\Models\Product::max('id') ?? 0;
+        $baseNumber = $maxId + 1;
+        
+        do {
+            $barcode = $prefix . str_pad($baseNumber, 6, '0', STR_PAD_LEFT);
+            $exists = \App\Models\Product::where('barcode', $barcode)->exists();
+            if ($exists) {
+                $baseNumber++;
+            }
+        } while ($exists);
+        
+        return $barcode;
     }
 }

@@ -32,6 +32,11 @@ export default function RatingNotification({ notification, onMarkAsRead, onViewD
             <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
+                        {/* HRMS header */}
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-bold text-orange-500 tracking-wider">HRMS</span>
+                            <span className="text-[10px] text-gray-400">{new Date(notification.created_at).toLocaleString()}</span>
+                        </div>
                         {/* Header */}
                         <div className="flex items-center gap-2 mb-2">
                             <div className="flex items-center gap-1">
@@ -113,11 +118,6 @@ export default function RatingNotification({ notification, onMarkAsRead, onViewD
                     >
                         <X className="w-3 h-3" />
                     </Button>
-                </div>
-
-                {/* Timestamp */}
-                <div className="text-xs text-gray-500 mt-2 pt-2 border-t">
-                    {new Date(notification.created_at).toLocaleString()}
                 </div>
             </CardContent>
         </Card>

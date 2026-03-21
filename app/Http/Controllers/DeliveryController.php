@@ -121,8 +121,11 @@ class DeliveryController extends Controller
         // Assign the rider
         $delivery->update([
             'rider_id' => $rider->id,
-            'status'   => 'pending', // Still pending until rider accepts
+            'status'   => 'confirmed', // Rider accepted
         ]);
+
+        // Update sale status to confirmed
+        $delivery->sale->update(['status' => 'confirmed']);
 
         // Update rider availability
         RiderProfile::where('user_id', $rider->id)->update(['availability' => 'on_delivery']);
@@ -131,7 +134,7 @@ class DeliveryController extends Controller
         CustomerNotification::create([
             'customer_id' => $delivery->sale->customer_id,
             'title' => 'Rider Assigned',
-            'message' => "A rider has been assigned to your order #{$delivery->tracking_number}",
+            'message' => "A rider has accepted your order #{$delivery->tracking_number} and is preparing for pickup.",
             'type' => 'rider_assigned'
         ]);
 
@@ -204,6 +207,8 @@ class DeliveryController extends Controller
 
         if ($request->status === 'in_progress') {
             $updates['pickup_at'] = now();
+            // Update sale status to out_for_delivery
+            $delivery->sale->update(['status' => 'out_for_delivery']);
             // Mark rider as on_delivery when they accept
             if ($delivery->rider_id) {
                 RiderProfile::where('user_id', $delivery->rider_id)
@@ -361,6 +366,7 @@ class DeliveryController extends Controller
             'data' => [
                 'latitude' => $riderProfile->current_latitude,
                 'longitude' => $riderProfile->current_longitude,
+                'heading' => $riderProfile->current_heading,
                 'updated_at' => $riderProfile->updated_at
             ]
         ]);
@@ -418,16 +424,13 @@ class DeliveryController extends Controller
         ]);
     }
 
-    /**
-     * Rider uploads proof-of-delivery photo.
-     */
     public function uploadProof(Request $request, $id)
     {
         $request->validate([
             'photo' => 'required|image|max:5120', // 5MB max
         ]);
 
-        $delivery = Delivery::findOrFail($id);
+        $delivery = Delivery::with('sale.items.product')->findOrFail($id);
 
         // Verify rider owns this delivery
         if ($delivery->rider_id !== $request->user()->id) {
@@ -436,27 +439,59 @@ class DeliveryController extends Controller
 
         // Store photo
         $path = $request->file('photo')->store('delivery-proofs', 'public');
+        $photoUrl = asset('storage/' . $path);
 
         $delivery->update([
             'proof_photo' => $path,
+            'status' => 'delivered',
+            'delivered_at' => now(),
         ]);
+
+        if ($delivery->sale) {
+            $delivery->sale->update(['status' => 'delivered']);
+        }
+
+        if ($delivery->rider_id) {
+            $profile = current($delivery->rider ? [$delivery->rider->profile] : [null]); // fallback
+            if (!$profile) {
+                $profile = RiderProfile::where('user_id', $delivery->rider_id)->first();
+            }
+            if ($profile) {
+                $profile->increment('total_deliveries');
+                $profile->on_time_count += 1;
+                $profile->availability = 'available';
+                $profile->save();
+            }
+        }
 
         // Notify customer that proof photo has been uploaded
         if ($delivery->sale && $delivery->sale->customer_id) {
+            $productNames = $delivery->sale->items->map(function ($item) {
+                $name = $item->product ? $item->product->name : 'Product';
+                return $item->quantity . 'x ' . $name;
+            })->implode(', ');
+
             CustomerNotification::create([
                 'customer_id' => $delivery->sale->customer_id,
                 'delivery_id' => $delivery->id,
-                'type' => 'proof_uploaded',
-                'title' => 'Delivery Proof Uploaded',
-                'message' => 'Your rider has uploaded a proof photo for your delivery.',
+                'type' => 'delivered',
+                'title' => 'Order Delivered successfully!',
+                'message' => "Your order containing {$productNames} has arrived. Please tap View Proof.",
+                'meta' => [
+                    'proof_url' => $photoUrl,
+                    'order_number' => $delivery->sale->order_number ?? null,
+                ],
                 'is_read' => false,
             ]);
         }
 
         return response()->json([
-            'data' => ['photo_url' => asset('storage/' . $path)],
+            'data' => [
+                'photo_url' => $photoUrl,
+                'status' => 'delivered'
+            ],
             'status' => 'success',
-            'message' => 'Proof photo uploaded successfully',
+            'message' => 'Delivery marked as complete and proof uploaded successfully',
         ]);
     }
 
@@ -478,7 +513,16 @@ class DeliveryController extends Controller
         ]);
 
         // Broadcast location update to customer
-        broadcast(new \App\Events\RiderLocationUpdated($delivery));
+        if ($delivery->sale && $delivery->sale->customer_id) {
+            broadcast(new \App\Events\RiderLocationUpdated(
+                $delivery->sale->customer_id,
+                $delivery->rider_id,
+                $request->latitude,
+                $request->longitude,
+                $request->heading ?? 0,
+                $delivery->tracking_number
+            ));
+        }
 
         return response()->json([
             'message' => 'Location updated successfully',

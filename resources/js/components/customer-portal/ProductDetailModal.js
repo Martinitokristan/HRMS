@@ -7,6 +7,7 @@ import { Percent, ShoppingCart, Minus, Plus, X, MessageSquare, Star } from 'luci
 import { getProductSaleInfo, getVariantSaleInfo } from '../../utils/priceCalculations';
 import { useAuth } from '../../context/AuthContext';
 import RatingStars from '../ui/RatingStars';
+import ProductReviewList from '../ui/ProductReviewList';
 
 export default function ProductDetailModal({ isOpen, onClose, product, onAddToCart }) {
     const [qty, setQty] = useState(1);
@@ -32,6 +33,14 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                 setForceUpdate(prev => prev + 1);
                 setShowReviews(false);
                 
+                // Initialize productRating with data from props if available to avoid flicker
+                if (product.average_rating !== undefined && product.total_reviews !== undefined) {
+                    setProductRating({
+                        average_rating: product.average_rating,
+                        total_reviews: product.total_reviews
+                    });
+                }
+                
                 // Fetch product rating and sold count in parallel
                 fetchProductData();
                 
@@ -50,7 +59,17 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
     const fetchProductData = async () => {
         if (!product?.id) return;
         
-        setLoadingRating(true);
+        // If we already have rating data in the product prop, use it immediately
+        if (product.average_rating !== undefined && product.total_reviews !== undefined && !productRating) {
+            setProductRating({
+                average_rating: product.average_rating,
+                total_reviews: product.total_reviews
+            });
+            // We can still fetch metadata in the background if needed
+        }
+
+        const hasInitialData = product.average_rating !== undefined && product.total_reviews !== undefined;
+        setLoadingRating(!hasInitialData && !productRating); // Only show loading if we don't have data yet
         try {
             // Fetch both rating and sold count in parallel for faster loading
             const [ratingResponse, soldResponse] = await Promise.all([
@@ -148,11 +167,13 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                         </div>
                     )}
 
-                    {/* Reviews List Component would go here */}
-                    <div className="text-center py-8 text-gray-500">
-                        <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p>Reviews component will be integrated here</p>
-                        <p className="text-sm mt-2">For now, please use the dedicated reviews page</p>
+                    {/* Reviews List */}
+                    <div className="mt-6">
+                        <ProductReviewList 
+                            productId={product.id} 
+                            variantId={selectedVariant?.id}
+                            productVariants={product.product_variants || []}
+                        />
                     </div>
 
                     <div className="mt-6 flex justify-center">
@@ -313,49 +334,54 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                             {product.name}
                         </h2>
 
-                        {/* Description */}
+
+                        {/* Description Section */}
                         {product.description && (
-                            <p className="text-sm text-gray-500 leading-relaxed mb-4">
-                                {product.description}
-                            </p>
+                            <div className="mb-5 mt-2">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">DESCRIPTION</div>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    {product.description}
+                                </p>
+                            </div>
                         )}
 
-                        {/* Stock Status */}
-                        <div className="flex items-center gap-2 mb-4">
-                            {isOutOfStock ? (
-                                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-500">
-                                    <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
-                                    Out of Stock
-                                </span>
-                            ) : (
-                                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                                    In Stock &nbsp;
-                                    <span className="font-bold text-green-700">{Math.round(currentStock)} units</span>
-                                </span>
-                            )}
+                        {/* Stock Status Badge - Pill Style */}
+                        <div className="mb-4">
+                            <div className={`inline-flex items-center px-4 py-1.5 rounded-full border text-sm font-semibold ${
+                                isOutOfStock 
+                                    ? 'bg-red-50 border-red-200 text-red-600' 
+                                    : 'bg-gray-50 border-gray-200 text-gray-700'
+                            }`}>
+                                {isOutOfStock ? 'Out of Stock' : `${Math.round(currentStock)} units in stock`}
+                            </div>
                         </div>
 
-                        {/* Price */}
-                        <div className="mb-4">
+                        {/* Price Display */}
+                        <div className="mb-5">
                             {currentSaleInfo.isOnSale ? (
-                                <div className="bg-orange-50 rounded-xl px-4 py-3 inline-flex items-center gap-4">
-                                    <span className="text-3xl font-bold text-orange-500">
-                                        ₱{currentSaleInfo.salePrice.toFixed(2)}
-                                    </span>
+                                <div className="bg-orange-50 rounded-xl px-5 py-4 flex items-center justify-between shadow-sm">
                                     <div className="flex flex-col">
-                                        <span className="text-sm text-gray-400 line-through">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-orange-400 mb-1">On Sale Price</span>
+                                        <span className="text-4xl font-bold text-orange-500">
+                                            ₱{currentSaleInfo.salePrice.toFixed(2)}
+                                        </span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-sm text-gray-400 line-through block">
                                             ₱{currentSaleInfo.originalPrice.toFixed(2)}
                                         </span>
-                                        <span className="text-xs text-green-600 font-semibold">
-                                            You save ₱{currentSaleInfo.savings.toFixed(2)}
+                                        <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded">
+                                            Save ₱{currentSaleInfo.savings.toFixed(2)}
                                         </span>
                                     </div>
                                 </div>
                             ) : (
-                                <span className="text-3xl font-bold text-orange-500">
-                                    ₱{displayPrice.toFixed(2)}
-                                </span>
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Price</span>
+                                    <span className="text-4xl font-bold text-orange-500">
+                                        ₱{displayPrice.toFixed(2)}
+                                    </span>
+                                </div>
                             )}
                         </div>
 
@@ -370,76 +396,105 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                                     </div>
                                     <span className="text-sm text-gray-400">Loading...</span>
                                 </div>
-                            ) : productRating && productRating.total_reviews > 0 ? (
+                            ) : productRating ? (
                                 <div className="flex items-center gap-3">
-                                    <RatingStars rating={productRating.average_rating} size="sm" />
-                                    {soldCount !== null && soldCount > 0 && (
-                                        <span className="text-sm text-gray-500">
-                                            ({soldCount} sold)
-                                        </span>
-                                    )}
+                                    <RatingStars rating={productRating.average_rating || 0} size="sm" />
+                                    <span className="text-sm text-gray-500">
+                                        ({soldCount || 0} sold)
+                                    </span>
                                 </div>
                             ) : null}
                         </div>
 
-                        {/* SKU */}
-                        {product.sku && (
-                            <p className="text-xs text-gray-400 mb-4">
-                                SKU: <span className="font-mono text-gray-600">{product.sku}</span>
-                            </p>
-                        )}
-
-                        {/* Variants */}
+                        {/* Variants - Button Selection Style */}
                         {hasVariants && (
-                            <div className="mb-5">
-                                <VariantSelector
-                                    variants={variants}
-                                    onVariantChange={handleVariantChange}
-                                    selectedVariant={selectedVariant}
-                                    showStock={false}
-                                    showPrice={false}
-                                />
+                            <div className="mb-6">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2.5">SELECT OPTION</div>
+                                <div className="flex flex-wrap gap-2.5">
+                                    {variants.map((v) => {
+                                        // A variant is selected if:
+                                        // 1. We chose 'base' and v.id is 'base'
+                                        // 2. We chose a specific variant and v.id matches it
+                                        const isSelected = selectedVariant 
+                                            ? selectedVariant.id === v.id 
+                                            : v.id === 'base';
+                                            
+                                        const isOOS = v.stock <= 0;
+                                        
+                                        // Variant label helper
+                                        const getLabel = (v) => {
+                                            if (v.id === 'base') return 'Regular';
+                                            const parts = [v.size, v.color, v.weight].filter(Boolean);
+                                            return parts.join(' / ') || 'Option';
+                                        };
+
+                                        return (
+                                            <button
+                                                key={v.id}
+                                                type="button"
+                                                disabled={isOOS}
+                                                onClick={() => {
+                                                    const options = { size: v.size, color: v.color, weight: v.weight };
+                                                    handleVariantChange(v, options);
+                                                }}
+                                                className={`px-5 py-2 rounded-lg border-2 text-sm font-bold transition-all shadow-sm ${
+                                                    isOOS 
+                                                        ? 'bg-gray-100 border-transparent text-gray-400 cursor-not-allowed opacity-50'
+                                                        : isSelected
+                                                            ? 'bg-white text-orange-500 border-orange-500'
+                                                            : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
+                                                }`}
+                                            >
+                                                {getLabel(v)}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 
-                        {/* Quantity */}
-                        <div className="mb-5">
-                            <p className="text-sm font-semibold text-gray-700 mb-2">Quantity</p>
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
+                        {/* Quantity & Add to Cart Section */}
+                        <div className="mt-auto pt-5 border-t border-gray-100">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
                                     <button
                                         onClick={() => setQty(q => Math.max(1, q - 1))}
-                                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                        className="w-11 h-11 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600 font-bold text-lg"
                                     >
-                                        <Minus className="w-4 h-4" />
+                                        −
                                     </button>
-                                    <span className="w-12 text-center font-bold text-gray-900 text-base">
-                                        {qty}
-                                    </span>
+                                    <input
+                                        type="number"
+                                        value={qty}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value) || 1;
+                                            setQty(Math.max(1, Math.min(currentStock, val)));
+                                        }}
+                                        className="w-12 text-center font-bold text-gray-900 border-x-2 border-gray-200 outline-none h-11"
+                                    />
                                     <button
                                         onClick={() => setQty(q => Math.min(q + 1, currentStock))}
-                                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
+                                        className="w-11 h-11 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600 font-bold text-lg"
                                     >
-                                        <Plus className="w-4 h-4" />
+                                        +
                                     </button>
                                 </div>
-                                <span className="text-sm text-gray-400">{Math.round(currentStock)} units available</span>
+                                <span className="text-sm font-medium text-gray-500">{Math.round(currentStock)} units in stock</span>
                             </div>
-                        </div>
 
-                        {/* Add to Cart Button */}
-                        <button
-                            onClick={handleAddToCart}
-                            disabled={!canAdd}
-                            className={`w-full h-12 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md ${
-                                canAdd
-                                    ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-200'
-                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                            }`}
-                        >
-                            <ShoppingCart className="w-5 h-5" />
-                            {isOutOfStock ? 'Sold Out' : `Add to Cart — ₱${subtotal.toFixed(2)}`}
-                        </button>
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={!canAdd}
+                                className={`w-full h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg ${
+                                    canAdd
+                                        ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-100'
+                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                }`}
+                            >
+                                <ShoppingCart className="w-6 h-6" />
+                                {isOutOfStock ? 'Sold Out' : `Add to Cart — ₱${subtotal.toFixed(2)}`}
+                            </button>
+                        </div>
 
                         {/* Reviews Button */}
                         <Button

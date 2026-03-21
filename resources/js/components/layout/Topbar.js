@@ -34,7 +34,7 @@ export default function Topbar({ toggleSidebar }) {
 
     useEffect(() => {
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 30000);
+        const interval = setInterval(fetchNotifications, 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -133,11 +133,14 @@ export default function Topbar({ toggleSidebar }) {
                                                 !n.read_at && 'bg-[#EFF6FF]'
                                             )}
                                         >
-                                            <p className={cn('text-[13px] text-foreground mb-1', !n.read_at && 'font-semibold')}>
+                                            <div className="flex justify-between items-center mb-1.5">
+                                                <span className="text-[10px] font-bold text-[#FF6B35] tracking-wider uppercase">
+                                                    {n.data?.supplier_name || 'HRMS'}
+                                                </span>
+                                                <span className="text-[10px] text-muted-foreground">{n.created_at ? timeAgo(n.created_at) : 'Just now'}</span>
+                                            </div>
+                                            <p className={cn('text-[13px] text-foreground leading-snug', !n.read_at && 'font-semibold')}>
                                                 {n.data?.message || n.message || 'New notification'}
-                                            </p>
-                                            <p className="text-[11px] text-muted-foreground">
-                                                {n.created_at ? timeAgo(n.created_at) : 'Just now'}
                                             </p>
                                         </div>
                                     ))}

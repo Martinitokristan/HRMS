@@ -24,13 +24,19 @@ class PurchaseOrderRequest extends Notification
 
     public function toArray($notifiable)
     {
+        $products = $this->po->items->map(function ($item) {
+            $name = $item->supplierProduct ? $item->supplierProduct->name : ($item->product ? $item->product->name : 'Product');
+            $qty = floatval($item->quantity);
+            return $qty . 'x ' . $name;
+        })->implode(', ');
+
         return [
             'type' => 'purchase_order_request',
             'po_id' => $this->po->id,
             'po_number' => $this->po->po_number,
             'admin_id' => $this->po->created_by,
-            'title' => 'New Stock Request Received',
-            'message' => "An admin has requested stock from you (PO #{$this->po->po_number}). Please review and approve.",
+            'title' => 'New Stock Request',
+            'message' => "HRMS has requested: {$products} (PO #{$this->po->po_number}). Please review and approve.",
         ];
     }
 }

@@ -18,14 +18,16 @@ class RiderLocationUpdated implements ShouldBroadcast
     public $riderId;
     public $latitude;
     public $longitude;
+    public $heading;
     public $trackingNumber;
 
-    public function __construct($customerId, $riderId, $latitude, $longitude, $trackingNumber)
+    public function __construct($customerId, $riderId, $latitude, $longitude, $heading, $trackingNumber)
     {
         $this->customerId = $customerId;
         $this->riderId = $riderId;
         $this->latitude = $latitude;
         $this->longitude = $longitude;
+        $this->heading = $heading;
         $this->trackingNumber = $trackingNumber;
     }
 
@@ -45,6 +47,7 @@ class RiderLocationUpdated implements ShouldBroadcast
             'rider_id' => $this->riderId,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
+            'heading' => $this->heading,
             'tracking_number' => $this->trackingNumber,
             'timestamp' => now()->toISOString()
         ];

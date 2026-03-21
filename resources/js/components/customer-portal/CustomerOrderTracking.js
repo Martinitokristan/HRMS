@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
-import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useAuth } from '../../context/AuthContext';
 import 'leaflet/dist/leaflet.css';
@@ -17,46 +17,37 @@ L.Icon.Default.mergeOptions({
     shadowSize: [41, 41]
 });
 
-// Custom icons
-const customerIcon = L.divIcon({
-    html: '🏠',
-    iconSize: [30, 30],
-    className: 'customer-location-marker'
-});
-
-const riderIcon = L.divIcon({
-    html: '🏍️',
-    iconSize: [30, 30],
-    className: 'rider-location-marker'
-});
-
 // Custom styles
 const trackingStyles = `
-    .customer-location-marker {
+    .customer-marker-blob {
+        width: 32px;
+        height: 32px;
         background: #10b981;
-        border: 3px solid white;
+        border: 4px solid white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
     }
-    .rider-location-marker {
-        background: #ef4444;
-        border: 3px solid white;
+    .rider-marker-blob {
+        width: 34px;
+        height: 34px;
+        background: #f59e0b;
+        border: 4px solid white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        animation: pulse 2s infinite;
+        font-size: 18px;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        transition: transform 0.3s ease-out;
     }
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
+    @keyframes rider-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
     }
 `;
 
@@ -66,65 +57,139 @@ if (typeof document !== 'undefined') {
     document.head.appendChild(styleSheet);
 }
 
+// Function to create icons with dynamic rotation
+const createRiderIcon = (heading = 0) => L.divIcon({
+    html: `<div class="rider-marker-blob" style="transform: rotate(${heading}deg)">🏍️</div>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    className: ''
+});
+
+const customerIcon = L.divIcon({
+    html: '<div class="customer-marker-blob">🏠</div>',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    className: ''
+});
+
+const MapBounds = ({ customerPos, riderPos }) => {
+    const map = useMap();
+    const hasFittedBounds = useRef(false);
+    useEffect(() => {
+        if (customerPos && riderPos && !hasFittedBounds.current) {
+            const bounds = L.latLngBounds([customerPos, riderPos]);
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            hasFittedBounds.current = true;
+        }
+    }, [customerPos, riderPos, map]);
+    return null;
+};
+
 const CustomerOrderTracking = ({ delivery }) => {
     const { user } = useAuth();
     const [riderLocation, setRiderLocation] = useState({
-        latitude: 7.0543,
-        longitude: 125.5947,
+        latitude: delivery.latitude || 7.0543,
+        longitude: delivery.longitude || 125.5947,
+        heading: 0,
         updated_at: new Date().toISOString()
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [roadRoute, setRoadRoute] = useState(null);
+    const routeCacheRef = useRef(new Map());
+    const pollingIntervalRef = useRef(null);
+
+    // Initial rider location fetch
+    const fetchRiderLocation = useCallback(async () => {
+        try {
+            const response = await axios.get(`/customer/delivery/${delivery.id}/rider-location`);
+            if (response.data.data) {
+                setRiderLocation(response.data.data);
+            }
+            setLoading(false);
+        } catch (err) {
+            console.error('Failed to load rider location:', err);
+            setLoading(false);
+        }
+    }, [delivery.id]);
 
     // WebSocket connection for real-time updates
     useEffect(() => {
         if (!delivery || !delivery.tracking_number) return;
 
-        // Initial rider location fetch
-        const fetchRiderLocation = async () => {
-            try {
-                const response = await axios.get(`/customer/delivery/${delivery.id}/rider-location`);
-                if (response.data.data) {
-                    setRiderLocation(response.data.data);
-                }
-                setLoading(false);
-            } catch (err) {
-                setError('Failed to load rider location');
-                setLoading(false);
-            }
-        };
-
         fetchRiderLocation();
 
-        // WebSocket for real-time updates (if available)
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws/customer.${user?.id || 'guest'}`;
+        let interval = null;
+        // Since WebSocket server is not running on port 8000, we use polling directly
+        interval = setInterval(fetchRiderLocation, 5000);
+
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [delivery.tracking_number, fetchRiderLocation]);
+
+    // Get real road route using backend proxy
+    const getRoadRoute = useCallback(async (startLat, startLon, endLat, endLon) => {
+        const startLatNum = parseFloat(startLat);
+        const startLonNum = parseFloat(startLon);
+        const endLatNum = parseFloat(endLat);
+        const endLonNum = parseFloat(endLon);
         
-        const ws = new WebSocket(wsUrl);
+        const cacheKey = `${startLatNum.toFixed(6)},${startLonNum.toFixed(6)}-${endLatNum.toFixed(6)},${endLonNum.toFixed(6)}`;
         
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.event === 'rider.location.updated' && 
-                data.data.tracking_number === delivery.tracking_number) {
-                setRiderLocation({
-                    latitude: data.data.latitude,
-                    longitude: data.data.longitude,
-                    updated_at: data.data.timestamp
-                });
+        if (routeCacheRef.current.has(cacheKey)) {
+            return routeCacheRef.current.get(cacheKey);
+        }
+        
+        try {
+            const response = await axios.post('/route', {
+                start_lat: startLatNum,
+                start_lon: startLonNum,
+                end_lat: endLatNum,
+                end_lon: endLonNum
+            });
+            
+            const data = response.data;
+            
+            if (data.features && data.features.length > 0) {
+                const route = data.features[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+                const routeData = {
+                    coordinates: route,
+                    distance: data.features[0].properties.segments[0].distance,
+                    duration: data.features[0].properties.segments[0].duration
+                };
+                
+                routeCacheRef.current.set(cacheKey, routeData);
+                return routeData;
+            }
+            return null;
+        } catch (error) {
+            console.error('Failed to get road route:', error);
+            return null;
+        }
+    }, []);
+
+    const customerPosition = [delivery.latitude || 7.0543, delivery.longitude || 125.5947];
+    const riderPosition = [riderLocation.latitude, riderLocation.longitude];
+
+    // Fetch road route when rider location changes
+    useEffect(() => {
+        if (!riderLocation.latitude || !riderLocation.longitude) return;
+
+        const updateRoute = async () => {
+            const route = await getRoadRoute(
+                riderLocation.latitude, riderLocation.longitude,
+                customerPosition[0], customerPosition[1]
+            );
+            if (route) {
+                setRoadRoute(route);
             }
         };
 
-        ws.onerror = () => {
-            console.warn('WebSocket connection failed, falling back to polling');
-            // Fallback to polling every 10 seconds
-            const interval = setInterval(fetchRiderLocation, 10000);
-            return () => clearInterval(interval);
-        };
-
-        return () => {
-            ws.close();
-        };
-    }, [delivery]);
+        updateRoute();
+    }, [riderLocation.latitude, riderLocation.longitude, customerPosition[0], customerPosition[1], getRoadRoute]);
 
     if (loading) {
         return (
@@ -147,9 +212,6 @@ const CustomerOrderTracking = ({ delivery }) => {
             </div>
         );
     }
-
-    const customerPosition = [delivery.latitude || 7.0543, delivery.longitude || 125.5947];
-    const riderPosition = [riderLocation.latitude, riderLocation.longitude];
 
     return (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -178,18 +240,29 @@ const CustomerOrderTracking = ({ delivery }) => {
                     </Marker>
                     
                     {/* Rider location */}
-                    <Marker position={riderPosition} icon={riderIcon}>
+                    <Marker position={riderPosition} icon={createRiderIcon(riderLocation.heading)}>
                         <Popup>Rider is here</Popup>
                     </Marker>
                     
                     {/* Route line */}
-                    <Polyline
-                        positions={[riderPosition, customerPosition]}
-                        color="#ef4444"
-                        weight={4}
-                        opacity={0.8}
-                        dashArray="5, 5"
-                    />
+                    {roadRoute && roadRoute.coordinates ? (
+                        <Polyline
+                            positions={roadRoute.coordinates}
+                            color="#10b981"
+                            weight={4}
+                            opacity={0.8}
+                        />
+                    ) : (
+                        <Polyline
+                            positions={[riderPosition, customerPosition]}
+                            color="#10b981"
+                            weight={4}
+                            opacity={0.8}
+                            dashArray="5, 5"
+                        />
+                    )}
+
+                    <MapBounds customerPos={customerPosition} riderPos={riderPosition} />
                 </MapContainer>
             </div>
             
@@ -200,7 +273,7 @@ const CustomerOrderTracking = ({ delivery }) => {
                         <span className="text-gray-600">Your Location</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
                         <span className="text-gray-600">Rider (Live)</span>
                     </div>
                 </div>

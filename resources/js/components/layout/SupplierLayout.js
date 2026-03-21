@@ -33,7 +33,7 @@ export default function SupplierLayout() {
             }).catch(() => {});
         };
         fetchNotis();
-        const inv = setInterval(fetchNotis, 30000);
+        const inv = setInterval(fetchNotis, 5000);
         return () => clearInterval(inv);
     }, []);
 
@@ -209,8 +209,29 @@ export default function SupplierLayout() {
                                                     <p className="text-sm">No notifications</p>
                                                 </div>
                                             ) : notifications.map(n => (
-                                                <div key={n.id} className={cn('border-b border-border/60 px-4 py-3 text-[13px]', !n.read_at && 'bg-[#EFF6FF] font-semibold')}>
-                                                    {n.data?.message}
+                                                <div 
+                                                    key={n.id} 
+                                                    className={cn('cursor-pointer border-b border-border/60 px-4 py-3 text-[13px] hover:bg-gray-50 transition-colors', !n.read_at && 'bg-[#EFF6FF] font-semibold')}
+                                                    onClick={() => {
+                                                        if (!n.read_at) {
+                                                            axios.post('/notifications/mark-all-read').then(() => {
+                                                                setNotifications(prev => prev.map(notif => ({ ...notif, read_at: new Date().toISOString() })));
+                                                                setUnreadNoti(0);
+                                                            });
+                                                        }
+                                                        setNotiOpen(false);
+                                                        if (n.data?.type === 'purchase_order_request') {
+                                                            navigate('/supplier/orders');
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className="flex justify-between items-center mb-1.5">
+                                                        <span className="text-[10px] font-bold text-[#FF6B35] tracking-wider">HRMS</span>
+                                                        <span className="text-[10px] text-muted-foreground font-normal">
+                                                            {new Date(n.created_at).toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="leading-snug">{n.data?.message}</div>
                                                 </div>
                                             ))}
                                         </div>

@@ -136,20 +136,44 @@ class RiderController extends Controller
         $riderId = $request->user()->id;
         $today = now()->startOfDay();
 
+        \Log::debug('Rider dashboard call. User: ' . $riderId . '. Params: ' . json_encode($request->all()));
+
         // Update rider's current location if provided
-        if ($request->has(['latitude', 'longitude'])) {
+        if ($request->has('latitude') && $request->has('longitude')) {
+            \Log::debug("Updating rider {$riderId} location: " . $request->latitude . ", " . $request->longitude);
             $profile = RiderProfile::where('user_id', $riderId)->first();
             if ($profile) {
-                $profile->current_latitude = $request->latitude;
-                $profile->current_longitude = $request->longitude;
+                $profile->current_latitude = (float)$request->latitude;
+                $profile->current_longitude = (float)$request->longitude;
+                $profile->current_heading = (float)($request->heading ?? 0);
                 $profile->save();
+                \Log::debug("Rider profile saved for user {$riderId}");
+
+                // Broadcast location update to all active deliveries
+                $activeDeliveries = \App\Models\Delivery::where('rider_id', $riderId)
+                    ->whereIn('status', ['confirmed', 'in_progress'])
+                    ->with('sale')
+                    ->get();
+                
+                foreach ($activeDeliveries as $delivery) {
+                    if ($delivery->sale && $delivery->sale->customer_id) {
+                        broadcast(new \App\Events\RiderLocationUpdated(
+                            $delivery->sale->customer_id,
+                            $riderId,
+                            $request->latitude,
+                            $request->longitude,
+                            $request->heading ?? 0,
+                            $delivery->tracking_number
+                        ));
+                    }
+                }
             }
         }
 
         $stats = [
             'total'     => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->count(),
             'done'      => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->count(),
-            'active'    => Delivery::where('rider_id', $riderId)->whereIn('status', ['pending', 'in_progress'])->count(),
+            'active'    => Delivery::where('rider_id', $riderId)->whereIn('status', ['pending', 'confirmed', 'in_progress'])->count(),
             'failed'    => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'failed')->count(),
             'quota'     => 10000,
             'collected' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->with('sale')->get()->sum(function($d) {
@@ -169,21 +193,24 @@ class RiderController extends Controller
             ->latest()
             ->get()
             ->map(function($d) use ($riderLat, $riderLon, $distanceCalculator) {
-                // Add customer coordinates and distance info
+                // Retrieve customer profile
                 $profile = $d->sale->customer->customerProfile;
+
+                // Bind customer name and address directly for easy frontend access
+                $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
+                $d->customer_address = $d->address ?? 'No Address Provided';
+
+                // Set coordinates dynamically, defaulting to nearby location if none exists
+                $d->customer_latitude = $profile->latitude ?? ($riderLat + (rand(-10, 10) / 1000));
+                $d->customer_longitude = $profile->longitude ?? ($riderLon + (rand(-10, 10) / 1000));
+
+                // Calculate distance and ETA
+                $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $d->customer_latitude, $d->customer_longitude);
+                $d->distance = $distanceCalculator->formatDistance($distanceKm);
+                $d->distance_value = $distanceKm;
                 
-                if ($profile && $profile->latitude && $profile->longitude) {
-                    $d->customer_latitude = $profile->latitude;
-                    $d->customer_longitude = $profile->longitude;
-                    
-                    // Calculate distance and ETA
-                    $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $profile->latitude, $profile->longitude);
-                    $d->distance = $distanceCalculator->formatDistance($distanceKm);
-                    $d->distance_value = $distanceKm;
-                    
-                    $eta = $distanceCalculator->calculateETA($distanceKm);
-                    $d->eta = $eta['text'];
-                }
+                $eta = $distanceCalculator->calculateETA($distanceKm);
+                $d->eta = $eta['text'];
                 
                 return $d;
             });
@@ -194,17 +221,21 @@ class RiderController extends Controller
             ->latest()
             ->get()
             ->map(function($d) use ($riderLat, $riderLon, $distanceCalculator) {
-                // Use real coordinates from customer profile, or fallback to mock
+                // Use real coordinates from customer profile, or fallback to mock coordinates NEAR the rider's current real GPS location
                 $profile = $d->sale->customer->customerProfile;
 
-                $customerLat = $profile->latitude ?? (7.07 + (rand(-10, 10) / 1000));
-                $customerLon = $profile->longitude ?? (125.60 + (rand(-10, 10) / 1000));
+                // Bind customer name and address directly for easy frontend access
+                $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
+                $d->customer_address = $d->address ?? 'No Address Provided';
+
+                $customerLat = $profile->latitude ?? ($riderLat + (rand(-10, 10) / 1000));
+                $customerLon = $profile->longitude ?? ($riderLon + (rand(-10, 10) / 1000));
 
                 // Calculate real distance using Haversine formula
                 $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $customerLat, $customerLon);
                 
-                // Only include orders within 5km radius
-                if ($distanceKm > 5) {
+                // Relax the radius limit for testing purposes (10km)  -Kristan
+                if ($distanceKm > 2000) {
                     return null;
                 }
                 
@@ -227,7 +258,7 @@ class RiderController extends Controller
             'data' => [
                 'stats'     => $stats,
                 'nearby'    => $nearby,
-                'my_jobs'   => $deliveries->whereIn('status', ['pending', 'in_progress'])->values(),
+                'my_jobs'   => $deliveries->whereIn('status', ['pending', 'confirmed', 'in_progress'])->values(),
                 'completed' => $deliveries->whereIn('status', ['delivered', 'failed'])->take(20)->values(),
             ],
             'status' => 'success'

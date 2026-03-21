@@ -6,7 +6,7 @@ use App\Models\PurchaseOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class PurchaseOrderAccepted extends Notification
+class PurchaseOrderDelivered extends Notification
 {
     use Queueable;
 
@@ -25,12 +25,12 @@ class PurchaseOrderAccepted extends Notification
     public function toArray($notifiable)
     {
         return [
-            'type' => 'purchase_order_accepted',
+            'type' => 'purchase_order_delivered',
             'po_id' => $this->po->id,
             'po_number' => $this->po->po_number,
             'supplier_name' => $this->po->supplier->name ?? 'Supplier',
-            'title' => 'Purchase Order Accepted',
-            'message' => "Your stock request (PO #{$this->po->po_number}) has been accepted and is being prepared for delivery.",
+            'title' => 'Purchase Order Delivered',
+            'message' => "The items for PO #{$this->po->po_number} have been delivered. Please review and mark as received.",
         ];
     }
 }

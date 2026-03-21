@@ -184,16 +184,24 @@ export default function VariantSelector({
             {uniqueWeights.length > 0 && (
                 <div>
                     <Label className="text-xs font-semibold text-muted-foreground mb-2 block">Weight Option</Label>
-                    <select
-                        value={selected.weight}
-                        onChange={(e) => handleWeightChange(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                    >
-                        <option value="">Select weight</option>
-                        {uniqueWeights.map(weight => (
-                            <option key={weight} value={weight}>{weight}</option>
-                        ))}
-                    </select>
+                    <div className="flex flex-wrap gap-2">
+                        {uniqueWeights.map(weight => {
+                            const isSelected = selected.weight === weight;
+                            return (
+                                <button
+                                    key={weight}
+                                    onClick={() => handleWeightChange(weight)}
+                                    className={`px-4 py-2 rounded-lg border-2 font-medium text-sm transition-all ${
+                                        isSelected 
+                                            ? 'border-orange-500 bg-orange-500 text-white' 
+                                            : 'border-gray-300 bg-white text-gray-700 hover:border-orange-300 hover:bg-orange-50'
+                                    }`}
+                                >
+                                    {weight}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
 

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw, Map, Navigation } from 'lucide-react';
 import CustomerOrderTracking from './CustomerOrderTracking';
 import { useToast } from '../../context/ToastContext';
 
@@ -48,18 +48,35 @@ export default function OrderHistory() {
     const [returnDetails, setReturnDetails] = useState('');
     const [returnItems, setReturnItems] = useState([]);
     const [submittingReturn, setSubmittingReturn] = useState(false);
+    const [visibleTrackers, setVisibleTrackers] = useState({}); // Tracking which order maps are visible
 
-    useEffect(() => {
-        fetchOrders();
-    }, []);
+    const toggleTracker = (orderId) => {
+        setVisibleTrackers(prev => ({
+            ...prev,
+            [orderId]: !prev[orderId]
+        }));
+    };
 
-    const fetchOrders = () => {
-        setLoading(true);
+    const fetchOrders = (showLoading = true) => {
+        if (showLoading) setLoading(true);
         axios
             .get("/customer/orders")
             .then((res) => setOrders(res.data.data))
-            .finally(() => setLoading(false));
+            .finally(() => {
+                if (showLoading) setLoading(false);
+            });
     };
+
+    useEffect(() => {
+        fetchOrders();
+
+        // Real-time polling for status updates
+        const interval = setInterval(() => {
+            fetchOrders(false); // Fetch in background without showing spinner
+        }, 5000); // Poll every 5 seconds for snappier updates
+
+        return () => clearInterval(interval);
+    }, []);
 
     const openCancelModal = (order) => {
         setCancelModal({ show: true, order });
@@ -255,9 +272,8 @@ export default function OrderHistory() {
                                                     <div className="absolute top-3 left-[10%] h-0.5 bg-primary z-[1] transition-all duration-500" style={{ width: `${(currentStep / (steps.length - 1)) * 80}%` }} />
                                                     {steps.map((step, idx) => (
                                                         <div key={idx} className="relative z-[2] text-center w-1/4">
-                                                            <div className={`w-6 h-6 rounded-full mx-auto mb-2 flex items-center justify-center text-[10px] transition-all ${
-                                                                idx <= currentStep ? 'bg-primary text-white ring-4 ring-primary/10' : 'bg-white border-2 border-border'
-                                                            } ${idx === currentStep ? 'ring-4 ring-primary/20' : ''}`}>
+                                                            <div className={`w-6 h-6 rounded-full mx-auto mb-2 flex items-center justify-center text-[10px] transition-all ${idx <= currentStep ? 'bg-primary text-white ring-4 ring-primary/10' : 'bg-white border-2 border-border'
+                                                                } ${idx === currentStep ? 'ring-4 ring-primary/20' : ''}`}>
                                                                 {idx < currentStep ? "✓" : ""}
                                                             </div>
                                                             <span className={`text-xs ${idx <= currentStep ? 'font-extrabold text-foreground' : 'font-medium text-muted-foreground'}`}>
@@ -314,9 +330,35 @@ export default function OrderHistory() {
                                             </Card>
                                         )}
 
-                                        {/* Live Order Tracking */}
-                                        {order.delivery && ['pending', 'in_progress'].includes(order.delivery.status) && (
-                                            <CustomerOrderTracking delivery={order.delivery} />
+                                        {/* Live Order Tracking Toggle Button */}
+                                        {order.delivery && order.delivery.rider && ['accepted', 'in_progress', 'out_for_delivery'].includes(order.delivery.status) && (
+                                            <div className="mb-4">
+                                                <Button
+                                                    variant={visibleTrackers[order.id] ? "default" : "secondary"}
+                                                    size="sm"
+                                                    onClick={() => toggleTracker(order.id)}
+                                                    className="w-full flex items-center justify-center gap-2 rounded-xl py-5"
+                                                >
+                                                    {visibleTrackers[order.id] ? (
+                                                        <>
+                                                            <XCircle className="h-4 w-4" />
+                                                            Hide Map Tracker
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Map className="h-4 w-4" />
+                                                            Track Order Live
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        )}
+
+                                        {/* Live Order Tracking Map */}
+                                        {order.delivery && order.delivery.rider && ['accepted', 'in_progress', 'out_for_delivery'].includes(order.delivery.status) && visibleTrackers[order.id] && (
+                                            <div className="mb-6 rounded-3xl overflow-hidden border border-border shadow-sm">
+                                                <CustomerOrderTracking delivery={order.delivery} />
+                                            </div>
                                         )}
 
                                         {/* Rating Display (already rated) */}
@@ -512,11 +554,10 @@ export default function OrderHistory() {
                                 {CANCEL_REASONS.map((reason) => (
                                     <label
                                         key={reason.value}
-                                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                                            cancelReason === reason.value
+                                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${cancelReason === reason.value
                                                 ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
                                                 : 'border-border hover:border-primary/30 hover:bg-secondary/30'
-                                        }`}
+                                            }`}
                                     >
                                         <input
                                             type="radio"
@@ -583,9 +624,8 @@ export default function OrderHistory() {
                             <label className="text-sm font-bold text-foreground block mb-2">Items to Return</label>
                             <div className="space-y-2">
                                 {returnItems.map((item, idx) => (
-                                    <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                                        item.selected ? 'border-primary bg-primary/5' : 'border-border'
-                                    }`}>
+                                    <div key={idx} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${item.selected ? 'border-primary bg-primary/5' : 'border-border'
+                                        }`}>
                                         <input
                                             type="checkbox"
                                             checked={item.selected}
@@ -629,11 +669,10 @@ export default function OrderHistory() {
                                 {RETURN_REASONS.map((reason) => (
                                     <label
                                         key={reason.value}
-                                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                                            returnReason === reason.value
+                                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${returnReason === reason.value
                                                 ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-200'
                                                 : 'border-border hover:border-amber-300 hover:bg-secondary/30'
-                                        }`}
+                                            }`}
                                     >
                                         <input
                                             type="radio"

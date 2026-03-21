@@ -16,7 +16,7 @@ export default function RatingNotificationsPanel() {
     useEffect(() => {
         fetchNotifications();
         // Set up polling for new notifications
-        const interval = setInterval(fetchNotifications, 30000);
+        const interval = setInterval(fetchNotifications, 5000);
         return () => clearInterval(interval);
     }, []);
 

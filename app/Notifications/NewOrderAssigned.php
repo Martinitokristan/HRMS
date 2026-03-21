@@ -25,6 +25,11 @@ class NewOrderAssigned extends Notification
     public function toArray($notifiable)
     {
         $orderNumber = $this->delivery->sale->order_number ?? $this->delivery->sale_id;
+        $products = $this->delivery->sale->items->map(function ($item) {
+            $name = $item->product ? $item->product->name : 'Product';
+            return $item->quantity . 'x ' . $name;
+        })->implode(', ');
+
         return [
             'type' => 'new_order',
             'delivery_id' => $this->delivery->id,
@@ -33,7 +38,7 @@ class NewOrderAssigned extends Notification
             'customer_name' => $this->delivery->sale->customer->name ?? 'Customer',
             'customer_address' => $this->delivery->address,
             'title' => 'New Order Assigned',
-            'message' => "You have been assigned a new delivery for Order #{$orderNumber}.",
+            'message' => "You have been assigned to deliver {$products} (Order #{$orderNumber}).",
         ];
     }
 }

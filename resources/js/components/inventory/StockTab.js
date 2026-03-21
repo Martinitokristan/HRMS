@@ -440,12 +440,12 @@ export default function StockTab() {
                             // Aggregated totals for display in the summary row
                             const variantWarehouse = hasVariants ? item.variants.reduce((s, v) => s + Number(v.warehouse_stock || 0), 0) : 0;
                             const variantStorefront = hasVariants ? item.variants.reduce((s, v) => s + Number(v.current_stock || 0), 0) : 0;
-                            const totalSold = hasVariants
+                            const totalSold = (hasVariants
                                 ? item.variants.reduce((s, v) => s + Number(v.total_sold || 0), 0)
-                                : Number(item.total_sold || 0);
-                            const totalImported = hasVariants
+                                : 0) + Number(item.total_sold || 0);
+                            const totalImported = (hasVariants
                                 ? item.variants.reduce((s, v) => s + Number(v.total_imported || 0), 0)
-                                : Number(item.total_imported || 0);
+                                : 0) + Number(item.total_imported || 0);
 
                             // For the warehouse column: show ONLY base own stock (variants shown separately)
                             const displayWarehouse = baseWarehouse;
