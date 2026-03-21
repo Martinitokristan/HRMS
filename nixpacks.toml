@@ -1,5 +1,5 @@
 [variables]
-    PORT = "8080"
+    # Remove hardcoded PORT to let Railway decide
 
 [phases.setup]
 nixPkgs = ["php82", "php82Packages.composer", "nodejs-18_x"]
@@ -11,4 +11,4 @@ cmds = ["composer install --no-dev --no-interaction --prefer-dist", "npm install
 cmds = ["npm run prod"]
 
 [start]
-cmd = "php artisan config:clear && php artisan cache:clear && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=$PORT"
+cmd = "php artisan config:clear && php artisan cache:clear && php artisan storage:link && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
