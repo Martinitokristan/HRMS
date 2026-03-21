@@ -270,15 +270,10 @@ class PurchaseOrderController extends Controller
     {
         // Helper function to generate truly unique barcodes
         $generateUniqueBarcode = function($prefix = 'BARCODE-') {
-            $maxId = \App\Models\Product::max('id') ?? 0;
-            $baseNumber = $maxId + 1;
-            
             do {
-                $barcode = $prefix . str_pad($baseNumber, 6, '0', STR_PAD_LEFT);
-                $exists = \App\Models\Product::where('barcode', $barcode)->exists();
-                if ($exists) {
-                    $baseNumber++; // Increment if barcode exists
-                }
+                $barcode = $prefix . strtoupper(\Illuminate\Support\Str::random(10));
+                $exists = \App\Models\Product::where('barcode', $barcode)->exists() || 
+                          \App\Models\ProductVariant::where('barcode', $barcode)->exists();
             } while ($exists);
             
             return $barcode;
@@ -491,18 +486,20 @@ class PurchaseOrderController extends Controller
                         $supplierProduct = SupplierProduct::find($item->supplier_product_id);
                         
                         if ($supplierProduct) {
-                            $newProduct = Product::create([
-                                'name' => $supplierProduct->name,
-                                'description' => $supplierProduct->description,
-                                'category_id' => $supplierProduct->category_id,
-                                'unit_type_id' => 1, // Default unit type
-                                'supplier_id' => $supplierProduct->supplier_id ?? 1,
-                                'purchase_price' => $supplierProduct->price,
-                                'sell_price' => $supplierProduct->price * 1.3, // 30% markup
-                                'barcode' => !empty($supplierProduct->barcode) && $supplierProduct->barcode !== 'undefined' ? $supplierProduct->barcode : $generateUniqueBarcode(),
-                                'image_path' => $supplierProduct->image_path, // Copy image from supplier
-                                'is_active' => 1, // Active product
-                            ]);
+                            $newProduct = Product::updateOrCreate(
+                                ['barcode' => !empty($supplierProduct->barcode) && $supplierProduct->barcode !== 'undefined' ? $supplierProduct->barcode : $generateUniqueBarcode()],
+                                [
+                                    'name' => $supplierProduct->name,
+                                    'description' => $supplierProduct->description,
+                                    'category_id' => $supplierProduct->category_id,
+                                    'unit_type_id' => 1, // Default unit type
+                                    'supplier_id' => $supplierProduct->supplier_id ?? 1,
+                                    'purchase_price' => $supplierProduct->price,
+                                    'sell_price' => $supplierProduct->price * 1.3, // 30% markup
+                                    'image_path' => $supplierProduct->image_path, // Copy image from supplier
+                                    'is_active' => 1, // Active product
+                                ]
+                            );
                             $productId = $newProduct->id;
                             $productLocalCache[$supplierProductId] = $productId;
                             \Log::info('Created new product', ['product_id' => $productId, 'name' => $newProduct->name]);
