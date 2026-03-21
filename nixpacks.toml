@@ -1,5 +1,14 @@
+[variables]
+    PORT = "8080"
+
 [phases.setup]
-nixPkgs = ["...", "php82", "php82Packages.composer", "nodejs-18_x"]
+nixPkgs = ["php82", "php82Packages.composer", "nodejs-18_x"]
 
 [phases.install]
 cmds = ["composer install --no-dev --no-interaction --prefer-dist", "npm install"]
+
+[phases.build]
+cmds = ["npm run prod", "php artisan key:generate --force", "php artisan storage:link"]
+
+[start]
+cmd = "php artisan serve --host=0.0.0.0 --port=$PORT"
