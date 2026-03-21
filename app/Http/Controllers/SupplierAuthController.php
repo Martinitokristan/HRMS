@@ -15,14 +15,21 @@ class SupplierAuthController extends Controller
 {
     public function register(Request $request)
     {
+        $customMessages = [
+            'name.regex' => 'The name must only contain letters, spaces, dots, or hyphens.',
+            'contact_name.regex' => 'The contact name must only contain letters, spaces, dots, or hyphens.',
+            'phone.regex' => 'Phone number must be exactly 12 digits starting with 63.',
+            'password.regex' => 'Password must contain at least 8 characters, one letter and one number.',
+        ];
+
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
-            'contact_name' => 'required|string|max:100',
+            'name' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
+            'contact_name' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
             'email' => 'required|email|unique:suppliers,email',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['required', 'string', 'regex:/^63\d{10}$/'],
             'address' => 'nullable|string',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
+        ], $customMessages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -31,6 +38,8 @@ class SupplierAuthController extends Controller
                 'status' => 'error',
             ], 422);
         }
+
+        $verifyToken = Str::random(64);
 
         $supplier = Supplier::create([
             'name' => $request->name,
@@ -41,11 +50,11 @@ class SupplierAuthController extends Controller
             'password' => Hash::make($request->password),
             'status' => 'pending',
             'email_verified_at' => null,
+            'email_verification_token' => $verifyToken,
         ]);
 
-        // Generate email verification token
-        $verificationToken = Str::random(64);
-        // TODO: Send verification email
+        // Send Email
+        Mail::to($supplier->email)->send(new \App\Mail\VerifyEmail($supplier->name, $verifyToken, 'supplier'));
 
         return response()->json([
             'message' => 'Supplier account created successfully. Please check your email for verification.',
@@ -81,7 +90,14 @@ class SupplierAuthController extends Controller
             ], 401);
         }
 
-        if (!$supplier->isActive()) {
+        if (!$supplier->email_verified_at) {
+            return response()->json([
+                'message' => 'Please verify your email address before logging in.',
+                'status' => 'error',
+            ], 403);
+        }
+
+        if (!$supplier->isActive() && $supplier->status === 'inactive') {
             return response()->json([
                 'message' => 'Account is not active. Please contact administrator.',
                 'status' => 'error',
@@ -191,30 +207,58 @@ class SupplierAuthController extends Controller
 
     public function verifyEmail(Request $request)
     {
-        $supplier = Supplier::where('email', $request->email)->first();
+        $token = $request->query('token');
+
+        if (!$token) {
+            return response()->json(['message' => 'Invalid token.', 'status' => 'error'], 400);
+        }
+
+        $supplier = Supplier::where('email_verification_token', $token)->first();
 
         if (!$supplier) {
             return response()->json([
-                'message' => 'Supplier not found',
+                'message' => 'Token is invalid or expired.',
                 'status' => 'error',
             ], 404);
         }
 
-        if ($supplier->email_verified_at) {
-            return response()->json([
-                'message' => 'Email already verified',
-                'status' => 'success',
-            ]);
-        }
-
         $supplier->update([
             'email_verified_at' => Carbon::now(),
+            'email_verification_token' => null,
             'status' => 'active',
         ]);
+
+        $authToken = $supplier->createToken('supplier-token')->plainTextToken;
 
         return response()->json([
             'message' => 'Email verified successfully',
             'status' => 'success',
+            'data' => $supplier,
+            'token' => $authToken
         ]);
+    }
+
+    public function resendVerification(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+        
+        $supplier = Supplier::where('email', $request->email)->first();
+        
+        if (!$supplier) {
+            return response()->json(['message' => 'Supplier not found.'], 404);
+        }
+        
+        if ($supplier->email_verified_at) {
+            return response()->json(['message' => 'Email is already verified.'], 400);
+        }
+
+        $verifyToken = Str::random(64);
+        $supplier->update([
+            'email_verification_token' => $verifyToken
+        ]);
+
+        \Illuminate\Support\Facades\Mail::to($supplier->email)->send(new \App\Mail\VerifyEmail($supplier->name, $verifyToken, 'supplier'));
+
+        return response()->json(['message' => 'Verification email resent successfully!']);
     }
 }

@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Bike } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, Upload, Bike } from 'lucide-react';
+import { useFormValidation } from '../../hooks/useFormValidation';
 
 export default function RiderRegister() {
     const [form, setForm] = useState({
@@ -28,16 +31,91 @@ export default function RiderRegister() {
     const [submitting, setSubmitting] = useState(false);
     const { showToast } = useToast();
     const navigate = useNavigate();
+    const [successMsg, setSuccessMsg] = useState('');
+    const [capsWarning, setCapsWarning] = useState(false);
+    
+    const { errors, validateName, validatePhone, validatePassword, validateIdFile, setError, clearError, clearAllErrors } = useFormValidation();
+
+    const handleChange = (field, value) => {
+        let newValue = value;
+        if (field === 'phone') {
+            newValue = value.replace(/\D/g, '').substring(0, 10);
+        }
+        setForm({ ...form, [field]: newValue });
+        
+        // Real-time validation
+        let error = null;
+        if (field === 'name') error = validateName(newValue);
+        if (field === 'phone') error = validatePhone(newValue);
+        if (field === 'password') error = validatePassword(newValue);
+        
+        if (error) {
+            setError(field, error);
+        } else {
+            clearError(field);
+        }
+
+        if (field === 'password_confirmation') {
+            if (newValue !== form.password) setError('password_confirmation', 'Passwords do not match');
+            else clearError('password_confirmation');
+        }
+        if (field === 'password' && form.password_confirmation) {
+            if (newValue !== form.password_confirmation) setError('password_confirmation', 'Passwords do not match');
+            else clearError('password_confirmation');
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.getModifierState('CapsLock')) {
+            setCapsWarning(true);
+        } else {
+            setCapsWarning(false);
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setIdFile(file);
+        clearError('valid_id_file');
+        
+        const fileError = validateIdFile(file);
+        if (fileError) {
+            setError('valid_id_file', fileError);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        clearAllErrors();
+        setSuccessMsg('');
+        
+        const nameErr = validateName(form.name);
+        const phoneErr = validatePhone(form.phone);
+        const passErr = validatePassword(form.password);
+        const idErr = validateIdFile(idFile);
+        
+        if (nameErr) setError('name', nameErr);
+        if (phoneErr) setError('phone', phoneErr);
+        if (passErr) setError('password', passErr);
+        if (idErr) setError('valid_id_file', idErr);
+        
         if (form.password !== form.password_confirmation) {
-            showToast('Passwords do not match', 'error');
+            setError('password_confirmation', 'Passwords do not match');
+        }
+
+        if (nameErr || phoneErr || passErr || idErr || form.password !== form.password_confirmation) {
+            showToast('Please fix the validation errors.', 'error');
             return;
         }
 
         const formData = new FormData();
-        Object.keys(form).forEach(key => formData.append(key, form[key]));
+        Object.keys(form).forEach(key => {
+            if (key === 'phone') {
+                formData.append(key, `63${form[key]}`);
+            } else {
+                formData.append(key, form[key]);
+            }
+        });
         formData.append('role', 'rider');
         if (idFile) formData.append('valid_id_file', idFile);
 
@@ -46,23 +124,108 @@ export default function RiderRegister() {
             await axios.post('/auth/register', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            showToast('Application submitted! Please wait for admin review and interview schedule.', 'success');
-            navigate('/login');
+            setSuccessMsg('Application submitted! Please check your email to verify your account.');
+            showToast('Application submitted successfully!', 'success');
         } catch (err) {
-            showToast(err.response?.data?.message || 'Registration failed', 'error');
+            const errorMsg = err.response?.data?.message || 'Registration failed';
+            showToast(errorMsg, 'error');
+            setError('form', errorMsg);
+            if (err.response?.data?.errors) {
+                Object.keys(err.response.data.errors).forEach(key => {
+                    setError(key, err.response.data.errors[key][0]);
+                });
+            }
         } finally {
             setSubmitting(false);
+        }
+    };
+    const [resendLoading, setResendLoading] = useState(false);
+    const [resendMsg, setResendMsg] = useState('');
+    const [resendError, setResendError] = useState('');
+
+    const handleResend = async () => {
+        setResendLoading(true);
+        setResendMsg('');
+        setResendError('');
+        try {
+            const response = await axios.post('/auth/resend-verification', { email: form.email });
+            setResendMsg(response.data.message);
+        } catch (err) {
+            setResendError(err.response?.data?.message || 'Failed to resend email.');
+        } finally {
+            setResendLoading(false);
         }
     };
 
     return (
         <div className="min-h-screen flex">
+            {/* Success Modal */}
+            <Dialog open={!!successMsg} onOpenChange={(open) => { if (!open) navigate('/login') }}>
+                <DialogContent className="sm:max-w-md border-primary/20 shadow-2xl overflow-hidden p-0">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-orange-400" />
+                    <DialogHeader className="text-center pt-8 px-6">
+                        <div className="mx-auto w-16 h-16 bg-primary/10 text-primary flex items-center justify-center rounded-full mb-4">
+                            <Mail className="w-8 h-8" />
+                        </div>
+                        <DialogTitle className="text-2xl font-black text-foreground">Verify Your Email</DialogTitle>
+                        <DialogDescription className="text-muted-foreground text-[15px] leading-relaxed pt-2">
+                            We've sent a verification link to <br/>
+                            <span className="font-bold text-foreground">{form.email}</span>. <br/>
+                            Check your inbox and click the link to activate your rider application.
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="p-6 space-y-4">
+                        {resendMsg && (
+                            <Alert className="bg-green-50 text-green-800 border-green-200">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <AlertDescription>{resendMsg}</AlertDescription>
+                            </Alert>
+                        )}
+                        {resendError && (
+                            <Alert variant="destructive">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>{resendError}</AlertDescription>
+                            </Alert>
+                        )}
+
+                        <div className="flex flex-col gap-3">
+                            <Button 
+                                onClick={handleResend} 
+                                disabled={resendLoading} 
+                                className="w-full h-11 font-bold shadow-md"
+                            >
+                                {resendLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                                Resend Verification Link
+                            </Button>
+                            <Button variant="ghost" className="w-full h-11" onClick={() => navigate('/login')}>
+                                Return to Login
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             {/* Left - Form */}
             <div className="flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto">
                 <div className="w-full max-w-lg">
                     <div className="text-xl font-black text-foreground mb-6 cursor-pointer" onClick={() => navigate('/')}>HRMS <span className="text-primary">Pro</span></div>
                     <h1 className="text-2xl font-extrabold text-foreground mb-1">Rider Fleet Application</h1>
                     <p className="text-muted-foreground mb-8">Apply to become a professional logistics partner.</p>
+
+                    {errors.form && (
+                        <Alert variant="destructive" className="mb-6">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>{errors.form}</AlertDescription>
+                        </Alert>
+                    )}
+
+                    {successMsg && (
+                        <Alert className="mb-6 bg-green-50 text-green-800 border-green-200">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <AlertDescription>{successMsg}</AlertDescription>
+                        </Alert>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Driver Profile */}
@@ -71,30 +234,39 @@ export default function RiderRegister() {
                             <div className="space-y-4">
                                 <div className="space-y-1.5">
                                     <Label>Full Legal Name *</Label>
-                                    <Input type="text" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} required placeholder="Enter your full name" />
+                                    <Input type="text" value={form.name} onChange={(e) => handleChange('name', e.target.value)} required placeholder="Enter your full name" className={errors.name ? 'border-red-500' : ''} />
+                                    {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <Label>Email Address *</Label>
-                                        <Input type="email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} required placeholder="email@example.com" />
+                                        <Input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} required placeholder="email@example.com" className={errors.email ? 'border-red-500' : ''} />
+                                        {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label>Phone Number *</Label>
-                                        <Input type="tel" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} required placeholder="09XXXXXXXXX" />
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-2 text-sm text-muted-foreground">+63</span>
+                                            <Input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} required placeholder="9XXXXXXXXX" className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`} />
+                                        </div>
+                                        {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label>Current Residential Address *</Label>
-                                    <Textarea value={form.address} onChange={(e) => setForm({...form, address: e.target.value})} required placeholder="Complete home address" rows={2} />
+                                    <Textarea value={form.address} onChange={(e) => handleChange('address', e.target.value)} required placeholder="Complete home address" rows={2} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <Label>System Password *</Label>
-                                        <Input type="password" value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} required minLength="8" placeholder="Min 8 chars" />
+                                        <Input type="password" value={form.password} onChange={(e) => handleChange('password', e.target.value)} onKeyDown={handleKeyDown} required placeholder="Min 8 chars, 1 letter, 1 number" className={errors.password ? 'border-red-500' : ''} />
+                                        {capsWarning && <p className="text-xs text-orange-500 my-1 font-semibold">Caps Lock is on!</p>}
+                                        {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label>Confirm Password *</Label>
-                                        <Input type="password" value={form.password_confirmation} onChange={(e) => setForm({...form, password_confirmation: e.target.value})} required placeholder="Repeat password" />
+                                        <Input type="password" value={form.password_confirmation} onChange={(e) => handleChange('password_confirmation', e.target.value)} required placeholder="Repeat password" className={errors.password_confirmation ? 'border-red-500' : ''} />
+                                        {errors.password_confirmation && <p className="text-sm text-red-500">{errors.password_confirmation}</p>}
                                     </div>
                                 </div>
                             </div>
@@ -152,8 +324,9 @@ export default function RiderRegister() {
                                 <div className="space-y-1.5">
                                     <Label>ID Image Upload</Label>
                                     <div className="relative">
-                                        <Input type="file" onChange={(e) => setIdFile(e.target.files[0])} required accept="image/*" className="text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                                        <Input type="file" onChange={handleFileChange} required accept="image/jpeg,image/png,image/jpg" className={`text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 ${errors.valid_id_file ? 'border-red-500' : ''}`} />
                                     </div>
+                                    {errors.valid_id_file && <p className="text-sm text-red-500">{errors.valid_id_file}</p>}
                                 </div>
                             </div>
                         </div>

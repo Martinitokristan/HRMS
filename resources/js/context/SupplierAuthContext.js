@@ -54,11 +54,18 @@ export const SupplierAuthProvider = ({ children }) => {
         setSupplier(null);
     };
 
+    const loginWithToken = (token, supplier) => {
+        localStorage.setItem('supplier_token', token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setSupplier(supplier);
+    };
+
     const value = {
         supplier,
         loading,
         login,
         logout,
+        loginWithToken,
         isAuthenticated: !!supplier,
     };
 

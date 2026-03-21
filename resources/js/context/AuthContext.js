@@ -40,11 +40,8 @@ export function AuthProvider({ children }) {
 
     const register = async (formData) => {
         const res = await axios.post('/auth/register', formData);
-        const { token, data } = res.data;
-        localStorage.setItem('hrms_token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        setUser(data);
-        return data;
+        // Registration now requires email verification — no auto-login token returned
+        return res.data;
     };
 
     const logout = async () => {
@@ -56,8 +53,14 @@ export function AuthProvider({ children }) {
         setUser(null);
     };
 
+    const loginWithToken = (token, data) => {
+        localStorage.setItem('hrms_token', token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setUser(data);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, setUser, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, loginWithToken }}>
             {children}
         </AuthContext.Provider>
     );

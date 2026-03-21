@@ -13,12 +13,14 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'phone', 'photo', 'role', 'status', 'password', 'last_login_at',
+        'email_verified_at', 'email_verification_token'
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'last_login_at' => 'datetime',
+        'email_verified_at' => 'datetime',
     ];
 
     public function sales()

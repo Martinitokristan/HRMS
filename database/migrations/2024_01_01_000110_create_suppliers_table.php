@@ -16,6 +16,7 @@ class CreateSuppliersTable extends Migration
             $table->string('password')->nullable();
             $table->enum('status', ['active', 'inactive', 'pending'])->default('pending');
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('email_verification_token', 64)->nullable();
             $table->string('phone', 20)->nullable();
             $table->text('address')->nullable();
             $table->timestamps();

@@ -14,6 +14,7 @@ import AdminLayout from './components/layout/AdminLayout';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import RiderRegister from './components/auth/RiderRegister';
+import EmailVerification from './components/auth/EmailVerification';
 
 // Landing
 import Landing from './components/landing/Landing';
@@ -102,6 +103,7 @@ export default function AppRouter() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/rider/register" element={<RiderRegister />} />
+            <Route path="/verify-email" element={<EmailVerification />} />
 
             {/* Admin — wrapped in AdminLayout */}
             <Route element={

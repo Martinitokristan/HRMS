@@ -25,11 +25,14 @@ use App\Http\Controllers\ProductReviewController;
 // Auth (public)
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::get('/auth/verify-email', [AuthController::class, 'verifyEmail']);
+Route::post('/auth/resend-verification', [AuthController::class, 'resendVerification']);
 
 // Supplier Auth (public)
 Route::post('/supplier/auth/register', [SupplierAuthController::class, 'register']);
 Route::post('/supplier/auth/login', [SupplierAuthController::class, 'login']);
-Route::post('/supplier/auth/verify-email', [SupplierAuthController::class, 'verifyEmail']);
+Route::get('/supplier/auth/verify-email', [SupplierAuthController::class, 'verifyEmail']);
+Route::post('/supplier/auth/resend-verification', [SupplierAuthController::class, 'resendVerification']);
 
 // Public Products & Categories
 Route::get('/products', [ProductController::class, 'index']);

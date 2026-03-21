@@ -18,7 +18,9 @@ class Supplier extends Authenticatable
         'phone',
         'address',
         'password',
-        'status'
+        'status',
+        'email_verified_at',
+        'email_verification_token'
     ];
 
     protected $hidden = [

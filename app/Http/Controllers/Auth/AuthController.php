@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -17,10 +20,16 @@ class AuthController extends Controller
         $role = $request->get('role', 'customer');
 
         $rules = [
-            'name'         => 'required|string|max:100',
+            'name'         => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
             'email'        => 'required|email|unique:users,email',
-            'phone'        => 'required|string|max:20',
-            'password'     => 'required|string|min:8|confirmed',
+            'phone'        => ['required', 'string', 'regex:/^63\d{10}$/'],
+            'password'     => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
+        ];
+
+        $customMessages = [
+            'name.regex' => 'The name must only contain letters, spaces, dots, or hyphens.',
+            'phone.regex' => 'Phone number must be exactly 12 digits starting with 63.',
+            'password.regex' => 'Password must contain at least 8 characters, one letter and one number.',
         ];
 
         if ($role === 'rider') {
@@ -31,29 +40,34 @@ class AuthController extends Controller
                 'license_number'    => 'required|string',
                 'address'           => 'required|string',
                 'valid_id_type'     => 'required|string',
-                'valid_id_file'     => 'required|file|image|max:5000',
+                'valid_id_file'     => 'required|file|image|mimes:jpeg,png,jpg|max:5000',
                 'id_number'         => 'required|string',
                 'emergency_contact' => 'required|string',
             ]);
+            $customMessages['valid_id_file.image'] = 'The valid ID must be an image file (jpeg, png, jpg).';
+            $customMessages['valid_id_file.mimes'] = 'The valid ID must be an image file (jpeg, png, jpg).';
         } else {
             $rules = array_merge($rules, [
                 'province'     => 'required|string|max:100',
                 'municipality' => 'required|string|max:100',
-                'zip_code'     => 'required|string|max:10',
+                'zip_code'     => 'nullable|string|max:10',
                 'address'      => 'required|string|max:255',
             ]);
         }
 
-        $request->validate($rules);
+        $request->validate($rules, $customMessages);
 
-        $user = \DB::transaction(function () use ($request, $role) {
+        $verifyToken = Str::random(64);
+
+        $user = \DB::transaction(function () use ($request, $role, $verifyToken) {
             $user = User::create([
                 'name'     => $request->name,
                 'email'    => $request->email,
                 'phone'    => $request->phone,
                 'role'     => $role,
-                'status'   => $role === 'rider' ? 'pending' : 'active',
+                'status'   => 'pending',
                 'password' => Hash::make($request->password),
+                'email_verification_token' => $verifyToken,
             ]);
 
             if ($role === 'rider') {
@@ -94,14 +108,70 @@ class AuthController extends Controller
             return $user;
         });
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // Send Email
+        Mail::to($user->email)->send(new \App\Mail\VerifyEmail($user->name, $verifyToken, $role));
 
         return response()->json([
-            'data'    => $user,
-            'token'   => $token,
-            'message' => 'Registration successful',
+            'message' => 'Registration successful! Please check your email to verify your account.',
             'status'  => 'success',
         ], 201);
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        $token = $request->query('token');
+
+        if (!$token) {
+            return response()->json(['message' => 'Invalid token.', 'status' => 'error'], 400);
+        }
+
+        $user = User::where('email_verification_token', $token)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Token is invalid or expired.', 'status' => 'error'], 404);
+        }
+
+        // Activate customer immediately, leave rider as pending for admin approval
+        $status = $user->role === 'customer' ? 'active' : 'pending';
+
+        $user->update([
+            'email_verified_at' => Carbon::now(),
+            'email_verification_token' => null,
+            'status' => $status
+        ]);
+
+        $authToken = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Email verified successfully!',
+            'status' => 'success',
+            'data' => $user,
+            'token' => $authToken
+        ]);
+    }
+
+    public function resendVerification(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+        
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+        
+        if ($user->email_verified_at) {
+            return response()->json(['message' => 'Email is already verified.'], 400);
+        }
+
+        $verifyToken = Str::random(64);
+        $user->update([
+            'email_verification_token' => $verifyToken
+        ]);
+
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\VerifyEmail($user->name, $verifyToken, $user->role));
+
+        return response()->json(['message' => 'Verification email resent successfully!']);
     }
 
     public function login(Request $request)
@@ -119,6 +189,12 @@ class AuthController extends Controller
             ]);
         }
 
+        if (!$user->email_verified_at) {
+            return response()->json([
+                'message' => 'Please verify your email address before logging in.',
+                'status'  => 'error',
+            ], 403);
+        }
 
         if ($user->status === 'suspended') {
             return response()->json([
@@ -138,7 +214,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'data'    => $user,
+            'data'    => $user->load('riderProfile'),
             'token'   => $token,
             'message' => 'Login successful',
             'status'  => 'success',
