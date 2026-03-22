@@ -53,19 +53,32 @@ class BrevoEmailService
         // Verification URL
         $verificationUrl = $appUrl . "/verify-email?token={$token}&type={$role}";
 
-        // HTML Content
+        // HTML Content (Premium Design)
         $htmlContent = "
             <html>
-            <body style='font-family: Arial, sans-serif; background-color: #f4f4f5; padding: 40px;'>
-                <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 8px;'>
-                    <h2 style='color: #0f172a;'>Hardware Retail Management System</h2>
-                    <p style='font-size: 16px; color: #475569;'>Hello {$name},</p>
-                    <p style='font-size: 16px; color: #475569;'>Thank you for registering with us! Please click the button below to verify your email address and activate your account.</p>
-                    <div style='text-align: center; margin-top: 30px;'>
-                        <a href='{$verificationUrl}' style='display: inline-block; background-color: #FF6B35; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: bold;'>Verify Email Address</a>
+            <body style='font-family: \"Inter\", Arial, sans-serif; background-color: #f8fafc; padding: 40px; margin: 0;'>
+                <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 48px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+                    <div style='text-align: center; margin-bottom: 32px;'>
+                        <h1 style='color: #0f172a; font-size: 24px; font-weight: 800; margin: 0;'>HRMS <span style='color: #FF6B35;'>PRO</span></h1>
+                        <p style='color: #64748b; font-size: 14px; margin-top: 4px;'>Hardware Retail Management System</p>
                     </div>
-                    <p style='font-size: 14px; color: #94a3b8; margin-top: 40px;'>If the button doesn't work, copy and paste this link into your browser:<br>{$verificationUrl}</p>
-                    <p style='font-size: 14px; color: #94a3b8;'>If you did not create an account, no further action is required.</p>
+                    
+                    <h2 style='color: #1e293b; font-size: 20px; font-weight: 700; margin-bottom: 16px;'>Verify your email address</h2>
+                    <p style='font-size: 16px; color: #475569; line-height: 1.6;'>Hello <strong>{$name}</strong>,</p>
+                    <p style='font-size: 16px; color: #475569; line-height: 1.6;'>Welcome to HRMS! To get started with your account, please verify your email address by clicking the button below.</p>
+                    
+                    <div style='text-align: center; margin-top: 40px; margin-bottom: 40px;'>
+                        <a href='{$verificationUrl}' style='display: inline-block; background-color: #FF6B35; color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 16px; transition: background-color 0.2s;'>Confirm Email Address</a>
+                    </div>
+                    
+                    <div style='border-top: 1px solid #e2e8f0; padding-top: 24px; margin-top: 32px;'>
+                        <p style='font-size: 13px; color: #94a3b8; line-height: 1.5;'>
+                            If you're having trouble clicking the button, <a href='{$verificationUrl}' style='color: #FF6B35; text-decoration: underline;'>click here to verify</a>.
+                        </p>
+                        <p style='font-size: 12px; color: #cbd5e1; margin-top: 24px;'>
+                            If you did not create an account, you can safely ignore this email.
+                        </p>
+                    </div>
                 </div>
             </body>
             </html>

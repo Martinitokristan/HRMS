@@ -11,6 +11,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useFormValidation } from '../../hooks/useFormValidation';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default marker icons in React-Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Helper component to center map when coordinates change
+function ChangeView({ center, zoom }) {
+    const map = useMap();
+    map.setView(center, zoom);
+    return null;
+}
 
 export default function Register() {
     const { register } = useAuth();
@@ -27,6 +45,35 @@ export default function Register() {
 
     const [successMsg, setSuccessMsg] = useState('');
     const [capsWarning, setCapsWarning] = useState(false);
+    const [isGeocoding, setIsGeocoding] = useState(false);
+    const [mapCenter, setMapCenter] = useState([8.9475, 125.5406]); // Default Butuan City
+
+    // Function to search coordinates based on address
+    const handleGeocode = async () => {
+        const fullAddress = `${formData.address}, ${formData.municipality}, ${formData.province}, Philippines`;
+        if (formData.address.length < 5) return;
+
+        setIsGeocoding(true);
+        try {
+            const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`);
+            if (response.data && response.data.length > 0) {
+                const { lat, lon } = response.data[0];
+                const newCoords = { lat: parseFloat(lat), lon: parseFloat(lon) };
+                setFormData(prev => ({ ...prev, latitude: newCoords.lat, longitude: newCoords.lon }));
+                setMapCenter([newCoords.lat, newCoords.lon]);
+            }
+        } catch (error) {
+            console.error("Geocoding failed:", error);
+        } finally {
+            setIsGeocoding(false);
+        }
+    };
+
+    // Update coordinates when marker is dragged
+    const onMarkerDragEnd = (e) => {
+        const { lat, lng } = e.target.getLatLng();
+        setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -277,6 +324,51 @@ export default function Register() {
                                     <Label htmlFor="landmark">Landmark / Delivery Instructions</Label>
                                     <Input id="landmark" name="landmark" type="text" onChange={handleChange} placeholder="Optional: e.g. Near Blue Gate" className={`h-11 ${errors.landmark ? 'border-red-500' : ''}`} />
                                     {errors.landmark && <p className="text-sm text-red-500">{errors.landmark}</p>}
+                                </div>
+
+                                <Separator className="my-4" />
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-sm font-bold text-primary flex items-center gap-2">
+                                            <MapPin className="h-4 w-4" />
+                                            Pin Delivery Location
+                                        </Label>
+                                        <Button 
+                                            type="button" 
+                                            variant="outline" 
+                                            size="sm" 
+                                            onClick={handleGeocode}
+                                            disabled={isGeocoding || formData.address.length < 5}
+                                            className="text-xs h-8"
+                                        >
+                                            {isGeocoding ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
+                                            Find on Map
+                                        </Button>
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground italic">
+                                        Drag the blue pin to your exact delivery spot for more accurate routing.
+                                    </p>
+                                    <div className="h-[220px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner">
+                                        <MapContainer center={mapCenter} zoom={15} style={{ height: '100%', width: '100%' }}>
+                                            <ChangeView center={mapCenter} zoom={15} />
+                                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                            <Marker 
+                                                position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : mapCenter} 
+                                                draggable={true}
+                                                eventHandlers={{ dragend: onMarkerDragEnd }}
+                                            />
+                                        </MapContainer>
+                                        {!formData.latitude && (
+                                            <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-[1000] flex items-center justify-center p-4 text-center">
+                                                <div className="bg-white p-4 rounded-xl shadow-lg border border-primary/10">
+                                                    <MapPin className="h-8 w-8 text-primary mx-auto mb-2 opacity-50" />
+                                                    <p className="text-sm font-bold text-foreground">Set Address First</p>
+                                                    <p className="text-[11px] text-muted-foreground">Then click 'Find on Map' to pin your exact location.</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>

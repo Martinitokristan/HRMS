@@ -201,8 +201,8 @@ class RiderController extends Controller
                 $d->customer_address = $d->address ?? 'No Address Provided';
 
                 // Set coordinates dynamically, defaulting to nearby location if none exists
-                $d->customer_latitude = $profile->latitude ?? ($riderLat + (rand(-10, 10) / 1000));
-                $d->customer_longitude = $profile->longitude ?? ($riderLon + (rand(-10, 10) / 1000));
+                $d->customer_latitude = $profile->latitude ?? 7.0707;
+                $d->customer_longitude = $profile->longitude ?? 125.6080;
 
                 // Calculate distance and ETA
                 $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $d->customer_latitude, $d->customer_longitude);
@@ -228,8 +228,8 @@ class RiderController extends Controller
                 $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
                 $d->customer_address = $d->address ?? 'No Address Provided';
 
-                $customerLat = $profile->latitude ?? ($riderLat + (rand(-10, 10) / 1000));
-                $customerLon = $profile->longitude ?? ($riderLon + (rand(-10, 10) / 1000));
+                $customerLat = $profile->latitude ?? 7.0707;
+                $customerLon = $profile->longitude ?? 125.6080;
 
                 // Calculate real distance using Haversine formula
                 $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $customerLat, $customerLon);
