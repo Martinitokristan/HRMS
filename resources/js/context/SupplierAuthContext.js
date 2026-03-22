@@ -18,8 +18,8 @@ export const SupplierAuthProvider = ({ children }) => {
         const token = localStorage.getItem('supplier_token');
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            fetchProfile(isMounted);
-            refreshSettings();
+            // Removed automatic profile fetch to avoid 401s for admin users
+            setLoading(false);
         } else {
             setLoading(false);
         }

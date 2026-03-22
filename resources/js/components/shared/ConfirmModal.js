@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Info } from 'lucide-react';
 
 export default function ConfirmModal({ modal, onClose }) {
-    if (!modal.show) return null;
+    if (!modal || !modal.show) return null;
 
     const isDestructive = modal.variant === 'destructive';
 

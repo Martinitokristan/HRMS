@@ -42,16 +42,24 @@ export default function Suppliers() {
     const [viewSupplierId, setViewSupplierId] = useState(null);
 
     const [confirmModal, setConfirmModal] = useState({
-        show: false, title: '', message: '',
-        onConfirm: null, variant: 'default'
+        show: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        variant: 'default'
     });
+
     const showConfirm = (title, message, onConfirm, variant = 'default') => {
         setConfirmModal({ show: true, title, message, onConfirm, variant });
     };
+
     const closeConfirm = () => {
         setConfirmModal({
-            show: false, title: '', message: '',
-            onConfirm: null, variant: 'default'
+            show: false,
+            title: '',
+            message: '',
+            onConfirm: null,
+            variant: 'default'
         });
     };
 
