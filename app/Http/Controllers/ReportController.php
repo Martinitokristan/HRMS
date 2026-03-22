@@ -20,9 +20,11 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        } elseif ($period === 'year') {
+        }
+        elseif ($period === 'year') {
             $from = now()->subYear();
-        } else { // month
+        }
+        else { // month
             $from = now()->subDays(30);
         }
 
@@ -53,16 +55,16 @@ class ReportController extends Controller
             'data' => [
                 'chart_data' => $sales,
                 'summary' => [
-                    'total_revenue'        => round($totalRevenue, 2),
-                    'total_orders'         => $totalOrders,
-                    'average_order_value'  => round($avgOrderValue, 2),
-                    'delivered_orders'     => $summaryData->delivered_orders ?? 0,
-                    'pending_orders'       => $summaryData->pending_orders ?? 0,
-                    'in_progress_orders'     => $summaryData->in_progress_orders ?? 0,
-                    'failed_orders'          => $summaryData->failed_orders ?? 0,
-                    'returned_orders'        => $summaryData->returned_orders ?? 0,
-                    'cod_revenue'            => $summaryData->cod_revenue ?? 0,
-                    'cod_orders'             => $summaryData->cod_orders ?? 0,
+                    'total_revenue' => round($totalRevenue, 2),
+                    'total_orders' => $totalOrders,
+                    'average_order_value' => round($avgOrderValue, 2),
+                    'delivered_orders' => $summaryData->delivered_orders ?? 0,
+                    'pending_orders' => $summaryData->pending_orders ?? 0,
+                    'in_progress_orders' => $summaryData->in_progress_orders ?? 0,
+                    'failed_orders' => $summaryData->failed_orders ?? 0,
+                    'returned_orders' => $summaryData->returned_orders ?? 0,
+                    'cod_revenue' => $summaryData->cod_revenue ?? 0,
+                    'cod_orders' => $summaryData->cod_orders ?? 0,
                 ]
             ],
             'status' => 'success',
@@ -78,11 +80,14 @@ class ReportController extends Controller
 
             if ($period === 'week') {
                 $from = now()->subDays(7);
-            } elseif ($period === 'year') {
+            }
+            elseif ($period === 'year') {
                 $from = now()->subYear();
-            } elseif ($period === 'quarter') {
+            }
+            elseif ($period === 'quarter') {
                 $from = now()->subDays(90);
-            } else { // month
+            }
+            else { // month
                 $from = now()->subDays(30);
             }
 
@@ -92,13 +97,13 @@ class ReportController extends Controller
                 ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from->toDateString(), $to->toDateString()])
                 ->whereIn('sales.status', ['delivered', 'in_progress', 'pending'])
                 ->select(
-                    'products.id',
-                    'products.name',
-                    'products.barcode',
-                    DB::raw('SUM(sale_items.quantity) as total_sold'),
-                    DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue')
-                )
-                ->groupBy('products.id', 'products.name', 'products.sku')
+                'products.id',
+                'products.name',
+                'products.barcode',
+                DB::raw('SUM(sale_items.quantity) as total_sold'),
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue')
+            )
+                ->groupBy('products.id', 'products.name', 'products.barcode')
                 ->orderByDesc('total_sold')
                 ->limit(10)
                 ->get();
@@ -107,7 +112,8 @@ class ReportController extends Controller
                 'data' => $topProducts,
                 'status' => 'success'
             ]);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             \Log::error('Top Products Query Error', ['message' => $e->getMessage()]);
             return response()->json([
                 'error' => 'Failed to fetch top products',
@@ -135,9 +141,11 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        } elseif ($period === 'year') {
+        }
+        elseif ($period === 'year') {
             $from = now()->subYear();
-        } else { // month
+        }
+        else { // month
             $from = now()->subDays(30);
         }
 
@@ -167,7 +175,7 @@ class ReportController extends Controller
             }
 
             return response($csv, 200, [
-                'Content-Type'        => 'text/csv',
+                'Content-Type' => 'text/csv',
                 'Content-Disposition' => "attachment; filename=\"sales_report_{$period}_" . now()->toDateString() . ".csv\"",
             ]);
         }
@@ -221,7 +229,8 @@ class ReportController extends Controller
                     'Content-Disposition' => 'attachment; filename="' . $filename . '"',
                 ]);
 
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 // Log the error for debugging
                 \Log::error('PDF Generation Error', ['message' => $e->getMessage()]);
                 \Log::error('PDF Error Stack', ['trace' => $e->getTraceAsString()]);
@@ -235,7 +244,7 @@ class ReportController extends Controller
         }
 
         return response()->json([
-            'data'   => $sales,
+            'data' => $sales,
             'status' => 'success',
         ]);
     }
@@ -594,29 +603,31 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        } elseif ($period === 'year') {
+        }
+        elseif ($period === 'year') {
             $from = now()->subYear();
-        } else { // month
+        }
+        else { // month
             $from = now()->subDays(30);
         }
 
         // Overall rating statistics
         $overallStats = [
             'total_ratings' => DB::table('deliveries')
-                ->whereNotNull('rating')
-                ->whereBetween('rated_at', [$from, $to])
-                ->count(),
+            ->whereNotNull('rating')
+            ->whereBetween('rated_at', [$from, $to])
+            ->count(),
             'average_rating' => DB::table('deliveries')
-                ->whereNotNull('rating')
-                ->whereBetween('rated_at', [$from, $to])
-                ->avg('rating'),
+            ->whereNotNull('rating')
+            ->whereBetween('rated_at', [$from, $to])
+            ->avg('rating'),
             'rating_distribution' => DB::table('deliveries')
-                ->whereNotNull('rating')
-                ->whereBetween('rated_at', [$from, $to])
-                ->selectRaw('rating, COUNT(*) as count')
-                ->groupBy('rating')
-                ->pluck('count', 'rating')
-                ->toArray(),
+            ->whereNotNull('rating')
+            ->whereBetween('rated_at', [$from, $to])
+            ->selectRaw('rating, COUNT(*) as count')
+            ->groupBy('rating')
+            ->pluck('count', 'rating')
+            ->toArray(),
         ];
 
         // Round average rating
@@ -648,12 +659,12 @@ class ReportController extends Controller
             ->orderBy('total_ratings', 'desc')
             ->get()
             ->map(function ($rider) {
-                $rider->average_rating = round($rider->average_rating, 2);
-                $rider->positive_rate = $rider->total_ratings > 0 
-                    ? round(($rider->positive_ratings / $rider->total_ratings) * 100, 1) 
-                    : 0;
-                return $rider;
-            });
+            $rider->average_rating = round($rider->average_rating, 2);
+            $rider->positive_rate = $rider->total_ratings > 0
+                ? round(($rider->positive_ratings / $rider->total_ratings) * 100, 1)
+                : 0;
+            return $rider;
+        });
 
         // Top performers (5+ ratings, 4.0+ average)
         $topPerformers = $riderRankings->filter(function ($rider) {
@@ -674,9 +685,9 @@ class ReportController extends Controller
             ->orderBy('date')
             ->get()
             ->map(function ($trend) {
-                $trend->average_rating = round($trend->average_rating, 2);
-                return $trend;
-            });
+            $trend->average_rating = round($trend->average_rating, 2);
+            return $trend;
+        });
 
         // Recent feedback
         $recentFeedback = DB::table('deliveries')
@@ -724,9 +735,11 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        } elseif ($period === 'year') {
+        }
+        elseif ($period === 'year') {
             $from = now()->subYear();
-        } else { // month
+        }
+        else { // month
             $from = now()->subDays(30);
         }
 
@@ -756,8 +769,8 @@ class ReportController extends Controller
         // Calculate positive rate for each rider
         $rankings->getCollection()->transform(function ($rider) {
             $rider->average_rating = round($rider->average_rating, 2);
-            $rider->positive_rate = $rider->total_ratings > 0 
-                ? round(($rider->positive_ratings / $rider->total_ratings) * 100, 1) 
+            $rider->positive_rate = $rider->total_ratings > 0
+                ? round(($rider->positive_ratings / $rider->total_ratings) * 100, 1)
                 : 0;
             return $rider;
         });
@@ -773,9 +786,11 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        } elseif ($period === 'year') {
+        }
+        elseif ($period === 'year') {
             $from = now()->subYear();
-        } else { // month
+        }
+        else { // month
             $from = now()->subDays(30);
         }
 
@@ -798,10 +813,10 @@ class ReportController extends Controller
 
         // Apply search if provided
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('customers.name', 'like', "%{$request->search}%")
-                  ->orWhere('riders.name', 'like', "%{$request->search}%")
-                  ->orWhere('deliveries.tracking_number', 'like', "%{$request->search}%");
+                    ->orWhere('riders.name', 'like', "%{$request->search}%")
+                    ->orWhere('deliveries.tracking_number', 'like', "%{$request->search}%");
             });
         }
 
@@ -871,11 +886,11 @@ class ReportController extends Controller
             ->whereBetween('sales.created_at', [now()->subDays(30), now()])
             ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
             ->select(
-                'products.id',
-                'products.name',
-                DB::raw('SUM(sale_items.quantity) as units_sold_30d'),
-                DB::raw('SUM(sale_items.quantity) / 30 as daily_velocity')
-            )
+            'products.id',
+            'products.name',
+            DB::raw('SUM(sale_items.quantity) as units_sold_30d'),
+            DB::raw('SUM(sale_items.quantity) / 30 as daily_velocity')
+        )
             ->groupBy('products.id', 'products.name')
             ->get();
 
@@ -903,7 +918,7 @@ class ReportController extends Controller
         }
 
         // Sort by urgency
-        usort($forecast, function($a, $b) {
+        usort($forecast, function ($a, $b) {
             return $a['days_until_stockout'] <=> $b['days_until_stockout'];
         });
 
@@ -913,7 +928,7 @@ class ReportController extends Controller
             ->where('sales.created_at', '>=', now()->subDays(30))
             ->select('product_id', DB::raw('SUM(quantity) as sold'))
             ->groupBy('product_id');
-            
+
         $slowMoving = DB::table('inventory')
             ->join('products', 'inventory.product_id', '=', 'products.id')
             ->leftJoinSub($salesData, 'sales_data', 'products.id', '=', 'sales_data.product_id')
@@ -948,25 +963,25 @@ class ReportController extends Controller
             ->whereBetween('sales.created_at', [$from, now()])
             ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
             ->select(
-                'products.id',
-                'products.name',
-                DB::raw('SUM(sale_items.quantity) as units_sold'),
-                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
-                DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
-                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
-                DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
-            )
+            'products.id',
+            'products.name',
+            DB::raw('SUM(sale_items.quantity) as units_sold'),
+            DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
+            DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
+            DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
+            DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
+        )
             ->groupBy('products.id', 'products.name')
             ->orderBy('profit', 'desc')
             ->limit(20)
             ->get()
-            ->map(function($item) {
-                $item->profit_margin = round($item->profit_margin, 2);
-                $item->profit = round($item->profit, 2);
-                $item->revenue = round($item->revenue, 2);
-                $item->cogs = round($item->cogs, 2);
-                return $item;
-            });
+            ->map(function ($item) {
+            $item->profit_margin = round($item->profit_margin, 2);
+            $item->profit = round($item->profit, 2);
+            $item->revenue = round($item->revenue, 2);
+            $item->cogs = round($item->cogs, 2);
+            return $item;
+        });
 
         // Profit by Category
         $categoryProfit = DB::table('sale_items')
@@ -976,23 +991,23 @@ class ReportController extends Controller
             ->whereBetween('sales.created_at', [$from, now()])
             ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
             ->select(
-                'categories.id',
-                'categories.name',
-                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
-                DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
-                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
-                DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
-            )
+            'categories.id',
+            'categories.name',
+            DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
+            DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
+            DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
+            DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
+        )
             ->groupBy('categories.id', 'categories.name')
             ->orderBy('profit', 'desc')
             ->get()
-            ->map(function($item) {
-                $item->profit_margin = round($item->profit_margin, 2);
-                $item->profit = round($item->profit, 2);
-                $item->revenue = round($item->revenue, 2);
-                $item->cogs = round($item->cogs, 2);
-                return $item;
-            });
+            ->map(function ($item) {
+            $item->profit_margin = round($item->profit_margin, 2);
+            $item->profit = round($item->profit, 2);
+            $item->revenue = round($item->revenue, 2);
+            $item->cogs = round($item->cogs, 2);
+            return $item;
+        });
 
         // Overall Summary
         $totalRevenue = $productProfit->sum('revenue');

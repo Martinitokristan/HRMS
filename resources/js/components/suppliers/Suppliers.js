@@ -39,8 +39,21 @@ export default function Suppliers() {
     // Modals
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSupplier, setSelectedSupplier] = useState(null);
-    const [deleteId, setDeleteId] = useState(null);
     const [viewSupplierId, setViewSupplierId] = useState(null);
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
     const fetchSuppliers = async () => {
         setLoading(true);
@@ -66,10 +79,10 @@ export default function Suppliers() {
         };
     }, [search, page, statusFilter, refreshTrigger]);
 
-    const handleDelete = async () => {
-        if (!deleteId) return;
+    const performDelete = async (id) => {
+        closeConfirm();
         try {
-            const res = await axios.delete(`/suppliers/${deleteId}`);
+            const res = await axios.delete(`/suppliers/${id}`);
             if (res.data.status === 'success') {
                 showToast('Supplier deleted successfully');
                 triggerRefresh();
@@ -79,9 +92,16 @@ export default function Suppliers() {
         } catch (error) {
             const msg = error.response?.data?.message || 'Error deleting supplier';
             showToast(msg, 'error');
-        } finally {
-            setDeleteId(null);
         }
+    };
+
+    const handleDelete = (id) => {
+        showConfirm(
+            'Delete Supplier',
+            'Are you sure you want to delete this supplier? This action cannot be undone.',
+            () => performDelete(id),
+            'destructive'
+        );
     };
 
     const handleEdit = (supplier) => {
@@ -233,7 +253,7 @@ export default function Suppliers() {
                                             <Button variant="ghost" size="sm" onClick={() => setViewSupplierId(supplier.id)} className="h-7 px-2 gap-1">
                                                 <Eye className="h-3.5 w-3.5" /> View
                                             </Button>
-                                            <Button variant="destructive" size="sm" onClick={() => setDeleteId(supplier.id)} className="h-7 px-2">
+                                            <Button variant="destructive" size="sm" onClick={() => handleDelete(supplier.id)} className="h-7 px-2">
                                                 <Trash2 className="h-3.5 w-3.5" />
                                             </Button>
                                         </div>
@@ -265,10 +285,8 @@ export default function Suppliers() {
             </Modal>
 
             <ConfirmModal
-                isOpen={!!deleteId}
-                onCancel={() => setDeleteId(null)}
-                onConfirm={handleDelete}
-                message="Are you sure you want to delete this supplier? This action cannot be undone."
+                modal={confirmModal}
+                onClose={closeConfirm}
             />
 
             <SupplierViewModal 
