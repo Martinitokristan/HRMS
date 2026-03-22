@@ -165,9 +165,12 @@ export default function StockTab() {
         axios.get('/suppliers').then(res => {
             console.log('✅ [StockTab] Suppliers response:', res);
             console.log('✅ [StockTab] Suppliers data structure:', res.data);
-            setSuppliers(res.data?.data || res.data || []);
+            // Handle different response structures safely
+            const suppliersData = res.data?.data?.data || res.data?.data || res.data || [];
+            setSuppliers(Array.isArray(suppliersData) ? suppliersData : []);
         }).catch(err => {
             console.error('❌ [StockTab] Suppliers error:', err);
+            setSuppliers([]); // Ensure suppliers is always an array
         });
     }, []);
 

@@ -293,7 +293,7 @@ export default function Suppliers() {
             </Modal>
 
             <ConfirmModal
-                modal={confirmModal}
+                modal={confirmModal || { show: false }}
                 onClose={closeConfirm}
             />
 
