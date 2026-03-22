@@ -10696,8 +10696,7 @@ function Register() {
             return axios__WEBPACK_IMPORTED_MODULE_3___default().get("https://nominatim.openstreetmap.org/reverse?format=json&lat=".concat(lat, "&lon=").concat(lon));
           case 1:
             res = _context2.v;
-            if (res.data && res.data.display_name) {
-              setPinnedAddressDetails(res.data.display_name);
+            if (res.data) {
               if (res.data.address && res.data.address.postcode && !formData.zip_code) {
                 setFormData(function (prev) {
                   return _objectSpread(_objectSpread({}, prev), {}, {
@@ -10705,15 +10704,13 @@ function Register() {
                   });
                 });
               }
-            } else {
-              setPinnedAddressDetails('Location pinned on map');
             }
             _context2.n = 3;
             break;
           case 2:
             _context2.p = 2;
             _t2 = _context2.v;
-            setPinnedAddressDetails('Location pinned on map');
+            console.error("Silent Reverse Geocode failure");
           case 3:
             return _context2.a(2);
         }
@@ -11253,7 +11250,7 @@ function Register() {
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)("div", {
                 className: "space-y-3",
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)("div", {
-                  className: "flex items-center justify-between",
+                  className: "flex justify-between items-center mb-1",
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)(_components_ui_label__WEBPACK_IMPORTED_MODULE_17__.Label, {
                     className: "text-sm font-bold text-primary flex items-center gap-2",
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
@@ -11276,14 +11273,18 @@ function Register() {
                       }), "Use Current GPS"]
                     })
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)("p", {
-                  className: "text-[11px] text-muted-foreground italic",
-                  children: "Manual: Click on the map or drag the pin to your exact delivery spot."
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)("p", {
+                  className: "text-[11px] text-muted-foreground italic leading-tight",
+                  children: ["Manual: Click on the map or drag the pin to your exact delivery spot. ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)("span", {
+                    className: "font-bold text-amber-600 block mt-1",
+                    children: "\u26A0\uFE0F Note: Desktop/Laptop GPS can be slightly off. Please zoom in deeply and drag the pin EXACTLY to your house roof."
+                  })]
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)("div", {
-                  className: "h-[220px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner cursor-crosshair",
+                  className: "h-[260px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner cursor-crosshair",
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)(react_leaflet__WEBPACK_IMPORTED_MODULE_23__.MapContainer, {
                     center: mapCenter,
                     zoom: 15,
+                    maxZoom: 20,
                     style: {
                       height: '100%',
                       width: '100%'
@@ -11294,7 +11295,8 @@ function Register() {
                       onMapClick: handleMapClick
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_25__.TileLayer, {
                       url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-                      attribution: "\xA9 Google Maps"
+                      attribution: "\xA9 Google Maps",
+                      maxZoom: 20
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_24__.Marker, {
                       position: formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : mapCenter,
                       draggable: true,
@@ -11317,17 +11319,17 @@ function Register() {
                       })]
                     })
                   })]
-                }), pinnedAddressDetails && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)("div", {
+                }), (formData.latitude || formData.longitude) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)("div", {
                   className: "text-xs p-2.5 bg-green-50/50 text-green-800 border-l-4 border-green-500 rounded-lg mt-2 flex items-start gap-2 shadow-sm",
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
                     className: "h-4 w-4 shrink-0 mt-0.5 text-green-600"
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)("div", {
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)("span", {
                       className: "font-bold block text-green-900 mb-0.5",
-                      children: "Pinned Location Detected:"
+                      children: "Location Pinned For:"
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)("span", {
-                      className: "text-green-700/90 leading-relaxed",
-                      children: pinnedAddressDetails
+                      className: "text-green-700/90 leading-relaxed font-semibold",
+                      children: formData.address ? "".concat(formData.address, ", ").concat(formData.municipality, ", ").concat(formData.province) : 'Exact GPS Coordinates Captured'
                     })]
                   })]
                 })]
@@ -14167,6 +14169,7 @@ function CustomerOrder() {
                   children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(react_leaflet__WEBPACK_IMPORTED_MODULE_6__.MapContainer, {
                     center: checkoutPosition,
                     zoom: 16,
+                    maxZoom: 20,
                     style: {
                       height: "100%",
                       width: "100%"
@@ -14176,7 +14179,8 @@ function CustomerOrder() {
                       onMapClick: handleMapClick
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_8__.TileLayer, {
                       url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-                      attribution: "\xA9 Google Maps"
+                      attribution: "\xA9 Google Maps",
+                      maxZoom: 20
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_7__.Marker, {
                       position: checkoutPosition,
                       draggable: true,

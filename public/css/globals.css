@@ -1238,6 +1238,9 @@ input, select, textarea {
 .h-\[240px\]{
   height: 240px;
 }
+.h-\[260px\]{
+  height: 260px;
+}
 .max-h-0{
   max-height: 0px;
 }

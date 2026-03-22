@@ -99,16 +99,13 @@ export default function Register() {
     const reverseGeocode = async (lat, lon) => {
         try {
             const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-            if (res.data && res.data.display_name) {
-                setPinnedAddressDetails(res.data.display_name);
+            if (res.data) {
                 if (res.data.address && res.data.address.postcode && !formData.zip_code) {
                     setFormData(prev => ({ ...prev, zip_code: res.data.address.postcode }));
                 }
-            } else {
-                setPinnedAddressDetails('Location pinned on map');
             }
         } catch (error) {
-            setPinnedAddressDetails('Location pinned on map');
+            console.error("Silent Reverse Geocode failure");
         }
     };
 
@@ -410,7 +407,7 @@ export default function Register() {
                                 <Separator className="my-4" />
 
                                 <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex justify-between items-center mb-1">
                                         <Label className="text-sm font-bold text-primary flex items-center gap-2">
                                             <MapPin className="h-4 w-4" />
                                             Pin Delivery Location
@@ -430,15 +427,17 @@ export default function Register() {
                                             </Button>
                                         </div>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground italic">
-                                        Manual: Click on the map or drag the pin to your exact delivery spot.
+                                    <p className="text-[11px] text-muted-foreground italic leading-tight">
+                                        Manual: Click on the map or drag the pin to your exact delivery spot. <br/>
+                                        <span className="font-bold text-amber-600 block mt-1">⚠️ Note: Desktop/Laptop GPS can be slightly off. Please zoom in deeply and drag the pin EXACTLY to your house roof.</span>
                                     </p>
-                                    <div className="h-[220px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner cursor-crosshair">
-                                        <MapContainer center={mapCenter} zoom={15} style={{ height: '100%', width: '100%' }}>
+                                    <div className="h-[260px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner cursor-crosshair">
+                                        <MapContainer center={mapCenter} zoom={15} maxZoom={20} style={{ height: '100%', width: '100%' }}>
                                             <MapController center={mapCenter} zoom={15} onMapClick={handleMapClick} />
                                             <TileLayer 
                                                 url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" 
                                                 attribution="&copy; Google Maps" 
+                                                maxZoom={20}
                                             />
                                             <Marker 
                                                 position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : mapCenter} 
@@ -457,12 +456,14 @@ export default function Register() {
                                         )}
                                     </div>
                                     
-                                    {pinnedAddressDetails && (
+                                    {(formData.latitude || formData.longitude) && (
                                         <div className="text-xs p-2.5 bg-green-50/50 text-green-800 border-l-4 border-green-500 rounded-lg mt-2 flex items-start gap-2 shadow-sm">
                                             <CheckCircle className="h-4 w-4 shrink-0 mt-0.5 text-green-600" />
                                             <div>
-                                                <span className="font-bold block text-green-900 mb-0.5">Pinned Location Detected:</span>
-                                                <span className="text-green-700/90 leading-relaxed">{pinnedAddressDetails}</span>
+                                                <span className="font-bold block text-green-900 mb-0.5">Location Pinned For:</span>
+                                                <span className="text-green-700/90 leading-relaxed font-semibold">
+                                                    {formData.address ? `${formData.address}, ${formData.municipality}, ${formData.province}` : 'Exact GPS Coordinates Captured'}
+                                                </span>
                                             </div>
                                         </div>
                                     )}

@@ -360,11 +360,12 @@ export default function CustomerOrder() {
                                 {hasLocation ? (
                                     <>
                                         <div className="h-[240px] rounded-xl overflow-hidden border-2 border-primary/20 cursor-crosshair relative shadow-inner">
-                                            <MapContainer center={checkoutPosition} zoom={16} style={{ height: "100%", width: "100%" }}>
+                                            <MapContainer center={checkoutPosition} zoom={16} maxZoom={20} style={{ height: "100%", width: "100%" }}>
                                                 <CheckoutMapController position={checkoutPosition} onMapClick={handleMapClick} />
                                                 <TileLayer 
                                                     url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" 
                                                     attribution="&copy; Google Maps"
+                                                    maxZoom={20}
                                                 />
                                                 <Marker 
                                                     position={checkoutPosition} 
