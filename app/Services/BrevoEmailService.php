@@ -22,13 +22,13 @@ class BrevoEmailService
      */
     public static function sendVerificationEmail($email, $name, $token, $role)
     {
-        $apiKey = env('BREVO_API_KEY');
-        $fromEmail = env('BREVO_FROM_EMAIL', 'hrms.noreplyy@gmail.com');
-        $fromName = env('BREVO_FROM_NAME', 'Hardware Retail Management System');
-        $appUrl = env('APP_URL', 'https://hrms-production-426c.up.railway.app');
+        $apiKey = config('services.brevo.api_key');
+        $fromEmail = config('services.brevo.from_email');
+        $fromName = config('services.brevo.from_name');
+        $appUrl = config('app.url');
 
         if (!$apiKey) {
-            Log::error('Brevo API key is not set in environment variables.');
+            Log::error('Brevo API key is not set in config/services.php.');
             return false;
         }
 
