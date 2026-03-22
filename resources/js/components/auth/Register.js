@@ -101,6 +101,9 @@ export default function Register() {
             const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
             if (res.data && res.data.display_name) {
                 setPinnedAddressDetails(res.data.display_name);
+                if (res.data.address && res.data.address.postcode && !formData.zip_code) {
+                    setFormData(prev => ({ ...prev, zip_code: res.data.address.postcode }));
+                }
             } else {
                 setPinnedAddressDetails('Location pinned on map');
             }
@@ -391,10 +394,17 @@ export default function Register() {
                                     <Input id="address" name="address" type="text" required onChange={handleChange} placeholder="Full address details" className={`h-11 ${errors.address ? 'border-red-500' : ''}`} />
                                     {errors.address && <p className="text-sm text-red-500">{errors.address}</p>}
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="landmark">Landmark / Delivery Instructions</Label>
-                                    <Input id="landmark" name="landmark" type="text" onChange={handleChange} placeholder="Optional: e.g. Near Blue Gate" className={`h-11 ${errors.landmark ? 'border-red-500' : ''}`} />
-                                    {errors.landmark && <p className="text-sm text-red-500">{errors.landmark}</p>}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="zip_code">Zip / Postal Code</Label>
+                                        <Input id="zip_code" name="zip_code" type="text" required onChange={handleChange} placeholder="e.g. 8600" className={`h-11 ${errors.zip_code ? 'border-red-500' : ''}`} />
+                                        {errors.zip_code && <p className="text-sm text-red-500">{errors.zip_code}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="landmark">Landmark / Delivery Instructions</Label>
+                                        <Input id="landmark" name="landmark" type="text" onChange={handleChange} placeholder="Optional: e.g. Near Blue Gate" className={`h-11 ${errors.landmark ? 'border-red-500' : ''}`} />
+                                        {errors.landmark && <p className="text-sm text-red-500">{errors.landmark}</p>}
+                                    </div>
                                 </div>
 
                                 <Separator className="my-4" />
@@ -411,22 +421,12 @@ export default function Register() {
                                                 variant="outline" 
                                                 size="sm" 
                                                 onClick={handleGetLocation}
-                                                disabled={gpsLoading}
-                                                className="text-xs h-8 px-2"
-                                                title="Use Current GPS Location"
+                                                disabled={gpsLoading || !formData.province || !formData.municipality || !formData.address}
+                                                className="text-xs h-8 px-3 font-semibold text-primary"
+                                                title="Type your address first to use GPS Auto-Locate"
                                             >
-                                                {gpsLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Navigation className="h-3 w-3 text-primary" />}
-                                            </Button>
-                                            <Button 
-                                                type="button" 
-                                                variant="outline" 
-                                                size="sm" 
-                                                onClick={handleGeocode}
-                                                disabled={isGeocoding || formData.address.length < 5}
-                                                className="text-xs h-8"
-                                            >
-                                                {isGeocoding ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
-                                                Find on Map
+                                                {gpsLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Navigation className="h-3 w-3 mr-1" />}
+                                                Use Current GPS
                                             </Button>
                                         </div>
                                     </div>
@@ -451,7 +451,7 @@ export default function Register() {
                                                 <div className="bg-white p-4 rounded-xl shadow-lg border border-primary/10">
                                                     <MapPin className="h-8 w-8 text-primary mx-auto mb-2 opacity-50" />
                                                     <p className="text-sm font-bold text-foreground">Set Address First</p>
-                                                    <p className="text-[11px] text-muted-foreground">Then use 'Find on Map', GPS, or click the map manually.</p>
+                                                    <p className="text-[11px] text-muted-foreground">Then use 'Use Current GPS' or click the map manually.</p>
                                                 </div>
                                             </div>
                                         )}

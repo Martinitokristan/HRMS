@@ -370,8 +370,8 @@ export default function RiderApp() {
                         zoomControl={false}
                     >
                         <TileLayer
-                            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                            url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+                            attribution="&copy; Google Maps"
                         />
                         
                         {/* Rider Marker */}

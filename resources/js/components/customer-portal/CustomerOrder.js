@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import ProductDetailModal from "./ProductDetailModal";
 import Modal from "../shared/Modal";
 import { Button } from '@/components/ui/button';
@@ -12,9 +12,22 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle, Navigation, Loader2 } from 'lucide-react';
 
 import "leaflet/dist/leaflet.css";
+
+// Helper component to center map when coordinates change
+function CheckoutMapController({ position, onMapClick }) {
+    const map = useMap();
+    useEffect(() => {
+        if (position) map.flyTo(position, map.getZoom());
+    }, [position, map]);
+
+    useMapEvents({
+        click: onMapClick,
+    });
+    return null;
+}
 
 export default function CustomerOrder() {
     const navigate = useNavigate();
@@ -31,6 +44,39 @@ export default function CustomerOrder() {
 
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [orderSuccess, setOrderSuccess] = useState(false);
+    const [checkoutPosition, setCheckoutPosition] = useState([7.0707, 125.608]);
+    const [gpsLoading, setGpsLoading] = useState(false);
+
+    // Get current GPS location
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            showToast("Geolocation is not supported by your browser.", "error");
+            return;
+        }
+        setGpsLoading(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setCheckoutPosition([position.coords.latitude, position.coords.longitude]);
+                setGpsLoading(false);
+                showToast("Location updated to your current GPS position.", "success");
+            },
+            (error) => {
+                showToast("Unable to get GPS location.", "error");
+                setGpsLoading(false);
+            },
+            { enableHighAccuracy: true }
+        );
+    };
+
+    // Handle manual map click
+    const handleMapClick = (e) => {
+        setCheckoutPosition([e.latlng.lat, e.latlng.lng]);
+    };
+
+    // Update coordinates when marker is dragged
+    const handleMarkerDragEnd = (e) => {
+        setCheckoutPosition([e.target.getLatLng().lat, e.target.getLatLng().lng]);
+    };
 
     const updateCartItem = (product, options) => {
         const qty = options.qty || 1;
@@ -87,9 +133,10 @@ export default function CustomerOrder() {
                 setCustomerProfile(res.data.data);
                 if (res.data.data?.address) {
                     const profile = res.data.data;
-                    setAddress(
-                        `${profile.address}, ${profile.municipality}, ${profile.province}`,
-                    );
+                    setAddress(`${profile.address}, ${profile.municipality}, ${profile.province}`);
+                    if (profile.latitude && profile.longitude) {
+                        setCheckoutPosition([parseFloat(profile.latitude), parseFloat(profile.longitude)]);
+                    }
                 }
             })
             .catch(() => console.log("Could not fetch profile"));
@@ -160,6 +207,8 @@ export default function CustomerOrder() {
             console.log('Sending order request...');
             const orderResponse = await axios.post("/sales", {
                 address: address.trim(),
+                latitude: checkoutPosition[0],
+                longitude: checkoutPosition[1],
                 payment_method: payment,
                 customer_id: user?.id,
                 items: cart.map((i) => ({
@@ -290,24 +339,48 @@ export default function CustomerOrder() {
 
                             {/* LOCATION CONFIRMATION */}
                             <div className="space-y-4">
-                                <h3 className="font-bold text-foreground flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Delivery Location</h3>
+                                <div className="flex justify-between items-end mb-2">
+                                    <h3 className="font-bold text-foreground flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Delivery Location</h3>
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={handleGetLocation} 
+                                        disabled={gpsLoading}
+                                        className="h-8 text-xs font-semibold gap-1 px-3 bg-white"
+                                    >
+                                        {gpsLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Navigation className="h-3 w-3 text-primary" />}
+                                        Use Current GPS
+                                    </Button>
+                                </div>
+                                
+                                <p className="text-xs text-muted-foreground italic -mt-2">
+                                    The pin below is your default home. If you want this delivered elsewhere today (like work), click "Use Current GPS" or drag the pin.
+                                </p>
 
                                 {hasLocation ? (
                                     <>
-                                        <div className="h-[200px] rounded-xl overflow-hidden border border-border">
-                                            <MapContainer center={position} zoom={16} style={{ height: "100%", width: "100%" }}>
-                                                <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-                                                <Marker position={position} />
+                                        <div className="h-[240px] rounded-xl overflow-hidden border-2 border-primary/20 cursor-crosshair relative shadow-inner">
+                                            <MapContainer center={checkoutPosition} zoom={16} style={{ height: "100%", width: "100%" }}>
+                                                <CheckoutMapController position={checkoutPosition} onMapClick={handleMapClick} />
+                                                <TileLayer 
+                                                    url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" 
+                                                    attribution="&copy; Google Maps"
+                                                />
+                                                <Marker 
+                                                    position={checkoutPosition} 
+                                                    draggable={true}
+                                                    eventHandlers={{ dragend: handleMarkerDragEnd }}
+                                                />
                                             </MapContainer>
                                         </div>
 
                                         <Card className="bg-amber-50 border-amber-200 p-3">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <MapPin className="h-4 w-4 text-amber-600" />
-                                                <span className="font-semibold text-sm text-amber-800">Your Registered Location</span>
+                                                <span className="font-semibold text-sm text-amber-800">Your Checkout Location</span>
                                             </div>
                                             <div className="text-xs text-muted-foreground">
-                                                {customerProfile?.latitude ? Number(customerProfile.latitude).toFixed(6) : 'N/A'}, {customerProfile?.longitude ? Number(customerProfile.longitude).toFixed(6) : 'N/A'}
+                                                {checkoutPosition[0].toFixed(6)}, {checkoutPosition[1].toFixed(6)}
                                             </div>
                                         </Card>
 

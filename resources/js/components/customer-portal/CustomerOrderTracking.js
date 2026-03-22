@@ -230,8 +230,8 @@ const CustomerOrderTracking = ({ delivery }) => {
                     zoomControl={true}
                 >
                     <TileLayer 
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+                        attribution="&copy; Google Maps"
                     />
                     
                     {/* Customer location */}

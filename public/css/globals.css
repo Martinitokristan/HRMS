@@ -1055,6 +1055,9 @@ input, select, textarea {
 .mt-auto{
   margin-top: auto;
 }
+.-mt-2{
+  margin-top: -0.5rem;
+}
 .line-clamp-1{
   overflow: hidden;
   display: -webkit-box;
@@ -1231,6 +1234,9 @@ input, select, textarea {
 }
 .h-\[220px\]{
   height: 220px;
+}
+.h-\[240px\]{
+  height: 240px;
 }
 .max-h-0{
   max-height: 0px;
