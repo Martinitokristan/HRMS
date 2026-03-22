@@ -29,7 +29,7 @@ export default function ShoppingCart() {
 
     const fetchCart = async () => {
         try {
-            const response = await axios.get('/api/cart');
+            const response = await axios.get('/cart');
             setCart(response.data.data || []);
         } catch (error) {
             console.error('Failed to fetch cart:', error);
@@ -38,7 +38,7 @@ export default function ShoppingCart() {
 
     const fetchReservations = async () => {
         try {
-            const response = await axios.get('/api/cart/reservations');
+            const response = await axios.get('/cart/reservations');
             const reservations = response.data.data || [];
             setReservations(reservations);
             
@@ -58,7 +58,7 @@ export default function ShoppingCart() {
         
         setLoading(true);
         try {
-            await axios.put(`/api/cart/${itemId}`, { quantity });
+            await axios.put(`/cart/${itemId}`, { quantity });
             await fetchCart();
             await fetchReservations();
         } catch (error) {
@@ -71,7 +71,7 @@ export default function ShoppingCart() {
     const removeFromCart = async (itemId) => {
         setLoading(true);
         try {
-            await axios.delete(`/api/cart/${itemId}`);
+            await axios.delete(`/cart/${itemId}`);
             await fetchCart();
             await fetchReservations();
             toast.success('Item removed from cart');
@@ -85,7 +85,7 @@ export default function ShoppingCart() {
     const reserveItem = async (item) => {
         setLoading(true);
         try {
-            await axios.post('/api/cart/reserve', {
+            await axios.post('/cart/reserve', {
                 product_id: item.product_id,
                 product_variant_id: item.product_variant_id,
                 quantity: item.quantity
@@ -102,7 +102,7 @@ export default function ShoppingCart() {
     const releaseReservation = async (reservationId) => {
         setLoading(true);
         try {
-            await axios.post('/api/cart/release', { reservation_id: reservationId });
+            await axios.post('/cart/release', { reservation_id: reservationId });
             await fetchReservations();
             toast.success('Reservation released');
         } catch (error) {

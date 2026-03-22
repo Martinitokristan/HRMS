@@ -63,13 +63,28 @@ export default function Products() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get('/api/products', { params: { page, search, category_id: categoryFilter } });
-            const paginated = res.data.data;
-            setProducts({
-                data: paginated.data || [],
-                total: paginated.total || 0,
-                current_page: paginated.current_page || 1
-            });
+            const res = await axios.get('/products', { params: { page, search, category_id: categoryFilter } });
+            // Handle different possible response structures
+            const responseData = res.data?.data || res.data;
+            
+            if (responseData && typeof responseData === 'object' && 'data' in responseData) {
+                // Standard Laravel Paginator (if not further wrapped)
+                setProducts({
+                    data: responseData.data || [],
+                    total: responseData.total || 0,
+                    current_page: responseData.current_page || 1
+                });
+            } else if (Array.isArray(responseData)) {
+                // Direct array response
+                setProducts({
+                    data: responseData,
+                    total: responseData.length,
+                    current_page: 1
+                });
+            }
+        } catch (err) {
+            console.error('Failed to fetch products:', err);
+            showToast('Failed to load products list', 'error');
         } finally {
             if (!silent) setLoading(false);
         }

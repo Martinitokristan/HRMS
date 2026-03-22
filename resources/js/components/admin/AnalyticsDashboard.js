@@ -37,11 +37,11 @@ export default function AnalyticsDashboard() {
         setLoading(true);
         try {
             const [salesRes, topProductsRes, customerBehaviorRes, inventoryRes, profitRes] = await Promise.all([
-                axios.get(`/api/reports/sales?period=${period}`),
-                axios.get(`/api/reports/top-products?period=${period}`),
-                axios.get('/api/analytics/customer-behavior'),
-                axios.get('/api/analytics/inventory-forecast'),
-                axios.get('/api/analytics/profit-margins')
+                axios.get(`/reports/sales?period=${period}`),
+                axios.get(`/reports/top-products?period=${period}`),
+                axios.get('/analytics/customer-behavior'),
+                axios.get('/analytics/inventory-forecast'),
+                axios.get('/analytics/profit-margins')
             ]);
 
             setData({
@@ -60,7 +60,7 @@ export default function AnalyticsDashboard() {
 
     const exportReport = async (type) => {
         try {
-            const response = await axios.get(`/api/reports/export?type=${type}&period=${period}`, {
+            const response = await axios.get(`/reports/export?type=${type}&period=${period}`, {
                 responseType: 'blob'
             });
             

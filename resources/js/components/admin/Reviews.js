@@ -51,7 +51,7 @@ export default function Reviews() {
             if (statusFilter !== 'all') params.append('status', statusFilter);
             if (searchTerm) params.append('search', searchTerm);
 
-            const response = await axios.get(`/api/reviews?${params.toString()}`);
+            const response = await axios.get(`/reviews?${params.toString()}`);
             
             // If response is HTML, it means we probably hit a redirect or 404/500 page
             if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
@@ -88,7 +88,7 @@ export default function Reviews() {
         const performUpdate = async () => {
             closeConfirm();
             try {
-                await axios.put(`/api/reviews/${reviewId}/status`, { status });
+                await axios.put(`/reviews/${reviewId}/status`, { status });
                 showToast(`Review ${status} successfully`);
                 fetchReviews();
                 setSelectedReview(null);
@@ -117,7 +117,7 @@ export default function Reviews() {
         }
 
         try {
-            await axios.post(`/api/reviews/${reviewId}/respond`, {
+            await axios.post(`/reviews/${reviewId}/respond`, {
                 response: responseText
             });
             showToast('Response sent successfully');
@@ -137,7 +137,7 @@ export default function Reviews() {
             async () => {
                 closeConfirm();
                 try {
-                    await axios.delete(`/api/reviews/${reviewId}`);
+                    await axios.delete(`/reviews/${reviewId}`);
                     showToast('Review deleted successfully');
                     fetchReviews();
                     setSelectedReview(null);

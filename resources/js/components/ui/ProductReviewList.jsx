@@ -27,8 +27,8 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
     if (!silent) setLoading(true);
     try {
       const url = selectedVariant && selectedVariant !== 'all'
-        ? `/api/products/${productId}/reviews?variant=${selectedVariant}&sort=${sortBy}`
-        : `/api/products/${productId}/reviews?sort=${sortBy}`;
+        ? `/products/${productId}/reviews?variant=${selectedVariant}&sort=${sortBy}`
+        : `/products/${productId}/reviews?sort=${sortBy}`;
       const response = await axios.get(url);
       const data = response.data;
       
@@ -45,7 +45,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
 
   const handleHelpful = async (reviewId, isHelpful) => {
     try {
-      const response = await axios.post(`/api/reviews/${reviewId}/helpful`, { is_helpful: isHelpful }, {
+      const response = await axios.post(`/reviews/${reviewId}/helpful`, { is_helpful: isHelpful }, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('hrms_token')}`,
         }

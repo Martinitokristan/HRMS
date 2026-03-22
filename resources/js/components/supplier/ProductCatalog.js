@@ -46,7 +46,7 @@ export default function ProductCatalog() {
             if (categoryFilter) params.append('category_id', categoryFilter);
             if (statusFilter !== 'all') params.append('status', statusFilter);
 
-            const response = await axios.get(`/api/supplier/products?${params}`);
+            const response = await axios.get(`/supplier/products?${params}`);
             setProducts(response.data.data || []);
         } catch (error) {
             toast.error('Failed to fetch products');
@@ -57,7 +57,7 @@ export default function ProductCatalog() {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('/api/supplier/categories');
+            const response = await axios.get('/supplier/categories');
             setCategories(response.data.data || []);
         } catch (error) {
             console.error('Failed to fetch categories:', error);
@@ -66,7 +66,7 @@ export default function ProductCatalog() {
 
     const fetchStats = async () => {
         try {
-            const response = await axios.get('/api/supplier/stats');
+            const response = await axios.get('/supplier/stats');
             setStats(response.data.data);
         } catch (error) {
             console.error('Failed to fetch stats:', error);
@@ -77,7 +77,7 @@ export default function ProductCatalog() {
         if (!confirm('Are you sure you want to delete this product?')) return;
         
         try {
-            await axios.delete(`/api/supplier/products/${productId}`);
+            await axios.delete(`/supplier/products/${productId}`);
             toast.success('Product deleted successfully');
             fetchProducts();
             fetchStats();
@@ -90,7 +90,7 @@ export default function ProductCatalog() {
         const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
         
         try {
-            await axios.put(`/api/supplier/products/${productId}`, { is_active: newStatus === 'active' });
+            await axios.put(`/supplier/products/${productId}`, { is_active: newStatus === 'active' });
             toast.success(`Product ${newStatus === 'active' ? 'activated' : 'deactivated'}`);
             fetchProducts();
             fetchStats();

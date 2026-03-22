@@ -57,7 +57,7 @@ export default function ProductReviewsPage() {
         
         if (!silent) setLoading(true);
         try {
-            const response = await axios.get(`/api/products/${productId}`);
+            const response = await axios.get(`/products/${productId}`);
             const data = response.data;
             if (data.status === 'success') {
                 setProduct(data.data);

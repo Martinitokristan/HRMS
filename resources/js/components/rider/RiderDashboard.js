@@ -53,7 +53,7 @@ export default function RiderDashboard() {
 
     const fetchDashboard = async () => {
         try {
-            const response = await axios.get('/api/riders/me/dashboard');
+            const response = await axios.get('/riders/me/dashboard');
             setDashboard(response.data.data);
         } catch (error) {
             toast.error('Failed to fetch dashboard data');
@@ -64,7 +64,7 @@ export default function RiderDashboard() {
 
     const fetchActiveDelivery = async () => {
         try {
-            const response = await axios.get('/api/deliveries/active');
+            const response = await axios.get('/deliveries/active');
             setActiveDelivery(response.data.data);
         } catch (error) {
             // No active delivery is fine
@@ -77,7 +77,7 @@ export default function RiderDashboard() {
         
         setLocationLoading(true);
         try {
-            await axios.post(`/api/deliveries/${activeDelivery.id}/location`, {
+            await axios.post(`/deliveries/${activeDelivery.id}/location`, {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude
             });
@@ -94,7 +94,7 @@ export default function RiderDashboard() {
 
     const toggleStatus = async () => {
         try {
-            const response = await axios.post('/api/riders/me/toggle-status');
+            const response = await axios.post('/riders/me/toggle-status');
             setDashboard(prev => ({
                 ...prev,
                 availability: response.data.data.availability
@@ -107,7 +107,7 @@ export default function RiderDashboard() {
 
     const acceptDelivery = async (deliveryId) => {
         try {
-            await axios.post(`/api/deliveries/${deliveryId}/self-assign`);
+            await axios.post(`/deliveries/${deliveryId}/self-assign`);
             toast.success('Delivery accepted successfully');
             fetchActiveDelivery();
             fetchDashboard();
@@ -120,7 +120,7 @@ export default function RiderDashboard() {
         if (!activeDelivery) return;
         
         try {
-            await axios.post(`/api/deliveries/${activeDelivery.id}/status`, { status });
+            await axios.post(`/deliveries/${activeDelivery.id}/status`, { status });
             toast.success(`Delivery status updated to ${status}`);
             fetchActiveDelivery();
             fetchDashboard();

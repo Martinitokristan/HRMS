@@ -36,7 +36,7 @@ export default function Landing() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const r = await axios.get('/api/products', { params: { per_page: 8 } });
+            const r = await axios.get('/products', { params: { per_page: 8 } });
             const d = r.data.data;
             setProducts(d.data ? d.data : d);
         } catch (err) {
