@@ -63,12 +63,15 @@ export default function Reviews() {
 
             const data = response.data;
             
-            // Handle the response structure properly
-            if (data && data.data && data.data.data) {
+            // Handle the response structure properly with multiple fallbacks
+            if (data && data.data && data.data.data && Array.isArray(data.data.data)) {
                 setReviews(data.data.data);
             } else if (data && data.data && Array.isArray(data.data)) {
                 setReviews(data.data);
+            } else if (data && Array.isArray(data)) {
+                setReviews(data);
             } else {
+                console.warn('🔍 [Reviews] Unexpected data structure:', data);
                 setReviews([]);
             }
         } catch (error) {
@@ -416,7 +419,7 @@ export default function Reviews() {
             )}
             {/* Confirm Modal */}
             <ConfirmModal
-                modal={confirmModal}
+                modal={confirmModal || { show: false }}
                 onClose={closeConfirm}
             />
         </div>

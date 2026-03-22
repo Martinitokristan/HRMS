@@ -41,9 +41,15 @@ export default function ProductReviews({ productId }) {
         if (!silent) setLoading(true);
         try {
             const response = await axios.get(`/products/${productId}/reviews`);
-            setReviews(response.data.data.reviews || []);
-            setStats(response.data.data);
+            
+            // Handle different response structures safely
+            const reviewsData = response.data?.data?.reviews || response.data?.reviews || response.data?.data || [];
+            const statsData = response.data?.data || response.data;
+            
+            setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+            setStats(statsData);
         } catch (error) {
+            console.error('Failed to fetch reviews:', error);
             // Silently fail on background error
         } finally {
             if (!silent) setLoading(false);
@@ -285,7 +291,7 @@ export default function ProductReviews({ productId }) {
                 )}
             </div>
 
-            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
+            <ConfirmModal modal={confirmModal || { show: false }} onClose={closeConfirm} />
         </div>
     );
 }
