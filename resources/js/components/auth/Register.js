@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus, MapPin, Shield } from 'lucide-react';
+import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus, MapPin, Shield, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -52,6 +52,8 @@ export default function Register() {
     const [successMsg, setSuccessMsg] = useState('');
     const [capsWarning, setCapsWarning] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
+    const [gpsLoading, setGpsLoading] = useState(false);
+    const [pinnedAddressDetails, setPinnedAddressDetails] = useState('');
     const [mapCenter, setMapCenter] = useState([8.9475, 125.5406]); // Default Butuan City
 
     // Function to search coordinates based on address
@@ -80,6 +82,7 @@ export default function Register() {
                 const newCoords = { lat: parseFloat(lat), lon: parseFloat(lon) };
                 setFormData(prev => ({ ...prev, latitude: newCoords.lat, longitude: newCoords.lon }));
                 setMapCenter([newCoords.lat, newCoords.lon]);
+                setPinnedAddressDetails(response.data[0].display_name);
             } else {
                 alert("Location not found. Please click on the map manually to pin your location.");
                 // Center on a rough Filipino coordinate if totally lost
@@ -92,16 +95,55 @@ export default function Register() {
         }
     };
 
+    // Reverse Geocode to get address for a given lat/lon
+    const reverseGeocode = async (lat, lon) => {
+        try {
+            const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            if (res.data && res.data.display_name) {
+                setPinnedAddressDetails(res.data.display_name);
+            } else {
+                setPinnedAddressDetails('Location pinned on map');
+            }
+        } catch (error) {
+            setPinnedAddressDetails('Location pinned on map');
+        }
+    };
+
     // Handle manual map click
     const handleMapClick = (e) => {
         const { lat, lng } = e.latlng;
         setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+        reverseGeocode(lat, lng);
     };
 
     // Update coordinates when marker is dragged
     const onMarkerDragEnd = (e) => {
         const { lat, lng } = e.target.getLatLng();
         setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+        reverseGeocode(lat, lng);
+    };
+
+    // Get current GPS location
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser.');
+            return;
+        }
+        setGpsLoading(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setFormData(prev => ({ ...prev, latitude, longitude }));
+                setMapCenter([latitude, longitude]);
+                reverseGeocode(latitude, longitude);
+                setGpsLoading(false);
+            },
+            (error) => {
+                alert('Unable to retrieve your location. Please check your browser permissions.');
+                setGpsLoading(false);
+            },
+            { enableHighAccuracy: true }
+        );
     };
 
     const handleChange = (e) => {
@@ -363,17 +405,30 @@ export default function Register() {
                                             <MapPin className="h-4 w-4" />
                                             Pin Delivery Location
                                         </Label>
-                                        <Button 
-                                            type="button" 
-                                            variant="outline" 
-                                            size="sm" 
-                                            onClick={handleGeocode}
-                                            disabled={isGeocoding || formData.address.length < 5}
-                                            className="text-xs h-8"
-                                        >
-                                            {isGeocoding ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
-                                            Find on Map
-                                        </Button>
+                                        <div className="flex gap-2">
+                                            <Button 
+                                                type="button" 
+                                                variant="outline" 
+                                                size="sm" 
+                                                onClick={handleGetLocation}
+                                                disabled={gpsLoading}
+                                                className="text-xs h-8 px-2"
+                                                title="Use Current GPS Location"
+                                            >
+                                                {gpsLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Navigation className="h-3 w-3 text-primary" />}
+                                            </Button>
+                                            <Button 
+                                                type="button" 
+                                                variant="outline" 
+                                                size="sm" 
+                                                onClick={handleGeocode}
+                                                disabled={isGeocoding || formData.address.length < 5}
+                                                className="text-xs h-8"
+                                            >
+                                                {isGeocoding ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
+                                                Find on Map
+                                            </Button>
+                                        </div>
                                     </div>
                                     <p className="text-[11px] text-muted-foreground italic">
                                         Manual: Click on the map or drag the pin to your exact delivery spot.
@@ -381,7 +436,10 @@ export default function Register() {
                                     <div className="h-[220px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner cursor-crosshair">
                                         <MapContainer center={mapCenter} zoom={15} style={{ height: '100%', width: '100%' }}>
                                             <MapController center={mapCenter} zoom={15} onMapClick={handleMapClick} />
-                                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                                            <TileLayer 
+                                                url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" 
+                                                attribution="&copy; Google Maps" 
+                                            />
                                             <Marker 
                                                 position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : mapCenter} 
                                                 draggable={true}
@@ -393,11 +451,21 @@ export default function Register() {
                                                 <div className="bg-white p-4 rounded-xl shadow-lg border border-primary/10">
                                                     <MapPin className="h-8 w-8 text-primary mx-auto mb-2 opacity-50" />
                                                     <p className="text-sm font-bold text-foreground">Set Address First</p>
-                                                    <p className="text-[11px] text-muted-foreground">Then use 'Find on Map' or click the map manually.</p>
+                                                    <p className="text-[11px] text-muted-foreground">Then use 'Find on Map', GPS, or click the map manually.</p>
                                                 </div>
                                             </div>
                                         )}
                                     </div>
+                                    
+                                    {pinnedAddressDetails && (
+                                        <div className="text-xs p-2.5 bg-green-50/50 text-green-800 border-l-4 border-green-500 rounded-lg mt-2 flex items-start gap-2 shadow-sm">
+                                            <CheckCircle className="h-4 w-4 shrink-0 mt-0.5 text-green-600" />
+                                            <div>
+                                                <span className="font-bold block text-green-900 mb-0.5">Pinned Location Detected:</span>
+                                                <span className="text-green-700/90 leading-relaxed">{pinnedAddressDetails}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
