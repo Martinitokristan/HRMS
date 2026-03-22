@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, MessageSquare, ThumbsUp, CheckCircle, XCircle, Clock, Filter, Search } from 'lucide-react';
+import { Star, MessageSquare, ThumbsUp, CheckCircle, XCircle, Clock, Filter, Search, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import ConfirmModal from '../shared/ConfirmModal';
+import StatCard from '../shared/StatCard';
 
 export default function Reviews() {
     const [reviews, setReviews] = useState([]);
@@ -18,6 +20,22 @@ export default function Reviews() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const { showToast } = useToast();
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        variant: 'default'
+    });
+
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+
+    const closeConfirm = () => {
+        setConfirmModal(prev => ({ ...prev, show: false }));
+    };
 
     useEffect(() => {
         fetchReviews();
@@ -64,14 +82,28 @@ export default function Reviews() {
     };
 
     const updateReviewStatus = async (reviewId, status) => {
-        try {
-            await axios.put(`/api/reviews/${reviewId}/status`, { status });
-            showToast(`Review ${status} successfully`);
-            fetchReviews();
-            setSelectedReview(null);
-        } catch (error) {
-            console.error('Failed to update review status:', error);
-            showToast('Failed to update review status', 'error');
+        const performUpdate = async () => {
+            closeConfirm();
+            try {
+                await axios.put(`/api/reviews/${reviewId}/status`, { status });
+                showToast(`Review ${status} successfully`);
+                fetchReviews();
+                setSelectedReview(null);
+            } catch (error) {
+                console.error('Failed to update review status:', error);
+                showToast('Failed to update review status', 'error');
+            }
+        };
+
+        if (status === 'rejected') {
+            showConfirm(
+                'Reject Review',
+                'Are you sure you want to reject this review? It will be hidden from the storefront.',
+                performUpdate,
+                'destructive'
+            );
+        } else {
+            performUpdate();
         }
     };
 
@@ -96,17 +128,23 @@ export default function Reviews() {
     };
 
     const deleteReview = async (reviewId) => {
-        if (!confirm('Are you sure you want to delete this review?')) return;
-
-        try {
-            await axios.delete(`/api/reviews/${reviewId}`);
-            showToast('Review deleted successfully');
-            fetchReviews();
-            setSelectedReview(null);
-        } catch (error) {
-            console.error('Failed to delete review:', error);
-            showToast('Failed to delete review', 'error');
-        }
+        showConfirm(
+            'Delete Review',
+            'Are you sure you want to delete this review? This action cannot be undone.',
+            async () => {
+                closeConfirm();
+                try {
+                    await axios.delete(`/api/reviews/${reviewId}`);
+                    showToast('Review deleted successfully');
+                    fetchReviews();
+                    setSelectedReview(null);
+                } catch (error) {
+                    console.error('Failed to delete review:', error);
+                    showToast('Failed to delete review', 'error');
+                }
+            },
+            'destructive'
+        );
     };
 
     const getStatusBadge = (status) => {
@@ -148,6 +186,28 @@ export default function Reviews() {
                     <h1 className="text-2xl font-bold">Reviews Management</h1>
                     <p className="text-muted-foreground">Manage customer reviews and feedback</p>
                 </div>
+            </div>
+
+            {/* Stats Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <StatCard 
+                    label="Total Reviews" 
+                    value={reviews.length} 
+                    icon={MessageSquare} 
+                    accentColor="accent" 
+                />
+                <StatCard 
+                    label="Pending Approval" 
+                    value={reviews.filter(r => r.status === 'pending').length} 
+                    icon={Clock} 
+                    accentColor="amber" 
+                />
+                <StatCard 
+                    label="Approved Content" 
+                    value={reviews.filter(r => r.status === 'approved').length} 
+                    icon={ShieldCheck} 
+                    accentColor="green" 
+                />
             </div>
 
             {/* Filters */}
@@ -354,6 +414,11 @@ export default function Reviews() {
                     </Card>
                 </div>
             )}
+            {/* Confirm Modal */}
+            <ConfirmModal
+                modal={confirmModal}
+                onClose={closeConfirm}
+            />
         </div>
     );
 }
