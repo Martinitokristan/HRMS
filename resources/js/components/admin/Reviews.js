@@ -17,7 +17,7 @@ export default function Reviews() {
     const [responseText, setResponseText] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
-    const { toast } = useToast();
+    const { showToast } = useToast();
 
     useEffect(() => {
         fetchReviews();
@@ -25,12 +25,7 @@ export default function Reviews() {
 
     const fetchReviews = async () => {
         setLoading(true);
-        
-        // Debug: Check authentication token
         const token = localStorage.getItem('hrms_token');
-        console.log('🔍 [Reviews] Token found:', token ? 'YES' : 'NO');
-        console.log('🔍 [Reviews] Token length:', token ? token.length : 0);
-        console.log('🔍 [Reviews] Token starts with:', token ? token.substring(0, 20) + '...' : 'NONE');
         
         try {
             const params = new URLSearchParams();
@@ -38,46 +33,30 @@ export default function Reviews() {
             if (statusFilter !== 'all') params.append('status', statusFilter);
             if (searchTerm) params.append('search', searchTerm);
 
-            const response = await axios.get(`/api/reviews?${params.toString()}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const response = await axios.get(`/api/reviews?${params.toString()}`);
             
-            console.log('🔍 [Reviews] API Response:', response.status);
-            console.log('🔍 [Reviews] Response data type:', typeof response.data);
-            console.log('🔍 [Reviews] Response data:', response.data);
-            
-            // Parse response.data if it's a string
-            let data = response.data;
-            if (typeof data === 'string') {
-                try {
-                    data = JSON.parse(data);
-                    console.log('🔍 [Reviews] Parsed JSON data:', data);
-                } catch (e) {
-                    console.error('🔍 [Reviews] Failed to parse JSON:', e);
-                    setReviews([]);
-                    return;
-                }
+            // If response is HTML, it means we probably hit a redirect or 404/500 page
+            if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+                console.error('🔍 [Reviews] Received HTML instead of JSON. Check API routes.');
+                showToast('Failed to load reviews: Server returned an invalid format', 'error');
+                setReviews([]);
+                return;
             }
+
+            const data = response.data;
             
             // Handle the response structure properly
             if (data && data.data && data.data.data) {
                 setReviews(data.data.data);
-                console.log('🔍 [Reviews] Reviews loaded:', data.data.data.length);
+            } else if (data && data.data && Array.isArray(data.data)) {
+                setReviews(data.data);
             } else {
                 setReviews([]);
-                console.log('🔍 [Reviews] No reviews found in response');
             }
         } catch (error) {
             console.error('Failed to fetch reviews:', error);
-            if (error.response && error.response.status === 401) {
-                toast.error('Please login as admin to access reviews');
-                console.log('🔍 [Reviews] 401 Unauthorized - Admin login required');
-            } else {
-                toast.error('Failed to load reviews');
-                console.log('🔍 [Reviews] Error:', error.message);
-            }
+            const msg = error.response?.data?.message || 'Failed to load reviews';
+            showToast(msg, 'error');
             setReviews([]);
         } finally {
             setLoading(false);
@@ -86,43 +65,33 @@ export default function Reviews() {
 
     const updateReviewStatus = async (reviewId, status) => {
         try {
-            const token = localStorage.getItem('hrms_token');
-            await axios.put(`/api/reviews/${reviewId}/status`, { status }, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            toast.success(`Review ${status} successfully`);
+            await axios.put(`/api/reviews/${reviewId}/status`, { status });
+            showToast(`Review ${status} successfully`);
             fetchReviews();
             setSelectedReview(null);
         } catch (error) {
             console.error('Failed to update review status:', error);
-            toast.error('Failed to update review status');
+            showToast('Failed to update review status', 'error');
         }
     };
 
     const respondToReview = async (reviewId) => {
         if (!responseText.trim()) {
-            toast.error('Please enter a response');
+            showToast('Please enter a response', 'error');
             return;
         }
 
         try {
-            const token = localStorage.getItem('hrms_token');
             await axios.post(`/api/reviews/${reviewId}/respond`, {
                 response: responseText
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
             });
-            toast.success('Response sent successfully');
+            showToast('Response sent successfully');
             setResponseText('');
             fetchReviews();
             setSelectedReview(null);
         } catch (error) {
             console.error('Failed to respond to review:', error);
-            toast.error('Failed to send response');
+            showToast('Failed to send response', 'error');
         }
     };
 
@@ -130,18 +99,13 @@ export default function Reviews() {
         if (!confirm('Are you sure you want to delete this review?')) return;
 
         try {
-            const token = localStorage.getItem('hrms_token');
-            await axios.delete(`/api/reviews/${reviewId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            toast.success('Review deleted successfully');
+            await axios.delete(`/api/reviews/${reviewId}`);
+            showToast('Review deleted successfully');
             fetchReviews();
             setSelectedReview(null);
         } catch (error) {
             console.error('Failed to delete review:', error);
-            toast.error('Failed to delete review');
+            showToast('Failed to delete review', 'error');
         }
     };
 
