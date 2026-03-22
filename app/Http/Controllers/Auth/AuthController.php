@@ -109,11 +109,8 @@ class AuthController extends Controller
         });
 
         // Send Email - Wrapped in try-catch to prevent 500 error if SMTP is broken
-        try {
-            Mail::to($user->email)->send(new \App\Mail\VerifyEmail($user->name, $verifyToken, $role));
-        } catch (\Exception $e) {
-            \Log::error('Registration mail failed: ' . $e->getMessage());
-        }
+        // Send Email via Brevo API (Bypasses Railway SMTP block)
+        \App\Services\BrevoEmailService::sendVerificationEmail($user->email, $user->name, $verifyToken, $role);
 
         return response()->json([
             'message' => 'Registration successful! Please check your email to verify your account.',
@@ -173,11 +170,8 @@ class AuthController extends Controller
             'email_verification_token' => $verifyToken
         ]);
 
-        try {
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\VerifyEmail($user->name, $verifyToken, $user->role));
-        } catch (\Exception $e) {
-            \Log::error('Resend verification mail failed: ' . $e->getMessage());
-        }
+        // Send Email via Brevo API (Bypasses Railway SMTP block)
+        \App\Services\BrevoEmailService::sendVerificationEmail($user->email, $user->name, $verifyToken, $user->role);
 
         return response()->json(['message' => 'Verification email resent successfully!']);
     }
