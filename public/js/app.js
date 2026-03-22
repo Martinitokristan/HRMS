@@ -10545,7 +10545,7 @@ function MapController(_ref) {
     zoom = _ref.zoom,
     onMapClick = _ref.onMapClick;
   var map = (0,react_leaflet__WEBPACK_IMPORTED_MODULE_21__.useMap)();
-  useEffect(function () {
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (center) map.setView(center, zoom);
   }, [center, zoom, map]);
   (0,react_leaflet__WEBPACK_IMPORTED_MODULE_21__.useMapEvents)({
