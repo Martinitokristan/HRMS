@@ -10540,11 +10540,17 @@ leaflet__WEBPACK_IMPORTED_MODULE_25___default().Icon.Default.mergeOptions({
 });
 
 // Helper component to center map when coordinates change
-function ChangeView(_ref) {
+function MapController(_ref) {
   var center = _ref.center,
-    zoom = _ref.zoom;
+    zoom = _ref.zoom,
+    onMapClick = _ref.onMapClick;
   var map = (0,react_leaflet__WEBPACK_IMPORTED_MODULE_21__.useMap)();
-  map.setView(center, zoom);
+  useEffect(function () {
+    if (center) map.setView(center, zoom);
+  }, [center, zoom, map]);
+  (0,react_leaflet__WEBPACK_IMPORTED_MODULE_21__.useMapEvents)({
+    click: onMapClick
+  });
   return null;
 }
 function Register() {
@@ -10602,23 +10608,34 @@ function Register() {
   // Function to search coordinates based on address
   var handleGeocode = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var fullAddress, response, _response$data$, lat, lon, newCoords, _t;
+      var query, response, fallbackQuery, _response$data$, lat, lon, newCoords, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
-            fullAddress = "".concat(formData.address, ", ").concat(formData.municipality, ", ").concat(formData.province, ", Philippines");
-            if (!(formData.address.length < 5)) {
+            query = formData.address ? "".concat(formData.address, ", ").concat(formData.municipality, ", ").concat(formData.province, ", Philippines") : "".concat(formData.municipality, ", ").concat(formData.province, ", Philippines");
+            if (!(formData.municipality.length < 3)) {
               _context.n = 1;
               break;
             }
+            alert("Please enter a Municipality/City first.");
             return _context.a(2);
           case 1:
             setIsGeocoding(true);
             _context.p = 2;
             _context.n = 3;
-            return axios__WEBPACK_IMPORTED_MODULE_3___default().get("https://nominatim.openstreetmap.org/search?format=json&q=".concat(encodeURIComponent(fullAddress)));
+            return axios__WEBPACK_IMPORTED_MODULE_3___default().get("https://nominatim.openstreetmap.org/search?format=json&q=".concat(encodeURIComponent(query)));
           case 3:
             response = _context.v;
+            if (!(!response.data || response.data.length === 0)) {
+              _context.n = 5;
+              break;
+            }
+            fallbackQuery = "".concat(formData.municipality, ", ").concat(formData.province, ", Philippines");
+            _context.n = 4;
+            return axios__WEBPACK_IMPORTED_MODULE_3___default().get("https://nominatim.openstreetmap.org/search?format=json&q=".concat(encodeURIComponent(fallbackQuery)));
+          case 4:
+            response = _context.v;
+          case 5:
             if (response.data && response.data.length > 0) {
               _response$data$ = response.data[0], lat = _response$data$.lat, lon = _response$data$.lon;
               newCoords = {
@@ -10632,26 +10649,43 @@ function Register() {
                 });
               });
               setMapCenter([newCoords.lat, newCoords.lon]);
+            } else {
+              alert("Location not found. Please click on the map manually to pin your location.");
+              // Center on a rough Filipino coordinate if totally lost
+              setMapCenter([8.9475, 125.5406]);
             }
-            _context.n = 5;
+            _context.n = 7;
             break;
-          case 4:
-            _context.p = 4;
+          case 6:
+            _context.p = 6;
             _t = _context.v;
             console.error("Geocoding failed:", _t);
-          case 5:
-            _context.p = 5;
+          case 7:
+            _context.p = 7;
             setIsGeocoding(false);
-            return _context.f(5);
-          case 6:
+            return _context.f(7);
+          case 8:
             return _context.a(2);
         }
-      }, _callee, null, [[2, 4, 5, 6]]);
+      }, _callee, null, [[2, 6, 7, 8]]);
     }));
     return function handleGeocode() {
       return _ref2.apply(this, arguments);
     };
   }();
+
+  // Handle manual map click
+  var handleMapClick = function handleMapClick(e) {
+    var _e$latlng = e.latlng,
+      lat = _e$latlng.lat,
+      lng = _e$latlng.lng;
+    setFormData(function (prev) {
+      return _objectSpread(_objectSpread({}, prev), {}, {
+        latitude: lat,
+        longitude: lng
+      });
+    });
+  };
 
   // Update coordinates when marker is dragged
   var onMarkerDragEnd = function onMarkerDragEnd(e) {
@@ -11140,9 +11174,9 @@ function Register() {
                   })]
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsx)("p", {
                   className: "text-[11px] text-muted-foreground italic",
-                  children: "Drag the blue pin to your exact delivery spot for more accurate routing."
+                  children: "Manual: Click on the map or drag the pin to your exact delivery spot."
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsxs)("div", {
-                  className: "h-[220px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner",
+                  className: "h-[220px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner cursor-crosshair",
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsxs)(react_leaflet__WEBPACK_IMPORTED_MODULE_22__.MapContainer, {
                     center: mapCenter,
                     zoom: 15,
@@ -11150,9 +11184,10 @@ function Register() {
                       height: '100%',
                       width: '100%'
                     },
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsx)(ChangeView, {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsx)(MapController, {
                       center: mapCenter,
-                      zoom: 15
+                      zoom: 15,
+                      onMapClick: handleMapClick
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_24__.TileLayer, {
                       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_23__.Marker, {
@@ -11162,7 +11197,7 @@ function Register() {
                         dragend: onMarkerDragEnd
                       }
                     })]
-                  }), !formData.latitude && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsx)("div", {
+                  }), !formData.latitude && !formData.address && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsx)("div", {
                     className: "absolute inset-0 bg-background/60 backdrop-blur-[2px] z-[1000] flex items-center justify-center p-4 text-center",
                     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsxs)("div", {
                       className: "bg-white p-4 rounded-xl shadow-lg border border-primary/10",
@@ -11173,7 +11208,7 @@ function Register() {
                         children: "Set Address First"
                       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_27__.jsx)("p", {
                         className: "text-[11px] text-muted-foreground",
-                        children: "Then click 'Find on Map' to pin your exact location."
+                        children: "Then use 'Find on Map' or click the map manually."
                       })]
                     })
                   })]

@@ -24,9 +24,15 @@ L.Icon.Default.mergeOptions({
 });
 
 // Helper component to center map when coordinates change
-function ChangeView({ center, zoom }) {
+function MapController({ center, zoom, onMapClick }) {
     const map = useMap();
-    map.setView(center, zoom);
+    useEffect(() => {
+        if (center) map.setView(center, zoom);
+    }, [center, zoom, map]);
+
+    useMapEvents({
+        click: onMapClick,
+    });
     return null;
 }
 
@@ -50,23 +56,46 @@ export default function Register() {
 
     // Function to search coordinates based on address
     const handleGeocode = async () => {
-        const fullAddress = `${formData.address}, ${formData.municipality}, ${formData.province}, Philippines`;
-        if (formData.address.length < 5) return;
+        const query = formData.address 
+            ? `${formData.address}, ${formData.municipality}, ${formData.province}, Philippines`
+            : `${formData.municipality}, ${formData.province}, Philippines`;
+            
+        if (formData.municipality.length < 3) {
+            alert("Please enter a Municipality/City first.");
+            return;
+        }
 
         setIsGeocoding(true);
         try {
-            const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`);
+            // Internal logic: Try full address, then fallback to city
+            let response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+            
+            if (!response.data || response.data.length === 0) {
+                const fallbackQuery = `${formData.municipality}, ${formData.province}, Philippines`;
+                response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}`);
+            }
+
             if (response.data && response.data.length > 0) {
                 const { lat, lon } = response.data[0];
                 const newCoords = { lat: parseFloat(lat), lon: parseFloat(lon) };
                 setFormData(prev => ({ ...prev, latitude: newCoords.lat, longitude: newCoords.lon }));
                 setMapCenter([newCoords.lat, newCoords.lon]);
+            } else {
+                alert("Location not found. Please click on the map manually to pin your location.");
+                // Center on a rough Filipino coordinate if totally lost
+                setMapCenter([8.9475, 125.5406]); 
             }
         } catch (error) {
             console.error("Geocoding failed:", error);
         } finally {
             setIsGeocoding(false);
         }
+    };
+
+    // Handle manual map click
+    const handleMapClick = (e) => {
+        const { lat, lng } = e.latlng;
+        setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
     };
 
     // Update coordinates when marker is dragged
@@ -347,11 +376,11 @@ export default function Register() {
                                         </Button>
                                     </div>
                                     <p className="text-[11px] text-muted-foreground italic">
-                                        Drag the blue pin to your exact delivery spot for more accurate routing.
+                                        Manual: Click on the map or drag the pin to your exact delivery spot.
                                     </p>
-                                    <div className="h-[220px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner">
+                                    <div className="h-[220px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner cursor-crosshair">
                                         <MapContainer center={mapCenter} zoom={15} style={{ height: '100%', width: '100%' }}>
-                                            <ChangeView center={mapCenter} zoom={15} />
+                                            <MapController center={mapCenter} zoom={15} onMapClick={handleMapClick} />
                                             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                                             <Marker 
                                                 position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : mapCenter} 
@@ -359,12 +388,12 @@ export default function Register() {
                                                 eventHandlers={{ dragend: onMarkerDragEnd }}
                                             />
                                         </MapContainer>
-                                        {!formData.latitude && (
+                                        {!formData.latitude && !formData.address && (
                                             <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-[1000] flex items-center justify-center p-4 text-center">
                                                 <div className="bg-white p-4 rounded-xl shadow-lg border border-primary/10">
                                                     <MapPin className="h-8 w-8 text-primary mx-auto mb-2 opacity-50" />
                                                     <p className="text-sm font-bold text-foreground">Set Address First</p>
-                                                    <p className="text-[11px] text-muted-foreground">Then click 'Find on Map' to pin your exact location.</p>
+                                                    <p className="text-[11px] text-muted-foreground">Then use 'Find on Map' or click the map manually.</p>
                                                 </div>
                                             </div>
                                         )}
