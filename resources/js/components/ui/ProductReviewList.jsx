@@ -6,52 +6,54 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import RatingStars from '@/components/ui/RatingStars';
 import { ThumbsUp, MessageSquare, Filter, CheckCircle, Star } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import axios from 'axios';
 
 const ProductReviewList = ({ productId, variantId, productVariants }) => {
+  const { refreshTrigger } = useSilentRefresh('product_reviews');
   const [reviews, setReviews] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(reviews.length === 0);
   const [sortBy, setSortBy] = useState('recent');
   const [helpfulVotes, setHelpfulVotes] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(variantId || 'all');
 
   useEffect(() => {
-    fetchReviews();
-  }, [productId, selectedVariant, sortBy]);
+    fetchReviews(reviews.length > 0);
+  }, [productId, selectedVariant, sortBy, refreshTrigger]);
 
-  const fetchReviews = async () => {
-    setLoading(true);
+  const fetchReviews = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const url = selectedVariant && selectedVariant !== 'all'
         ? `/api/products/${productId}/reviews?variant=${selectedVariant}&sort=${sortBy}`
         : `/api/products/${productId}/reviews?sort=${sortBy}`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const response = await axios.get(url);
+      const data = response.data;
       
-      if (response.ok) {
+      if (data.status === 'success' || data.data) {
         setReviews(data.data.reviews?.data || []);
         setSummary(data.data.summary);
       }
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      // Silence background check
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   const handleHelpful = async (reviewId, isHelpful) => {
     try {
-      const response = await fetch(`/api/reviews/${reviewId}/helpful`, {
-        method: 'POST',
+      const response = await axios.post(`/api/reviews/${reviewId}/helpful`, { is_helpful: isHelpful }, {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('hrms_token')}`,
-        },
-        body: JSON.stringify({ is_helpful: isHelpful }),
+        }
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.data.status === 'success' || response.data.data) {
+        const data = response.data;
+        markStale('product_reviews');
         setHelpfulVotes(prev => ({
           ...prev,
           [reviewId]: data.data.helpful_count

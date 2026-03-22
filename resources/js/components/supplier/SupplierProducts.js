@@ -13,15 +13,33 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Plus, X, Upload, ClipboardList, Package, CheckCircle2 } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierProducts() {
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('supplier_products');
     const [products, setProducts] = useState({ data: [], total: 0 });
     const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(products.data.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
     const [formOpen, setFormOpen] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -36,7 +54,6 @@ export default function SupplierProducts() {
     const [variantExtraImages, setVariantExtraImages] = useState({});
     const [variantImagePreviews, setVariantImagePreviews] = useState({});
     const [variantExtraPreviews, setVariantExtraPreviews] = useState({});
-    const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [additionalImagePreviews, setAdditionalImagePreviews] = useState([]);
     const [existingAdditionalImages, setExistingAdditionalImages] = useState([]);
@@ -48,7 +65,9 @@ export default function SupplierProducts() {
 
     const location = useLocation();
     
-    useEffect(() => { fetchProducts(); }, [page, search, categoryFilter]);
+    useEffect(() => { 
+        fetchProducts(products.data.length > 0); 
+    }, [page, search, categoryFilter, refreshTrigger]);
     useEffect(() => { fetchCategories(); fetchVariantValues(); }, []);
 
     // Sync URL search params with local state
@@ -96,8 +115,8 @@ export default function SupplierProducts() {
         }
     };
 
-    const fetchProducts = async () => {
-        setLoading(true);
+    const fetchProducts = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const params = { page, per_page: 15 };
             if (search) params.search = search;
@@ -105,9 +124,9 @@ export default function SupplierProducts() {
             const res = await axios.get('/supplier/products', { params });
             setProducts(res.data.data);
         } catch (e) {
-            showToast('Failed to load products', 'error');
+            // Silently fail on background refresh
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
@@ -355,8 +374,9 @@ export default function SupplierProducts() {
                 await axios.post('/supplier/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                 showToast('Product created!', 'success');
             }
+            markStale('supplier_products', 'admin_products', 'customer_shop');
             setFormOpen(false);
-            fetchProducts();
+            fetchProducts(true);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to save product', 'error');
         } finally {
@@ -364,16 +384,25 @@ export default function SupplierProducts() {
         }
     };
 
-    const handleDelete = async () => {
-        if (!deleteConfirm) return;
+    const performDelete = async (id) => {
+        closeConfirm();
         try {
-            await axios.delete(`/supplier/products/${deleteConfirm.id}`);
+            await axios.delete(`/supplier/products/${id}`);
             showToast('Product deleted', 'success');
-            setDeleteConfirm(null);
-            fetchProducts();
+            markStale('supplier_products', 'admin_products', 'customer_shop');
+            fetchProducts(true);
         } catch (err) {
             showToast('Failed to delete product', 'error');
         }
+    };
+
+    const handleDelete = (product) => {
+        showConfirm(
+            'Delete Product',
+            `Are you sure you want to delete ${product.name}? This cannot be undone.`,
+            () => performDelete(product.id),
+            'destructive'
+        );
     };
 
     // FULLSCREEN PRODUCT FORM
@@ -389,7 +418,7 @@ export default function SupplierProducts() {
                         <h2 className="text-xl font-extrabold text-foreground">{editing ? 'Edit Product' : 'Add New Product'}</h2>
                     </div>
                     <div className="flex gap-3">
-                        {editing && <Button variant="destructive" size="sm" onClick={() => { setFormOpen(false); setDeleteConfirm(editing); }}>Delete</Button>}
+                        {editing && <Button variant="destructive" size="sm" onClick={() => { setFormOpen(false); handleDelete(editing); }}>Delete</Button>}
                         <Button variant="outline" size="sm" onClick={() => setFormOpen(false)} disabled={submitting}>Cancel</Button>
                         <Button size="sm" onClick={handleSubmit} disabled={submitting}>{submitting ? 'Saving...' : (editing ? 'Update Product' : 'Create Product')}</Button>
                     </div>
@@ -957,18 +986,7 @@ export default function SupplierProducts() {
 
             <Pagination page={page} total={products.total} perPage={15} onChange={setPage} />
 
-            {/* Delete Confirm */}
-            {/* Delete Confirm */}
-
-            <Modal isOpen={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} title="Delete Product?" size="sm" hideFooter>
-                <p className="mb-6 text-muted-foreground">
-                    Are you sure you want to delete <strong className="text-foreground">{deleteConfirm?.name}</strong>? This cannot be undone.
-                </p>
-                <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
-                    <Button variant="destructive" className="flex-1" onClick={handleDelete}>Delete</Button>
-                </div>
-            </Modal>
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

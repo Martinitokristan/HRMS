@@ -10,40 +10,55 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Bike, Eye, CalendarCheck, UserCheck } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function Riders() {
+    const { refreshTrigger } = useSilentRefresh('admin_riders');
     const [riders, setRiders] = useState({ data: [], total: 0 });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(riders.data.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [selectedRider, setSelectedRider] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { showToast } = useToast();
 
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
+
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await axios.get('/riders', { params: { page, search, status: statusFilter === 'all' ? '' : statusFilter } });
+            const paginatedData = res.data.data;
+            setRiders({
+                data: paginatedData.data ? paginatedData.data : paginatedData,
+                total: paginatedData.total || paginatedData.length || 0
+            });
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
 
     useEffect(() => {
         let isMounted = true;
-        const fetchRiders = () => {
+        const debounce = setTimeout(() => {
             if (!isMounted) return;
-            setLoading(true);
-            axios.get('/riders', { params: { page, search, status: statusFilter === 'all' ? '' : statusFilter } })
-                .then(res => {
-                    const paginatedData = res.data.data;
-                    if (isMounted) {
-                        setRiders({
-                            data: paginatedData.data ? paginatedData.data : paginatedData,
-                            total: paginatedData.total || paginatedData.length || 0
-                        });
-                    }
-                })
-                .finally(() => {
-                    if (isMounted) setLoading(false);
-                });
-        };
-        const debounce = setTimeout(fetchRiders, 400);
+            fetchData(riders.data.length > 0);
+        }, 400);
         return () => {
             clearTimeout(debounce);
             isMounted = false;
@@ -56,21 +71,32 @@ export default function Riders() {
         try {
             await axios.post(`/riders/${id}/interview`, { interview_at: datetime });
             showToast('Interview scheduled!', 'success');
-            triggerRefresh();
+            markStale('admin_riders');
+            fetchData(true);
         } catch (err) {
             showToast('Failed to schedule interview', 'error');
         }
     };
 
-    const handleHire = async (id) => {
-        if (!confirm('Are you sure you want to hire and activate this rider?')) return;
+    const performHire = async (id) => {
+        closeConfirm();
         try {
             await axios.post(`/riders/${id}/approve`);
             showToast('Rider hired and account activated!', 'success');
-            triggerRefresh();
+            markStale('admin_riders');
+            fetchData(true);
         } catch (err) {
             showToast('Failed to hire rider', 'error');
         }
+    };
+
+    const handleHire = (id) => {
+        showConfirm(
+            'Hire Rider',
+            'Are you sure you want to hire and activate this rider?',
+            () => performHire(id),
+            'default'
+        );
     };
 
     return (
@@ -202,6 +228,8 @@ export default function Riders() {
                 onClose={() => setIsModalOpen(false)} 
                 rider={selectedRider} 
             />
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

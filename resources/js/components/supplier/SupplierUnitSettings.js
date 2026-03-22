@@ -8,32 +8,47 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Plus, Trash2 } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierUnitSettings() {
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('supplier_unit_types');
     const [unitTypes, setUnitTypes] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(unitTypes.length === 0);
     const [saving, setSaving] = useState(false);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
     const [newUnit, setNewUnit] = useState({ purchase_unit: '', sell_unit: '', multiplier: 1 });
 
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await axios.get('/supplier/unit-types');
+            setUnitTypes(res.data.data || []);
+        } catch (err) {
+            // Silence background error
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        let isMounted = true;
-        const fetchData = async () => {
-            try {
-                const res = await axios.get('/supplier/unit-types');
-                if (!isMounted) return;
-                setUnitTypes(res.data.data || []);
-            } catch (err) {
-                if (isMounted) showToast('Failed to load unit types', 'error');
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-        fetchData();
-        return () => { isMounted = false; };
+        fetchData(unitTypes.length > 0);
     }, [refreshTrigger]);
 
     const handleSaveUnit = async () => {
@@ -45,8 +60,9 @@ export default function SupplierUnitSettings() {
         try {
             await axios.post('/supplier/unit-types', newUnit);
             showToast('Unit type added successfully');
+            markStale('supplier_unit_types');
             setNewUnit({ purchase_unit: '', sell_unit: '', multiplier: 1 });
-            triggerRefresh();
+            fetchData(true);
         } catch (e) {
             showToast(e.response?.data?.message || 'Error saving unit type', 'error');
         } finally {
@@ -54,15 +70,25 @@ export default function SupplierUnitSettings() {
         }
     };
 
-    const handleDeleteUnit = async (id) => {
-        if (!confirm('Delete this unit type? Products using it may be affected.')) return;
+    const performDeleteUnit = async (id) => {
+        closeConfirm();
         try {
             await axios.delete(`/supplier/unit-types/${id}`);
             showToast('Unit type deleted');
-            triggerRefresh();
+            markStale('supplier_unit_types');
+            fetchData(true);
         } catch (e) {
             showToast('Error deleting unit type', 'error');
         }
+    };
+
+    const handleDeleteUnit = (id) => {
+        showConfirm(
+            'Delete Unit Type',
+            'Delete this unit type? Products using it may be affected.',
+            () => performDeleteUnit(id),
+            'destructive'
+        );
     };
 
     if (loading) {
@@ -166,6 +192,8 @@ export default function SupplierUnitSettings() {
                     <p>• <strong>Example:</strong> Buy screws by "Box" (100 pieces), sell by "Piece" → Conversion: 1:100</p>
                 </div>
             </Card>
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

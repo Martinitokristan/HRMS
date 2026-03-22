@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Camera, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const RiderSettings = ({ onBack }) => {
-    const { user, setUser } = useAuth();
+    const { user, setUser, refreshSettings } = useAuth();
     const [profileData, setProfileData] = useState({
         name: user?.name || '',
         phone: user?.phone || '',
@@ -30,6 +30,7 @@ const RiderSettings = ({ onBack }) => {
             const res = await axios.put('/riders/me/profile', profileData);
             setMessage({ type: 'success', text: 'Profile updated successfully' });
             setUser(res.data.user);
+            if (refreshSettings) refreshSettings();
         } catch (err) {
             setMessage({ type: 'error', text: err.response?.data?.message || 'Update failed' });
         } finally {
@@ -51,6 +52,7 @@ const RiderSettings = ({ onBack }) => {
             });
             setMessage({ type: 'success', text: 'Photo updated successfully' });
             setUser(res.data.user);
+            if (refreshSettings) refreshSettings();
         } catch (err) {
             setMessage({ type: 'error', text: 'Upload failed' });
         } finally {

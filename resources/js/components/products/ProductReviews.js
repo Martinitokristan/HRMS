@@ -7,9 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Star, ThumbsUp, MessageSquare, User, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function ProductReviews({ productId }) {
     const { user } = useAuth();
+    const { refreshTrigger } = useSilentRefresh('admin_reviews');
     const [reviews, setReviews] = useState([]);
     const [rating, setRating] = useState(0);
     const [review, setReview] = useState('');
@@ -19,22 +23,39 @@ export default function ProductReviews({ productId }) {
     const [hoveredStar, setHoveredStar] = useState(0);
     const [stats, setStats] = useState(null);
 
-    useEffect(() => {
-        fetchReviews();
-        if (user) {
-            checkEligibility();
-        }
-    }, [productId, user]);
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
-    const fetchReviews = async () => {
+    const fetchReviews = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const response = await axios.get(`/products/${productId}/reviews`);
             setReviews(response.data.data.reviews || []);
             setStats(response.data.data);
         } catch (error) {
-            console.error('Failed to fetch reviews:', error);
+            // Silently fail on background error
+        } finally {
+            if (!silent) setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchReviews(reviews.length > 0);
+        if (user) {
+            checkEligibility();
+        }
+    }, [productId, user, refreshTrigger]);
 
     const checkEligibility = async () => {
         try {
@@ -62,7 +83,8 @@ export default function ProductReviews({ productId }) {
             setRating(0);
             setReview('');
             setCanReview(false);
-            fetchReviews();
+            markStale('admin_reviews', 'admin_dashboard');
+            fetchReviews(true);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to submit review');
         } finally {
@@ -73,7 +95,8 @@ export default function ProductReviews({ productId }) {
     const markHelpful = async (reviewId) => {
         try {
             await axios.post(`/api/reviews/${reviewId}/helpful`, { is_helpful: true });
-            fetchReviews();
+            markStale('admin_reviews');
+            fetchReviews(true);
             toast.success('Thank you for your feedback!');
         } catch (error) {
             toast.error('Failed to mark as helpful');
@@ -261,6 +284,8 @@ export default function ProductReviews({ productId }) {
                     ))
                 )}
             </div>
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

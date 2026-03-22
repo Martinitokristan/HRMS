@@ -8,11 +8,28 @@ axios.defaults.baseURL = '/api';
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [settings, setSettings] = useState({});
+    const [categories, setCategories] = useState([]);
     // Start as true — we DON'T know yet if the token is valid
     const [loading, setLoading] = useState(true);
 
+    const refreshSettings = async () => {
+        try {
+            const res = await axios.get('/settings');
+            setSettings(res.data);
+        } catch (e) {}
+    };
+
+    const refreshCategories = async () => {
+        try {
+            const res = await axios.get('/categories');
+            setCategories(res.data?.data || []);
+        } catch (e) {}
+    };
+
     useEffect(() => {
         const storedToken = localStorage.getItem('hrms_token');
+        refreshCategories();
         if (storedToken) {
             // Attach header before the me() call
             axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
@@ -60,7 +77,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, loginWithToken }}>
+        <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, loginWithToken, settings, refreshSettings, categories, refreshCategories }}>
             {children}
         </AuthContext.Provider>
     );

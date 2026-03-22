@@ -11,40 +11,56 @@ import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableFooter } from '@/components/ui/table';
 import { AlertCircle, CheckCircle2, XCircle, Loader2, Package } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function PurchaseTab() {
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('admin_purchases');
+    
     const [pos, setPos] = useState({ data: [], total: 0 });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(pos.data.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
 
     const [viewPo, setViewPo] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
 
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({ show: false, title: '', message: '', onConfirm: null, variant: 'default' });
+    };
+
+    const fetchPos = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await axios.get('/purchase-orders', { params: { page, search, status: statusFilter } });
+            const paginatedData = res.data.data;
+            setPos({
+                data: paginatedData.data ? paginatedData.data : paginatedData,
+                total: paginatedData.total || paginatedData.length || 0
+            });
+        } catch (err) {
+            // never wipe existing data on background error
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
         let isMounted = true;
-        const fetchPos = () => {
+        const debounce = setTimeout(() => {
             if (!isMounted) return;
-            setLoading(true);
-            axios.get('/purchase-orders', { params: { page, search, status: statusFilter } })
-                .then(res => {
-                    const paginatedData = res.data.data;
-                    if (isMounted) {
-                        setPos({
-                            data: paginatedData.data ? paginatedData.data : paginatedData,
-                            total: paginatedData.total || paginatedData.length || 0
-                        });
-                    }
-                })
-                .finally(() => {
-                    if (isMounted) setLoading(false);
-                });
-        };
-        const debounce = setTimeout(fetchPos, 400);
+            fetchPos(pos.data.length > 0);
+        }, 400);
         return () => {
             clearTimeout(debounce);
             isMounted = false;
@@ -53,25 +69,32 @@ export default function PurchaseTab() {
 
 
     const handleAction = async (poId, action) => {
+        setActionLoading(true);
+        try {
+            await axios.post(`/purchase-orders/${poId}/${action}`);
+            showToast(`PO ${action}d successfully`);
+            
+            // Re-fetch quietly
+            markStale('admin_purchases', 'admin_stock', 'admin_dashboard', 'supplier_orders');
+            fetchPos(true);
+            
+            setViewPo(null);
+            closeConfirm();
+        } catch (err) {
+            showToast(err.response?.data?.message || `Failed to ${action} PO`, 'error');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const confirmAction = (poId, action) => {
         const confirmMsg = action === 'approve' 
             ? 'Approve and send this PO to the supplier?' 
             : action === 'decline'
             ? 'Are you sure you want to decline/cancel this PO?'
             : 'Mark as received? This will automatically increase your inventory stock for all items in this PO.';
         
-        if (!confirm(confirmMsg)) return;
-
-        setActionLoading(true);
-        try {
-            await axios.post(`/purchase-orders/${poId}/${action}`);
-            showToast(`PO ${action}d successfully`);
-            triggerRefresh();
-            setViewPo(null);
-        } catch (err) {
-            showToast(err.response?.data?.message || `Failed to ${action} PO`, 'error');
-        } finally {
-            setActionLoading(false);
-        }
+        showConfirm('Confirm Action', confirmMsg, () => handleAction(poId, action), action === 'decline' ? 'destructive' : 'default');
     };
 
 
@@ -256,7 +279,7 @@ export default function PurchaseTab() {
                                     <>
                                         <Button 
                                             disabled={actionLoading} 
-                                            onClick={() => handleAction(viewPo.id, 'approve')}
+                                            onClick={() => confirmAction(viewPo.id, 'approve')}
                                             className="shadow-md shadow-primary/20"
                                         >
                                             Authorize PO
@@ -265,7 +288,7 @@ export default function PurchaseTab() {
                                             variant="outline"
                                             className="border-destructive/30 text-destructive hover:bg-destructive/5"
                                             disabled={actionLoading} 
-                                            onClick={() => handleAction(viewPo.id, 'decline')}
+                                            onClick={() => confirmAction(viewPo.id, 'decline')}
                                         >
                                             Decline Request
                                         </Button>
@@ -275,7 +298,7 @@ export default function PurchaseTab() {
                                 {viewPo.status === 'supplier_delivered' && (
                                     <Button 
                                         disabled={actionLoading} 
-                                        onClick={() => handleAction(viewPo.id, 'receive')}
+                                        onClick={() => confirmAction(viewPo.id, 'receive')}
                                         className="shadow-md shadow-primary/20"
                                     >
                                         Confirm & Add to Stock
@@ -307,6 +330,8 @@ export default function PurchaseTab() {
                     </div>
                 )}
             </Modal>
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

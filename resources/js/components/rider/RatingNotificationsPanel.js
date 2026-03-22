@@ -6,21 +6,22 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Star, Bell, BellOff, RefreshCw, Filter } from 'lucide-react';
 import RatingNotification from './RatingNotification';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
 
 export default function RatingNotificationsPanel() {
+    const { refreshTrigger } = useSilentRefresh('rider_rating_notifications');
     const [notifications, setNotifications] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(notifications.length === 0);
     const [filter, setFilter] = useState('all'); // all, unread, read
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
-        fetchNotifications();
-        // Set up polling for new notifications
-        const interval = setInterval(fetchNotifications, 5000);
-        return () => clearInterval(interval);
-    }, []);
+        fetchNotifications(notifications.length > 0);
+    }, [refreshTrigger]);
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const response = await axios.get('/riders/me/notifications');
             const allNotifications = response.data.data || [];
@@ -32,16 +33,17 @@ export default function RatingNotificationsPanel() {
             
             setNotifications(ratingNotifications);
         } catch (error) {
-            console.error('Failed to fetch notifications:', error);
+            // Silence background check
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
     const handleMarkAsRead = async (notificationId) => {
         try {
             await axios.post('/riders/me/notifications/read');
-            // Update local state
+            markStale('rider_rating_notifications');
+            // Update local state for immediate feedback
             setNotifications(prev => 
                 prev.map(notif => 
                     notif.id === notificationId 
@@ -57,6 +59,7 @@ export default function RatingNotificationsPanel() {
     const handleMarkAllAsRead = async () => {
         try {
             await axios.post('/riders/me/notifications/read');
+            markStale('rider_rating_notifications');
             setNotifications(prev => 
                 prev.map(notif => ({ ...notif, read_at: new Date().toISOString() }))
             );
@@ -67,7 +70,7 @@ export default function RatingNotificationsPanel() {
 
     const handleRefresh = async () => {
         setRefreshing(true);
-        await fetchNotifications();
+        await fetchNotifications(true);
         setRefreshing(false);
     };
 

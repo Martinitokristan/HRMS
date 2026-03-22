@@ -7,14 +7,18 @@ import { ArrowLeft, Star, MessageSquare, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ProductReviewList from '@/components/ui/ProductReviewList';
 import ProductReviewForm from '@/components/ui/ProductReviewForm';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import axios from 'axios';
 
 export default function ProductReviewsPage() {
     const params = useParams();
     const productId = params.id;
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { refreshTrigger } = useSilentRefresh('product_reviews');
     const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!product);
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [canReview, setCanReview] = useState(false);
     const [reviewSubmitted, setReviewSubmitted] = useState(false);
@@ -39,25 +43,22 @@ export default function ProductReviewsPage() {
             }
         }
         
-        fetchProduct();
+        fetchProduct(!!product);
         if (user) {
             checkReviewEligibility();
         }
-    }, [productId, user, selectedVariant]);
+    }, [productId, user, selectedVariant, refreshTrigger]);
 
-    const fetchProduct = async () => {
+    const fetchProduct = async (silent = false) => {
         if (!productId) {
-            console.error('No productId provided');
-            setLoading(false);
+            if (!silent) setLoading(false);
             return;
         }
         
+        if (!silent) setLoading(true);
         try {
-            const response = await fetch(`/api/products/${productId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            const data = await response.json();
+            const response = await axios.get(`/api/products/${productId}`);
+            const data = response.data;
             if (data.status === 'success') {
                 setProduct(data.data);
                 
@@ -74,11 +75,9 @@ export default function ProductReviewsPage() {
                 }
             }
         } catch (error) {
-            console.error('Error fetching product:', error);
-            // Show error message to user
-            alert('Failed to load product. Please try again.');
+            // Silence background check
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
@@ -115,11 +114,8 @@ export default function ProductReviewsPage() {
     const handleReviewSubmitted = (newReview) => {
         setReviewSubmitted(true);
         setShowReviewForm(false);
-        // The review will be immediately visible since it's auto-approved
-        // We can trigger a refresh of the reviews list
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+        markStale('product_reviews', 'admin_reviews');
+        fetchProduct(true);
     };
 
     const handleBackToProduct = () => {

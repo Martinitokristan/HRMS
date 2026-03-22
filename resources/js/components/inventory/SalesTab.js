@@ -9,69 +9,105 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SalesTab() {
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('admin_sales');
+    
     const [sales, setSales] = useState({ data: [], total: 0, current_page: 1 });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(sales.data.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
 
     const [viewOrder, setViewOrder] = useState(null);
 
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({ show: false, title: '', message: '', onConfirm: null, variant: 'default' });
+    };
+
+    const fetchProds = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await axios.get('/sales', { params: { page, search, status: statusFilter } });
+            const paginated = res.data.data;
+            setSales({
+                data: paginated.data || [],
+                total: paginated.total || 0,
+                current_page: paginated.current_page || 1
+            });
+        } catch (err) {
+            // never wipe existing data on background error
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
         let isMounted = true;
-        const fetchProds = () => {
+        const debounce = setTimeout(() => {
             if (!isMounted) return;
-            setLoading(true);
-            axios.get('/sales', { params: { page, search, status: statusFilter } })
-                .then(res => {
-                    const paginated = res.data.data;
-                    if (isMounted) {
-                        setSales({
-                            data: paginated.data || [],
-                            total: paginated.total || 0,
-                            current_page: paginated.current_page || 1
-                        });
-                    }
-                })
-                .finally(() => {
-                    if (isMounted) setLoading(false);
-                });
-        };
-        const debounce = setTimeout(fetchProds, 400);
+            fetchProds(sales.data.length > 0);
+        }, 400);
         return () => {
             clearTimeout(debounce);
             isMounted = false;
         };
     }, [page, search, statusFilter, refreshTrigger]);
 
-    const handleReturn = async (saleId) => {
-        if (!confirm('Are you sure you want to mark this sale as returned? Stock will be added back to inventory.')) return;
+    const performReturn = async (saleId) => {
         try {
             await axios.post(`/sales/${saleId}/return`);
             showToast('Order returned and stock restored');
-            triggerRefresh();
+            markStale('admin_sales', 'admin_stock', 'admin_dashboard', 'customer_orders');
+            fetchProds(true);
             setViewOrder(null);
+            closeConfirm();
         } catch (err) {
             showToast('Failed to return order', 'error');
         }
     };
 
-    const handleUpdateStatus = async (saleId, newStatus) => {
-        const labels = { confirmed: 'confirm', out_for_delivery: 'mark as out for delivery', delivered: 'mark as delivered', cancelled: 'cancel' };
-        if (!confirm(`Are you sure you want to ${labels[newStatus] || newStatus} this order?`)) return;
+    const handleReturn = (saleId) => {
+        showConfirm(
+            'Return Order',
+            'Are you sure you want to mark this sale as returned? Stock will be added back to inventory.',
+            () => performReturn(saleId),
+            'destructive'
+        );
+    };
+
+    const performUpdateStatus = async (saleId, newStatus) => {
         try {
             const res = await axios.put(`/sales/${saleId}/status`, { status: newStatus });
             showToast(res.data.message || 'Status updated');
             setViewOrder(res.data.data);
-            triggerRefresh();
+            markStale('admin_sales', 'admin_dashboard', 'admin_deliveries', 'customer_orders', 'rider_dashboard');
+            fetchProds(true);
+            closeConfirm();
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to update status', 'error');
         }
+    };
+
+    const handleUpdateStatus = (saleId, newStatus) => {
+        const labels = { confirmed: 'confirm', out_for_delivery: 'mark as out for delivery', delivered: 'mark as delivered', cancelled: 'cancel' };
+        showConfirm(
+            'Update Status',
+            `Are you sure you want to ${labels[newStatus] || newStatus} this order?`,
+            () => performUpdateStatus(saleId, newStatus),
+            newStatus === 'cancelled' ? 'destructive' : 'default'
+        );
     };
 
     const getNextStatuses = (currentStatus) => {
@@ -233,6 +269,8 @@ export default function SalesTab() {
                     </div>
                 )}
             </Modal>
+            
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

@@ -14,19 +14,37 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertTriangle } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierOrders() {
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const highlightId = searchParams.get('id');
+    const { refreshTrigger } = useSilentRefresh('supplier_orders');
     const [orders, setOrders] = useState({ data: [], total: 0 });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(orders.data.length === 0);
     const [page, setPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [deliveryNotes, setDeliveryNotes] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
     // Reject modal state
     const [rejectModal, setRejectModal] = useState(null); // holds the order to reject
@@ -34,9 +52,8 @@ export default function SupplierOrders() {
     const [rejectError, setRejectError] = useState('');
 
     useEffect(() => {
-        console.log("SupplierOrders component version: 1.0.1 (Accept/Reject Live)");
-        fetchOrders();
-    }, [page, statusFilter]);
+        fetchOrders(orders.data.length > 0);
+    }, [page, statusFilter, refreshTrigger]);
 
     useEffect(() => {
         if (highlightId && orders.data?.length > 0 && !selectedOrder) {
@@ -47,34 +64,42 @@ export default function SupplierOrders() {
         }
     }, [highlightId, orders.data]);
 
-    const fetchOrders = async () => {
+    const fetchOrders = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
-            setLoading(true);
             const params = { page, per_page: 15 };
             if (statusFilter) params.status = statusFilter;
-            
+
             const res = await axios.get('/supplier/purchase-orders', { params });
             setOrders(res.data.data);
         } catch (err) {
-            console.error('Failed to fetch orders:', err);
-            showToast('Failed to load orders', 'error');
+            // Silently fail on background refresh
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
-    const handleAccept = async (order) => {
-        if (!confirm(`Accept PO ${order.po_number}? This confirms you have the stock available.`)) return;
+    const performAccept = async (order) => {
+        closeConfirm();
         setSubmitting(true);
         try {
             await axios.post(`/supplier/purchase-orders/${order.id}/accept`);
             showToast(`PO ${order.po_number} accepted! You can now mark it as delivered when ready.`, 'success');
-            fetchOrders();
+            markStale('supplier_orders', 'supplier_dashboard', 'admin_purchase');
+            fetchOrders(true);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to accept PO', 'error');
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const handleAccept = (order) => {
+        showConfirm(
+            'Accept Purchase Order',
+            `Accept PO ${order.po_number}? This confirms you have the stock available.`,
+            () => performAccept(order)
+        );
     };
 
     const openRejectModal = (order) => {
@@ -94,9 +119,10 @@ export default function SupplierOrders() {
                 rejection_reason: rejectionReason.trim(),
             });
             showToast(`PO ${rejectModal.po_number} rejected. The admin has been notified.`, 'success');
+            markStale('supplier_orders', 'supplier_dashboard', 'admin_purchase');
             setRejectModal(null);
             setRejectionReason('');
-            fetchOrders();
+            fetchOrders(true);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to reject PO', 'error');
         } finally {
@@ -106,16 +132,17 @@ export default function SupplierOrders() {
 
     const handleDeliver = async () => {
         if (!selectedOrder) return;
-        
+
         setSubmitting(true);
         try {
             await axios.post(`/supplier/purchase-orders/${selectedOrder.id}/deliver`, {
                 delivery_notes: deliveryNotes
             });
             showToast('Order marked as delivered successfully!');
+            markStale('supplier_orders', 'supplier_dashboard', 'admin_purchase');
             setSelectedOrder(null);
             setDeliveryNotes('');
-            fetchOrders();
+            fetchOrders(true);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to mark as delivered', 'error');
         } finally {
@@ -125,12 +152,12 @@ export default function SupplierOrders() {
 
     const getStatusBadge = (status) => {
         const badges = {
-            pending:            { cls: '', label: 'Pending Admin Approval' },
-            pending_supplier:   { cls: 'bg-orange-100 text-orange-700 border-orange-200', label: 'Awaiting Your Response' },
-            accepted:           { cls: 'bg-blue-100 text-blue-700 border-blue-200', label: 'Accepted – Ready to Deliver' },
-            rejected:           { cls: 'bg-red-100 text-red-700 border-red-200', label: 'Rejected' },
+            pending: { cls: '', label: 'Pending Admin Approval' },
+            pending_supplier: { cls: 'bg-orange-100 text-orange-700 border-orange-200', label: 'Awaiting Your Response' },
+            accepted: { cls: 'bg-blue-100 text-blue-700 border-blue-200', label: 'Accepted – Ready to Deliver' },
+            rejected: { cls: 'bg-red-100 text-red-700 border-red-200', label: 'Rejected' },
             supplier_delivered: { cls: 'bg-purple-100 text-purple-700 border-purple-200', label: 'Delivered' },
-            received:           { cls: 'bg-green-100 text-green-700 border-green-200', label: 'Received' },
+            received: { cls: 'bg-green-100 text-green-700 border-green-200', label: 'Received' },
         };
         const badge = badges[status] || badges.pending;
         return <Badge variant="outline" className={badge.cls}>{badge.label}</Badge>;
@@ -155,12 +182,12 @@ export default function SupplierOrders() {
                         value: statusFilter,
                         onChange: setStatusFilter,
                         options: [
-                            { value: '',                   label: 'All Statuses' },
-                            { value: 'pending_supplier',   label: 'Awaiting Your Response' },
-                            { value: 'accepted',           label: 'Accepted' },
-                            { value: 'rejected',           label: 'Rejected' },
+                            { value: '', label: 'All Statuses' },
+                            { value: 'pending_supplier', label: 'Awaiting Your Response' },
+                            { value: 'accepted', label: 'Accepted' },
+                            { value: 'rejected', label: 'Rejected' },
                             { value: 'supplier_delivered', label: 'Delivered' },
-                            { value: 'received',           label: 'Received' },
+                            { value: 'received', label: 'Received' },
                         ]
                     }
                 ]}
@@ -200,11 +227,11 @@ export default function SupplierOrders() {
                 </Table>
             </Card>
 
-            <Pagination 
-                page={page} 
-                total={orders.total} 
-                perPage={15} 
-                onChange={setPage} 
+            <Pagination
+                page={page}
+                total={orders.total}
+                perPage={15}
+                onChange={setPage}
             />
 
             {/* Reject PO Modal */}
@@ -270,7 +297,7 @@ export default function SupplierOrders() {
                             <div className="space-y-4">
                                 <h4 className="font-bold text-foreground">Confirm Dispatch</h4>
                                 <p className="text-muted-foreground text-sm">You are marking order <strong className="text-foreground">{selectedOrder.po_number}</strong> as ready for delivery. Please confirm the items below are packed.</p>
-                                
+
                                 <Card className="divide-y divide-border">
                                     {selectedOrder.items?.map(item => (
                                         <div key={item.id} className="flex justify-between items-center px-4 py-2.5">
@@ -375,7 +402,7 @@ export default function SupplierOrders() {
                                         </>
                                     )}
                                     {canDeliver(selectedOrder.status) && (
-                                        <Button onClick={() => setSelectedOrder({...selectedOrder, action: 'deliver'})}>Mark as Delivered</Button>
+                                        <Button onClick={() => setSelectedOrder({ ...selectedOrder, action: 'deliver' })}>Mark as Delivered</Button>
                                     )}
                                     <Button variant="outline" onClick={() => setSelectedOrder(null)}>Close</Button>
                                 </div>
@@ -384,6 +411,8 @@ export default function SupplierOrders() {
                     </div>
                 )}
             </Modal>
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

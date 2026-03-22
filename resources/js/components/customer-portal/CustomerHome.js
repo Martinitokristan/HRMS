@@ -9,6 +9,9 @@ import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search, X, Package, ClipboardList, LogOut, Bell, Percent } from 'lucide-react';
 import { getProductSaleInfo } from '../../utils/priceCalculations';
 import RatingStars from '../ui/RatingStars';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 // Product card component (removed memo to allow stock updates)
 const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
@@ -230,10 +233,9 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
 };
 
 export default function CustomerHome() {
-    const { user, logout } = useAuth();
+    const { user, logout, categories } = useAuth();
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
@@ -242,6 +244,24 @@ export default function CustomerHome() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef(null);
+
+    const { refreshTrigger } = useSilentRefresh('customer_shop');
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
     // Notifications
     const [notifications, setNotifications] = useState([]);
@@ -303,9 +323,6 @@ export default function CustomerHome() {
         }
     }, [flyingItem]);
 
-    // Fetch categories
-    useEffect(() => { axios.get('/categories').then(r => setCategories(r.data?.data || [])).catch(() => { }); }, []);
-
     // Close profile dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -325,8 +342,8 @@ export default function CustomerHome() {
         let isMounted = true;
         let debounce;
 
-        const fetch = () => {
-            setLoading(true);
+        const fetchData = (silent = false) => {
+            if (!silent) setLoading(true);
             // Add aggressive cache-busting with timestamp and random string
             const params = {
                 page: 1,
@@ -347,21 +364,24 @@ export default function CustomerHome() {
                     }
                 })
                 .catch(err => {
-                    if (isMounted) setProducts([]);
+                    // never wipe existing data on background error
                 })
                 .finally(() => {
-                    if (isMounted) setLoading(false);
+                    if (isMounted && !silent) setLoading(false);
                 });
         };
 
         // Debounce search to reduce API calls (400ms for responsive UX)
-        debounce = setTimeout(fetch, 400);
+        debounce = setTimeout(() => {
+            if (!isMounted) return;
+            fetchData(products.length > 0);
+        }, 400);
 
         return () => {
             clearTimeout(debounce);
             isMounted = false;
         };
-    }, [search, categoryFilter]);
+    }, [search, categoryFilter, refreshTrigger]);
 
     // Fetch notifications (optimized - real-time polling)
     useEffect(() => {
@@ -668,6 +688,8 @@ export default function CustomerHome() {
                     </div>
                 </div>
             )}
+            
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

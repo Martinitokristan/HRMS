@@ -11,41 +11,57 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Users as UsersIcon, Plus, Pencil, ShieldOff, ShieldCheck } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function Users() {
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('admin_users');
     const [users, setUsers] = useState({ data: [], total: 0 });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(users.data.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
 
     const [modal, setModal] = useState({ open: false, user: null });
     const [formData, setFormData] = useState({ name: '', email: '', role: 'admin', phone: '', password: '' });
     const [saving, setSaving] = useState(false);
 
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
+
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await axios.get('/users', { params: { page, search, role: roleFilter } });
+            const paginatedData = res.data.data;
+            setUsers({
+                data: paginatedData.data ? paginatedData.data : paginatedData,
+                total: paginatedData.total || paginatedData.length || 0
+            });
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
         let isMounted = true;
-        const fetchUsers = () => {
+        const debounce = setTimeout(() => {
             if (!isMounted) return;
-            setLoading(true);
-            axios.get('/users', { params: { page, search, role: roleFilter } })
-                .then(res => {
-                    const paginatedData = res.data.data;
-                    if (isMounted) {
-                        setUsers({
-                            data: paginatedData.data ? paginatedData.data : paginatedData,
-                            total: paginatedData.total || paginatedData.length || 0
-                        });
-                    }
-                })
-                .finally(() => {
-                    if (isMounted) setLoading(false);
-                });
-        };
-        const debounce = setTimeout(fetchUsers, 400);
+            fetchData(users.data.length > 0);
+        }, 400);
         return () => {
             clearTimeout(debounce);
             isMounted = false;
@@ -63,7 +79,8 @@ export default function Users() {
                 await axios.post('/users', formData);
                 showToast('User created successfully');
             }
-            triggerRefresh();
+            markStale('admin_users');
+            fetchData(true);
             setModal({ open: false, user: null });
         } catch (err) {
             showToast(err.response?.data?.message || 'Error saving user', 'error');
@@ -72,15 +89,25 @@ export default function Users() {
         }
     };
 
-    const handleToggleStatus = async (userId, currentStatus) => {
-        if (!confirm(`Are you sure you want to ${currentStatus === 'active' ? 'suspend' : 'restore'} this user?`)) return;
+    const performToggleStatus = async (userId, currentStatus) => {
+        closeConfirm();
         try {
             await axios.put(`/users/${userId}/status`, { status: currentStatus === 'active' ? 'suspended' : 'active' });
             showToast('User status updated');
-            triggerRefresh();
+            markStale('admin_users');
+            fetchData(true);
         } catch (e) {
             showToast('Failed to update status', 'error');
         }
+    };
+
+    const handleToggleStatus = (userId, currentStatus) => {
+        showConfirm(
+            'Toggle User Status',
+            `Are you sure you want to ${currentStatus === 'active' ? 'suspend' : 'restore'} this user?`,
+            () => performToggleStatus(userId, currentStatus),
+            currentStatus === 'active' ? 'destructive' : 'default'
+        );
     };
 
     const openEdit = (u) => {
@@ -207,6 +234,8 @@ export default function Users() {
                     <Button type="submit" className="w-full" disabled={saving}>{saving ? 'Saving...' : 'Save User'}</Button>
                 </form>
             </Modal>
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

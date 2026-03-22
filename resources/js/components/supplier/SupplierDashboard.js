@@ -10,18 +10,33 @@ import {
     BarChart3, ArrowRight, Plus, ClipboardCheck, Settings,
     ChevronRight, FileText
 } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierDashboard() {
     const { supplier } = useSupplierAuth();
+    const { refreshTrigger } = useSilentRefresh('supplier_dashboard');
     const [stats, setStats] = useState({ pending: 0, approved: 0, delivered: 0, total: 0, totalRevenue: 0, productCount: 0 });
     const [recentPos, setRecentPos] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(recentPos.length === 0);
 
-    useEffect(() => { fetchDashboardData(); }, []);
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
-            setLoading(true);
             const [posRes, prodsRes] = await Promise.all([
                 axios.get('/supplier/purchase-orders?per_page=5'),
                 axios.get('/supplier/products?per_page=1').catch(() => ({ data: { data: { total: 0 } } })),
@@ -40,11 +55,15 @@ export default function SupplierDashboard() {
                 productCount: prodsRes.data.data.total || 0,
             });
         } catch (err) {
-            console.error('Failed to fetch dashboard data:', err);
+            // Silently fail on background error
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
+
+    useEffect(() => { 
+        fetchDashboardData(recentPos.length > 0); 
+    }, [refreshTrigger]);
 
     const getStatusBadge = (status) => {
         const variants = {
@@ -187,6 +206,8 @@ export default function SupplierDashboard() {
                     </Card>
                 </div>
             </div>
+            
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

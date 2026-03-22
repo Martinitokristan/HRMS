@@ -6,13 +6,20 @@ const SupplierAuthContext = createContext();
 export const SupplierAuthProvider = ({ children }) => {
     const [supplier, setSupplier] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([]);
 
-    useEffect(() => {
+    const refreshSettings = async () => {
+        try {
+            const res = await axios.get('/supplier/categories');
+            setCategories(res.data.data || []);
+        } catch (e) {}
+    };    useEffect(() => {
         let isMounted = true;
         const token = localStorage.getItem('supplier_token');
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             fetchProfile(isMounted);
+            refreshSettings();
         } else {
             setLoading(false);
         }
@@ -67,6 +74,8 @@ export const SupplierAuthProvider = ({ children }) => {
         logout,
         loginWithToken,
         isAuthenticated: !!supplier,
+        categories,
+        refreshSettings,
     };
 
     return (

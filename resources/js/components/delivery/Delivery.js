@@ -13,6 +13,8 @@ import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RefreshCw, Truck, Eye, Rocket, CheckCircle2, XCircle, Trash2, Package, Clock, CheckCheck } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
 
 const STATUS_CONFIG = {
     pending: { label: 'Pending', color: '#F59E0B', bgColor: '#FEF3C7' },
@@ -23,54 +25,71 @@ const STATUS_CONFIG = {
 
 export default function Delivery() {
     const { showToast } = useToast();
-    const [deliveries, setDeliveries] = useState([]);
-    const [riders, setRiders] = useState([]);
-    const [loading, setLoading] = useState(true);
+    
+    const { refreshTrigger } = useSilentRefresh('admin_deliveries');
+    const [pageData, setPageData] = useState({
+        deliveries: [],
+        riders: [],
+        stats: { total: 0, pending: 0, in_progress: 0, delivered: 0, failed: 0, today_delivered: 0 },
+        total: 0
+    });
+    const { deliveries, riders, stats, total } = pageData;
+    const [loading, setLoading] = useState(deliveries.length === 0);
+
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     
     // Pagination & Modal states
     const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
-    const [stats, setStats] = useState({ total: 0, pending: 0, in_progress: 0, delivered: 0, failed: 0, today_delivered: 0 });
     
     const [viewDeliveryId, setViewDeliveryId] = useState(null);
-    const [deleteId, setDeleteId] = useState(null);
+    
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({ show: false, title: '', message: '', onConfirm: null, variant: 'default' });
+    };
     
     const [selectedDeliveries, setSelectedDeliveries] = useState([]);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [showBulkAssign, setShowBulkAssign] = useState(false);
     const [bulkRiderId, setBulkRiderId] = useState('');
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const [deliveriesRes, ridersRes] = await Promise.all([
+                axios.get('/deliveries', { 
+                    params: { search, page, status: statusFilter !== 'all' ? statusFilter : undefined } 
+                }),
+                axios.get('/riders/available')
+            ]);
+            const data = deliveriesRes.data;
+            const dData = data.data?.data || data.data || [];
+            
+            setPageData({
+                deliveries: dData,
+                riders: ridersRes.data.data || [],
+                stats: data.stats || pageData.stats,
+                total: data.data?.total || dData.length
+            });
+        } catch (err) {
+            if (!silent) showToast('Failed to fetch delivery data', 'error');
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
 
     // Fetch data
     useEffect(() => {
         let isMounted = true;
-        const debounce = setTimeout(async () => {
-            setLoading(true);
-            try {
-                const [deliveriesRes, ridersRes] = await Promise.all([
-                    axios.get('/deliveries', { 
-                        params: { search, page, status: statusFilter !== 'all' ? statusFilter : undefined } 
-                    }),
-                    axios.get('/riders/available')
-                ]);
-
-                if (!isMounted) return;
-
-                const data = deliveriesRes.data;
-                const dData = data.data?.data || data.data || [];
-                setDeliveries(dData);
-                setTotal(data.data?.total || dData.length);
-                if (data.stats) {
-                    setStats(data.stats);
-                }
-                setRiders(ridersRes.data.data || []);
-            } catch (err) {
-                if (isMounted) showToast('Failed to fetch delivery data', 'error');
-            } finally {
-                if (isMounted) setLoading(false);
-            }
+        const debounce = setTimeout(() => {
+            if (!isMounted) return;
+            fetchData(pageData.deliveries.length > 0);
         }, 300);
 
         return () => {
@@ -85,7 +104,8 @@ export default function Delivery() {
         try {
             await axios.put(`/deliveries/${deliveryId}/assign`, { rider_id: riderId });
             showToast('Rider assigned successfully');
-            triggerRefresh();
+            markStale('admin_deliveries', 'rider_dashboard');
+            fetchData(true);
         } catch (err) {
             showToast('Assignment failed', 'error');
         }
@@ -96,22 +116,22 @@ export default function Delivery() {
             await axios.put(`/deliveries/${deliveryId}/status`, { status });
             const statusLabel = STATUS_CONFIG[status]?.label || status;
             showToast(`Delivery marked as ${statusLabel}`);
-            triggerRefresh();
+            markStale('admin_deliveries', 'admin_dashboard', 'rider_dashboard', 'customer_orders');
+            fetchData(true);
         } catch (err) {
             showToast('Status update failed', 'error');
         }
     };
 
-    const handleDelete = async () => {
-        if (!deleteId) return;
+    const handleDeleteDelivery = async (id) => {
         try {
-            await axios.delete(`/deliveries/${deleteId}`);
+            await axios.delete(`/deliveries/${id}`);
             showToast('Delivery deleted successfully');
-            triggerRefresh();
+            markStale('admin_deliveries', 'admin_dashboard', 'rider_dashboard', 'customer_orders');
+            fetchData(true);
+            closeConfirm();
         } catch (err) {
             showToast(err.response?.data?.message || 'Delete failed', 'error');
-        } finally {
-            setDeleteId(null);
         }
     };
 
@@ -125,10 +145,11 @@ export default function Delivery() {
                 )
             );
             showToast(`Assigned ${selectedDeliveries.length} deliveries to rider`);
+            markStale('admin_deliveries', 'rider_dashboard');
+            fetchData(true);
             setSelectedDeliveries([]);
             setShowBulkAssign(false);
             setBulkRiderId('');
-            triggerRefresh();
         } catch (err) {
             showToast('Bulk assignment failed', 'error');
         }
@@ -160,7 +181,7 @@ export default function Delivery() {
                     </h2>
                     <p className="text-sm text-muted-foreground mt-0.5">Track, assign and manage all deliveries in real-time</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={triggerRefresh} className="gap-2">
+                <Button variant="outline" size="sm" onClick={() => fetchData(true)} className="gap-2">
                     <RefreshCw className="h-4 w-4" /> Refresh
                 </Button>
             </div>
@@ -321,13 +342,13 @@ export default function Delivery() {
                                                         <Button size="sm" onClick={() => handleStatus(d.id, 'delivered')} className="h-7 px-2 gap-1 bg-success hover:bg-success/90">
                                                             <CheckCircle2 className="h-3.5 w-3.5" /> Delivered
                                                         </Button>
-                                                        <Button variant="destructive" size="sm" onClick={() => { if(confirm('Mark as failed?')) handleStatus(d.id, 'failed'); }} className="h-7 px-2 gap-1">
+                                                        <Button variant="destructive" size="sm" onClick={() => showConfirm('Mark Failed', 'Mark as failed?', () => handleStatus(d.id, 'failed'), 'destructive')} className="h-7 px-2 gap-1">
                                                             <XCircle className="h-3.5 w-3.5" /> Failed
                                                         </Button>
                                                     </>
                                                 )}
                                                 {d.status === 'pending' && (
-                                                    <Button variant="destructive" size="sm" onClick={() => setDeleteId(d.id)} className="h-7 px-2">
+                                                    <Button variant="destructive" size="sm" onClick={() => showConfirm('Delete Delivery', 'Are you sure you want to delete this delivery? Only pending deliveries can be deleted.', () => handleDeleteDelivery(d.id), 'destructive')} className="h-7 px-2">
                                                         <Trash2 className="h-3.5 w-3.5" />
                                                     </Button>
                                                 )}
@@ -348,13 +369,7 @@ export default function Delivery() {
 
             {/* Modals */}
             <DeliveryViewModal isOpen={!!viewDeliveryId} onClose={() => setViewDeliveryId(null)} deliveryId={viewDeliveryId} />
-            
-            <ConfirmModal
-                isOpen={!!deleteId}
-                onCancel={() => setDeleteId(null)}
-                onConfirm={handleDelete}
-                message="Are you sure you want to delete this delivery? Only pending deliveries can be deleted."
-            />
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

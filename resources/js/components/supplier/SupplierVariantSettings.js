@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Plus, Pencil, Trash2, Ruler, Palette, Weight as WeightIcon } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 const TABS = [
     { id: 'sizes', label: 'Sizes', Icon: Ruler, variantId: 1 },
@@ -17,13 +20,26 @@ const TABS = [
 
 export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('supplier_variant_values');
     const [activeTab, setActiveTab] = useState(initialTab);
     const [variants, setVariants] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(variants.length === 0);
     const [saving, setSaving] = useState(false);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
     const [newVal, setNewVal] = useState({ variant_id: '', label: '', hex_code: '', description: '', category: '' });
 
@@ -32,25 +48,24 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
         setActiveTab(initialTab);
     }, [initialTab]);
 
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const [variantsRes, categoriesRes] = await Promise.all([
+                axios.get('/supplier/variant-values'),
+                axios.get('/supplier/categories')
+            ]);
+            setVariants(variantsRes.data.data || []);
+            setCategories(categoriesRes.data.data || []);
+        } catch (err) {
+            // Silence background error
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        let isMounted = true;
-        const fetchData = async () => {
-            try {
-                const [variantsRes, categoriesRes] = await Promise.all([
-                    axios.get('/supplier/variant-values'),
-                    axios.get('/supplier/categories')
-                ]);
-                if (!isMounted) return;
-                setVariants(variantsRes.data.data || []);
-                setCategories(categoriesRes.data.data || []);
-            } catch (err) {
-                if (isMounted) showToast('Failed to load variant settings', 'error');
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-        fetchData();
-        return () => { isMounted = false; };
+        fetchData(variants.length > 0);
     }, [refreshTrigger]);
 
     const handleSaveVal = async (variantId) => {
@@ -62,8 +77,9 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
         try {
             await axios.post('/supplier/variant-values', { ...newVal, variant_id: variantId });
             showToast('Value added successfully');
+            markStale('supplier_variant_values');
             setNewVal({ variant_id: '', label: '', hex_code: '', description: '', category: '' });
-            triggerRefresh();
+            fetchData(true);
         } catch (e) {
             showToast(e.response?.data?.message || 'Error saving value', 'error');
         } finally {
@@ -71,15 +87,25 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
         }
     };
 
-    const handleDeleteVal = async (id) => {
-        if (!confirm('Delete this value? Products using it may be affected.')) return;
+    const performDeleteVal = async (id) => {
+        closeConfirm();
         try {
             await axios.delete(`/supplier/variant-values/${id}`);
             showToast('Value deleted');
-            triggerRefresh();
+            markStale('supplier_variant_values');
+            fetchData(true);
         } catch (e) {
             showToast('Error deleting value', 'error');
         }
+    };
+
+    const handleDeleteVal = (id) => {
+        showConfirm(
+            'Delete Variant Value',
+            'Delete this value? Products using it may be affected.',
+            () => performDeleteVal(id),
+            'destructive'
+        );
     };
 
     if (loading) {
@@ -350,6 +376,8 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
                     </Card>
                 </div>
             )}
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

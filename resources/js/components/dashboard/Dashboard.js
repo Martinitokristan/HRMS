@@ -9,15 +9,38 @@ import { cn } from '@/lib/utils';
 import { PhilippinePeso, ShoppingBag, AlertTriangle, Bike } from 'lucide-react';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export default function Dashboard() {
-    const [stats, setStats] = useState(null);
-    const [chartDataRaw, setChartDataRaw] = useState([]);
+    const { refreshTrigger } = useSilentRefresh('admin_dashboard');
+
+    const [dashboardData, setDashboardData] = useState({
+        stats: null,
+        chartDataRaw: []
+    });
+    const { stats, chartDataRaw } = dashboardData;
+
     const [period, setPeriod] = useState('month');
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!stats);
     
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
+
     // Load saved layout or use defaults
     const [layouts, setLayouts] = useState(() => {
         const saved = localStorage.getItem('dashboard_layout');
@@ -43,24 +66,36 @@ export default function Dashboard() {
         { value: 'year', label: '1 Year' }
     ];
 
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const [summaryRes, chartRes] = await Promise.all([
+                axios.get('/sales/summary'),
+                axios.get('/reports/sales', { params: { period } })
+            ]);
+            setDashboardData({
+                stats: summaryRes.data.data,
+                chartDataRaw: chartRes.data.data?.chart_data || []
+            });
+        } catch (err) {
+            console.error('Failed to fetch dashboard data', err);
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [summaryRes, chartRes] = await Promise.all([
-                    axios.get('/sales/summary'),
-                    axios.get('/reports/sales', { params: { period } })
-                ]);
-                setStats(summaryRes.data.data);
-                setChartDataRaw(chartRes.data.data?.chart_data || []);
-            } catch (err) {
-                console.error('Failed to fetch dashboard data', err);
-            } finally {
-                setLoading(false);
-            }
+        let isMounted = true;
+        const debounce = setTimeout(() => {
+            if (!isMounted) return;
+            fetchData(!!dashboardData.stats);
+        }, 300);
+
+        return () => {
+            clearTimeout(debounce);
+            isMounted = false;
         };
-        fetchData();
-    }, [period]);
+    }, [period, refreshTrigger]);
 
     const formatCurr = (val) => new Intl.NumberFormat('en-PH', { 
         style: 'currency', 
@@ -277,6 +312,8 @@ export default function Dashboard() {
                     border-radius: 16px;
                 }
             `}</style>
+            
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

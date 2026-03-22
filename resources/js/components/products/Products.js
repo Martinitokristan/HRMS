@@ -10,16 +10,16 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Package } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
 
 export default function Products() {
+    const { categories, unitTypes, settings, refreshCategories, refreshSettings } = useAuth();
+    const { refreshTrigger } = useSilentRefresh('admin_products');
     const [products, setProducts] = useState({ data: [], total: 0, current_page: 1 });
-    const [categories, setCategories] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
-    const [unitTypes, setUnitTypes] = useState([]);
-    const [allVariants, setAllVariants] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+    const [loading, setLoading] = useState(products.data.length === 0);
     
     // Filters & Pagination
     const [page, setPage] = useState(1);
@@ -29,7 +29,19 @@ export default function Products() {
     // View: 'list' | 'form'
     const [view, setView] = useState('list');
     const [editingProduct, setEditingProduct] = useState(null);
-    const [deleteId, setDeleteId] = useState(null);
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
     const { showToast } = useToast();
 
     const openCreate = () => { setEditingProduct(null); setView('form'); };
@@ -37,48 +49,38 @@ export default function Products() {
     const closeForm  = () => { setEditingProduct(null); setView('list'); };
 
     useEffect(() => {
+        refreshCategories();
+        refreshSettings();
+        
         let isMounted = true;
-        const fetchDependencies = async () => {
-            try {
-                const [cats, sups, units, settingsData] = await Promise.all([
-                    axios.get('/categories'),
-                    axios.get('/suppliers', { params: { no_pagination: 1 } }),
-                    axios.get('/unit-types'),
-                    axios.get('/settings')
-                ]);
-                if (isMounted) {
-                    setCategories(cats.data.data);
-                    setSuppliers(sups.data.data);
-                    setUnitTypes(units.data.data);
-                    setAllVariants(settingsData.data.data.variants || []);
-                }
-            } catch (err) {}
-        };
-        fetchDependencies();
+        axios.get('/suppliers', { params: { no_pagination: 1 } })
+            .then(res => {
+                if (isMounted) setSuppliers(res.data.data);
+            });
         return () => { isMounted = false; };
     }, []);
 
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await axios.get('/api/products', { params: { page, search, category_id: categoryFilter } });
+            const paginated = res.data.data;
+            setProducts({
+                data: paginated.data || [],
+                total: paginated.total || 0,
+                current_page: paginated.current_page || 1
+            });
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
         let isMounted = true;
-        const fetchProds = () => {
+        const debounce = setTimeout(() => {
             if (!isMounted) return;
-            setLoading(true);
-            axios.get('/api/products', { params: { page, search, category_id: categoryFilter } })
-                .then(res => {
-                    const paginated = res.data.data;
-                    if (isMounted) {
-                        setProducts({
-                            data: paginated.data || [],
-                            total: paginated.total || 0,
-                            current_page: paginated.current_page || 1
-                        });
-                    }
-                })
-                .finally(() => {
-                    if (isMounted) setLoading(false);
-                });
-        };
-        const debounce = setTimeout(fetchProds, 400);
+            fetchData(products.data.length > 0);
+        }, 400);
         return () => {
             clearTimeout(debounce);
             isMounted = false;
@@ -87,16 +89,25 @@ export default function Products() {
 
     const handleEdit = (product) => openEdit(product);
 
-    const handleDelete = async () => {
+    const performDelete = async (id) => {
+        closeConfirm();
         try {
-            await axios.delete(`/products/${deleteId}`);
-            if (showToast) showToast('Product deleted successfully');
-            triggerRefresh();
+            await axios.delete(`/products/${id}`);
+            showToast('Product deleted successfully');
+            markStale('admin_products', 'customer_shop', 'supplier_catalog');
+            fetchData(true);
         } catch (err) {
             showToast('Failed to delete product', 'error');
-        } finally {
-            setDeleteId(null);
         }
+    };
+
+    const handleDelete = (id) => {
+        showConfirm(
+            'Delete Product',
+            'Are you sure you want to delete this product? This action cannot be undone.',
+            () => performDelete(id),
+            'destructive'
+        );
     };
 
     // If form view, render ProductForm filling the content area
@@ -107,8 +118,12 @@ export default function Products() {
                 categories={categories}
                 suppliers={suppliers}
                 unitTypes={unitTypes}
-                variants={allVariants}
-                onSuccess={() => { closeForm(); triggerRefresh(); }}
+                variants={settings?.variants || []}
+                onSuccess={() => { 
+                    closeForm(); 
+                    markStale('admin_products', 'customer_shop', 'supplier_catalog');
+                    fetchData(true); 
+                }}
                 onCancel={closeForm}
             />
         );
@@ -212,7 +227,7 @@ export default function Products() {
                                     <TableCell className="px-4 py-3 text-center">
                                         <div className="flex items-center justify-center gap-2">
                                             <Button variant="outline" size="sm" className="font-semibold" onClick={() => openEdit(p)}>Edit</Button>
-                                            <Button variant="destructive" size="sm" className="font-semibold" onClick={() => setDeleteId(p.id)}>Delete</Button>
+                                            <Button variant="destructive" size="sm" className="font-semibold" onClick={() => handleDelete(p.id)}>Delete</Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -224,12 +239,7 @@ export default function Products() {
 
             <Pagination page={page} total={products.total} perPage={15} onChange={setPage} />
 
-            <ConfirmModal 
-                isOpen={!!deleteId}
-                onCancel={() => setDeleteId(null)}
-                onConfirm={handleDelete}
-                message="Are you sure you want to delete this product? This action cannot be undone."
-            />
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

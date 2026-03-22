@@ -18,6 +18,9 @@ import {
     Menu,
     X
 } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 // Add custom CSS for markers
 const markerStyles = `
@@ -76,6 +79,8 @@ const customerIcon = L.divIcon({
 
 export default function RiderDashboardV3() {
     const { user, logout } = useAuth();
+    const { refreshTrigger: dashTrigger } = useSilentRefresh('rider_dashboard');
+    const { refreshTrigger: notifTrigger } = useSilentRefresh('rider_notifications');
     const [view, setView] = useState('dashboard');
     const [showMap, setShowMap] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -90,6 +95,20 @@ export default function RiderDashboardV3() {
     const [riderPosition, setRiderPosition] = useState(null);
     const riderPositionRef = useRef(null);
     const [showNotifications, setShowNotifications] = useState(false);
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
     // State for order management
     const [assigningOrder, setAssigningOrder] = useState(null);
@@ -216,8 +235,9 @@ export default function RiderDashboardV3() {
     }, []);
 
     // Fetch dashboard data
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (silent = false) => {
         if (!isMountedRef.current) return;
+        if (!silent) setLoading(true);
 
         try {
             const currentPos = riderPositionRef.current;
@@ -242,9 +262,9 @@ export default function RiderDashboardV3() {
                 setNearbyOrders(Array.isArray(nearby) ? nearby : []);
             }
         } catch (error) {
-            console.error('Failed to fetch dashboard data:', error);
+            // Silence background check
         } finally {
-            if (isMountedRef.current) {
+            if (isMountedRef.current && !silent) {
                 setLoading(false);
             }
         }
@@ -265,11 +285,17 @@ export default function RiderDashboardV3() {
 
     // Initialize data
     useEffect(() => {
-        fetchData();
-        fetchNotifications();
-        const interval = setInterval(fetchData, 5000); // refresh every 5s for smoother tracking
+        fetchData(deliveries.length > 0 || nearbyOrders.length > 0);
+    }, [fetchData, dashTrigger]);
+
+    useEffect(() => {
+        fetchNotifications(notifications.length > 0);
+    }, [fetchNotifications, notifTrigger]);
+
+    useEffect(() => {
+        const interval = setInterval(() => fetchData(true), 5000); // refresh every 5s for smoother tracking
         return () => clearInterval(interval);
-    }, [fetchData, fetchNotifications]);
+    }, [fetchData]);
 
     // Get rider location
     useEffect(() => {
@@ -361,7 +387,8 @@ export default function RiderDashboardV3() {
         setAssigningOrder(deliveryId);
         try {
             await axios.post(`/deliveries/${deliveryId}/self-assign`);
-            await fetchData();
+            markStale('rider_dashboard', 'admin_dashboard', 'customer_dashboard');
+            await fetchData(true);
             alert('Order assigned successfully!');
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to assign order');
@@ -385,7 +412,8 @@ export default function RiderDashboardV3() {
         }
         try {
             await axios.post(`/deliveries/${decliningOrder}/decline`, { note: declineNote });
-            await fetchData();
+            markStale('rider_dashboard', 'admin_dashboard', 'customer_dashboard');
+            await fetchData(true);
             setShowDeclineModal(false);
             setDeclineNote('');
             setDecliningOrder(null);
@@ -399,6 +427,7 @@ export default function RiderDashboardV3() {
     const handleStatusChange = useCallback(async (deliveryId, newStatus) => {
         try {
             await axios.put(`/deliveries/${deliveryId}/status`, { status: newStatus });
+            markStale('rider_dashboard', 'admin_dashboard', 'customer_dashboard');
             if (isMountedRef.current) {
                 const updated = deliveries.map(d =>
                     d.id === deliveryId ? { ...d, status: newStatus } : d
@@ -427,6 +456,7 @@ export default function RiderDashboardV3() {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             if (isMountedRef.current) {
+                markStale('rider_dashboard', 'admin_dashboard', 'customer_dashboard');
                 const updated = deliveries.filter(d => d.id !== deliveryId);
                 setDeliveries(updated);
                 setStats(prev => ({
@@ -1257,6 +1287,8 @@ export default function RiderDashboardV3() {
                     </div>
                 </div>
             )}
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

@@ -10,19 +10,16 @@ import { cn } from '../../lib/utils';
 
 export default function SupplierLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { supplier, logout } = useSupplierAuth();
+    const { supplier, logout, categories } = useSupplierAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [profileOpen, setProfileOpen] = useState(false);
     const [catsOpen, setCatsOpen] = useState(false);
-    const [categories, setCategories] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [unreadNoti, setUnreadNoti] = useState(0);
     const [notiOpen, setNotiOpen] = useState(false);
 
     React.useEffect(() => {
-        // Fetch categories
-        axios.get('/supplier/categories').then(res => setCategories(res.data.data)).catch(() => {});
         
         // Fetch notifications
         const fetchNotis = () => {

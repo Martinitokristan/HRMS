@@ -146,7 +146,7 @@ export default function CustomerOrder() {
         const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
         const newSaved = saved.filter(item => item.cartId !== cartId);
         localStorage.setItem("hrms_cart", JSON.stringify(newSaved));
-        
+
         const newCart = cart.filter(item => item.cartId !== cartId);
         setCart(newCart);
         if (newCart.length === 0) {
@@ -227,7 +227,7 @@ export default function CustomerOrder() {
             const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
             const cartIdsToRemove = cart.map(i => i.cartId);
             const remainingCart = saved.filter(item => !cartIdsToRemove.includes(item.cartId));
-            
+
             if (remainingCart.length > 0) {
                 localStorage.setItem("hrms_cart", JSON.stringify(remainingCart));
             } else {
@@ -341,10 +341,10 @@ export default function CustomerOrder() {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-end mb-2">
                                     <h3 className="font-bold text-foreground flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Delivery Location</h3>
-                                    <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        onClick={handleGetLocation} 
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleGetLocation}
                                         disabled={gpsLoading}
                                         className="h-8 text-xs font-semibold gap-1 px-3 bg-white"
                                     >
@@ -352,7 +352,7 @@ export default function CustomerOrder() {
                                         Use Current GPS
                                     </Button>
                                 </div>
-                                
+
                                 <p className="text-xs text-muted-foreground italic -mt-2">
                                     The pin below is your default home. If you want this delivered elsewhere today (like work), click "Use Current GPS" or drag the pin.
                                 </p>
@@ -362,13 +362,13 @@ export default function CustomerOrder() {
                                         <div className="h-[240px] rounded-xl overflow-hidden border-2 border-primary/20 cursor-crosshair relative shadow-inner">
                                             <MapContainer center={checkoutPosition} zoom={16} maxZoom={20} style={{ height: "100%", width: "100%" }}>
                                                 <CheckoutMapController position={checkoutPosition} onMapClick={handleMapClick} />
-                                                <TileLayer 
-                                                    url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" 
+                                                <TileLayer
+                                                    url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
                                                     attribution="&copy; Google Maps"
                                                     maxZoom={20}
                                                 />
-                                                <Marker 
-                                                    position={checkoutPosition} 
+                                                <Marker
+                                                    position={checkoutPosition}
                                                     draggable={true}
                                                     eventHandlers={{ dragend: handleMarkerDragEnd }}
                                                 />

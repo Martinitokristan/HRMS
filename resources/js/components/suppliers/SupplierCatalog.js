@@ -34,11 +34,11 @@ export default function SupplierCatalog() {
 
     useEffect(() => { fetchProducts(); }, [page, search, categoryFilter, supplierFilter, promotedOnly]);
     useEffect(() => {
-        axios.get('/categories').then(r => setCategories(r.data.data || [])).catch(() => {});
+        axios.get('/categories').then(r => setCategories(r.data.data || [])).catch(() => { });
         axios.get('/suppliers').then(r => {
             const d = r.data.data;
             setSuppliers(Array.isArray(d) ? d : d?.data || []);
-        }).catch(() => {});
+        }).catch(() => { });
     }, []);
 
     const fetchProducts = async () => {
@@ -186,17 +186,17 @@ export default function SupplierCatalog() {
                                 <div className="text-[12px] text-muted-foreground mb-2">
                                     {p.category?.name || 'Uncategorized'} &bull; {p.variants?.length || 0} variant{p.variants?.length !== 1 ? 's' : ''}
                                 </div>
-                                
+
                                 {/* Stock Availability Badge */}
                                 <div className="mb-3">
-                                    <Badge 
-                                        variant={p.total_stock > 0 ? "default" : "destructive"} 
+                                    <Badge
+                                        variant={p.total_stock > 0 ? "default" : "destructive"}
                                         className="text-[10px] font-bold"
                                     >
                                         {p.total_stock > 0 ? `✓ ${p.total_stock} Available` : '✗ Out of Stock'}
                                     </Badge>
                                 </div>
-                                
+
                                 <div className="flex items-center justify-between">
                                     <span className="font-bold text-lg text-primary">
                                         ₱{Number(p.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -228,7 +228,7 @@ export default function SupplierCatalog() {
                         additional_images: v.additional_images || []
                     }));
                     const hasVariants = variants.length > 0;
-                    
+
                     // selectedVariant === null means base/Regular is selected
                     const currentPrice = selectedVariant ? (selectedVariant.price_override || viewProduct.price) : viewProduct.price;
                     const currentStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
@@ -257,10 +257,10 @@ export default function SupplierCatalog() {
                                 {/* Main Image Box - FIXED SIZE */}
                                 <div className="w-full aspect-square relative rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center overflow-hidden mb-6">
                                     {displayImage ? (
-                                        <img 
-                                            src={`/storage/${displayImage}`} 
-                                            alt={viewProduct.name} 
-                                            className="w-full h-full object-contain p-4" 
+                                        <img
+                                            src={`/storage/${displayImage}`}
+                                            alt={viewProduct.name}
+                                            className="w-full h-full object-contain p-4"
                                         />
                                     ) : (
                                         <Package className="h-24 w-24 opacity-10 text-muted-foreground" />
@@ -274,11 +274,10 @@ export default function SupplierCatalog() {
                                             <button
                                                 key={i}
                                                 onClick={() => setActiveGalleryImage(img)}
-                                                className={`w-16 h-16 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${
-                                                    displayImage === img 
-                                                        ? 'border-orange-500 shadow-md ring-2 ring-orange-100' 
+                                                className={`w-16 h-16 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${displayImage === img
+                                                        ? 'border-orange-500 shadow-md ring-2 ring-orange-100'
                                                         : 'border-border hover:border-orange-200'
-                                                }`}
+                                                    }`}
                                             >
                                                 <img src={`/storage/${img}`} className="w-full h-full object-contain rounded-lg" />
                                             </button>
@@ -344,11 +343,10 @@ export default function SupplierCatalog() {
                                             <button
                                                 type="button"
                                                 onClick={() => { setSelectedVariant(null); setOrderQty(viewProduct.min_order_qty || 1); setActiveGalleryImage(null); }}
-                                                className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${
-                                                    selectedVariant === null
+                                                className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${selectedVariant === null
                                                         ? 'bg-white text-orange-500 border-orange-500 shadow-sm'
                                                         : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
-                                                }`}
+                                                    }`}
                                             >
                                                 Regular
                                             </button>
@@ -363,11 +361,10 @@ export default function SupplierCatalog() {
                                                         type="button"
                                                         disabled={isOOS}
                                                         onClick={() => { setSelectedVariant(v); setSelectedOptions({ size: v.size, color: v.color, weight: v.weight }); setOrderQty(viewProduct.min_order_qty || 1); setActiveGalleryImage(null); }}
-                                                        className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${
-                                                            isOOS ? 'opacity-40 cursor-not-allowed bg-secondary/50 border-transparent text-muted-foreground'
-                                                            : isSelected ? 'bg-white text-orange-500 border-orange-500 shadow-sm'
-                                                            : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
-                                                        }`}
+                                                        className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${isOOS ? 'opacity-40 cursor-not-allowed bg-secondary/50 border-transparent text-muted-foreground'
+                                                                : isSelected ? 'bg-white text-orange-500 border-orange-500 shadow-sm'
+                                                                    : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
+                                                            }`}
                                                     >
                                                         {getVariantLabel(v)}
                                                     </button>

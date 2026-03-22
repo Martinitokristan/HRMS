@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function Landing() {
     const navigate = useNavigate();
@@ -14,15 +17,46 @@ export default function Landing() {
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(false);
 
+    const { refreshTrigger } = useSilentRefresh('landing_products');
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
+
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const r = await axios.get('/api/products', { params: { per_page: 8 } });
+            const d = r.data.data;
+            setProducts(d.data ? d.data : d);
+        } catch (err) {
+            // never wipe existing data on background error
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        axios.get('/api/products', { params: { per_page: 8 } })
-            .then(r => {
-                const d = r.data.data;
-                setProducts(d.data ? d.data : d);
-            })
-            .catch(() => {})
-            .finally(() => setLoading(false));
-    }, []);
+        let isMounted = true;
+        const debounce = setTimeout(() => {
+            if (!isMounted) return;
+            fetchData(products.length > 0);
+        }, 400);
+        return () => {
+            clearTimeout(debounce);
+            isMounted = false;
+        };
+    }, [refreshTrigger]);
 
     const triggerLoginNotice = () => {
         setNotification(true);
@@ -214,6 +248,8 @@ export default function Landing() {
                     <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Hardware Retail Management System. All rights reserved.</p>
                 </div>
             </footer>
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

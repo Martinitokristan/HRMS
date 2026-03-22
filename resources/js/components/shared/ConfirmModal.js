@@ -1,33 +1,54 @@
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
-import {
-    Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
-} from '../ui/dialog.jsx';
-import { Button } from '../ui/button.jsx';
+import Modal from './Modal';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Info } from 'lucide-react';
 
-export default function ConfirmModal({ isOpen, message, onConfirm, onCancel, title = 'Confirm Action' }) {
+export default function ConfirmModal({ modal, onClose }) {
+    if (!modal.show) return null;
+
+    const isDestructive = modal.variant === 'destructive';
+
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onCancel(); }}>
-            <DialogContent className="max-w-sm">
-                <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                    <div className="flex flex-col items-center text-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF2F2]">
-                            <AlertTriangle className="h-7 w-7 text-[#EF4444]" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-foreground mb-1.5">Are you sure?</h3>
-                            <p className="text-sm text-muted-foreground">{message}</p>
-                        </div>
+        <Modal
+            isOpen={modal.show}
+            onClose={onClose}
+            title={modal.title}
+            size="sm"
+            hideFooter
+        >
+            <div className="py-2">
+                <div className="flex items-start gap-3 mb-6">
+                    <div className={`p-2 rounded-full shrink-0 ${
+                        isDestructive
+                            ? 'bg-destructive/10'
+                            : 'bg-primary/10'
+                    }`}>
+                        {isDestructive
+                            ? <AlertTriangle className="h-5 w-5 text-destructive" />
+                            : <Info className="h-5 w-5 text-primary" />
+                    }
                     </div>
+                    <p className="text-muted-foreground text-sm pt-1 leading-relaxed">
+                        {modal.message}
+                    </p>
                 </div>
-                <DialogFooter>
-                    <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-                    <Button variant="destructive" onClick={onConfirm}>Confirm Delete</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                <div className="flex gap-3">
+                    <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant={isDestructive ? 'destructive' : 'default'}
+                        className="flex-1"
+                        onClick={modal.onConfirm}
+                    >
+                        Confirm
+                    </Button>
+                </div>
+            </div>
+        </Modal>
     );
 }

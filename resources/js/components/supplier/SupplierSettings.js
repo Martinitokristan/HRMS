@@ -12,12 +12,30 @@ import { Switch } from '@/components/ui/switch';
 import { Trash2, User, FolderOpen, Lock, Bell, Ruler, Palette, Weight, ArrowLeftRight, RefreshCw } from 'lucide-react';
 import SupplierVariantSettings from './SupplierVariantSettings';
 import SupplierUnitSettings from './SupplierUnitSettings';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierSettings() {
-    const { supplier, logout } = useSupplierAuth();
+    const { supplier, logout, refreshSettings } = useSupplierAuth();
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('supplier_categories');
     const [activeTab, setActiveTab] = useState('profile');
     const [saving, setSaving] = useState(false);
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
 
     const [profile, setProfile] = useState({
         name: supplier?.name || '',
@@ -39,6 +57,7 @@ export default function SupplierSettings() {
         try {
             await axios.put('/supplier/auth/profile', profile);
             showToast('Profile updated successfully', 'success');
+            if (refreshSettings) refreshSettings();
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to update profile', 'error');
         } finally {
@@ -81,15 +100,19 @@ export default function SupplierSettings() {
     const [loadingCats, setLoadingCats] = useState(false);
 
     React.useEffect(() => {
-        if (activeTab === 'categories') fetchCategories();
-    }, [activeTab]);
+        if (activeTab === 'categories') fetchCategories(categories.length > 0);
+    }, [activeTab, refreshTrigger]);
 
-    const fetchCategories = async () => {
-        setLoadingCats(true);
+    const fetchCategories = async (silent = false) => {
+        if (!silent) setLoadingCats(true);
         try {
             const res = await axios.get('/supplier/categories');
             setCategories(res.data.data || []);
-        } finally { setLoadingCats(false); }
+        } catch (err) {
+            // Silence background errors
+        } finally { 
+            if (!silent) setLoadingCats(false); 
+        }
     };
 
     const handleAddCategory = async (e) => {
@@ -98,23 +121,36 @@ export default function SupplierSettings() {
         setSaving(true);
         try {
             await axios.post('/supplier/categories', { name: newCat });
+            markStale('supplier_categories');
             setNewCat('');
-            fetchCategories();
+            if (refreshSettings) refreshSettings();
+            fetchCategories(true);
             showToast('Category added', 'success');
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to add category', 'error');
         } finally { setSaving(false); }
     };
 
-    const handleDeleteCategory = async (id) => {
-        if (!window.confirm('Are you sure? This will delete the category.')) return;
+    const performDeleteCategory = async (id) => {
+        closeConfirm();
         try {
             await axios.delete(`/supplier/categories/${id}`);
-            fetchCategories();
+            markStale('supplier_categories');
+            if (refreshSettings) refreshSettings();
+            fetchCategories(true);
             showToast('Category deleted', 'success');
         } catch (err) {
             showToast('Failed to delete category', 'error');
         }
+    };
+
+    const handleDeleteCategory = (id) => {
+        showConfirm(
+            'Delete Category',
+            'Are you sure you want to delete this category? This action cannot be undone.',
+            () => performDeleteCategory(id),
+            'destructive'
+        );
     };
 
     return (
@@ -338,6 +374,8 @@ export default function SupplierSettings() {
                     </>
                 )}
             </div>
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

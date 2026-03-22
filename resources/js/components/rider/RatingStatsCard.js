@@ -4,23 +4,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Star, TrendingUp, Users, MessageSquare } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
 
 export default function RatingStatsCard() {
+    const { refreshTrigger } = useSilentRefresh('rider_rating_stats');
     const [stats, setStats] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!stats);
 
     useEffect(() => {
-        fetchRatingStats();
-    }, []);
+        fetchRatingStats(!!stats);
+    }, [refreshTrigger]);
 
-    const fetchRatingStats = async () => {
+    const fetchRatingStats = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const response = await axios.get('/riders/me/rating-stats');
             setStats(response.data.data);
         } catch (error) {
-            console.error('Failed to fetch rating stats:', error);
+            // Silence background check
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 

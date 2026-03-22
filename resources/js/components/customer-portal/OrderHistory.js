@@ -9,6 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw, Map, Navigation } from 'lucide-react';
 import CustomerOrderTracking from './CustomerOrderTracking';
 import { useToast } from '../../context/ToastContext';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 const CANCEL_REASONS = [
     { value: 'changed_mind', label: 'Changed my mind' },
@@ -50,6 +53,22 @@ export default function OrderHistory() {
     const [submittingReturn, setSubmittingReturn] = useState(false);
     const [visibleTrackers, setVisibleTrackers] = useState({}); // Tracking which order maps are visible
 
+    const { refreshTrigger } = useSilentRefresh('customer_orders');
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
+
     const toggleTracker = (orderId) => {
         setVisibleTrackers(prev => ({
             ...prev,
@@ -57,26 +76,37 @@ export default function OrderHistory() {
         }));
     };
 
-    const fetchOrders = (showLoading = true) => {
-        if (showLoading) setLoading(true);
-        axios
-            .get("/customer/orders")
-            .then((res) => setOrders(res.data.data))
-            .finally(() => {
-                if (showLoading) setLoading(false);
-            });
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await axios.get("/customer/orders");
+            setOrders(res.data?.data || res.data || []);
+        } catch (err) {
+            // never wipe existing data on background error
+        } finally {
+            if (!silent) setLoading(false);
+        }
     };
 
     useEffect(() => {
-        fetchOrders();
+        let isMounted = true;
+        const debounce = setTimeout(() => {
+            if (!isMounted) return;
+            fetchData(orders.length > 0);
+        }, 400);
 
         // Real-time polling for status updates
         const interval = setInterval(() => {
-            fetchOrders(false); // Fetch in background without showing spinner
+            if (!isMounted) return;
+            fetchData(true); // Fetch in background without showing spinner
         }, 5000); // Poll every 5 seconds for snappier updates
 
-        return () => clearInterval(interval);
-    }, []);
+        return () => {
+            clearTimeout(debounce);
+            clearInterval(interval);
+            isMounted = false;
+        };
+    }, [refreshTrigger]);
 
     const openCancelModal = (order) => {
         setCancelModal({ show: true, order });
@@ -99,7 +129,9 @@ export default function OrderHistory() {
                 reason: cancelReason,
                 notes: cancelNotes || null,
             });
-            setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'cancelled', cancellation_reason: cancelReason } : o));
+            toast.success("Order cancelled successfully");
+            markStale('customer_shop', 'admin_sales', 'admin_dashboard', 'customer_orders', 'admin_stock');
+            fetchData(true);
             closeCancelModal();
         } catch (err) {
             toast.error(err.response?.data?.message || "Failed to cancel order");
@@ -141,9 +173,10 @@ export default function OrderHistory() {
                 reason_details: returnDetails || null,
                 items: selectedItems.map(i => ({ sale_item_id: i.sale_item_id, quantity: i.quantity })),
             });
-            setOrders(prev => prev.map(o => o.id === returnModal.order.id ? { ...o, has_return: true } : o));
-            closeReturnModal();
             toast.success('Return request submitted successfully! You will be notified when it is reviewed.');
+            markStale('customer_orders', 'admin_dashboard', 'admin_sales');
+            fetchData(true);
+            closeReturnModal();
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to submit return request');
         } finally {
@@ -159,13 +192,9 @@ export default function OrderHistory() {
                 rating: ratingValue,
                 comment: ratingComment,
             });
-            // Update local state
-            setOrders(prev => prev.map(o => {
-                if (o.id === ratingOrder.id && o.delivery) {
-                    return { ...o, delivery: { ...o.delivery, rating: ratingValue, rating_comment: ratingComment } };
-                }
-                return o;
-            }));
+            toast.success("Rating submitted successfully");
+            markStale('customer_orders', 'rider_dashboard');
+            fetchData(true);
             setRatingOrder(null);
             setRatingValue(0);
             setRatingComment("");
@@ -732,6 +761,8 @@ export default function OrderHistory() {
                 }
                 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
             `}</style>
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }

@@ -7,35 +7,51 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Users, Eye } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { markStale } from '../../store/dataStore';
+import ConfirmModal from '../shared/ConfirmModal';
 
 export default function Customers() {
+    const { refreshTrigger } = useSilentRefresh('admin_customers');
     const [customers, setCustomers] = useState({ data: [], total: 0 });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(customers.data.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+
+    const [confirmModal, setConfirmModal] = useState({
+        show: false, title: '', message: '',
+        onConfirm: null, variant: 'default'
+    });
+    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+        setConfirmModal({ show: true, title, message, onConfirm, variant });
+    };
+    const closeConfirm = () => {
+        setConfirmModal({
+            show: false, title: '', message: '',
+            onConfirm: null, variant: 'default'
+        });
+    };
+
+    const fetchData = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await axios.get('/customers', { params: { page, search } });
+            const paginatedData = res.data.data;
+            setCustomers({
+                data: paginatedData.data ? paginatedData.data : paginatedData,
+                total: paginatedData.total || paginatedData.length || 0
+            });
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
 
     useEffect(() => {
         let isMounted = true;
-        const fetchCustomers = () => {
+        const debounce = setTimeout(() => {
             if (!isMounted) return;
-            setLoading(true);
-            axios.get('/customers', { params: { page, search } })
-                .then(res => {
-                    const paginatedData = res.data.data;
-                    if (isMounted) {
-                        setCustomers({
-                            data: paginatedData.data ? paginatedData.data : paginatedData,
-                            total: paginatedData.total || paginatedData.length || 0
-                        });
-                    }
-                })
-                .finally(() => {
-                    if (isMounted) setLoading(false);
-                });
-        };
-        const debounce = setTimeout(fetchCustomers, 400);
+            fetchData(customers.data.length > 0);
+        }, 400);
         return () => {
             clearTimeout(debounce);
             isMounted = false;
@@ -102,6 +118,8 @@ export default function Customers() {
             </Card>
 
             <Pagination page={page} total={customers.total} perPage={15} onChange={setPage} />
+
+            <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
         </div>
     );
 }
