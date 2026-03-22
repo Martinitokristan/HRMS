@@ -29,18 +29,28 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         const storedToken = localStorage.getItem('hrms_token');
+        const supplierToken = localStorage.getItem('supplier_token');
+        
         refreshCategories();
+        
         if (storedToken) {
-            // Attach header before the me() call
+            // Priority: Attach HRMS token if it exists
             axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
             axios.get('/auth/me')
                 .then(res => setUser(res.data.data))
                 .catch(() => {
                     localStorage.removeItem('hrms_token');
-                    delete axios.defaults.headers.common['Authorization'];
+                    // Only delete header if there's no supplier token fallback
+                    if (!localStorage.getItem('supplier_token')) {
+                        delete axios.defaults.headers.common['Authorization'];
+                    }
                     setUser(null);
                 })
                 .finally(() => setLoading(false));
+        } else if (supplierToken) {
+            // Secondary: If no HRMS token but a supplier token exists, use that
+            axios.defaults.headers.common['Authorization'] = `Bearer ${supplierToken}`;
+            setLoading(false);
         } else {
             setLoading(false);
         }

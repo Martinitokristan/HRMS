@@ -16,10 +16,15 @@ export const SupplierAuthProvider = ({ children }) => {
     };    useEffect(() => {
         let isMounted = true;
         const token = localStorage.getItem('supplier_token');
-        if (token) {
+        const hrmsToken = localStorage.getItem('hrms_token');
+        
+        if (token && !hrmsToken) {
+            // Only set supplier token as header if no HRMS token is active
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            // Removed automatic profile fetch to avoid 401s for admin users
-            setLoading(false);
+            fetchProfile(isMounted);
+        } else if (token && hrmsToken) {
+            // If both exist, keep HRMS header for now but load profile
+            fetchProfile(isMounted);
         } else {
             setLoading(false);
         }
@@ -57,7 +62,10 @@ export const SupplierAuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem('supplier_token');
-        delete axios.defaults.headers.common['Authorization'];
+        // Only delete Authorization header if no HRMS token is active
+        if (!localStorage.getItem('hrms_token')) {
+            delete axios.defaults.headers.common['Authorization'];
+        }
         setSupplier(null);
     };
 

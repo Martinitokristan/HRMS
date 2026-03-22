@@ -253,7 +253,8 @@ export default function StockTab() {
             showToast('Stock transferred to storefront successfully!');
             setTransferModal({ show: false, item: null, qty: '1', allVariants: [] });
             setSelectedVariantId('');
-            triggerRefresh();
+            triggerRefresh(); // Refresh and clear expanded set to ensure data is updated accurately
+            setExpandedProducts(new Set());
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to transfer stock', 'error');
         } finally {
@@ -289,11 +290,11 @@ export default function StockTab() {
         let unit_type_id = item.unit_type_id || 1;
         
         // If this is a variant and missing category/unit, fetch from parent product
-        if (item.is_variant && (!category_id || !unit_type_id)) {
+        if (item.is_variant && item.product_id && (!category_id || !unit_type_id)) {
             try {
-                const productRes = await axios.get(`/api/products/${item.product_id}`);
+                // Use relative path for internal API call
+                const productRes = await axios.get(`/products/${item.product_id}`);
                 console.log('✅ [StockTab] Transfer - product API response:', productRes);
-                console.log('✅ [StockTab] Transfer - product data structure:', productRes.data);
                 const product = productRes.data?.data || productRes.data || {};
                 
                 if (!category_id) category_id = product.category_id || '';
