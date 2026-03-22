@@ -22,9 +22,9 @@ class BrevoEmailService
      */
     public static function sendVerificationEmail($email, $name, $token, $role)
     {
-        $apiKey = config('services.brevo.api_key');
-        $fromEmail = config('services.brevo.from_email');
-        $fromName = config('services.brevo.from_name');
+        $apiKey = trim(config('services.brevo.api_key'));
+        $fromEmail = trim(config('services.brevo.from_email'), '"\' ');
+        $fromName = trim(config('services.brevo.from_name'), '"\' ');
         $appUrl = config('app.url');
 
         if (!$apiKey) {
