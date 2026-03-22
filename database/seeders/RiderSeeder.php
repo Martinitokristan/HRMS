@@ -23,6 +23,7 @@ class RiderSeeder extends Seeder
                 'role'     => 'rider',
                 'status'   => 'active',
                 'password' => Hash::make('password'),
+                'email_verified_at' => now(),
             ]
         );
 

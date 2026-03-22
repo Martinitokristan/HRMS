@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             'role'     => 'admin',
             'status'   => 'active',
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
 
         // Default Customer
@@ -47,6 +48,7 @@ class DatabaseSeeder extends Seeder
             'role'     => 'customer',
             'status'   => 'active',
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
 
         \App\Models\CustomerProfile::create([
