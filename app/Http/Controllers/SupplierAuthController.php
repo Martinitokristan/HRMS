@@ -55,7 +55,11 @@ class SupplierAuthController extends Controller
 
         // Send Email - Wrapped in try-catch to prevent 500 error if SMTP is broken
         // Send Email via Brevo API (Bypasses Railway SMTP block)
-        \App\Services\BrevoEmailService::sendVerificationEmail($supplier->email, $supplier->name, $verifyToken, 'supplier');
+                $sent = \App\Services\BrevoEmailService::sendVerificationEmail($supplier->email, $supplier->name, $verifyToken, 'supplier');
+        if (!$sent) {
+            throw new \Exception("Failed to send verification email via Brevo API.");
+        }
+
 
         return response()->json([
             'message' => 'Supplier account created successfully. Please check your email for verification.',
@@ -259,7 +263,11 @@ class SupplierAuthController extends Controller
         ]);
 
         // Send Email via Brevo API (Bypasses Railway SMTP block)
-        \App\Services\BrevoEmailService::sendVerificationEmail($supplier->email, $supplier->name, $verifyToken, 'supplier');
+                $sent = \App\Services\BrevoEmailService::sendVerificationEmail($supplier->email, $supplier->name, $verifyToken, 'supplier');
+        if (!$sent) {
+            throw new \Exception("Failed to send verification email via Brevo API.");
+        }
+
 
         return response()->json(['message' => 'Verification email resent successfully!']);
     }

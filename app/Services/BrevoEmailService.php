@@ -75,10 +75,14 @@ class BrevoEmailService
 
         try {
             $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
-            Log::info("Brevo API: Email sent successfully to {$email}. MessageId: " . ($result->getMessageId() ?? 'N/A'));
+            $msg = "Brevo API: Email sent successfully to {$email}. MessageId: " . ($result->getMessageId() ?? 'N/A');
+            Log::info($msg);
+            error_log($msg); // Legacy log to ensure it hits Railway console
             return true;
         } catch (Exception $e) {
-            Log::error("Brevo API Error for {$email}: " . $e->getMessage());
+            $errorMsg = "Brevo API Error for {$email}: " . $e->getMessage();
+            Log::error($errorMsg);
+            error_log($errorMsg); // Ensure it shows in Railway console
             return false;
         }
     }
