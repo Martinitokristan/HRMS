@@ -1,57 +1,48 @@
 @echo off
-REM HRMS Setup Script for PHP 7.4 Devices (Teacher's Version)
-REM This script bypasses the PHP 8.2 requirement for use on older machines.
-
+REM HRMS Local Integration Setup (PHP 7.4 Bypass)
 echo.
-echo 🚀 Setting up HRMS Project for PHP 7.4...
-echo ---------------------------------------
+echo 🚀 Setting up HRMS for Local Testing...
+echo ----------------------------------------
 
-REM Check if .env file exists
+REM 1. Fix the environment file
 if not exist .env (
-    echo 📝 Creating .env file from example...
+    echo 📝 Creating Local .env from Example...
     copy .env.example .env
-) else (
-    echo ✅ .env file already exists
 )
 
-REM Install PHP dependencies with BYPASS
-echo 📦 Installing PHP dependencies (Ignoring PHP 8.2 Requirement)...
+REM 2. Install PHP dependencies with BYPASS
+echo 📦 Installing PHP dependencies...
 call composer install --ignore-platform-reqs --no-interaction --prefer-dist --optimize-autoloader
 
 if %errorlevel% neq 0 (
-    echo ❌ Composer failed! Check if composer is installed.
+    echo ❌ Composer setup failed.
     pause
     exit /b %errorlevel%
 )
 
-REM Install Node dependencies
+REM 3. Install Node dependencies
 echo 📦 Installing Node dependencies...
 call npm install
 
 if %errorlevel% neq 0 (
-    echo ❌ NPM failed! Check if Node.js is installed.
+    echo ❌ NPM setup failed.
     pause
     exit /b %errorlevel%
 )
 
-REM Generate application key
-echo 🔑 Generating application key...
+REM 4. Generate Key & Link (Needed for "serve" to work)
+echo 🔑 Refreshing APP_KEY...
 php artisan key:generate
 
-REM Create storage links
-echo 🔗 Creating storage links...
+echo 🔗 Linking Storage...
 php artisan storage:link
 
-REM Clean database setup
-echo 🧹 Cleaning database...
-php artisan migrate:fresh --seed --force
-
 echo.
-echo ✅ Setup complete!
-echo 🎯 Running on PHP 7.4 (Bypass Active).
+echo ✅ Dependencies and Engine ready!
 echo.
-echo 👤 Default Admin Login:
-echo    Email: admin@hrms.com
-echo    Password: password
+echo 🎯 NEXT STEPS FOR YOU:
+echo 1. Create a database named 'hrms' in your Local MySQL / phpMyAdmin.
+echo 2. Run 'php artisan migrate' to set up the tables.
+echo 3. Run 'php artisan serve' to start working.
 echo.
 pause
