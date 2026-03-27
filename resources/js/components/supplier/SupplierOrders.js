@@ -18,7 +18,8 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
-export default function SupplierOrders() {
+export default function SupplierOrders({ mode = 'completed' }) {
+    const isRequestMode = mode === 'requests';
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -53,7 +54,7 @@ export default function SupplierOrders() {
 
     useEffect(() => {
         fetchOrders(orders.data.length > 0);
-    }, [page, statusFilter, refreshTrigger]);
+    }, [page, statusFilter, refreshTrigger, mode]);
 
     useEffect(() => {
         if (highlightId && orders.data?.length > 0 && !selectedOrder) {
@@ -67,7 +68,7 @@ export default function SupplierOrders() {
     const fetchOrders = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const params = { page, per_page: 15 };
+            const params = { page, per_page: 15, tab: mode };
             if (statusFilter) params.status = statusFilter;
 
             const res = await axios.get('/supplier/purchase-orders', { params });
@@ -170,8 +171,12 @@ export default function SupplierOrders() {
         <div>
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
                 <div>
-                    <h2 className="text-xl font-extrabold text-foreground">Purchase Orders</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">Track and manage your purchase orders</p>
+                    <h2 className="text-xl font-extrabold text-foreground">
+                        {isRequestMode ? "Request Orders" : "Purchase Orders"}
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                        {isRequestMode ? "Track and respond to new purchase requests from admin" : "History of finalized purchase transactions"}
+                    </p>
                 </div>
             </div>
 
@@ -181,10 +186,12 @@ export default function SupplierOrders() {
                     {
                         value: statusFilter,
                         onChange: setStatusFilter,
-                        options: [
-                            { value: '', label: 'All Statuses' },
+                        options: isRequestMode ? [
+                            { value: '', label: 'All Active Requests' },
                             { value: 'pending_supplier', label: 'Awaiting Your Response' },
                             { value: 'accepted', label: 'Accepted' },
+                        ] : [
+                            { value: '', label: 'All Finalized' },
                             { value: 'rejected', label: 'Rejected' },
                             { value: 'supplier_delivered', label: 'Delivered' },
                             { value: 'received', label: 'Received' },
@@ -210,7 +217,9 @@ export default function SupplierOrders() {
                         {loading ? (
                             <TableRow><TableCell colSpan={6} className="text-center py-8"><div className="spinner" /></TableCell></TableRow>
                         ) : orders.data?.length === 0 ? (
-                            <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No purchase orders found</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                {isRequestMode ? "No active request orders found" : "No finalized purchase orders found"}
+                            </TableCell></TableRow>
                         ) : orders.data?.map(order => (
                             <TableRow key={order.id}>
                                 <TableCell className="font-semibold">{order.po_number}</TableCell>

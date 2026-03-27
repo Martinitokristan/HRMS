@@ -21,6 +21,13 @@ class PurchaseOrderController extends Controller
     public function index(Request $request)
     {
         $query = PurchaseOrder::with(['supplier', 'creator', 'items.product', 'items.supplierProduct'])
+            ->when($request->tab, function($q) use ($request) {
+                if ($request->tab === 'requests') {
+                    return $q->whereIn('status', ['pending', 'pending_supplier', 'accepted']);
+                } elseif ($request->tab === 'completed') {
+                    return $q->whereIn('status', ['supplier_delivered', 'received', 'rejected', 'cancelled']);
+                }
+            })
             ->when($request->status, function($q) use ($request) {
                 return $q->where('status', $request->status);
             })
@@ -497,7 +504,7 @@ class PurchaseOrderController extends Controller
                                     'purchase_price' => $supplierProduct->price,
                                     'sell_price' => $supplierProduct->price * 1.3, // 30% markup
                                     'image_path' => $supplierProduct->image_path, // Copy image from supplier
-                                    'is_active' => 1, // Active product
+                                    'is_active' => 0, // Inactive until explicitly displayed to storefront
                                 ]
                             );
                             $productId = $newProduct->id;
@@ -629,6 +636,13 @@ class PurchaseOrderController extends Controller
 
             $query = PurchaseOrder::with(['supplier', 'creator', 'items.product', 'items.supplierProduct'])
                 ->where('supplier_id', $supplier->id)
+                ->when($request->tab, function($q) use ($request) {
+                    if ($request->tab === 'requests') {
+                        return $q->whereIn('status', ['pending_supplier', 'accepted']);
+                    } elseif ($request->tab === 'completed') {
+                        return $q->whereIn('status', ['supplier_delivered', 'received', 'rejected', 'cancelled']);
+                    }
+                })
                 ->when($request->status, function($q) use ($request) {
                     return $q->where('status', $request->status);
                 })

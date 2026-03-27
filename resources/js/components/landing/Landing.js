@@ -88,7 +88,7 @@ export default function Landing() {
                             <span className="text-xs font-black text-primary-foreground">H</span>
                         </div>
                         <span className="text-lg font-bold tracking-tight text-foreground">
-                            HRMS <span className="text-primary">Pro</span>
+                            HRMS
                         </span>
                     </div>
                     <div className="hidden md:flex items-center gap-8">
@@ -242,7 +242,7 @@ export default function Landing() {
                             <span className="text-[10px] font-black text-primary-foreground">H</span>
                         </div>
                         <span className="text-[15px] font-bold text-foreground">
-                            HRMS <span className="text-primary">Pro</span>
+                            HRMS
                         </span>
                     </div>
                     <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Hardware Retail Management System. All rights reserved.</p>

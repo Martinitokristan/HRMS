@@ -52,7 +52,7 @@ import SupplierProducts from './components/supplier/SupplierProducts';
 import SupplierSettings from './components/supplier/SupplierSettings';
 import SupplierLayout from './components/layout/SupplierLayout';
 
-// Admin: Supplier Catalog
+// Admin: Supplier Available Products
 import SupplierCatalog from './components/suppliers/SupplierCatalog';
 
 // Admin: Returns
@@ -115,6 +115,7 @@ export default function AppRouter() {
                 <Route path="/products" element={<Products />} />
                 <Route path="/inventory" element={<Inventory tab="stock" />} />
                 <Route path="/inventory/sales" element={<Inventory tab="sales" />} />
+                <Route path="/inventory/requests" element={<Inventory tab="requests" />} />
                 <Route path="/inventory/purchase" element={<Inventory tab="purchase" />} />
                 <Route path="/delivery" element={<Delivery />} />
                 <Route path="/reports" element={<Reports />} />
@@ -158,7 +159,8 @@ export default function AppRouter() {
             }>
                 <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
                 <Route path="/supplier/products" element={<SupplierProducts />} />
-                <Route path="/supplier/orders" element={<SupplierOrders />} />
+                <Route path="/supplier/requests" element={<SupplierOrders mode="requests" />} />
+                <Route path="/supplier/orders" element={<SupplierOrders mode="completed" />} />
                 <Route path="/supplier/settings" element={<SupplierSettings />} />
             </Route>
 

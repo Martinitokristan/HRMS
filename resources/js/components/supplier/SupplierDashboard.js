@@ -47,8 +47,8 @@ export default function SupplierDashboard() {
             const allTotal = posRes.data.data.total || 0;
             const revenue = pos.reduce((s, p) => s + Number(p.total_cost || 0), 0);
             setStats({
-                pending: pos.filter(p => p.status === 'draft').length,
-                approved: pos.filter(p => p.status === 'approved').length,
+                pending: pos.filter(p => p.status === 'pending').length,
+                approved: pos.filter(p => p.status === 'pending_supplier').length,
                 delivered: pos.filter(p => p.status === 'supplier_delivered').length,
                 total: allTotal,
                 totalRevenue: revenue,
@@ -67,13 +67,14 @@ export default function SupplierDashboard() {
 
     const getStatusBadge = (status) => {
         const variants = {
-            draft: 'secondary',
-            approved: 'default',
+            pending: 'secondary',
+            pending_supplier: 'default',
+            accepted: 'default',
             supplier_delivered: 'outline',
             received: 'default',
         };
-        const labels = { draft: 'Draft', approved: 'Approved', supplier_delivered: 'Delivered', received: 'Received' };
-        return <Badge variant={variants[status] || 'secondary'} className={status === 'received' ? 'bg-green-100 text-green-700 border-green-200' : status === 'supplier_delivered' ? 'bg-orange-100 text-orange-700 border-orange-200' : status === 'approved' ? 'bg-blue-100 text-blue-700 border-blue-200' : ''}>{labels[status] || status}</Badge>;
+        const labels = { pending: 'Draft', pending_supplier: 'Awaiting Response', accepted: 'Accepted', supplier_delivered: 'Delivered', received: 'Received' };
+        return <Badge variant={variants[status] || 'secondary'} className={status === 'received' ? 'bg-green-100 text-green-700 border-green-200' : status === 'supplier_delivered' ? 'bg-orange-100 text-orange-700 border-orange-200' : status === 'pending_supplier' ? 'bg-blue-100 text-blue-700 border-blue-200' : ''}>{labels[status] || status}</Badge>;
     };
 
     if (loading) return <div className="flex items-center justify-center h-64"><div className="spinner" /></div>;
@@ -93,7 +94,7 @@ export default function SupplierDashboard() {
                 <div className="relative z-10">
                     <div className="text-sm text-white/60 mb-2 font-medium tracking-wide">Welcome back,</div>
                     <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 tracking-tight">{supplier?.name || 'Supplier'}</h2>
-                    <p className="text-sm text-white/80 max-w-xl leading-relaxed mb-6">Manage your products, track purchase orders, and grow your business with HRMS Pro.</p>
+                    <p className="text-sm text-white/80 max-w-xl leading-relaxed mb-6">Manage your products, track purchase orders, and grow your business with HRMS.</p>
                     <div className="flex flex-wrap gap-3">
                         <Button size="sm" className="bg-white text-slate-800 hover:bg-white/90 font-semibold shadow-lg" asChild>
                             <Link to="/supplier/products">Manage Products</Link>

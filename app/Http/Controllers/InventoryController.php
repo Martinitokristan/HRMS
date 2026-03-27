@@ -371,7 +371,7 @@ class InventoryController extends Controller
                         'purchase_price' => !empty($pd['purchase_price']) ? $pd['purchase_price'] : $sp->price,
                         'sell_price'     => !empty($pd['sell_price']) ? $pd['sell_price'] : ($sp->price * 1.3),
                         'image_path'     => $sp->image_path,
-                        'is_active'      => true,  // FIXED: Products should be active after transfer
+                        'is_active'      => true, 
                     ]);
                     $productId = $product->id;
                 }
@@ -437,6 +437,10 @@ class InventoryController extends Controller
                         if (!empty($pd['description'])) $updateData['description'] = $pd['description'];
                         if (!empty($pd['category_id'])) $updateData['category_id'] = $pd['category_id'];
                         if (!empty($pd['sell_price'])) $updateData['sell_price'] = $pd['sell_price'];
+                        
+                        // Always activate product when transferring to storefront
+                        $updateData['is_active'] = true;
+                        
                         if (count($updateData) > 0) {
                             $product->update($updateData);
                         }

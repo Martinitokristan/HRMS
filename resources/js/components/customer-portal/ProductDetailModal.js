@@ -3,7 +3,7 @@ import Modal from '../shared/Modal';
 import VariantSelector from '../shared/VariantSelector';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Percent, ShoppingCart, Minus, Plus, X, MessageSquare, Star } from 'lucide-react';
+import { Percent, ShoppingCart, Minus, Plus, X, MessageSquare, Star, CheckCircle2 } from 'lucide-react';
 import { getProductSaleInfo, getVariantSaleInfo } from '../../utils/priceCalculations';
 import { useAuth } from '../../context/AuthContext';
 import RatingStars from '../ui/RatingStars';
@@ -32,7 +32,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                 setActiveGalleryImage(null);
                 setForceUpdate(prev => prev + 1);
                 setShowReviews(false);
-                
+
                 // Initialize productRating with data from props if available to avoid flicker
                 if (product.average_rating !== undefined && product.total_reviews !== undefined) {
                     setProductRating({
@@ -40,10 +40,10 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                         total_reviews: product.total_reviews
                     });
                 }
-                
+
                 // Fetch product rating and sold count in parallel
                 fetchProductData();
-                
+
                 // Check review eligibility for logged-in users
                 if (user && product.id) {
                     checkReviewEligibility();
@@ -58,7 +58,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
 
     const fetchProductData = async () => {
         if (!product?.id) return;
-        
+
         // If we already have rating data in the product prop, use it immediately
         if (product.average_rating !== undefined && product.total_reviews !== undefined && !productRating) {
             setProductRating({
@@ -76,7 +76,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                 fetch(`/api/products/${product.id}/reviews`),
                 fetch(`/api/products/${product.id}/sold-count`)
             ]);
-            
+
             // Set rating data
             if (ratingResponse.ok) {
                 const ratingData = await ratingResponse.json();
@@ -84,7 +84,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                     setProductRating(ratingData.data.summary);
                 }
             }
-            
+
             // Set sold count data
             if (soldResponse.ok) {
                 const soldData = await soldResponse.json();
@@ -101,9 +101,9 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
 
     const checkReviewEligibility = async () => {
         if (!user || !product.id) return;
-        
+
         const token = localStorage.getItem('hrms_token');
-        
+
         setCheckingEligibility(true);
         try {
             const response = await fetch(`/api/customers/${user.id}/can-review/${product.id}`, {
@@ -138,51 +138,89 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
     // Show reviews view
     if (showReviews) {
         return (
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <div className="p-6 max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">Product Reviews</h2>
-                        <Button variant="ghost" onClick={handleBackToProduct}>
-                            <X className="w-5 h-5" />
-                        </Button>
-                    </div>
-                    
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                        <p className="text-sm text-gray-600">See what customers are saying about this product</p>
-                    </div>
-
-                    {/* Write Review Button (only for eligible customers) */}
-                    {user && canReview && (
-                        <div className="mb-6">
-                            <Button onClick={() => {
-                                const url = selectedVariant 
-                                    ? `/shop/products/${product.id}/reviews#write?variant=${selectedVariant.id}`
-                                    : `/shop/products/${product.id}/reviews#write`;
-                                window.location.href = url;
-                            }}>
-                                <Star className="w-4 h-4 mr-2" />
-                                Write a Review
-                            </Button>
+            <div className="fixed inset-0 z-[99999] bg-white overflow-y-auto animate-in fade-in slide-in-from-bottom duration-300">
+                <div className="w-full px-4 md:px-12 lg:px-20 py-8 md:py-16">
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 pb-8 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                            <div className="text-[11px] font-black uppercase tracking-[0.3em] text-[#FF5A1F]">Customer Voice</div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-200"></div>
+                            <div className="text-[11px] font-black uppercase tracking-widest text-gray-400">Product Reviews</div>
                         </div>
-                    )}
+                        <button 
+                            onClick={handleBackToProduct}
+                            className="bg-[#FF5A1F] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 px-10 rounded-full hover:bg-orange-600 transition-all active:scale-95 shadow-xl shadow-orange-500/20 flex items-center gap-3"
+                        >
+                            <span className="text-white/80">←</span> Back to Product
+                        </button>
+                    </div>
 
-                    {/* Reviews List */}
-                    <div className="mt-6">
-                        <ProductReviewList 
-                            productId={product.id} 
+                    {/* Product Summary Banner - Horizontal Split */}
+                    <div className="mb-16 p-10 lg:p-12 bg-white border border-gray-100 rounded-[2.5rem] shadow-sm flex flex-col xl:flex-row items-center gap-12">
+                        {/* Info */}
+                        <div className="flex-1 border-r border-gray-100 pr-12 text-center xl:text-left">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-400 mb-3 block">Viewing feedback for</span>
+                            <h3 className="text-4xl font-black text-gray-900 mb-4 tracking-tighter leading-tight">{product.name}</h3>
+                            <p className="text-base text-gray-500 leading-relaxed max-w-lg">
+                                Authentic feedback from verified buyers who have used this product. Read their experiences below.
+                            </p>
+                        </div>
+                        
+                        {/* Summary Score */}
+                        <div className="px-12 flex flex-col items-center">
+                            <div className="text-7xl font-black text-[#FF5A1F] tracking-tighter mb-2 leading-none">
+                                {productRating?.average_rating?.toFixed(1) || '0.0'}
+                            </div>
+                            <div className="flex items-center gap-0.5 mb-2 scale-110">
+                                <RatingStars rating={productRating?.average_rating || 0} size="sm" />
+                            </div>
+                            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">
+                                {productRating?.total_reviews || 0} reviews
+                            </div>
+                        </div>
+
+                        {/* Breakdown */}
+                        <div className="flex-1 w-full xl:w-80 space-y-2 border-l border-gray-100 pl-12">
+                            {[5, 4, 3, 2, 1].map(rating => {
+                                const count = productRating?.rating_breakdown?.[rating] || 0;
+                                const total = productRating?.total_reviews || 1;
+                                const percentage = (count / total) * 100;
+                                
+                                // Color Map from reference
+                                const barColor = {
+                                    5: 'bg-[#FF5A1F]',
+                                    4: 'bg-[#FF5A1F]',
+                                    3: 'bg-[#FFB800]',
+                                    2: 'bg-[#FF4D4D]',
+                                    1: 'bg-gray-200'
+                                }[rating];
+
+                                return (
+                                    <div key={rating} className="flex items-center gap-4 group">
+                                        <span className="text-[10px] font-black text-gray-400 w-2">{rating}</span>
+                                        <div className="flex-1 h-1.5 bg-gray-50 rounded-full overflow-hidden">
+                                            <div 
+                                                className={`h-full ${barColor} rounded-full transition-all duration-1000`}
+                                                style={{ width: `${percentage}%` }}
+                                            ></div>
+                                        </div>
+                                        <span className="text-[10px] font-black text-gray-300 w-6 text-right">{count}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Main Feed Area */}
+                    <div className="w-full">
+                        <ProductReviewList
+                            productId={product.id}
                             variantId={selectedVariant?.id}
                             productVariants={product.product_variants || []}
                         />
                     </div>
-
-                    <div className="mt-6 flex justify-center">
-                        <Button variant="outline" onClick={handleBackToProduct}>
-                            Back to Product
-                        </Button>
-                    </div>
                 </div>
-            </Modal>
+            </div>
         );
     }
 
@@ -263,165 +301,174 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
 
         const categoryName = product?.category?.name ||
             (product?.name?.includes('PVC') ? 'Plumbing' :
-            (product?.name?.includes('Hex Bolt') ? 'Hand Tools' : 'Supplies'));
+                (product?.name?.includes('Hex Bolt') ? 'Hand Tools' : 'Supplies'));
 
         return (
             <Modal isOpen={isOpen} onClose={onClose} title="" size="lg" hideFooter hideTitle>
-                <div className="flex flex-col md:flex-row rounded-2xl overflow-hidden bg-white" style={{ minHeight: '480px' }}>
+                <div className="flex flex-col md:flex-row overflow-hidden bg-white text-gray-900 border-none shadow-none" style={{ minHeight: '520px' }}>
 
-                    {/* Close Button */}
+                    {/* Close Button - More subtle */}
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
+                        className="absolute top-4 right-4 z-50 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-gray-100 shadow-sm hover:bg-white transition-all active:scale-90"
                     >
-                        <X className="w-4 h-4 text-gray-500" />
+                        <X className="w-5 h-5 text-gray-400" />
                     </button>
 
-                    {/* Left - Image Panel */}
-                    <div className="md:w-[45%] bg-gray-50 flex flex-col items-center justify-center p-6 relative">
+                    {/* Left Side - Image & Gallery */}
+                    <div className="md:w-[50%] p-6 flex flex-col items-center justify-center bg-gray-50/20 relative">
                         {/* Sale Badge */}
                         {currentSaleInfo.isOnSale && (
-                            <div className="absolute top-4 left-4 z-10">
-                                <span className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">
+                            <div className="absolute top-6 left-6 z-10">
+                                <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">
                                     SALE -{currentSaleInfo.salePercentage}% OFF
                                 </span>
                             </div>
                         )}
 
-                        {/* Main Image */}
-                        <div className="w-full aspect-square flex items-center justify-center rounded-xl overflow-hidden mb-4">
+                        {/* Main Image Box */}
+                        <div className="w-full aspect-square relative rounded-2xl bg-white shadow-xl shadow-gray-200/50 border border-gray-100 flex items-center justify-center overflow-hidden mb-4">
                             {displayImage ? (
                                 <img
                                     src={`/storage/${displayImage}`}
                                     alt={product.name}
-                                    className="w-full h-full object-contain"
+                                    className="w-full h-full object-contain p-4"
                                 />
                             ) : (
                                 <div className="text-8xl opacity-10">📦</div>
                             )}
                         </div>
 
-                        {/* Thumbnails */}
-                        {allImages.length > 1 && (
-                            <div className="flex gap-2 flex-wrap justify-center">
-                                {allImages.map((img, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => setActiveGalleryImage(img)}
-                                        className={`w-14 h-14 rounded-lg border-2 overflow-hidden bg-white flex items-center justify-center p-1 transition-all ${
-                                            displayImage === img
-                                                ? 'border-orange-500 shadow ring-2 ring-orange-100'
-                                                : 'border-gray-200 hover:border-orange-300'
-                                        }`}
-                                    >
-                                        <img src={`/storage/${img}`} alt="" className="w-full h-full object-contain" />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Right - Details Panel */}
-                    <div className="md:w-[55%] flex flex-col p-6 overflow-y-auto">
-
-                        {/* Category */}
-                        <p className="text-xs font-semibold text-orange-500 uppercase tracking-widest mb-1">
-                            {categoryName}
-                        </p>
-
-                        {/* Product Name */}
-                        <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-tight">
-                            {product.name}
-                        </h2>
-
-
-                        {/* Description Section */}
-                        {product.description && (
-                            <div className="mb-5 mt-2">
-                                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">DESCRIPTION</div>
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                    {product.description}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Stock Status Badge - Pill Style */}
-                        <div className="mb-4">
-                            <div className={`inline-flex items-center px-4 py-1.5 rounded-full border text-sm font-semibold ${
-                                isOutOfStock 
-                                    ? 'bg-red-50 border-red-200 text-red-600' 
-                                    : 'bg-gray-50 border-gray-200 text-gray-700'
-                            }`}>
-                                {isOutOfStock ? 'Out of Stock' : `${Math.round(currentStock)} units in stock`}
-                            </div>
-                        </div>
-
-                        {/* Price Display */}
-                        <div className="mb-5">
-                            {currentSaleInfo.isOnSale ? (
-                                <div className="bg-orange-50 rounded-xl px-5 py-4 flex items-center justify-between shadow-sm">
-                                    <div className="flex flex-col">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-orange-400 mb-1">On Sale Price</span>
-                                        <span className="text-4xl font-bold text-orange-500">
-                                            ₱{currentSaleInfo.salePrice.toFixed(2)}
-                                        </span>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="text-sm text-gray-400 line-through block">
-                                            ₱{currentSaleInfo.originalPrice.toFixed(2)}
-                                        </span>
-                                        <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded">
-                                            Save ₱{currentSaleInfo.savings.toFixed(2)}
-                                        </span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col">
-                                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Price</span>
-                                    <span className="text-4xl font-bold text-orange-500">
-                                        ₱{displayPrice.toFixed(2)}
-                                    </span>
+                        {/* Thumbnails Row - Fixed height to prevent jump */}
+                        <div className="h-16 mt-auto flex items-center justify-center w-full">
+                            {allImages.length > 1 && (
+                                <div className="flex flex-wrap justify-center gap-3">
+                                    {allImages.map((img, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setActiveGalleryImage(img)}
+                                            className={`w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${displayImage === img
+                                                ? 'border-orange-500 shadow-md ring-2 ring-orange-100'
+                                                : 'border-gray-100 hover:border-orange-200'
+                                                }`}
+                                        >
+                                            <img src={`/storage/${img}`} className="w-full h-full object-contain rounded-lg" />
+                                        </button>
+                                    ))}
                                 </div>
                             )}
                         </div>
+                    </div>
 
-                        {/* Product Rating */}
-                        <div className="mb-5">
-                            {loadingRating ? (
-                                <div className="flex items-center gap-3">
-                                    <div className="flex gap-1">
-                                        {[1, 2, 3, 4, 5].map(i => (
-                                            <div key={i} className="w-4 h-4 bg-gray-200 rounded animate-pulse" />
-                                        ))}
-                                    </div>
-                                    <span className="text-sm text-gray-400">Loading...</span>
-                                </div>
-                            ) : productRating ? (
-                                <div className="flex items-center gap-3">
-                                    <RatingStars rating={productRating.average_rating || 0} size="sm" />
-                                    <span className="text-sm text-gray-500">
-                                        ({soldCount || 0} sold)
-                                    </span>
-                                </div>
-                            ) : null}
+                    {/* Right Side - Details */}
+                    <div className="md:w-[50%] p-6 flex flex-col overflow-y-auto max-h-[85vh]">
+
+                        {/* Top Section / Category */}
+                        <div className="mb-2">
+                            <div className="text-[10px] font-black uppercase tracking-widest text-[#FF5A1F]">
+                                {categoryName}
+                            </div>
                         </div>
 
-                        {/* Variants - Button Selection Style */}
+                        {/* Title */}
+                        <h2 className="text-xl font-black text-gray-900 mb-1 leading-tight tracking-tight">
+                            {product.name}
+                        </h2>
+
+                        {/* Description */}
+                        {product.description && (
+                            <p className="text-xs text-gray-500 leading-relaxed mb-3">
+                                {product.description}
+                            </p>
+                        )}
+
+                        {/* Stock Badge */}
+                        <div className="mb-4">
+                            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold ${isOutOfStock
+                                ? 'bg-red-50 text-red-600 border border-red-100'
+                                : 'bg-green-50 text-green-600 border border-green-100'
+                                }`}>
+                                {isOutOfStock ? (
+                                    <>Out of Stock</>
+                                ) : (
+                                    <>
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        In Stock <span className="text-gray-900 ml-1">{Math.round(currentStock)} units</span>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Price Area */}
+                        <div className="mb-4 bg-[#FFF9F6] border border-[#FFE7DB] rounded-xl p-4 relative overflow-hidden">
+                            <div className="flex flex-col">
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-3xl font-black text-[#FF5A1F]">
+                                        ₱{displayPrice.toFixed(2)}
+                                    </span>
+                                    {currentSaleInfo.isOnSale && (
+                                        <span className="text-base text-gray-300 line-through font-bold">
+                                            ₱{currentSaleInfo.originalPrice.toFixed(2)}
+                                        </span>
+                                    )}
+                                </div>
+                                {currentSaleInfo.isOnSale && (
+                                    <div className="mt-0.5 flex items-center gap-2">
+                                        <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-100">
+                                            Save ₱{currentSaleInfo.savings.toFixed(2)}
+                                        </span>
+                                        <span className="text-[9px] text-orange-400 font-bold uppercase tracking-wider">Limited Time Offer</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Rating & Sold count - Moved Below Price */}
+                        {!loadingRating && productRating && (
+                            <div className="flex items-center gap-3 mb-6 px-1 mt-2">
+                                <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100 shadow-sm">
+                                    <RatingStars rating={productRating.average_rating || 0} size="sm" />
+                                    <span className="text-[10px] font-black text-gray-400 ml-1 mt-0.5">
+                                        {productRating.average_rating?.toFixed(1) || '0.0'}
+                                    </span>
+                                </div>
+                                <div className="h-4 w-[1px] bg-gray-200"></div>
+                                <div className="text-[10px] font-black text-[#FF5A1F] uppercase tracking-wider">
+                                    {soldCount || 0} Sold
+                                </div>
+                                <div className="h-4 w-[1px] bg-gray-200"></div>
+                                <button
+                                    onClick={handleReviewsClick}
+                                    className="text-[10px] font-bold text-gray-400 hover:text-orange-500 transition-colors uppercase tracking-wider underline-offset-4 hover:underline"
+                                >
+                                    {productRating.total_reviews || 0} Reviews
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Variants Section */}
                         {hasVariants && (
-                            <div className="mb-6">
-                                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2.5">SELECT OPTION</div>
+                            <div className="mb-4">
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                                    {(() => {
+                                        const hasSize = variants.some(v => v.size);
+                                        const hasColor = variants.some(v => v.color);
+                                        const hasWeight = variants.some(v => v.weight);
+
+                                        if (hasSize && !hasColor && !hasWeight) return 'SIZES';
+                                        if (hasColor && !hasSize && !hasWeight) return 'COLORS';
+                                        if (hasWeight && !hasSize && !hasColor) return 'WEIGHTS / KG';
+                                        return 'SELECT OPTIONS';
+                                    })()}
+                                </div>
                                 <div className="flex flex-wrap gap-2.5">
                                     {variants.map((v) => {
-                                        // A variant is selected if:
-                                        // 1. We chose 'base' and v.id is 'base'
-                                        // 2. We chose a specific variant and v.id matches it
-                                        const isSelected = selectedVariant 
-                                            ? selectedVariant.id === v.id 
+                                        const isSelected = selectedVariant
+                                            ? selectedVariant.id === v.id
                                             : v.id === 'base';
-                                            
+
                                         const isOOS = v.stock <= 0;
-                                        
-                                        // Variant label helper
+
                                         const getLabel = (v) => {
                                             if (v.id === 'base') return 'Regular';
                                             const parts = [v.size, v.color, v.weight].filter(Boolean);
@@ -437,13 +484,12 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                                                     const options = { size: v.size, color: v.color, weight: v.weight };
                                                     handleVariantChange(v, options);
                                                 }}
-                                                className={`px-5 py-2 rounded-lg border-2 text-sm font-bold transition-all shadow-sm ${
-                                                    isOOS 
-                                                        ? 'bg-gray-100 border-transparent text-gray-400 cursor-not-allowed opacity-50'
-                                                        : isSelected
-                                                            ? 'bg-white text-orange-500 border-orange-500'
-                                                            : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
-                                                }`}
+                                                className={`px-4 py-1.5 rounded-lg border-2 text-xs font-bold transition-all ${isOOS
+                                                    ? 'bg-gray-100 border-transparent text-gray-400 cursor-not-allowed opacity-50'
+                                                    : isSelected
+                                                        ? 'bg-[#FF5A1F] text-white border-[#FF5A1F] shadow-md shadow-orange-200 scale-105'
+                                                        : 'bg-white text-gray-700 border-gray-100 hover:border-orange-200'
+                                                    }`}
                                             >
                                                 {getLabel(v)}
                                             </button>
@@ -453,58 +499,52 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                             </div>
                         )}
 
-                        {/* Quantity & Add to Cart Section */}
-                        <div className="mt-auto pt-5 border-t border-gray-100">
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                        {/* Quantity & CTA Section */}
+                        <div className="mt-4 flex flex-col gap-6">
+                            <div className="flex items-center">
+                                <div className="flex items-center border border-gray-100 rounded-full overflow-hidden bg-white shadow-sm ring-1 ring-black/5 p-1 px-1">
                                     <button
                                         onClick={() => setQty(q => Math.max(1, q - 1))}
-                                        className="w-11 h-11 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600 font-bold text-lg"
+                                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-400 rounded-full"
                                     >
-                                        −
+                                        <Minus className="w-4 h-4" />
                                     </button>
-                                    <input
-                                        type="number"
-                                        value={qty}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value) || 1;
-                                            setQty(Math.max(1, Math.min(currentStock, val)));
-                                        }}
-                                        className="w-12 text-center font-bold text-gray-900 border-x-2 border-gray-200 outline-none h-11"
-                                    />
+                                    <div className="w-10 text-center font-black text-gray-900">
+                                        {qty}
+                                    </div>
                                     <button
                                         onClick={() => setQty(q => Math.min(q + 1, currentStock))}
-                                        className="w-11 h-11 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600 font-bold text-lg"
+                                        className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-400 rounded-full"
+                                        disabled={qty >= currentStock}
                                     >
-                                        +
+                                        <Plus className="w-4 h-4" />
                                     </button>
                                 </div>
-                                <span className="text-sm font-medium text-gray-500">{Math.round(currentStock)} units in stock</span>
                             </div>
 
-                            <button
-                                onClick={handleAddToCart}
-                                disabled={!canAdd}
-                                className={`w-full h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg ${
-                                    canAdd
-                                        ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-100'
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <Button
+                                    onClick={handleAddToCart}
+                                    disabled={!canAdd}
+                                    className={`flex-grow h-14 rounded-full text-base font-black transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl ${canAdd
+                                        ? 'bg-[#FF5A1F] hover:bg-[#e44e18] text-white shadow-orange-200/40'
                                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                }`}
-                            >
-                                <ShoppingCart className="w-6 h-6" />
-                                {isOutOfStock ? 'Sold Out' : `Add to Cart — ₱${subtotal.toFixed(2)}`}
-                            </button>
-                        </div>
+                                        }`}
+                                >
+                                    <ShoppingCart className="w-5 h-5" />
+                                    {isOutOfStock ? 'SOLD OUT' : 'ADD TO CART'}
+                                </Button>
 
-                        {/* Reviews Button */}
-                        <Button
-                            variant="outline"
-                            onClick={handleReviewsClick}
-                            className="w-full h-10 rounded-xl font-medium text-sm flex items-center justify-center gap-2"
-                        >
-                            <MessageSquare className="w-4 h-4" />
-                            View Reviews
-                        </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleReviewsClick}
+                                    className="h-14 w-14 rounded-full border-2 border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all text-gray-400 hover:text-orange-500 active:scale-90"
+                                    title="View Reviews"
+                                >
+                                    <MessageSquare className="w-5 h-5" />
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </Modal>

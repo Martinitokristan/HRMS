@@ -15,8 +15,9 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
-export default function PurchaseTab() {
+export default function PurchaseTab({ mode = 'completed' }) {
     const { showToast } = useToast();
+    const isRequestMode = mode === 'requests';
     const { refreshTrigger } = useSilentRefresh('admin_purchases');
     
     const [pos, setPos] = useState({ data: [], total: 0 });
@@ -42,7 +43,14 @@ export default function PurchaseTab() {
     const fetchPos = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get('/purchase-orders', { params: { page, search, status: statusFilter } });
+            const res = await axios.get('/purchase-orders', { 
+                params: { 
+                    page, 
+                    search, 
+                    status: statusFilter,
+                    tab: mode 
+                } 
+            });
             const paginatedData = res.data.data;
             setPos({
                 data: paginatedData.data ? paginatedData.data : paginatedData,
@@ -65,7 +73,7 @@ export default function PurchaseTab() {
             clearTimeout(debounce);
             isMounted = false;
         };
-    }, [page, search, statusFilter, refreshTrigger]);
+    }, [page, search, statusFilter, refreshTrigger, mode]);
 
 
     const handleAction = async (poId, action) => {
@@ -106,14 +114,16 @@ export default function PurchaseTab() {
                     filters={[
                         {
                             value: statusFilter, onChange: v => { setStatusFilter(v); setPage(1); },
-                            options: [
-                                { value: '',                   label: 'All Statuses' },
-                                { value: 'pending',            label: 'Pending' },
-                                { value: 'pending_supplier',   label: 'Approved / Sent' },
+                            options: isRequestMode ? [
+                                { value: '',                   label: 'All Active Requests' },
+                                { value: 'pending',            label: 'Draft (Pending admin)' },
+                                { value: 'pending_supplier',   label: 'Sent to Supplier' },
                                 { value: 'accepted',           label: 'Accepted' },
+                            ] : [
+                                { value: '',                   label: 'All Finalized' },
+                                { value: 'supplier_delivered', label: 'Delivered (Awaiting Receipt)' },
+                                { value: 'received',           label: 'Received (Completed)' },
                                 { value: 'rejected',           label: 'Rejected' },
-                                { value: 'supplier_delivered', label: 'Delivered' },
-                                { value: 'received',           label: 'Received' },
                                 { value: 'cancelled',          label: 'Declined' },
                             ]
                         }
@@ -138,7 +148,9 @@ export default function PurchaseTab() {
                         {loading ? (
                             <TableRow><TableCell colSpan={7} className="text-center py-10"><div className="spinner mx-auto"/></TableCell></TableRow>
                         ) : pos.data.length === 0 ? (
-                            <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">No purchase orders found</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                                {isRequestMode ? "No active request orders found" : "No finalized purchase orders found"}
+                            </TableCell></TableRow>
                         ) : pos.data.map(po => (
                             <TableRow key={po.id}>
                                 <TableCell className="px-4 py-3 font-semibold text-primary">{po.po_number}</TableCell>

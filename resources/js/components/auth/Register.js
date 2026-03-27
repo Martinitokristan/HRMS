@@ -305,7 +305,7 @@ export default function Register() {
                             <span className="text-sm font-black text-primary-foreground">H</span>
                         </div>
                         <span className="text-xl font-bold tracking-tight text-foreground">
-                            HRMS <span className="text-primary">Pro</span>
+                            HRMS
                         </span>
                     </div>
 

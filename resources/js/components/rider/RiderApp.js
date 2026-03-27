@@ -159,7 +159,7 @@ export default function RiderApp() {
         return (
             <div className="min-h-screen flex items-center justify-center p-8 bg-secondary/30">
                 <Card className="max-w-md w-full p-8 text-center">
-                    <div className="text-lg font-black text-foreground mb-6">HRMS <span className="text-primary">Pro</span></div>
+                    <div className="text-lg font-black text-foreground mb-6">HRMS</div>
                     <div className="mb-4">{user.status === 'pending' ? <Clock className="h-14 w-14 mx-auto text-amber-400" /> : <CheckCircle2 className="h-14 w-14 mx-auto text-green-400" />}</div>
                     <h1 className="text-xl font-bold text-foreground capitalize mb-3">Account {user.status.replace('_', ' ')}</h1>
                     <p className="text-muted-foreground leading-relaxed mb-6 max-w-sm mx-auto">

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Eye, Layers, Info } from 'lucide-react';
 
 export default function StockTab() {
     const { showToast } = useToast();
@@ -36,6 +37,8 @@ export default function StockTab() {
     const [selectedVariantId, setSelectedVariantId] = useState('');
     const [transferLoading, setTransferLoading] = useState(false);
     const [expandedProducts, setExpandedProducts] = useState(new Set());
+    const [viewVariantItem, setViewVariantItem] = useState(null);
+    const [variantPage, setVariantPage] = useState(1);
 
     // Memoize grouped inventory data to prevent unnecessary recalculations
     const groupedInventory = useMemo(() => {
@@ -253,7 +256,10 @@ export default function StockTab() {
                     purchase_price: transferForm.purchase_price,
                 },
             });
-            showToast('Stock transferred to storefront successfully!');
+            showToast('Stock displayed to storefront successfully!');
+            if (viewVariantItem) {
+                // Keep viewVariantItem set so the breakdown modal restores after transfer
+            }
             setTransferModal({ show: false, item: null, qty: '1', allVariants: [] });
             setSelectedVariantId('');
             triggerRefresh(); // Refresh and clear expanded set to ensure data is updated accurately
@@ -444,12 +450,8 @@ export default function StockTab() {
                             // Aggregated totals for display in the summary row
                             const variantWarehouse = hasVariants ? item.variants.reduce((s, v) => s + Number(v.warehouse_stock || 0), 0) : 0;
                             const variantStorefront = hasVariants ? item.variants.reduce((s, v) => s + Number(v.current_stock || 0), 0) : 0;
-                            const totalSold = (hasVariants
-                                ? item.variants.reduce((s, v) => s + Number(v.total_sold || 0), 0)
-                                : 0) + Number(item.total_sold || 0);
-                            const totalImported = (hasVariants
-                                ? item.variants.reduce((s, v) => s + Number(v.total_imported || 0), 0)
-                                : 0) + Number(item.total_imported || 0);
+                            const totalSold = Number(item.total_sold || 0);
+                            const totalImported = Number(item.total_imported || 0);
 
                             // For the warehouse column: show ONLY base own stock (variants shown separately)
                             const displayWarehouse = baseWarehouse;
@@ -465,13 +467,8 @@ export default function StockTab() {
                                     {/* Base Product Row */}
                                     <TableRow className={hasVariants ? 'cursor-pointer hover:bg-secondary/30' : ''}>
                                         <TableCell className="px-4 py-3 text-center text-[13px] font-semibold text-foreground">{item.barcode}</TableCell>
-                                        <TableCell className="px-4 py-3" onClick={() => hasVariants && toggleExpand(item.product_id || item.id)}>
+                                        <TableCell className="px-4 py-3">
                                             <div className="flex items-center gap-2">
-                                                {hasVariants && (
-                                                    <span className="text-orange-500 font-bold text-lg mr-2">
-                                                        {isExpanded ? '▼' : '▶'}
-                                                    </span>
-                                                )}
                                                 <div>
                                                     <div className="font-semibold text-foreground">{item.name}</div>
                                                     <div className="text-[12px] text-muted-foreground">{item.supplier}</div>
@@ -512,67 +509,27 @@ export default function StockTab() {
                                                 : <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground">Optimal</Badge>}
                                         </TableCell>
                                         <TableCell className="px-4 py-3 text-center">
-                                            {/* Base Transfer: only shown when the base product itself has warehouse stock */}
-                                            {baseWarehouse > 0 && (
-                                                <Button size="sm" onClick={() => openTransferModal(item)}>
-                                                    Transfer
-                                                </Button>
-                                            )}
+                                            <div className="flex items-center justify-center gap-2">
+                                                {hasVariants && (
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        className="h-8 w-8 p-0"
+                                                        onClick={() => setViewVariantItem(item)}
+                                                        title="View Details"
+                                                    >
+                                                        <Eye className="h-4 w-4 text-blue-600" />
+                                                    </Button>
+                                                )}
+                                                {baseWarehouse > 0 && (
+                                                    <Button size="sm" onClick={() => openTransferModal(item)}>
+                                                        Display
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
 
-                                    {/* Variant Rows (Expandable) */}
-                                    {hasVariants && isExpanded && item.variants.map(variant => {
-                                        const variantParts = [];
-                                        if (variant.size && variant.size !== '-') variantParts.push(variant.size);
-                                        if (variant.color && variant.color !== '-') variantParts.push(variant.color);
-                                        if (variant.weight && variant.weight !== '-') variantParts.push(variant.weight);
-                
-                                        const variantDetails = variantParts.join(' / ') || '';
-                                        const variantFullName = variantDetails ? `${item.name} (${variantDetails})` : item.name;
-                                        const variantLow = variant.current_stock <= variant.reorder_threshold;
-
-                                        return (
-                                            <TableRow key={variant.id} className="bg-secondary/10">
-                                                <TableCell className="px-4 py-3 text-center text-[13px] font-semibold text-foreground">{variant.barcode}</TableCell>
-                                                <TableCell className="px-4 py-3">
-                                                    <div className="flex items-center gap-2 ml-6">
-                                                        <div>
-                                                            <div className="font-semibold text-foreground">{variantFullName}</div>
-                                                            <div className="text-[12px] text-muted-foreground">{variant.supplier}</div>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-3 text-center text-muted-foreground">Variant</TableCell>
-                                                <TableCell className="px-4 py-3 text-center font-bold text-primary">{formatNum(variant.warehouse_stock)}</TableCell>
-                                                <TableCell className="px-4 py-3 text-center font-bold text-[15px] text-foreground">{formatNum(variant.current_stock)}</TableCell>
-                                                <TableCell className="px-4 py-3 text-center">
-                                                    <span className={`font-semibold ${variant.total_sold > 0 ? 'text-success-foreground' : 'text-muted-foreground'}`}>
-                                                        {formatNum(variant.total_sold)}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-3 text-center">
-                                                    <span className={`font-semibold ${variant.total_imported > 0 ? 'text-info' : 'text-muted-foreground'}`}>
-                                                        {formatNum(variant.total_imported)}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="px-4 py-3 text-center text-muted-foreground">{variant.unit}</TableCell>
-                                                <TableCell className="px-4 py-3 text-center font-semibold">{formatNum(variant.reorder_threshold)}</TableCell>
-                                                <TableCell className="px-4 py-3 text-center">
-                                                    {variantLow
-                                                        ? <Badge variant="outline" className="border-destructive/30 bg-danger-light text-destructive">Low Stock</Badge>
-                                                        : <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground">Optimal</Badge>}
-                                                </TableCell>
-                                                <TableCell className="px-4 py-3 text-center">
-                                                    {variant.warehouse_stock > 0 && (
-                                                        <Button size="sm" onClick={() => openTransferModal(variant)}>
-                                                            Transfer
-                                                        </Button>
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
                                 </React.Fragment>
                             );
                         })}
@@ -582,11 +539,147 @@ export default function StockTab() {
 
             <Pagination page={page} total={inventory.total} perPage={15} onChange={setPage} />
 
+            {/* Variant Details Modal (Focused Breakdown) */}
+            <Modal
+                isOpen={!!viewVariantItem && !transferModal.show}
+                onClose={() => { setViewVariantItem(null); setVariantPage(1); }}
+                title={`Product Breakdown: ${viewVariantItem?.name}`}
+                size="xl"
+                hideFooter
+            >
+                {viewVariantItem && (() => {
+                    const ITEMS_PER_PAGE = 10;
+                    const totalVariants = viewVariantItem.variants.length;
+                    const startIndex = (variantPage - 1) * ITEMS_PER_PAGE;
+                    const paginatedVariants = viewVariantItem.variants.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+                    return (
+                        <div className="space-y-6">
+                            {/* Header Info Banner */}
+                            <div className="bg-secondary/20 p-5 rounded-2xl border border-border flex justify-between items-center">
+                                <div>
+                                    <div className="text-sm font-bold text-primary uppercase tracking-wider mb-1 flex items-center gap-2">
+                                        <Layers className="h-4 w-4" /> {viewVariantItem.category}
+                                    </div>
+                                    <h2 className="text-2xl font-black text-foreground">{viewVariantItem.name}</h2>
+                                    <div className="text-sm text-muted-foreground mt-1 flex items-center gap-3">
+                                        <span><strong>Barcode:</strong> {viewVariantItem.barcode}</span>
+                                        <span>&bull;</span>
+                                        <span><strong>Supplier:</strong> {viewVariantItem.supplier}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <Badge variant="outline" className="text-lg px-4 py-1 font-bold">
+                                        {totalVariants} Variant{totalVariants !== 1 ? 's' : ''}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            {/* Variants Table */}
+                            <div className="rounded-xl border border-border overflow-hidden bg-white shadow-sm">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-secondary/30 hover:bg-secondary/30 text-[11px] font-bold uppercase tracking-wider">
+                                            <TableHead className="px-4 py-3">Variant Details</TableHead>
+                                            <TableHead className="px-4 py-3 text-center">Barcode</TableHead>
+                                            <TableHead className="px-4 py-3 text-center">Warehouse</TableHead>
+                                            <TableHead className="px-4 py-3 text-center">Storefront</TableHead>
+                                            <TableHead className="px-4 py-3 text-center">Sold</TableHead>
+                                            <TableHead className="px-4 py-3 text-center">Imported</TableHead>
+                                            <TableHead className="px-4 py-3 text-center">Status</TableHead>
+                                            <TableHead className="px-4 py-3 text-center">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {/* Include Base Product Row only on the first page */}
+                                        {variantPage === 1 && (
+                                            <TableRow className="border-b border-border bg-blue-50/30">
+                                                <TableCell className="px-4 py-4 font-bold text-foreground flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full bg-primary" />
+                                                    Base Product (Regular)
+                                                </TableCell>
+                                                <TableCell className="px-4 py-4 text-center font-mono text-xs">{viewVariantItem.barcode}</TableCell>
+                                                <TableCell className="px-4 py-4 text-center font-black text-primary">{formatNum(viewVariantItem.warehouse_stock)}</TableCell>
+                                                <TableCell className="px-4 py-4 text-center font-bold text-foreground text-lg">{formatNum(viewVariantItem.current_stock)}</TableCell>
+                                                <TableCell className="px-4 py-4 text-center font-semibold text-success-foreground">{formatNum(viewVariantItem.total_sold)}</TableCell>
+                                                <TableCell className="px-4 py-4 text-center font-semibold text-info">{formatNum(viewVariantItem.total_imported)}</TableCell>
+                                                <TableCell className="px-4 py-4 text-center">
+                                                    {Number(viewVariantItem.current_stock) <= Number(viewVariantItem.reorder_threshold)
+                                                        ? <Badge variant="outline" className="border-destructive/30 bg-danger-light text-destructive">Low Stock</Badge>
+                                                        : <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground">Optimal</Badge>}
+                                                </TableCell>
+                                                <TableCell className="px-4 py-4 text-center">
+                                                    {viewVariantItem.warehouse_stock > 0 && (
+                                                        <Button size="sm" onClick={() => openTransferModal(viewVariantItem)}>
+                                                            Display
+                                                        </Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+
+                                        {/* Then paginated Variants */}
+                                        {paginatedVariants.map((variant) => {
+                                            const variantParts = [];
+                                            if (variant.size && variant.size !== '-') variantParts.push(variant.size);
+                                            if (variant.color && variant.color !== '-') variantParts.push(variant.color);
+                                            if (variant.weight && variant.weight !== '-') variantParts.push(variant.weight);
+                                            const variantLabel = variantParts.join(' / ') || 'N/A';
+                                            
+                                            return (
+                                                <TableRow key={variant.id} className="hover:bg-secondary/10 transition-colors">
+                                                    <TableCell className="px-4 py-4 font-semibold text-foreground pl-10">
+                                                        {variantLabel}
+                                                    </TableCell>
+                                                    <TableCell className="px-4 py-4 text-center font-mono text-xs text-muted-foreground">{variant.barcode}</TableCell>
+                                                    <TableCell className="px-4 py-4 text-center font-bold text-primary">{formatNum(variant.warehouse_stock)}</TableCell>
+                                                    <TableCell className="px-4 py-4 text-center font-bold text-foreground text-lg">{formatNum(variant.current_stock)}</TableCell>
+                                                    <TableCell className="px-4 py-4 text-center font-semibold text-success-foreground">{formatNum(variant.total_sold)}</TableCell>
+                                                    <TableCell className="px-4 py-4 text-center font-semibold text-info">{formatNum(variant.total_imported)}</TableCell>
+                                                    <TableCell className="px-4 py-4 text-center">
+                                                        {Number(variant.current_stock) <= Number(variant.reorder_threshold)
+                                                            ? <Badge variant="outline" className="border-destructive/30 bg-danger-light text-destructive text-[10px]">Low Stock</Badge>
+                                                            : <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground text-[10px]">Optimal</Badge>}
+                                                    </TableCell>
+                                                    <TableCell className="px-4 py-4 text-center">
+                                                        {variant.warehouse_stock > 0 && (
+                                                            <Button size="sm" onClick={() => openTransferModal(variant)}>
+                                                                Display
+                                                            </Button>
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            {/* Modal Pagination for Variants */}
+                            {totalVariants > ITEMS_PER_PAGE && (
+                                <div className="mt-2 text-center flex justify-center">
+                                    <Pagination 
+                                        page={variantPage} 
+                                        total={totalVariants} 
+                                        perPage={ITEMS_PER_PAGE} 
+                                        onChange={setVariantPage} 
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                                <Button variant="outline" onClick={() => { setViewVariantItem(null); setVariantPage(1); }}>Close View</Button>
+                            </div>
+                        </div>
+                    );
+                })()}
+            </Modal>
+
             <Modal
                 isOpen={transferModal.show}
                 onClose={() => setTransferModal({ show: false, item: null, qty: '1', allVariants: [] })}
-                title="Transfer to Storefront"
-                size="xl"
+                title="Display to Storefront"
+                size="md"
             >
                 {transferModal.item && (() => {
                     const item = transferModal.item;
@@ -605,31 +698,31 @@ export default function StockTab() {
                     return (
                         <div className="space-y-5">
                         {/* ── Item Identity Banner ── */}
-                        <div className="flex items-start gap-4 p-4 rounded-xl bg-secondary/40 border border-border">
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-border">
                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-bold text-foreground text-base">{item.name.replace(' (Warehouse Only)', '')}</span>
-                                    {isVariant && variantLabel && (
-                                        <Badge variant="secondary" className="text-xs font-semibold">{variantLabel}</Badge>
-                                    )}
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold text-foreground text-sm truncate">{item.name.replace(' (Warehouse Only)', '')}</span>
                                     {isVariant
-                                        ? <Badge className="bg-blue-100 text-blue-700 text-[10px] font-bold">Variant</Badge>
-                                        : <Badge className="bg-orange-100 text-orange-700 text-[10px] font-bold">Base Product</Badge>
+                                        ? <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter">Variant</Badge>
+                                        : <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter">Base Product</Badge>
                                     }
                                 </div>
-                                <div className="text-xs text-muted-foreground mt-1">{item.supplier !== '-' ? item.supplier : ''}</div>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    {isVariant && variantLabel && (
+                                        <span className="text-[9px] font-bold text-muted-foreground bg-white/50 px-1.5 py-0.5 rounded border border-border/50">{variantLabel}</span>
+                                    )}
+                                    <span className="text-[10px] text-muted-foreground italic">{item.supplier !== '-' ? item.supplier : ''}</span>
+                                </div>
                             </div>
-                            <div className="text-right shrink-0">
-                                <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">In Warehouse</div>
-                                <div className="text-2xl font-black text-primary">{formatNum(item.warehouse_stock)}</div>
-                                <div className="text-xs text-muted-foreground">{item.unit || 'units'}</div>
+                            <div className="text-right">
+                                <div className="text-[9px] uppercase font-bold text-muted-foreground mr-1">Warehouse: <span className="text-primary text-sm font-black">{formatNum(item.warehouse_stock)}</span></div>
                             </div>
                         </div>
 
                         {/* ── Quantity + Pricing Row ── */}
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-3 gap-3">
                             <div className="space-y-1">
-                                <Label className="text-[11px] uppercase tracking-widest font-bold text-muted-foreground">Qty to Transfer</Label>
+                                <Label className="text-[10px] uppercase font-bold text-muted-foreground">Quantity</Label>
                                 <Input
                                     type="number"
                                     min="1"
@@ -641,27 +734,23 @@ export default function StockTab() {
                                         const num = parseInt(val);
                                         setTransferModal({ ...transferModal, qty: isNaN(num) ? '1' : num.toString() });
                                     }}
-                                    onBlur={() => {
-                                        if (!transferModal.qty || parseInt(transferModal.qty) < 1)
-                                            setTransferModal({ ...transferModal, qty: '1' });
-                                    }}
-                                    className="h-12 text-xl font-bold text-center border-2 focus:border-primary"
+                                    className="h-9 text-base font-bold text-center"
                                 />
                             </div>
                             <div className="space-y-1">
-                                <Label className="text-[11px] uppercase tracking-widest font-bold text-orange-600">Retail Price (₱) *</Label>
+                                <Label className="text-[10px] uppercase font-bold text-orange-600">Retail Price</Label>
                                 <Input
                                     type="number"
                                     step="0.01"
                                     min="0"
                                     value={transferForm.sell_price}
                                     onChange={e => setTransferForm({ ...transferForm, sell_price: e.target.value })}
-                                    className="h-12 text-xl font-bold text-center border-2 border-orange-300 focus:border-orange-500"
+                                    className="h-9 text-base font-bold text-center border-orange-200"
                                 />
                             </div>
                             <div className="space-y-1">
-                                <Label className="text-[11px] uppercase tracking-widest font-bold text-green-700">Profit Margin</Label>
-                                <div className={`h-12 flex items-center justify-center rounded-md border-2 font-black text-xl ${parseFloat(profitPct) >= 0 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                                <Label className="text-[10px] uppercase font-bold text-green-700">Profit</Label>
+                                <div className={`h-9 flex items-center justify-center rounded-md border font-black text-base ${parseFloat(profitPct) >= 0 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
                                     {profitPct}%
                                 </div>
                             </div>
@@ -676,33 +765,31 @@ export default function StockTab() {
 
                         {/* ── Retail Storefront Settings ── */}
                         <div className="rounded-xl border-2 border-orange-100 overflow-hidden">
-                            <div className="flex items-center justify-between px-5 py-3 bg-orange-50 border-b border-orange-100">
-                                <h4 className="font-bold text-gray-900 text-sm">Retail Storefront Settings</h4>
-                                <Badge className="bg-orange-500 text-white text-[10px] font-bold px-2">Admin Control</Badge>
+                            <div className="flex items-center justify-between px-3 py-1.5 bg-orange-50 border-b border-orange-100">
+                                <h4 className="font-bold text-gray-900 text-[10px] uppercase">Storefront Listing</h4>
+                                <Badge className="bg-orange-500 text-white text-[8px] h-3 px-1">Admin Only</Badge>
                             </div>
-                            <div className="p-5 bg-white grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-bold text-gray-700">Product Name</Label>
+                            <div className="p-3 bg-white grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div className="space-y-0.5">
+                                    <Label className="text-[9px] font-bold text-gray-500 uppercase">Product Name</Label>
                                     <Input
                                         value={transferForm.name}
                                         onChange={e => setTransferForm({ ...transferForm, name: e.target.value })}
-                                        placeholder="Display name in store"
-                                        className="h-10 border-gray-300 focus:border-orange-500"
+                                        className="h-8 text-[13px] border-gray-200"
                                     />
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-bold text-gray-700">Barcode</Label>
+                                <div className="space-y-0.5">
+                                    <Label className="text-[9px] font-bold text-gray-500 uppercase">Barcode</Label>
                                     <Input
                                         value={transferForm.barcode}
                                         onChange={e => setTransferForm({ ...transferForm, barcode: e.target.value })}
-                                        placeholder="SKU / Barcode"
-                                        className="h-10 border-gray-300 focus:border-orange-500"
+                                        className="h-8 text-[13px] font-mono border-gray-200"
                                     />
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-bold text-gray-700">Category</Label>
+                                <div className="space-y-0.5">
+                                    <Label className="text-[9px] font-bold text-gray-500 uppercase">Category</Label>
                                     <select
-                                        className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                        className="flex h-8 w-full rounded-md border border-gray-200 bg-white px-2 py-1 text-[13px] focus:outline-none"
                                         value={transferForm.category_id}
                                         onChange={e => setTransferForm({ ...transferForm, category_id: e.target.value })}
                                     >
@@ -710,10 +797,10 @@ export default function StockTab() {
                                         {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-bold text-gray-700">Unit Type</Label>
+                                <div className="space-y-0.5">
+                                    <Label className="text-[9px] font-bold text-gray-500 uppercase">Unit Type</Label>
                                     <select
-                                        className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                        className="flex h-8 w-full rounded-md border border-gray-200 bg-white px-2 py-1 text-[13px] focus:outline-none"
                                         value={transferForm.unit_type_id}
                                         onChange={e => setTransferForm({ ...transferForm, unit_type_id: e.target.value })}
                                     >
@@ -721,35 +808,34 @@ export default function StockTab() {
                                         {unitTypes.map(u => <option key={u.id} value={u.id}>{u.purchase_unit} / {u.sell_unit}</option>)}
                                     </select>
                                 </div>
-                                <div className="md:col-span-2 space-y-1">
-                                    <Label className="text-xs font-bold text-gray-700">Product Description</Label>
+                                <div className="md:col-span-2 space-y-0.5">
+                                    <Label className="text-[9px] font-bold text-gray-500 uppercase">Description</Label>
                                     <Textarea
-                                        rows={3}
+                                        rows={1}
                                         value={transferForm.description}
                                         onChange={e => setTransferForm({ ...transferForm, description: e.target.value })}
-                                        placeholder="Add details for customers..."
-                                        className="border-gray-300 focus:border-orange-500 resize-none"
+                                        className="text-[12px] border-gray-200 resize-none h-12"
                                     />
                                 </div>
                             </div>
                         </div>
 
                         <p className="text-xs text-muted-foreground">
-                            <strong>Note:</strong> You can edit product details and set retail pricing before transferring to the customer storefront.
+                            <strong>Note:</strong> You can edit product details and set retail pricing before displaying to the customer storefront.
                         </p>
 
                         {/* ── Action Buttons ── */}
-                        <div className="flex gap-3 pt-1">
+                        <div className="flex justify-center gap-4 pt-2">
                             <Button
                                 variant="outline"
-                                className="flex-1 h-12 font-semibold border-2"
+                                className="px-10 h-10 font-bold border rounded-full transition-all hover:bg-secondary/20"
                                 onClick={() => setTransferModal({ show: false, item: null, qty: '1', allVariants: [] })}
                                 disabled={transferLoading}
                             >
                                 Cancel
                             </Button>
                             <Button
-                                className="flex-1 h-12 font-semibold bg-orange-500 hover:bg-orange-600 text-white"
+                                className="px-12 h-10 font-black bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-200 rounded-full transition-all active:scale-95"
                                 onClick={handleTransfer}
                                 disabled={
                                     transferLoading ||
@@ -761,7 +847,7 @@ export default function StockTab() {
                                     parseFloat(transferForm.sell_price) <= 0
                                 }
                             >
-                                {transferLoading ? 'Transferring...' : `Transfer ${transferModal.qty || 0} to Storefront`}
+                                {transferLoading ? 'Displaying...' : `Display ${transferModal.qty || 0} to Storefront`}
                             </Button>
                         </div>
                     </div>

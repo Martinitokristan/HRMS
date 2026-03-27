@@ -166,7 +166,7 @@ export default function Products() {
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-                            <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">SKU / Image</TableHead>
+                            <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Barcode / Image</TableHead>
                             <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Product Name</TableHead>
                             <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4">Category</TableHead>
                             <TableHead className="text-[11px] font-bold uppercase tracking-wider px-4 text-right">Supply Price</TableHead>

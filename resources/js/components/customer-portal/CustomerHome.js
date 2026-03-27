@@ -124,108 +124,113 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
 
     return (
         <div
-            className="pcard group bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg"
+            className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-gray-300/10 hover:-translate-y-1"
             onClick={() => setSelectedProduct(product)}
         >
-            {/* Product Image - Smaller */}
-            <div className="pcard__img relative aspect-[4/3] bg-gray-50 overflow-hidden">
+            {/* Image Container with Badges */}
+            <div className="relative aspect-[1.1/1] overflow-hidden bg-gray-50/50 border-b border-gray-100/50">
+                {/* Product Image */}
                 {imgSrc ? (
                     <img
                         src={imgSrc}
                         alt={product.name}
                         loading="lazy"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                         onError={(e) => {
-                            console.log('❌ [ProductCard] Image failed to load:', imgSrc);
                             e.target.style.display = 'none';
                             e.target.nextSibling.style.display = 'flex';
                         }}
                     />
                 ) : null}
                 <div
-                    className="w-full h-full flex items-center justify-center"
+                    className="w-full h-full flex items-center justify-center bg-gray-50"
                     style={{ display: imgSrc ? 'none' : 'flex' }}
                 >
-                    <Package className="h-12 w-12 text-gray-300 opacity-40" />
+                    <Package className="h-10 w-10 text-gray-200" />
                 </div>
 
-                {/* Sale Badge - Top Right */}
-                {saleInfo.isOnSale && (
-                    <div className="absolute top-2 right-2">
-                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md">
-                            -{saleInfo.salePercentage}%
-                        </span>
-                    </div>
-                )}
+                {/* Badges Overlay */}
+                <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+                    {/* Category Label */}
+                    <span className="bg-[#FF5A1F] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-orange-500/20">
+                        {product.category?.name || 'Hand Tools'}
+                    </span>
 
+                    {/* Sale Badge */}
+                    {saleInfo.isOnSale && (
+                        <span className="bg-[#FF4D4D] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-red-500/20">
+                            SALE -{saleInfo.salePercentage}%
+                        </span>
+                    )}
+                </div>
+
+                {/* Out of Stock Overlay */}
                 {!inStock && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">Out of Stock</span>
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
+                        <span className="bg-gray-900 text-white text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full shadow-2xl">
+                            Sold Out
+                        </span>
                     </div>
                 )}
             </div>
 
-            {/* Product Info */}
-            <div className="p-3">
-                <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-1 leading-tight">{product.name}</h3>
+            {/* Content Section */}
+            <div className="p-4 space-y-3">
+                <div className="min-h-[60px]">
+                    <h3 className="text-base font-black text-gray-900 mb-1 leading-tight group-hover:text-[#FF5A1F] transition-colors line-clamp-1">{product.name}</h3>
+                    <p className="text-[9px] text-gray-500 leading-normal line-clamp-2 font-medium">
+                        {product.description || "Premium quality product designed for durability and high performance in all specific applications."}
+                    </p>
+                </div>
 
-                {/* Variants Info */}
-                {hasVariants && (
-                    <div className="text-xs text-gray-600 mb-2">
-                        {sizes.length > 0 && <span className="mr-2">{sizes.length} sizes</span>}
-                        {colors.length > 0 && <span>{colors.length} colors</span>}
+                {/* Stock Indicator Pill - Mini Spec Modal Style */}
+                <div className="inline-flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100/50">
+                    <span className="text-[8.5px] font-black text-emerald-600 uppercase tracking-widest leading-none">Stock</span>
+                    <span className="text-[8.5px] font-black text-gray-900 uppercase tracking-widest leading-none">
+                        {totalStock} units
+                    </span>
+                </div>
+
+                {/* Pricing Area - Vertical Tight */}
+                <div className="pt-1.5 pb-0.5">
+                    <div className="flex items-end gap-2">
+                        <div className="text-lg font-black text-[#FF5A1F] leading-none tracking-tighter">
+                            ₱{saleInfo.isOnSale ? saleInfo.salePrice.toFixed(2) : saleInfo.originalPrice.toFixed(2)}
+                        </div>
+                        {saleInfo.isOnSale && (
+                           <span className="text-[9px] text-gray-400 line-through font-bold leading-none mb-0.5">
+                               ₱{saleInfo.originalPrice.toFixed(2)}
+                           </span>
+                        )}
                     </div>
-                )}
+                </div>
 
-                {/* Stock Display */}
-                <div className="text-xs text-gray-600 mb-2">
-                    {inStock ? (
-                        <span className="text-green-600 font-medium">
-                            {hasVariants ? `${totalStock} units available` : `${baseStock} units`}
+                {/* Social Proof Row - Tucked Closely */}
+                <div className="flex items-center gap-2 pt-1 border-t border-gray-100/30">
+                    <div className="flex items-center gap-1">
+                        <div className="scale-75 origin-left -ml-1">
+                            <RatingStars rating={productRating?.average_rating || 0} size="xs" />
+                        </div>
+                        <span className="text-[8.5px] font-black text-gray-900 leading-none">
+                            {productRating?.average_rating?.toFixed(1) || '0.0'}
                         </span>
-                    ) : (
-                        <span className="text-red-600 font-medium">Out of Stock</span>
-                    )}
-                </div>
-
-                {/* Price */}
-                <div className="mb-2">
-                    {saleInfo.isOnSale ? (
-                        <div className="flex items-center gap-2">
-                            <span className="text-base font-bold text-red-600">
-                                ₱{saleInfo.salePrice.toFixed(2)}
-                            </span>
-                            <span className="text-xs text-gray-400 line-through">
-                                ₱{saleInfo.originalPrice.toFixed(2)}
-                            </span>
-                        </div>
-                    ) : (
-                        <div className="text-base font-bold text-gray-900">
-                            ₱{saleInfo.originalPrice.toFixed(2)}
-                        </div>
-                    )}
-                </div>
-
-                {/* Rating and Sold Count */}
-                {productRating && (
-                    <div className="mb-3">
-                        <div className="flex items-center gap-2">
-                            <RatingStars rating={productRating.average_rating || 0} size="sm" />
-                            <span className="text-xs text-gray-500">
-                                ({soldCount || 0} sold)
-                            </span>
-                        </div>
                     </div>
-                )}
+                    <div className="w-0.5 h-0.5 rounded-full bg-gray-300"></div>
+                    <span className="text-[8.5px] font-black text-gray-900 uppercase tracking-widest leading-none whitespace-nowrap">
+                        {soldCount || 0} SOLD
+                    </span>
+                </div>
 
-                {/* Add to Cart Button */}
+                {/* Interactive Area */}
                 <button
-                    className="w-full h-8 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded transition-colors flex items-center justify-center gap-1 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
                     disabled={!inStock || addingToCart}
                     onClick={handleAddToCart}
+                    className="w-full h-9 bg-[#FF5A1F] hover:bg-orange-600 active:scale-95 text-white rounded-lg transition-all duration-300 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 disabled:bg-gray-100 disabled:text-gray-300"
                 >
-                    <ShoppingCart className="h-3 w-3" />
-                    {addingToCart ? 'Adding...' : 'Add to Cart'}
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <span className="text-[9px] font-black uppercase tracking-[0.1em]">
+                        {addingToCart ? 'Wait...' : 'Add to Cart'}
+                    </span>
                 </button>
             </div>
         </div>
@@ -444,7 +449,7 @@ export default function CustomerHome() {
                     {/* Logo */}
                     <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => navigate('/shop')}>
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-sm">H</div>
-                        <div className="text-base font-bold text-gray-900">HRMS <span className="font-normal text-gray-600">Pro</span></div>
+                        <div className="text-base font-bold text-gray-900">HRMS</div>
                     </div>
 
                     {/* Centered Search */}
@@ -609,14 +614,15 @@ export default function CustomerHome() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                         {[...Array(12)].map((_, i) => (
-                            <div key={i} className="bg-white border border-gray-200 rounded-lg overflow-hidden animate-pulse">
-                                <div className="aspect-[4/3] bg-gray-100" />
-                                <div className="p-3 space-y-2">
-                                    <div className="h-3 bg-gray-100 rounded w-4/5" />
-                                    <div className="h-3 bg-gray-100 rounded w-2/5" />
-                                    <div className="h-6 bg-gray-100 rounded" />
+                            <div key={i} className="bg-white border border-gray-200 rounded-2xl overflow-hidden animate-pulse">
+                                <div className="aspect-[1.1/1] bg-gray-50" />
+                                <div className="p-4 space-y-3">
+                                    <div className="h-5 bg-gray-50 rounded w-4/5" />
+                                    <div className="h-3 bg-gray-50 rounded w-full" />
+                                    <div className="h-4 bg-gray-50 rounded w-2/5" />
+                                    <div className="h-8 bg-gray-50 rounded w-full mt-2" />
                                 </div>
                             </div>
                         ))}
@@ -629,7 +635,7 @@ export default function CustomerHome() {
                         <Button className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => { setSearch(''); setCategoryFilter(''); }}>Clear Filters</Button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                         {(products || []).map(p => (
                             <ProductCard
                                 key={`${p.id}-${p.available_stock || p.inventory?.current_stock || 0}`}

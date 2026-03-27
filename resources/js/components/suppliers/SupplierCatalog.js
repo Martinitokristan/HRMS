@@ -11,7 +11,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Store, ShoppingCart, Package } from 'lucide-react';
+import { Store, ShoppingCart, Package, Minus, Plus, CheckCircle2 } from 'lucide-react';
 import VariantSelector from '../shared/VariantSelector';
 
 export default function SupplierCatalog() {
@@ -52,7 +52,7 @@ export default function SupplierCatalog() {
             const res = await axios.get('/supplier-catalog', { params });
             setProducts(res.data.data);
         } catch (e) {
-            showToast('Failed to load supplier catalog', 'error');
+            showToast('Failed to load supplier available products', 'error');
         } finally {
             setLoading(false);
         }
@@ -97,7 +97,7 @@ export default function SupplierCatalog() {
             setSelectedVariant(null);
             setSelectedOptions({ size: '', color: '', weight: '' });
             setOrderQty(1);
-            // Refresh catalog so new stock counts are visible immediately
+            // Refresh list so new stock counts are visible immediately
             fetchProducts();
         } catch (e) {
             showToast(e.response?.data?.message || 'Failed to place order.', 'error');
@@ -112,7 +112,7 @@ export default function SupplierCatalog() {
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3 relative z-0">
                 <div>
                     <h2 className="text-xl font-bold text-foreground tracking-tight flex items-center gap-2">
-                        <Store className="h-6 w-6 text-primary" /> Supplier Product Catalog
+                        <Store className="h-6 w-6 text-primary" /> Supplier Available Products
                     </h2>
                     <p className="text-sm text-muted-foreground mt-0.5">Browse products promoted by your suppliers. Create POs directly from here.</p>
                 </div>
@@ -214,7 +214,7 @@ export default function SupplierCatalog() {
             <Pagination page={page} total={products.total} perPage={20} onChange={setPage} />
 
             {/* Product Detail Modal - Modern Design */}
-            <Modal isOpen={!!viewProduct} onClose={() => { setViewProduct(null); setSelectedVariant(null); setSelectedOptions({ size: '', color: '', weight: '' }); setOrderQty(1); setActiveGalleryImage(null); }} title="Product Details" size="lg" hideFooter>
+            <Modal isOpen={!!viewProduct} onClose={() => { setViewProduct(null); setSelectedVariant(null); setSelectedOptions({ size: '', color: '', weight: '' }); setOrderQty(1); setActiveGalleryImage(null); }} title="" size="lg" hideFooter hideTitle>
                 {viewProduct && (() => {
                     const variants = (viewProduct.variants || []).map(v => ({
                         id: v.id,
@@ -251,16 +251,21 @@ export default function SupplierCatalog() {
                     const displayImage = activeGalleryImage || mainImage;
 
                     return (
-                        <div className="grid grid-cols-1 md:grid-cols-[1.2fr,1fr] gap-0">
+                        <div className="flex flex-col md:flex-row overflow-hidden bg-white text-gray-900 border-none shadow-none">
                             {/* Left Side - Image & Gallery */}
-                            <div className="bg-secondary/10 p-6 flex flex-col items-center border-r border-border">
-                                {/* Main Image Box - FIXED SIZE */}
-                                <div className="w-full aspect-square relative rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center overflow-hidden mb-6">
+                            <div className="md:w-[50%] p-8 flex flex-col items-center justify-center bg-gray-50/20">
+                                {/* Main Image Box */}
+                                <div className="w-full aspect-square relative rounded-2xl bg-white shadow-lg shadow-gray-200/50 border border-gray-100 flex items-center justify-center overflow-hidden mb-4">
+                                    {/* Sale Badge Mock if needed - Or conditional if you have sale_price */}
+                                    {/* <div className="absolute top-4 right-4 z-10">
+                                        <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">SALE -50% OFF</span>
+                                    </div> */}
+                                    
                                     {displayImage ? (
                                         <img
                                             src={`/storage/${displayImage}`}
                                             alt={viewProduct.name}
-                                            className="w-full h-full object-contain p-4"
+                                            className="w-full h-full object-contain p-3"
                                         />
                                     ) : (
                                         <Package className="h-24 w-24 opacity-10 text-muted-foreground" />
@@ -274,9 +279,9 @@ export default function SupplierCatalog() {
                                             <button
                                                 key={i}
                                                 onClick={() => setActiveGalleryImage(img)}
-                                                className={`w-16 h-16 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${displayImage === img
+                                                className={`w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${displayImage === img
                                                         ? 'border-orange-500 shadow-md ring-2 ring-orange-100'
-                                                        : 'border-border hover:border-orange-200'
+                                                        : 'border-gray-200 hover:border-orange-200'
                                                     }`}
                                             >
                                                 <img src={`/storage/${img}`} className="w-full h-full object-contain rounded-lg" />
@@ -287,71 +292,90 @@ export default function SupplierCatalog() {
                             </div>
 
                             {/* Right Side - Details */}
-                            <div className="p-6 flex flex-col">
-                                {/* Category & Title */}
-                                <div className="mb-4">
-                                    <div className="text-xs font-bold uppercase tracking-wider text-orange-500 mb-1">
+                            <div className="md:w-[50%] p-8 flex flex-col overflow-y-auto max-h-[85vh]">
+                                {/* Top Nav-like spacing / Category */}
+                                <div className="mb-3">
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-[#FF5A1F] mb-0.5">
                                         {viewProduct.category?.name || 'SUPPLIES'}
                                     </div>
-                                    <h2 className="text-2xl font-bold text-foreground mb-2 leading-tight">
+                                    <h2 className="text-xl font-black text-gray-900 mb-1 leading-tight tracking-tight">
                                         {viewProduct.name}
                                     </h2>
-                                    <div className="text-3xl font-bold text-orange-500">
-                                        ₱{Number(currentPrice).toFixed(2)}
-                                    </div>
+                                    
+                                    {/* Description */}
+                                    {viewProduct.description && (
+                                        <p className="text-xs text-gray-500 leading-relaxed mb-2">
+                                            {viewProduct.description}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Stock Badge */}
                                 <div className="mb-4">
-                                    <Badge variant={isOutOfStock ? "destructive" : "success"} className="text-sm px-3 py-1">
-                                        {isOutOfStock ? 'Out of Stock' : `${currentStock} units in stock`}
-                                    </Badge>
+                                    <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                        isOutOfStock 
+                                            ? 'bg-red-50 text-red-600 border border-red-100' 
+                                            : 'bg-green-50 text-green-600 border border-green-100'
+                                    }`}>
+                                        {isOutOfStock ? (
+                                            <>Out of Stock</>
+                                        ) : (
+                                            <>
+                                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                                In Stock <span className="text-gray-900 ml-1">{currentStock} units</span>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
 
-                                {/* Barcode & Min Order */}
-                                <div className="space-y-2 mb-4 text-sm">
+                                {/* Price Area */}
+                                <div className="mb-4 bg-[#FFF9F6] border border-[#FFE7DB] rounded-xl p-4 relative overflow-hidden">
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-3xl font-black text-[#FF5A1F]">
+                                            ₱{Number(currentPrice).toFixed(2)}
+                                        </span>
+                                        {/* Original price placeholder if needed */}
+                                        {/* <span className="text-sm text-gray-300 line-through">₱{(currentPrice * 1.5).toFixed(2)}</span>
+                                        <span className="text-[10px] text-green-600 font-bold ml-1">You save ₱{(currentPrice * 0.5).toFixed(2)}</span> */}
+                                    </div>
+                                </div>
+
+                                {/* Labels / Meta Data Section */}
+                                <div className="grid grid-cols-1 gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
                                     {viewProduct.barcode && (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground font-semibold">Barcode:</span>
-                                            <span className="font-mono text-foreground">{viewProduct.barcode}</span>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-gray-400 font-bold uppercase tracking-wider">Barcode</span>
+                                            <span className="font-mono font-bold text-gray-700">{viewProduct.barcode}</span>
                                         </div>
                                     )}
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-muted-foreground font-semibold">MIN ORDER QTY:</span>
-                                        <span className="text-foreground">{viewProduct.min_order_qty || 1} units</span>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-400 font-bold uppercase tracking-wider">Min Order</span>
+                                        <span className="font-bold text-gray-700">{viewProduct.min_order_qty || 1} units</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-muted-foreground font-semibold">SUPPLIER:</span>
-                                        <span className="text-foreground">{viewProduct.supplier?.name}</span>
+                                    <div className="flex justify-between items-center text-xs text-right">
+                                        <span className="text-gray-400 font-bold uppercase tracking-wider">Supplier</span>
+                                        <span className="font-bold text-gray-700">{viewProduct.supplier?.name}</span>
                                     </div>
                                 </div>
 
-                                {/* Description */}
-                                {viewProduct.description && (
-                                    <div className="mb-4">
-                                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">DESCRIPTION</div>
-                                        <p className="text-sm text-foreground leading-relaxed">{viewProduct.description}</p>
-                                    </div>
-                                )}
-
-                                {/* Variants - show as clickable buttons with Regular as first option */}
+                                {/* Variants Section */}
                                 {hasVariants && (
                                     <div className="mb-4">
-                                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">SELECT OPTION</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">SELECT OPTION</div>
                                         <div className="flex flex-wrap gap-2">
-                                            {/* Regular / Base option */}
+                                            {/* Regular Option */}
                                             <button
                                                 type="button"
                                                 onClick={() => { setSelectedVariant(null); setOrderQty(viewProduct.min_order_qty || 1); setActiveGalleryImage(null); }}
-                                                className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${selectedVariant === null
-                                                        ? 'bg-white text-orange-500 border-orange-500 shadow-sm'
-                                                        : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
+                                                className={`px-4 py-1.5 rounded-lg border-2 text-xs font-bold transition-all ${selectedVariant === null
+                                                        ? 'bg-[#FF5A1F] text-white border-[#FF5A1F] shadow-md shadow-orange-200 scale-105'
+                                                        : 'bg-white text-gray-700 border-gray-100 hover:border-orange-200'
                                                     }`}
                                             >
                                                 Regular
                                             </button>
 
-                                            {/* Each variant as its own button */}
+                                            {/* Map over variants */}
                                             {variants.map(v => {
                                                 const isSelected = selectedVariant?.id === v.id;
                                                 const isOOS = v.stock <= 0;
@@ -361,9 +385,9 @@ export default function SupplierCatalog() {
                                                         type="button"
                                                         disabled={isOOS}
                                                         onClick={() => { setSelectedVariant(v); setSelectedOptions({ size: v.size, color: v.color, weight: v.weight }); setOrderQty(viewProduct.min_order_qty || 1); setActiveGalleryImage(null); }}
-                                                        className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${isOOS ? 'opacity-40 cursor-not-allowed bg-secondary/50 border-transparent text-muted-foreground'
-                                                                : isSelected ? 'bg-white text-orange-500 border-orange-500 shadow-sm'
-                                                                    : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'
+                                                        className={`px-4 py-1.5 rounded-lg border-2 text-xs font-bold transition-all ${isOOS ? 'opacity-40 cursor-not-allowed bg-gray-100 border-transparent text-gray-400'
+                                                                : isSelected ? 'bg-[#FF5A1F] text-white border-[#FF5A1F] shadow-md shadow-orange-200 scale-105'
+                                                                    : 'bg-white text-gray-700 border-gray-100 hover:border-orange-200'
                                                             }`}
                                                     >
                                                         {getVariantLabel(v)}
@@ -374,52 +398,41 @@ export default function SupplierCatalog() {
                                     </div>
                                 )}
 
-                                {/* Quantity & Order Button */}
-                                <div className="mt-auto pt-4 border-t border-border">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
+                                {/* Quantity Selector */}
+                                <div className="mb-6">
+                                    <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">QUANTITY</div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm ring-1 ring-black/5">
                                             <button
                                                 onClick={() => setOrderQty(q => Math.max(viewProduct.min_order_qty || 1, q - 1))}
-                                                className="px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold"
+                                                className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-500"
                                             >
-                                                −
+                                                <Minus className="w-3.5 h-3.5" />
                                             </button>
-                                            <input
-                                                type="number"
-                                                value={orderQty}
-                                                onChange={(e) => {
-                                                    const val = parseInt(e.target.value) || 1;
-                                                    const minQty = viewProduct.min_order_qty || 1;
-                                                    const maxQty = currentStock;
-                                                    setOrderQty(Math.max(minQty, Math.min(maxQty, val)));
-                                                }}
-                                                min={viewProduct.min_order_qty || 1}
-                                                max={currentStock}
-                                                className="w-16 text-center border-x-2 border-gray-300 py-2 font-bold text-lg focus:outline-none"
-                                            />
+                                            <div className="w-10 text-center font-bold text-gray-900 border-x border-gray-100 text-sm">
+                                                {orderQty}
+                                            </div>
                                             <button
                                                 onClick={() => setOrderQty(q => Math.min(currentStock, q + 1))}
-                                                className="px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold"
+                                                className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-500"
                                                 disabled={orderQty >= currentStock}
                                             >
-                                                +
+                                                <Plus className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
-                                        <span className="text-sm text-muted-foreground">{currentStock} unit{currentStock !== 1 ? 's' : ''} in stock</span>
                                     </div>
+                                </div>
+
+                                {/* CTA Action Button */}
+                                <div className="mt-auto">
                                     <Button
-                                        className="w-full h-12 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white"
+                                        className="w-full h-12 rounded-xl text-base font-black bg-[#FF5A1F] hover:bg-[#e44e18] text-white shadow-lg shadow-orange-100 transition-all flex items-center justify-center gap-3 active:scale-95"
                                         onClick={handleOrder}
                                         disabled={actionLoading || isOutOfStock}
                                     >
-                                        🛒 {actionLoading ? 'Sending...' : `Order (₱${subtotal.toFixed(2)})`}
+                                        <ShoppingCart className="w-5 h-5" />
+                                        {actionLoading ? 'PROCESSING...' : isOutOfStock ? 'OUT OF STOCK' : `Order — ₱${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                     </Button>
-                                </div>
-
-                                {/* Footer Buttons */}
-                                <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
-                                    <Button variant="ghost" onClick={() => setViewProduct(null)}>Cancel</Button>
-                                    <Button variant="outline">View Full Specs</Button>
                                 </div>
                             </div>
                         </div>

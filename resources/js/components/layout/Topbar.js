@@ -27,7 +27,7 @@ export default function Topbar({ toggleSidebar }) {
         if (path.startsWith('/users/riders')) return 'Riders';
         if (path.startsWith('/users')) return 'User Management';
         if (path.startsWith('/settings')) return 'System Settings';
-        if (path.startsWith('/supplier-catalog')) return 'Supplier Catalog';
+        if (path.startsWith('/supplier-catalog')) return 'Supplier Available Products';
         if (path.startsWith('/suppliers')) return 'Suppliers';
         return 'Admin Portal';
     };

@@ -10359,12 +10359,9 @@ function Login() {
               className: "text-sm font-black text-primary-foreground",
               children: "H"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
             className: "text-xl font-bold tracking-tight text-foreground",
-            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
-              className: "text-primary",
-              children: "Pro"
-            })]
+            children: "HRMS"
           })]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("h1", {
           className: "text-[26px] font-black text-foreground tracking-tight mb-2",
@@ -11050,12 +11047,9 @@ function Register() {
               className: "text-sm font-black text-primary-foreground",
               children: "H"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsxs)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)("span", {
             className: "text-xl font-bold tracking-tight text-foreground",
-            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)("span", {
-              className: "text-primary",
-              children: "Pro"
-            })]
+            children: "HRMS"
           })]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_28__.jsx)("h1", {
           className: "text-[26px] font-black text-foreground tracking-tight mb-2",
@@ -11796,15 +11790,12 @@ function RiderRegister() {
       className: "flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
         className: "w-full max-w-lg",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
           className: "text-xl font-black text-foreground mb-6 cursor-pointer",
           onClick: function onClick() {
             return navigate('/');
           },
-          children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
-            className: "text-primary",
-            children: "Pro"
-          })]
+          children: "HRMS"
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("h1", {
           className: "text-2xl font-extrabold text-foreground mb-1",
           children: "Rider Fleet Application"
@@ -12717,7 +12708,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 // Product card component (removed memo to allow stock updates)
 
 var ProductCard = function ProductCard(_ref) {
-  var _product$inventory;
+  var _product$inventory, _product$category, _productRating$averag;
   var product = _ref.product,
     onAddToCart = _ref.onAddToCart,
     setSelectedProduct = _ref.setSelectedProduct;
@@ -12906,99 +12897,107 @@ var ProductCard = function ProductCard(_ref) {
     };
   }();
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-    className: "pcard group bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg",
+    className: "group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-gray-300/10 hover:-translate-y-1",
     onClick: function onClick() {
       return setSelectedProduct(product);
     },
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-      className: "pcard__img relative aspect-[4/3] bg-gray-50 overflow-hidden",
+      className: "relative aspect-[1.1/1] overflow-hidden bg-gray-50/50 border-b border-gray-100/50",
       children: [imgSrc ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("img", {
         src: imgSrc,
         alt: product.name,
         loading: "lazy",
-        className: "w-full h-full object-cover",
+        className: "w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out",
         onError: function onError(e) {
-          console.log('❌ [ProductCard] Image failed to load:', imgSrc);
           e.target.style.display = 'none';
           e.target.nextSibling.style.display = 'flex';
         }
       }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-        className: "w-full h-full flex items-center justify-center",
+        className: "w-full h-full flex items-center justify-center bg-gray-50",
         style: {
           display: imgSrc ? 'none' : 'flex'
         },
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
-          className: "h-12 w-12 text-gray-300 opacity-40"
+          className: "h-10 w-10 text-gray-200"
         })
-      }), saleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-        className: "absolute top-2 right-2",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
-          className: "bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md",
-          children: ["-", saleInfo.salePercentage, "%"]
-        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        className: "absolute top-3 left-3 right-3 flex justify-between items-start",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+          className: "bg-[#FF5A1F] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-orange-500/20",
+          children: ((_product$category = product.category) === null || _product$category === void 0 ? void 0 : _product$category.name) || 'Hand Tools'
+        }), saleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+          className: "bg-[#FF4D4D] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-red-500/20",
+          children: ["SALE -", saleInfo.salePercentage, "%"]
+        })]
       }), !inStock && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-        className: "absolute inset-0 bg-black/40 flex items-center justify-center",
+        className: "absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center pointer-events-none",
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-          className: "bg-red-500 text-white text-xs font-bold px-3 py-1 rounded",
-          children: "Out of Stock"
+          className: "bg-gray-900 text-white text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full shadow-2xl",
+          children: "Sold Out"
         })
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-      className: "p-3",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("h3", {
-        className: "font-semibold text-gray-900 text-sm mb-1 line-clamp-1 leading-tight",
-        children: product.name
-      }), hasVariants && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-        className: "text-xs text-gray-600 mb-2",
-        children: [sizes.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
-          className: "mr-2",
-          children: [sizes.length, " sizes"]
-        }), colors.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
-          children: [colors.length, " colors"]
+      className: "p-4 space-y-3",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        className: "min-h-[60px]",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("h3", {
+          className: "text-base font-black text-gray-900 mb-1 leading-tight group-hover:text-[#FF5A1F] transition-colors line-clamp-1",
+          children: product.name
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("p", {
+          className: "text-[9px] text-gray-500 leading-normal line-clamp-2 font-medium",
+          children: product.description || "Premium quality product designed for durability and high performance in all specific applications."
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        className: "inline-flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100/50",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+          className: "text-[8.5px] font-black text-emerald-600 uppercase tracking-widest leading-none",
+          children: "Stock"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+          className: "text-[8.5px] font-black text-gray-900 uppercase tracking-widest leading-none",
+          children: [totalStock, " units"]
         })]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-        className: "text-xs text-gray-600 mb-2",
-        children: inStock ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-          className: "text-green-600 font-medium",
-          children: hasVariants ? "".concat(totalStock, " units available") : "".concat(baseStock, " units")
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-          className: "text-red-600 font-medium",
-          children: "Out of Stock"
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-        className: "mb-2",
-        children: saleInfo.isOnSale ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-          className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
-            className: "text-base font-bold text-red-600",
-            children: ["\u20B1", saleInfo.salePrice.toFixed(2)]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
-            className: "text-xs text-gray-400 line-through",
+        className: "pt-1.5 pb-0.5",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+          className: "flex items-end gap-2",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+            className: "text-lg font-black text-[#FF5A1F] leading-none tracking-tighter",
+            children: ["\u20B1", saleInfo.isOnSale ? saleInfo.salePrice.toFixed(2) : saleInfo.originalPrice.toFixed(2)]
+          }), saleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+            className: "text-[9px] text-gray-400 line-through font-bold leading-none mb-0.5",
             children: ["\u20B1", saleInfo.originalPrice.toFixed(2)]
           })]
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-          className: "text-base font-bold text-gray-900",
-          children: ["\u20B1", saleInfo.originalPrice.toFixed(2)]
         })
-      }), productRating && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-        className: "mb-3",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-          className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(_ui_RatingStars__WEBPACK_IMPORTED_MODULE_17__["default"], {
-            rating: productRating.average_rating || 0,
-            size: "sm"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
-            className: "text-xs text-gray-500",
-            children: ["(", soldCount || 0, " sold)"]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        className: "flex items-center gap-2 pt-1 border-t border-gray-100/30",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+          className: "flex items-center gap-1",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+            className: "scale-75 origin-left -ml-1",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(_ui_RatingStars__WEBPACK_IMPORTED_MODULE_17__["default"], {
+              rating: (productRating === null || productRating === void 0 ? void 0 : productRating.average_rating) || 0,
+              size: "xs"
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+            className: "text-[8.5px] font-black text-gray-900 leading-none",
+            children: (productRating === null || productRating === void 0 || (_productRating$averag = productRating.average_rating) === null || _productRating$averag === void 0 ? void 0 : _productRating$averag.toFixed(1)) || '0.0'
           })]
-        })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+          className: "w-0.5 h-0.5 rounded-full bg-gray-300"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+          className: "text-[8.5px] font-black text-gray-900 uppercase tracking-widest leading-none whitespace-nowrap",
+          children: [soldCount || 0, " SOLD"]
+        })]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("button", {
-        className: "w-full h-8 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded transition-colors flex items-center justify-center gap-1 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed",
         disabled: !inStock || addingToCart,
         onClick: handleAddToCart,
+        className: "w-full h-9 bg-[#FF5A1F] hover:bg-orange-600 active:scale-95 text-white rounded-lg transition-all duration-300 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 disabled:bg-gray-100 disabled:text-gray-300",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
-          className: "h-3 w-3"
-        }), addingToCart ? 'Adding...' : 'Add to Cart']
+          className: "w-3.5 h-3.5"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+          className: "text-[9px] font-black uppercase tracking-[0.1em]",
+          children: addingToCart ? 'Wait...' : 'Add to Cart'
+        })]
       })]
     })]
   });
@@ -13354,12 +13353,9 @@ function CustomerHome() {
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
             className: "flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-sm",
             children: "H"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
             className: "text-base font-bold text-gray-900",
-            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-              className: "font-normal text-gray-600",
-              children: "Pro"
-            })]
+            children: "HRMS"
           })]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
           className: "flex-1 max-w-xl mx-auto relative",
@@ -13566,20 +13562,22 @@ function CustomerHome() {
           children: [(products === null || products === void 0 ? void 0 : products.length) || 0, " items available"]
         })]
       }), loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-        className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4",
+        className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6",
         children: _toConsumableArray(Array(12)).map(function (_, i) {
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-            className: "bg-white border border-gray-200 rounded-lg overflow-hidden animate-pulse",
+            className: "bg-white border border-gray-200 rounded-2xl overflow-hidden animate-pulse",
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-              className: "aspect-[4/3] bg-gray-100"
+              className: "aspect-[1.1/1] bg-gray-50"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-              className: "p-3 space-y-2",
+              className: "p-4 space-y-3",
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-                className: "h-3 bg-gray-100 rounded w-4/5"
+                className: "h-5 bg-gray-50 rounded w-4/5"
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-                className: "h-3 bg-gray-100 rounded w-2/5"
+                className: "h-3 bg-gray-50 rounded w-full"
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-                className: "h-6 bg-gray-100 rounded"
+                className: "h-4 bg-gray-50 rounded w-2/5"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+                className: "h-8 bg-gray-50 rounded w-full mt-2"
               })]
             })]
           }, i);
@@ -13603,7 +13601,7 @@ function CustomerHome() {
           children: "Clear Filters"
         })]
       }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-        className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4",
+        className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6",
         children: (products || []).map(function (p) {
           var _p$inventory;
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(ProductCard, {
@@ -16099,15 +16097,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _shared_VariantSelector__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../shared/VariantSelector */ "./resources/js/components/shared/VariantSelector.js");
 /* harmony import */ var _components_ui_badge__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/components/ui/badge */ "./resources/js/components/ui/badge.jsx");
 /* harmony import */ var _components_ui_button__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/components/ui/button */ "./resources/js/components/ui/button.jsx");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/message-square.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-cart.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/star.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/x.js");
-/* harmony import */ var _utils_priceCalculations__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../utils/priceCalculations */ "./resources/js/utils/priceCalculations.js");
-/* harmony import */ var _context_AuthContext__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../context/AuthContext */ "./resources/js/context/AuthContext.js");
-/* harmony import */ var _ui_RatingStars__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../ui/RatingStars */ "./resources/js/components/ui/RatingStars.jsx");
-/* harmony import */ var _ui_ProductReviewList__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../ui/ProductReviewList */ "./resources/js/components/ui/ProductReviewList.jsx");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/circle-check.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/message-square.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/minus.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/plus.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-cart.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/x.js");
+/* harmony import */ var _utils_priceCalculations__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../utils/priceCalculations */ "./resources/js/utils/priceCalculations.js");
+/* harmony import */ var _context_AuthContext__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../context/AuthContext */ "./resources/js/context/AuthContext.js");
+/* harmony import */ var _ui_RatingStars__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../ui/RatingStars */ "./resources/js/components/ui/RatingStars.jsx");
+/* harmony import */ var _ui_ProductReviewList__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../ui/ProductReviewList */ "./resources/js/components/ui/ProductReviewList.jsx");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -16186,7 +16186,7 @@ function ProductDetailModal(_ref) {
     _useState20 = _slicedToArray(_useState19, 2),
     soldCount = _useState20[0],
     setSoldCount = _useState20[1];
-  var _useAuth = (0,_context_AuthContext__WEBPACK_IMPORTED_MODULE_10__.useAuth)(),
+  var _useAuth = (0,_context_AuthContext__WEBPACK_IMPORTED_MODULE_12__.useAuth)(),
     user = _useAuth.user;
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (isOpen && product) {
@@ -16361,63 +16361,110 @@ function ProductDetailModal(_ref) {
 
   // Show reviews view
   if (showReviews) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_1__["default"], {
-      isOpen: isOpen,
-      onClose: onClose,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-        className: "p-6 max-w-4xl max-h-[90vh] overflow-y-auto",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-          className: "flex items-center justify-between mb-6",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("h2", {
-            className: "text-2xl font-bold text-gray-900",
-            children: "Product Reviews"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
-            variant: "ghost",
+    var _productRating$averag;
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+      className: "fixed inset-0 z-[99999] bg-white overflow-y-auto animate-in fade-in slide-in-from-bottom duration-300",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+        className: "w-full px-4 md:px-12 lg:px-20 py-8 md:py-16",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+          className: "flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 pb-8 border-b border-gray-100",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "flex items-center gap-3",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "text-[11px] font-black uppercase tracking-[0.3em] text-[#FF5A1F]",
+              children: "Customer Voice"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "w-1.5 h-1.5 rounded-full bg-gray-200"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "text-[11px] font-black uppercase tracking-widest text-gray-400",
+              children: "Product Reviews"
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("button", {
             onClick: handleBackToProduct,
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
-              className: "w-5 h-5"
+            className: "bg-[#FF5A1F] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 px-10 rounded-full hover:bg-orange-600 transition-all active:scale-95 shadow-xl shadow-orange-500/20 flex items-center gap-3",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+              className: "text-white/80",
+              children: "\u2190"
+            }), " Back to Product"]
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+          className: "mb-16 p-10 lg:p-12 bg-white border border-gray-100 rounded-[2.5rem] shadow-sm flex flex-col xl:flex-row items-center gap-12",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "flex-1 border-r border-gray-100 pr-12 text-center xl:text-left",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+              className: "text-[10px] font-black uppercase tracking-[0.3em] text-orange-400 mb-3 block",
+              children: "Viewing feedback for"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("h3", {
+              className: "text-4xl font-black text-gray-900 mb-4 tracking-tighter leading-tight",
+              children: product.name
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("p", {
+              className: "text-base text-gray-500 leading-relaxed max-w-lg",
+              children: "Authentic feedback from verified buyers who have used this product. Read their experiences below."
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "px-12 flex flex-col items-center",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "text-7xl font-black text-[#FF5A1F] tracking-tighter mb-2 leading-none",
+              children: (productRating === null || productRating === void 0 || (_productRating$averag = productRating.average_rating) === null || _productRating$averag === void 0 ? void 0 : _productRating$averag.toFixed(1)) || '0.0'
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "flex items-center gap-0.5 mb-2 scale-110",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_ui_RatingStars__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                rating: (productRating === null || productRating === void 0 ? void 0 : productRating.average_rating) || 0,
+                size: "sm"
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+              className: "text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap",
+              children: [(productRating === null || productRating === void 0 ? void 0 : productRating.total_reviews) || 0, " reviews"]
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "flex-1 w-full xl:w-80 space-y-2 border-l border-gray-100 pl-12",
+            children: [5, 4, 3, 2, 1].map(function (rating) {
+              var _productRating$rating;
+              var count = (productRating === null || productRating === void 0 || (_productRating$rating = productRating.rating_breakdown) === null || _productRating$rating === void 0 ? void 0 : _productRating$rating[rating]) || 0;
+              var total = (productRating === null || productRating === void 0 ? void 0 : productRating.total_reviews) || 1;
+              var percentage = count / total * 100;
+
+              // Color Map from reference
+              var barColor = {
+                5: 'bg-[#FF5A1F]',
+                4: 'bg-[#FF5A1F]',
+                3: 'bg-[#FFB800]',
+                2: 'bg-[#FF4D4D]',
+                1: 'bg-gray-200'
+              }[rating];
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "flex items-center gap-4 group",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                  className: "text-[10px] font-black text-gray-400 w-2",
+                  children: rating
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+                  className: "flex-1 h-1.5 bg-gray-50 rounded-full overflow-hidden",
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+                    className: "h-full ".concat(barColor, " rounded-full transition-all duration-1000"),
+                    style: {
+                      width: "".concat(percentage, "%")
+                    }
+                  })
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                  className: "text-[10px] font-black text-gray-300 w-6 text-right",
+                  children: count
+                })]
+              }, rating);
             })
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-          className: "mb-4",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("h3", {
-            className: "text-lg font-semibold text-gray-800",
-            children: product.name
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("p", {
-            className: "text-sm text-gray-600",
-            children: "See what customers are saying about this product"
-          })]
-        }), user && canReview && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-          className: "mb-6",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
-            onClick: function onClick() {
-              var url = selectedVariant ? "/shop/products/".concat(product.id, "/reviews#write?variant=").concat(selectedVariant.id) : "/shop/products/".concat(product.id, "/reviews#write");
-              window.location.href = url;
-            },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
-              className: "w-4 h-4 mr-2"
-            }), "Write a Review"]
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-          className: "mt-6",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_ui_ProductReviewList__WEBPACK_IMPORTED_MODULE_12__["default"], {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+          className: "w-full",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_ui_ProductReviewList__WEBPACK_IMPORTED_MODULE_14__["default"], {
             productId: product.id,
             variantId: selectedVariant === null || selectedVariant === void 0 ? void 0 : selectedVariant.id,
             productVariants: product.product_variants || []
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-          className: "mt-6 flex justify-center",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
-            variant: "outline",
-            onClick: handleBackToProduct,
-            children: "Back to Product"
           })
         })]
       })
     });
   }
   try {
-    var _product$inventory, _product$category, _product$name, _product$name2;
+    var _product$inventory, _product$category, _product$name, _product$name2, _productRating$averag2;
     var baseStock = Number(product.available_stock || ((_product$inventory = product.inventory) === null || _product$inventory === void 0 ? void 0 : _product$inventory.current_stock) || 0);
     var allVariants = product.product_variants || product.variants || [];
     var hasOriginalVariants = allVariants.length > 0;
@@ -16448,7 +16495,7 @@ function ProductDetailModal(_ref) {
     }].concat(_toConsumableArray(variantOptions)) : variantOptions;
     var hasVariants = variants.length > 0;
     var currentPrice = (selectedVariant === null || selectedVariant === void 0 ? void 0 : selectedVariant.price_override) || product.sell_price;
-    var currentSaleInfo = selectedVariant ? (0,_utils_priceCalculations__WEBPACK_IMPORTED_MODULE_9__.getVariantSaleInfo)(selectedVariant, product.sell_price) : (0,_utils_priceCalculations__WEBPACK_IMPORTED_MODULE_9__.getProductSaleInfo)(product);
+    var currentSaleInfo = selectedVariant ? (0,_utils_priceCalculations__WEBPACK_IMPORTED_MODULE_11__.getVariantSaleInfo)(selectedVariant, product.sell_price) : (0,_utils_priceCalculations__WEBPACK_IMPORTED_MODULE_11__.getProductSaleInfo)(product);
     var displayPrice = Number(currentSaleInfo.isOnSale ? currentSaleInfo.salePrice : currentPrice) || 0;
     var currentStock = hasVariants ? selectedVariant ? Number(selectedVariant.stock || 0) : Number(baseStock || 0) : Number(baseStock || 0);
     var isOutOfStock = currentStock <= 0;
@@ -16478,160 +16525,166 @@ function ProductDetailModal(_ref) {
     var allImages = [mainImage].concat(_toConsumableArray(additionalImages)).filter(Boolean);
     var displayImage = activeGalleryImage || mainImage;
     var categoryName = (product === null || product === void 0 || (_product$category = product.category) === null || _product$category === void 0 ? void 0 : _product$category.name) || (product !== null && product !== void 0 && (_product$name = product.name) !== null && _product$name !== void 0 && _product$name.includes('PVC') ? 'Plumbing' : product !== null && product !== void 0 && (_product$name2 = product.name) !== null && _product$name2 !== void 0 && _product$name2.includes('Hex Bolt') ? 'Hand Tools' : 'Supplies');
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_1__["default"], {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_1__["default"], {
       isOpen: isOpen,
       onClose: onClose,
       title: "",
       size: "lg",
       hideFooter: true,
       hideTitle: true,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-        className: "flex flex-col md:flex-row rounded-2xl overflow-hidden bg-white",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+        className: "flex flex-col md:flex-row overflow-hidden bg-white text-gray-900 border-none shadow-none",
         style: {
-          minHeight: '480px'
+          minHeight: '520px'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("button", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("button", {
           onClick: onClose,
-          className: "absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
-            className: "w-4 h-4 text-gray-500"
+          className: "absolute top-4 right-4 z-50 w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-gray-100 shadow-sm hover:bg-white transition-all active:scale-90",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
+            className: "w-5 h-5 text-gray-400"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-          className: "md:w-[45%] bg-gray-50 flex flex-col items-center justify-center p-6 relative",
-          children: [currentSaleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-            className: "absolute top-4 left-4 z-10",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("span", {
-              className: "bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow",
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+          className: "md:w-[50%] p-6 flex flex-col items-center justify-center bg-gray-50/20 relative",
+          children: [currentSaleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "absolute top-6 left-6 z-10",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
+              className: "bg-red-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg",
               children: ["SALE -", currentSaleInfo.salePercentage, "% OFF"]
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-            className: "w-full aspect-square flex items-center justify-center rounded-xl overflow-hidden mb-4",
-            children: displayImage ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("img", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "w-full aspect-square relative rounded-2xl bg-white shadow-xl shadow-gray-200/50 border border-gray-100 flex items-center justify-center overflow-hidden mb-4",
+            children: displayImage ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("img", {
               src: "/storage/".concat(displayImage),
               alt: product.name,
-              className: "w-full h-full object-contain"
-            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
+              className: "w-full h-full object-contain p-4"
+            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
               className: "text-8xl opacity-10",
               children: "\uD83D\uDCE6"
             })
-          }), allImages.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-            className: "flex gap-2 flex-wrap justify-center",
-            children: allImages.map(function (img, i) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("button", {
-                onClick: function onClick() {
-                  return setActiveGalleryImage(img);
-                },
-                className: "w-14 h-14 rounded-lg border-2 overflow-hidden bg-white flex items-center justify-center p-1 transition-all ".concat(displayImage === img ? 'border-orange-500 shadow ring-2 ring-orange-100' : 'border-gray-200 hover:border-orange-300'),
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("img", {
-                  src: "/storage/".concat(img),
-                  alt: "",
-                  className: "w-full h-full object-contain"
-                })
-              }, i);
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "h-16 mt-auto flex items-center justify-center w-full",
+            children: allImages.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "flex flex-wrap justify-center gap-3",
+              children: allImages.map(function (img, i) {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("button", {
+                  onClick: function onClick() {
+                    return setActiveGalleryImage(img);
+                  },
+                  className: "w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ".concat(displayImage === img ? 'border-orange-500 shadow-md ring-2 ring-orange-100' : 'border-gray-100 hover:border-orange-200'),
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("img", {
+                    src: "/storage/".concat(img),
+                    className: "w-full h-full object-contain rounded-lg"
+                  })
+                }, i);
+              })
             })
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-          className: "md:w-[55%] flex flex-col p-6 overflow-y-auto",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("p", {
-            className: "text-xs font-semibold text-orange-500 uppercase tracking-widest mb-1",
-            children: categoryName
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("h2", {
-            className: "text-2xl font-bold text-gray-900 mb-3 leading-tight",
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+          className: "md:w-[50%] p-6 flex flex-col overflow-y-auto max-h-[85vh]",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "mb-2",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "text-[10px] font-black uppercase tracking-widest text-[#FF5A1F]",
+              children: categoryName
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("h2", {
+            className: "text-xl font-black text-gray-900 mb-1 leading-tight tracking-tight",
             children: product.name
-          }), product.description && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-            className: "mb-5 mt-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-              className: "text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5",
-              children: "DESCRIPTION"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("p", {
-              className: "text-sm text-gray-600 leading-relaxed",
-              children: product.description
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
+          }), product.description && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("p", {
+            className: "text-xs text-gray-500 leading-relaxed mb-3",
+            children: product.description
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
             className: "mb-4",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-              className: "inline-flex items-center px-4 py-1.5 rounded-full border text-sm font-semibold ".concat(isOutOfStock ? 'bg-red-50 border-red-200 text-red-600' : 'bg-gray-50 border-gray-200 text-gray-700'),
-              children: isOutOfStock ? 'Out of Stock' : "".concat(Math.round(currentStock), " units in stock")
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold ".concat(isOutOfStock ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'),
+              children: isOutOfStock ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.Fragment, {
+                children: "Out of Stock"
+              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.Fragment, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
+                  className: "w-4 h-4"
+                }), "In Stock ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
+                  className: "text-gray-900 ml-1",
+                  children: [Math.round(currentStock), " units"]
+                })]
+              })
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-            className: "mb-5",
-            children: currentSaleInfo.isOnSale ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-              className: "bg-orange-50 rounded-xl px-5 py-4 flex items-center justify-between shadow-sm",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "flex flex-col",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
-                  className: "text-xs font-bold uppercase tracking-wider text-orange-400 mb-1",
-                  children: "On Sale Price"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("span", {
-                  className: "text-4xl font-bold text-orange-500",
-                  children: ["\u20B1", currentSaleInfo.salePrice.toFixed(2)]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "text-right",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("span", {
-                  className: "text-sm text-gray-400 line-through block",
-                  children: ["\u20B1", currentSaleInfo.originalPrice.toFixed(2)]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("span", {
-                  className: "text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded",
-                  children: ["Save \u20B1", currentSaleInfo.savings.toFixed(2)]
-                })]
-              })]
-            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "mb-4 bg-[#FFF9F6] border border-[#FFE7DB] rounded-xl p-4 relative overflow-hidden",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
               className: "flex flex-col",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
-                className: "text-xs font-bold uppercase tracking-wider text-gray-400 mb-1",
-                children: "Price"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("span", {
-                className: "text-4xl font-bold text-orange-500",
-                children: ["\u20B1", displayPrice.toFixed(2)]
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "flex items-baseline gap-2",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
+                  className: "text-3xl font-black text-[#FF5A1F]",
+                  children: ["\u20B1", displayPrice.toFixed(2)]
+                }), currentSaleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
+                  className: "text-base text-gray-300 line-through font-bold",
+                  children: ["\u20B1", currentSaleInfo.originalPrice.toFixed(2)]
+                })]
+              }), currentSaleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "mt-0.5 flex items-center gap-2",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
+                  className: "text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-100",
+                  children: ["Save \u20B1", currentSaleInfo.savings.toFixed(2)]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                  className: "text-[9px] text-orange-400 font-bold uppercase tracking-wider",
+                  children: "Limited Time Offer"
+                })]
               })]
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-            className: "mb-5",
-            children: loadingRating ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-              className: "flex items-center gap-3",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                className: "flex gap-1",
-                children: [1, 2, 3, 4, 5].map(function (i) {
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                    className: "w-4 h-4 bg-gray-200 rounded animate-pulse"
-                  }, i);
-                })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
-                className: "text-sm text-gray-400",
-                children: "Loading..."
-              })]
-            }) : productRating ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-              className: "flex items-center gap-3",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_ui_RatingStars__WEBPACK_IMPORTED_MODULE_11__["default"], {
+          }), !loadingRating && productRating && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "flex items-center gap-3 mb-6 px-1 mt-2",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+              className: "flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100 shadow-sm",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_ui_RatingStars__WEBPACK_IMPORTED_MODULE_13__["default"], {
                 rating: productRating.average_rating || 0,
                 size: "sm"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("span", {
-                className: "text-sm text-gray-500",
-                children: ["(", soldCount || 0, " sold)"]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                className: "text-[10px] font-black text-gray-400 ml-1 mt-0.5",
+                children: ((_productRating$averag2 = productRating.average_rating) === null || _productRating$averag2 === void 0 ? void 0 : _productRating$averag2.toFixed(1)) || '0.0'
               })]
-            }) : null
-          }), hasVariants && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-            className: "mb-6",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-              className: "text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2.5",
-              children: "SELECT OPTION"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "h-4 w-[1px] bg-gray-200"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+              className: "text-[10px] font-black text-[#FF5A1F] uppercase tracking-wider",
+              children: [soldCount || 0, " Sold"]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "h-4 w-[1px] bg-gray-200"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("button", {
+              onClick: handleReviewsClick,
+              className: "text-[10px] font-bold text-gray-400 hover:text-orange-500 transition-colors uppercase tracking-wider underline-offset-4 hover:underline",
+              children: [productRating.total_reviews || 0, " Reviews"]
+            })]
+          }), hasVariants && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "mb-4",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3",
+              children: function () {
+                var hasSize = variants.some(function (v) {
+                  return v.size;
+                });
+                var hasColor = variants.some(function (v) {
+                  return v.color;
+                });
+                var hasWeight = variants.some(function (v) {
+                  return v.weight;
+                });
+                if (hasSize && !hasColor && !hasWeight) return 'SIZES';
+                if (hasColor && !hasSize && !hasWeight) return 'COLORS';
+                if (hasWeight && !hasSize && !hasColor) return 'WEIGHTS / KG';
+                return 'SELECT OPTIONS';
+              }()
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
               className: "flex flex-wrap gap-2.5",
               children: variants.map(function (v) {
-                // A variant is selected if:
-                // 1. We chose 'base' and v.id is 'base'
-                // 2. We chose a specific variant and v.id matches it
                 var isSelected = selectedVariant ? selectedVariant.id === v.id : v.id === 'base';
                 var isOOS = v.stock <= 0;
-
-                // Variant label helper
                 var getLabel = function getLabel(v) {
                   if (v.id === 'base') return 'Regular';
                   var parts = [v.size, v.color, v.weight].filter(Boolean);
                   return parts.join(' / ') || 'Option';
                 };
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("button", {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("button", {
                   type: "button",
                   disabled: isOOS,
                   onClick: function onClick() {
@@ -16642,76 +16695,77 @@ function ProductDetailModal(_ref) {
                     };
                     handleVariantChange(v, options);
                   },
-                  className: "px-5 py-2 rounded-lg border-2 text-sm font-bold transition-all shadow-sm ".concat(isOOS ? 'bg-gray-100 border-transparent text-gray-400 cursor-not-allowed opacity-50' : isSelected ? 'bg-white text-orange-500 border-orange-500' : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'),
+                  className: "px-4 py-1.5 rounded-lg border-2 text-xs font-bold transition-all ".concat(isOOS ? 'bg-gray-100 border-transparent text-gray-400 cursor-not-allowed opacity-50' : isSelected ? 'bg-[#FF5A1F] text-white border-[#FF5A1F] shadow-md shadow-orange-200 scale-105' : 'bg-white text-gray-700 border-gray-100 hover:border-orange-200'),
                   children: getLabel(v)
                 }, v.id);
               })
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-            className: "mt-auto pt-5 border-t border-gray-100",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-              className: "flex items-center gap-4 mb-4",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "mt-4 flex flex-col gap-6",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "flex items-center",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "flex items-center border border-gray-100 rounded-full overflow-hidden bg-white shadow-sm ring-1 ring-black/5 p-1 px-1",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("button", {
                   onClick: function onClick() {
                     return setQty(function (q) {
                       return Math.max(1, q - 1);
                     });
                   },
-                  className: "w-11 h-11 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600 font-bold text-lg",
-                  children: "\u2212"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("input", {
-                  type: "number",
-                  value: qty,
-                  onChange: function onChange(e) {
-                    var val = parseInt(e.target.value) || 1;
-                    setQty(Math.max(1, Math.min(currentStock, val)));
-                  },
-                  className: "w-12 text-center font-bold text-gray-900 border-x-2 border-gray-200 outline-none h-11"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("button", {
+                  className: "w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-400 rounded-full",
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
+                    className: "w-4 h-4"
+                  })
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+                  className: "w-10 text-center font-black text-gray-900",
+                  children: qty
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("button", {
                   onClick: function onClick() {
                     return setQty(function (q) {
                       return Math.min(q + 1, currentStock);
                     });
                   },
-                  className: "w-11 h-11 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600 font-bold text-lg",
-                  children: "+"
+                  className: "w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-400 rounded-full",
+                  disabled: qty >= currentStock,
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
+                    className: "w-4 h-4"
+                  })
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("span", {
-                className: "text-sm font-medium text-gray-500",
-                children: [Math.round(currentStock), " units in stock"]
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+              className: "flex flex-col sm:flex-row gap-3",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
+                onClick: handleAddToCart,
+                disabled: !canAdd,
+                className: "flex-grow h-14 rounded-full text-base font-black transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl ".concat(canAdd ? 'bg-[#FF5A1F] hover:bg-[#e44e18] text-white shadow-orange-200/40' : 'bg-gray-200 text-gray-400 cursor-not-allowed'),
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                  className: "w-5 h-5"
+                }), isOutOfStock ? 'SOLD OUT' : 'ADD TO CART']
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
+                variant: "outline",
+                onClick: handleReviewsClick,
+                className: "h-14 w-14 rounded-full border-2 border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all text-gray-400 hover:text-orange-500 active:scale-90",
+                title: "View Reviews",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                  className: "w-5 h-5"
+                })
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("button", {
-              onClick: handleAddToCart,
-              disabled: !canAdd,
-              className: "w-full h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg ".concat(canAdd ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-100' : 'bg-gray-200 text-gray-400 cursor-not-allowed'),
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
-                className: "w-6 h-6"
-              }), isOutOfStock ? 'Sold Out' : "Add to Cart \u2014 \u20B1".concat(subtotal.toFixed(2))]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
-            variant: "outline",
-            onClick: handleReviewsClick,
-            className: "w-full h-10 rounded-xl font-medium text-sm flex items-center justify-center gap-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
-              className: "w-4 h-4"
-            }), "View Reviews"]
           })]
         })]
       })
     });
   } catch (error) {
     console.error('Error rendering ProductDetailModal:', error);
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_1__["default"], {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_1__["default"], {
       isOpen: isOpen,
       onClose: onClose,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
         className: "p-6",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("h2", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("h2", {
           className: "text-xl font-bold text-red-600",
           children: "Error Loading Product"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("p", {
           className: "text-sm text-gray-600",
           children: "Please try again later."
         })]
@@ -17580,19 +17634,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_ui_card__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @/components/ui/card */ "./resources/js/components/ui/card.jsx");
 /* harmony import */ var _components_ui_table__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @/components/ui/table */ "./resources/js/components/ui/table.jsx");
 /* harmony import */ var _components_ui_checkbox__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @/components/ui/checkbox */ "./resources/js/components/ui/checkbox.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/circle-check.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/circle-x.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/check-check.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/clock.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/eye.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/refresh-cw.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/rocket.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/trash-2.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/truck.js");
-/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
-/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/circle-x.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/check-check.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/clock.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/eye.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/refresh-cw.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/trash-2.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/truck.js");
+/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
+/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -17626,8 +17678,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 var STATUS_CONFIG = {
+  waiting: {
+    label: 'Waiting for Confirmation',
+    color: '#6B7280',
+    bgColor: '#F3F4F6'
+  },
   pending: {
-    label: 'Pending',
+    label: 'Ready for Pickup',
     color: '#F59E0B',
     bgColor: '#FEF3C7'
   },
@@ -17650,7 +17707,7 @@ var STATUS_CONFIG = {
 function Delivery() {
   var _useToast = (0,_context_ToastContext__WEBPACK_IMPORTED_MODULE_2__.useToast)(),
     showToast = _useToast.showToast;
-  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_24__.useSilentRefresh)('admin_deliveries'),
+  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_22__.useSilentRefresh)('admin_deliveries'),
     refreshTrigger = _useSilentRefresh.refreshTrigger;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       deliveries: [],
@@ -17828,7 +17885,7 @@ function Delivery() {
             });
           case 2:
             showToast('Rider assigned successfully');
-            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_25__.markStale)('admin_deliveries', 'rider_dashboard');
+            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)('admin_deliveries', 'rider_dashboard');
             fetchData(true);
             _context2.n = 4;
             break;
@@ -17859,7 +17916,7 @@ function Delivery() {
           case 1:
             statusLabel = ((_STATUS_CONFIG$status = STATUS_CONFIG[status]) === null || _STATUS_CONFIG$status === void 0 ? void 0 : _STATUS_CONFIG$status.label) || status;
             showToast("Delivery marked as ".concat(statusLabel));
-            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_25__.markStale)('admin_deliveries', 'admin_dashboard', 'rider_dashboard', 'customer_orders');
+            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)('admin_deliveries', 'admin_dashboard', 'rider_dashboard', 'customer_orders');
             fetchData(true);
             _context3.n = 3;
             break;
@@ -17887,7 +17944,7 @@ function Delivery() {
             return axios__WEBPACK_IMPORTED_MODULE_1___default()["delete"]("/deliveries/".concat(id));
           case 1:
             showToast('Delivery deleted successfully');
-            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_25__.markStale)('admin_deliveries', 'admin_dashboard', 'rider_dashboard', 'customer_orders');
+            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)('admin_deliveries', 'admin_dashboard', 'rider_dashboard', 'customer_orders');
             fetchData(true);
             closeConfirm();
             _context4.n = 3;
@@ -17926,7 +17983,7 @@ function Delivery() {
             }));
           case 2:
             showToast("Assigned ".concat(selectedDeliveries.length, " deliveries to rider"));
-            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_25__.markStale)('admin_deliveries', 'rider_dashboard');
+            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)('admin_deliveries', 'rider_dashboard');
             fetchData(true);
             setSelectedDeliveries([]);
             setShowBulkAssign(false);
@@ -17972,94 +18029,94 @@ function Delivery() {
       timeStyle: 'short'
     });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       className: "flex items-center justify-between mb-6 flex-wrap gap-3",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("h2", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("h2", {
           className: "text-xl font-bold text-foreground tracking-tight flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_23__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_21__["default"], {
             className: "h-6 w-6 text-primary"
           }), " Delivery Management"]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
           className: "text-sm text-muted-foreground mt-0.5",
           children: "Track, assign and manage all deliveries in real-time"
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
         variant: "outline",
         size: "sm",
         onClick: function onClick() {
           return fetchData(true);
         },
         className: "gap-2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_20__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_19__["default"], {
           className: "h-4 w-4"
         }), " Refresh"]
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       className: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Total Deliveries",
         value: stats.total,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_19__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"],
         accentColor: "accent"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Pending",
         value: stats.pending,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"],
         accentColor: "amber"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "In Progress",
         value: stats.in_progress,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_23__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_21__["default"],
         accentColor: "blue"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Delivered Today",
         value: stats.today_delivered,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"],
         accentColor: "green"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Failed",
         value: stats.failed,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"],
         accentColor: "red"
       })]
-    }), selectedDeliveries.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_11__.Card, {
+    }), selectedDeliveries.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_11__.Card, {
       className: "p-3 mb-4 flex items-center justify-between flex-wrap gap-3 bg-primary/5 border-primary/20",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("span", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("span", {
         className: "text-sm font-semibold text-foreground",
         children: [selectedDeliveries.length, " delivery(s) selected"]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
         className: "flex items-center gap-2",
-        children: [!showBulkAssign ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
+        children: [!showBulkAssign ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
           size: "sm",
           onClick: function onClick() {
             return setShowBulkAssign(true);
           },
           children: "Assign Rider"
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
+        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("select", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("select", {
             className: "flex h-8 rounded-md border border-input bg-transparent px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
             value: bulkRiderId,
             onChange: function onChange(e) {
               return setBulkRiderId(e.target.value);
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("option", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("option", {
               value: "",
               children: "Select Rider..."
             }), riders.map(function (r) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("option", {
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("option", {
                 value: r.id,
                 children: r.name
               }, r.id);
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
             size: "sm",
             onClick: handleBulkAssign,
             disabled: !bulkRiderId,
             children: "Assign"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
             variant: "ghost",
             size: "sm",
             onClick: function onClick() {
@@ -18068,7 +18125,7 @@ function Delivery() {
             },
             children: "Cancel"
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
           variant: "ghost",
           size: "sm",
           onClick: function onClick() {
@@ -18077,16 +18134,16 @@ function Delivery() {
           children: "Clear"
         })]
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       className: "mb-4 space-y-3",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_4__["default"], {
         search: search,
         onSearchChange: function onSearchChange(v) {
           setSearch(v);
           setPage(1);
         },
         placeholder: "Search by tracking #, order #, customer, or address..."
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
         className: "flex items-center gap-2 flex-wrap",
         children: [{
           key: 'all',
@@ -18112,7 +18169,7 @@ function Delivery() {
           var key = _ref6.key,
             label = _ref6.label,
             count = _ref6.count;
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
             variant: statusFilter === key ? 'default' : 'outline',
             size: "sm",
             onClick: function onClick() {
@@ -18120,7 +18177,7 @@ function Delivery() {
               setPage(1);
             },
             className: "gap-1.5",
-            children: [label, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_10__.Badge, {
+            children: [label, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_10__.Badge, {
               variant: statusFilter === key ? 'secondary' : 'outline',
               className: "ml-1 text-[10px] px-1.5 py-0",
               children: count
@@ -18128,26 +18185,26 @@ function Delivery() {
           }, key);
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       className: "flex items-center justify-between mb-2 px-1",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("span", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("span", {
         className: "text-sm text-muted-foreground",
         children: ["Showing ", deliveries.length, " of ", total, " deliveries"]
-      }), riders.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("span", {
+      }), riders.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("span", {
         className: "text-sm text-muted-foreground flex items-center gap-1",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_23__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_21__["default"], {
           className: "h-3.5 w-3.5"
         }), " ", riders.length, " riders available"]
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_11__.Card, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_11__.Card, {
       className: "overflow-hidden mb-4",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.Table, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHeader, {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.Table, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHeader, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
             className: "bg-secondary/50 hover:bg-secondary/50",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "w-[40px] px-4",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_checkbox__WEBPACK_IMPORTED_MODULE_13__.Checkbox, {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_checkbox__WEBPACK_IMPORTED_MODULE_13__.Checkbox, {
                 onCheckedChange: toggleAllSelection,
                 checked: deliveries.length > 0 && selectedDeliveries.length === deliveries.filter(function (d) {
                   return d.status === 'pending';
@@ -18158,42 +18215,42 @@ function Delivery() {
                   return d.status === 'pending';
                 }).length === 0
               })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4",
               children: "Tracking / Order"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4",
               children: "Customer & Address"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4",
               children: "Rider"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4",
               children: "Status"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4",
               children: "Actions"
             })]
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableBody, {
-          children: loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableBody, {
+          children: loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
               colSpan: 6,
               className: "text-center py-10",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("div", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                 className: "spinner mx-auto"
               })
             })
-          }) : deliveries.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+          }) : deliveries.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
               colSpan: 6,
               className: "text-center py-16",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_19__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"], {
                 className: "h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("h3", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h3", {
                 className: "text-base font-semibold text-foreground mb-1",
                 children: "No deliveries found"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("p", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
                 className: "text-sm text-muted-foreground",
                 children: "Try adjusting your filters or search criteria"
               })]
@@ -18202,114 +18259,82 @@ function Delivery() {
             var _d$sale, _d$sale2;
             var isSelected = selectedDeliveries.includes(d.id);
             var canSelect = d.status === 'pending';
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
               className: isSelected ? 'bg-primary/5' : '',
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                 className: "px-4",
-                children: canSelect && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_checkbox__WEBPACK_IMPORTED_MODULE_13__.Checkbox, {
+                children: canSelect && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_checkbox__WEBPACK_IMPORTED_MODULE_13__.Checkbox, {
                   checked: isSelected,
                   onCheckedChange: function onCheckedChange() {
                     return toggleSelection(d.id);
                   }
                 })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                 className: "px-4 py-3",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                   className: "font-semibold text-foreground",
                   children: d.tracking_number
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                   className: "text-[12px] text-muted-foreground",
                   children: ["Order #", (_d$sale = d.sale) === null || _d$sale === void 0 ? void 0 : _d$sale.order_number]
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                 className: "px-4 py-3",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                   className: "font-semibold text-foreground",
                   children: ((_d$sale2 = d.sale) === null || _d$sale2 === void 0 || (_d$sale2 = _d$sale2.customer) === null || _d$sale2 === void 0 ? void 0 : _d$sale2.name) || 'Walk-in Customer'
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("div", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                   className: "text-[12px] text-muted-foreground truncate max-w-[250px]",
                   title: d.address,
                   children: d.address
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                 className: "px-4 py-3",
-                children: [d.rider ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("div", {
+                children: [d.rider ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                   className: "font-semibold text-sm text-foreground",
                   children: d.rider.name
-                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("span", {
+                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
                   className: "text-muted-foreground text-sm",
                   children: "Unassigned"
-                }), d.status !== 'delivered' && d.status !== 'failed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("select", {
+                }), d.status !== 'delivered' && d.status !== 'failed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("select", {
                   value: d.rider_id || '',
                   onChange: function onChange(e) {
                     return handleAssign(d.id, e.target.value);
                   },
                   className: "mt-1 flex h-7 w-[130px] rounded-md border border-input bg-transparent px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("option", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("option", {
                     value: "",
                     children: d.rider ? 'Change Rider...' : 'Assign Rider...'
                   }), riders.map(function (r) {
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("option", {
+                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("option", {
                       value: r.id,
                       children: [r.name, " (", r.active_deliveries_count || 0, " active)"]
                     }, r.id);
                   })]
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                 className: "px-4 py-3",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_Badge__WEBPACK_IMPORTED_MODULE_8__.StatusBadge, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_Badge__WEBPACK_IMPORTED_MODULE_8__.StatusBadge, {
                   status: d.status
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)("div", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                   className: "text-[11px] text-muted-foreground mt-1",
                   children: formatTime(d.updated_at)
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                 className: "px-4 py-3",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)("div", {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                   className: "flex flex-wrap gap-1",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
                     variant: "ghost",
                     size: "sm",
                     onClick: function onClick() {
                       return setViewDeliveryId(d.id);
                     },
                     className: "h-7 px-2 gap-1",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"], {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
                       className: "h-3.5 w-3.5"
                     }), " View"]
-                  }), d.status === 'pending' && d.rider_id && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
-                    size: "sm",
-                    onClick: function onClick() {
-                      return handleStatus(d.id, 'in_progress');
-                    },
-                    className: "h-7 px-2 gap-1",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_21__["default"], {
-                      className: "h-3.5 w-3.5"
-                    }), " Start"]
-                  }), d.status === 'in_progress' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.Fragment, {
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
-                      size: "sm",
-                      onClick: function onClick() {
-                        return handleStatus(d.id, 'delivered');
-                      },
-                      className: "h-7 px-2 gap-1 bg-success hover:bg-success/90",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
-                        className: "h-3.5 w-3.5"
-                      }), " Delivered"]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
-                      variant: "destructive",
-                      size: "sm",
-                      onClick: function onClick() {
-                        return showConfirm('Mark Failed', 'Mark as failed?', function () {
-                          return handleStatus(d.id, 'failed');
-                        }, 'destructive');
-                      },
-                      className: "h-7 px-2 gap-1",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
-                        className: "h-3.5 w-3.5"
-                      }), " Failed"]
-                    })]
-                  }), d.status === 'pending' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
+                  }), d.status === 'pending' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_9__.Button, {
                     variant: "destructive",
                     size: "sm",
                     onClick: function onClick() {
@@ -18318,7 +18343,7 @@ function Delivery() {
                       }, 'destructive');
                     },
                     className: "h-7 px-2",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_22__["default"], {
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_20__["default"], {
                       className: "h-3.5 w-3.5"
                     })
                   })]
@@ -18328,18 +18353,18 @@ function Delivery() {
           })
         })]
       })
-    }), !loading && deliveries.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_Pagination__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    }), !loading && deliveries.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_Pagination__WEBPACK_IMPORTED_MODULE_5__["default"], {
       page: page,
       total: total,
       perPage: 15,
       onChange: setPage
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_DeliveryViewModal__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_DeliveryViewModal__WEBPACK_IMPORTED_MODULE_7__["default"], {
       isOpen: !!viewDeliveryId,
       onClose: function onClose() {
         return setViewDeliveryId(null);
       },
       deliveryId: viewDeliveryId
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_26__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_6__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_6__["default"], {
       modal: confirmModal,
       onClose: closeConfirm
     })]
@@ -18612,13 +18637,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/dist/index.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/clipboard-list.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-cart.js");
-/* harmony import */ var _StockTab__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./StockTab */ "./resources/js/components/inventory/StockTab.js");
-/* harmony import */ var _SalesTab__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./SalesTab */ "./resources/js/components/inventory/SalesTab.js");
-/* harmony import */ var _PurchaseTab__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./PurchaseTab */ "./resources/js/components/inventory/PurchaseTab.js");
-/* harmony import */ var _components_ui_tabs__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @/components/ui/tabs */ "./resources/js/components/ui/tabs.jsx");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/file-check.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-cart.js");
+/* harmony import */ var _StockTab__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./StockTab */ "./resources/js/components/inventory/StockTab.js");
+/* harmony import */ var _SalesTab__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./SalesTab */ "./resources/js/components/inventory/SalesTab.js");
+/* harmony import */ var _PurchaseTab__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./PurchaseTab */ "./resources/js/components/inventory/PurchaseTab.js");
+/* harmony import */ var _components_ui_tabs__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @/components/ui/tabs */ "./resources/js/components/ui/tabs.jsx");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 
 
 
@@ -18630,48 +18656,57 @@ __webpack_require__.r(__webpack_exports__);
 var tabItems = [{
   key: 'stock',
   label: 'Stock Levels',
-  icon: lucide_react__WEBPACK_IMPORTED_MODULE_3__["default"],
+  icon: lucide_react__WEBPACK_IMPORTED_MODULE_4__["default"],
   path: '/inventory'
 }, {
   key: 'sales',
   label: 'Sales Orders',
-  icon: lucide_react__WEBPACK_IMPORTED_MODULE_4__["default"],
+  icon: lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"],
   path: '/inventory/sales'
+}, {
+  key: 'requests',
+  label: 'Request Orders',
+  icon: lucide_react__WEBPACK_IMPORTED_MODULE_2__["default"],
+  path: '/inventory/requests'
 }, {
   key: 'purchase',
   label: 'Purchase Orders',
-  icon: lucide_react__WEBPACK_IMPORTED_MODULE_2__["default"],
+  icon: lucide_react__WEBPACK_IMPORTED_MODULE_3__["default"],
   path: '/inventory/purchase'
 }];
 function Inventory(_ref) {
   var tab = _ref.tab;
   var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_1__.useNavigate)();
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
     className: "relative",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("h2", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("h2", {
       className: "text-xl font-bold text-foreground tracking-tight mb-5 relative z-0",
       children: "Inventory Management"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_8__.Tabs, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_9__.Tabs, {
       value: tab,
       className: "mb-6 relative z-0",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_8__.TabsList, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_9__.TabsList, {
         children: tabItems.map(function (t) {
           var Icon = t.icon;
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_8__.TabsTrigger, {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_9__.TabsTrigger, {
             value: t.key,
             onClick: function onClick() {
               return navigate(t.path);
             },
             className: "gap-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(Icon, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(Icon, {
               className: "h-4 w-4"
             }), t.label]
           }, t.key);
         })
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
       className: "relative z-0",
-      children: [tab === 'stock' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(_StockTab__WEBPACK_IMPORTED_MODULE_5__["default"], {}), tab === 'sales' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(_SalesTab__WEBPACK_IMPORTED_MODULE_6__["default"], {}), tab === 'purchase' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(_PurchaseTab__WEBPACK_IMPORTED_MODULE_7__["default"], {})]
+      children: [tab === 'stock' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_StockTab__WEBPACK_IMPORTED_MODULE_6__["default"], {}), tab === 'sales' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SalesTab__WEBPACK_IMPORTED_MODULE_7__["default"], {}), tab === 'requests' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_PurchaseTab__WEBPACK_IMPORTED_MODULE_8__["default"], {
+        mode: "requests"
+      }), tab === 'purchase' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_PurchaseTab__WEBPACK_IMPORTED_MODULE_8__["default"], {
+        mode: "completed"
+      })]
     })]
   });
 }
@@ -18739,10 +18774,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
-function PurchaseTab() {
+function PurchaseTab(_ref) {
   var _viewPo$supplier, _viewPo$supplier2, _viewPo$creator, _viewPo$items, _viewPo$items2;
+  var _ref$mode = _ref.mode,
+    mode = _ref$mode === void 0 ? 'completed' : _ref$mode;
   var _useToast = (0,_context_ToastContext__WEBPACK_IMPORTED_MODULE_2__.useToast)(),
     showToast = _useToast.showToast;
+  var isRequestMode = mode === 'requests';
   var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_17__.useSilentRefresh)('admin_purchases'),
     refreshTrigger = _useSilentRefresh.refreshTrigger;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
@@ -18806,7 +18844,7 @@ function PurchaseTab() {
     });
   };
   var fetchPos = /*#__PURE__*/function () {
-    var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var silent,
         res,
         paginatedData,
@@ -18823,7 +18861,8 @@ function PurchaseTab() {
               params: {
                 page: page,
                 search: search,
-                status: statusFilter
+                status: statusFilter,
+                tab: mode
               }
             });
           case 2:
@@ -18848,7 +18887,7 @@ function PurchaseTab() {
       }, _callee, null, [[1, 3, 4, 5]]);
     }));
     return function fetchPos() {
-      return _ref.apply(this, arguments);
+      return _ref2.apply(this, arguments);
     };
   }();
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
@@ -18861,9 +18900,9 @@ function PurchaseTab() {
       clearTimeout(debounce);
       isMounted = false;
     };
-  }, [page, search, statusFilter, refreshTrigger]);
+  }, [page, search, statusFilter, refreshTrigger, mode]);
   var handleAction = /*#__PURE__*/function () {
-    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(poId, action) {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(poId, action) {
       var _err$response, _t2;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.p = _context2.n) {
@@ -18896,7 +18935,7 @@ function PurchaseTab() {
       }, _callee2, null, [[1, 3, 4, 5]]);
     }));
     return function handleAction(_x, _x2) {
-      return _ref2.apply(this, arguments);
+      return _ref3.apply(this, arguments);
     };
   }();
   var confirmAction = function confirmAction(poId, action) {
@@ -18920,27 +18959,30 @@ function PurchaseTab() {
             setStatusFilter(v);
             setPage(1);
           },
-          options: [{
+          options: isRequestMode ? [{
             value: '',
-            label: 'All Statuses'
+            label: 'All Active Requests'
           }, {
             value: 'pending',
-            label: 'Pending'
+            label: 'Draft (Pending admin)'
           }, {
             value: 'pending_supplier',
-            label: 'Approved / Sent'
+            label: 'Sent to Supplier'
           }, {
             value: 'accepted',
             label: 'Accepted'
+          }] : [{
+            value: '',
+            label: 'All Finalized'
+          }, {
+            value: 'supplier_delivered',
+            label: 'Delivered (Awaiting Receipt)'
+          }, {
+            value: 'received',
+            label: 'Received (Completed)'
           }, {
             value: 'rejected',
             label: 'Rejected'
-          }, {
-            value: 'supplier_delivered',
-            label: 'Delivered'
-          }, {
-            value: 'received',
-            label: 'Received'
           }, {
             value: 'cancelled',
             label: 'Declined'
@@ -18989,7 +19031,7 @@ function PurchaseTab() {
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableCell, {
               colSpan: 7,
               className: "text-center py-10 text-muted-foreground",
-              children: "No purchase orders found"
+              children: isRequestMode ? "No active request orders found" : "No finalized purchase orders found"
             })
           }) : pos.data.map(function (po) {
             var _po$supplier, _po$supplier2, _po$items;
@@ -19527,8 +19569,10 @@ function SalesTab() {
   var getNextStatuses = function getNextStatuses(currentStatus) {
     var flow = {
       pending: ['confirmed', 'cancelled'],
-      confirmed: ['out_for_delivery', 'cancelled'],
-      out_for_delivery: ['delivered'],
+      confirmed: ['cancelled'],
+      // Restricted: Rider must handle the Out for Delivery step
+      out_for_delivery: [],
+      // Restricted: Rider must handle the Delivered step
       delivered: [],
       returned: [],
       cancelled: []
@@ -19866,7 +19910,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_ui_label__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @/components/ui/label */ "./resources/js/components/ui/label.jsx");
 /* harmony import */ var _components_ui_textarea__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @/components/ui/textarea */ "./resources/js/components/ui/textarea.jsx");
 /* harmony import */ var _components_ui_table__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @/components/ui/table */ "./resources/js/components/ui/table.jsx");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/layers.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/eye.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -19887,6 +19933,7 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 
 
@@ -20003,6 +20050,14 @@ function StockTab() {
     _useState34 = _slicedToArray(_useState33, 2),
     expandedProducts = _useState34[0],
     setExpandedProducts = _useState34[1];
+  var _useState35 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState36 = _slicedToArray(_useState35, 2),
+    viewVariantItem = _useState36[0],
+    setViewVariantItem = _useState36[1];
+  var _useState37 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1),
+    _useState38 = _slicedToArray(_useState37, 2),
+    variantPage = _useState38[0],
+    setVariantPage = _useState38[1];
 
   // Memoize grouped inventory data to prevent unnecessary recalculations
   var groupedInventory = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
@@ -20245,7 +20300,10 @@ function StockTab() {
               }
             });
           case 5:
-            showToast('Stock transferred to storefront successfully!');
+            showToast('Stock displayed to storefront successfully!');
+            if (viewVariantItem) {
+              // Keep viewVariantItem set so the breakdown modal restores after transfer
+            }
             setTransferModal({
               show: false,
               item: null,
@@ -20451,8 +20509,8 @@ function StockTab() {
   var formatNum = function formatNum(num) {
     return Math.round(Number(num || 0)).toLocaleString();
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_3__["default"], {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_3__["default"], {
       search: search,
       onSearchChange: function onSearchChange(v) {
         setSearch(v);
@@ -20474,58 +20532,58 @@ function StockTab() {
           };
         })))
       }]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_8__.Card, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_8__.Card, {
       className: "overflow-hidden",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.Table, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHeader, {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.Table, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHeader, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
             className: "bg-secondary/50 hover:bg-secondary/50",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Barcode"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4",
               children: "Product Name"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Variant"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Warehouse"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Storefront"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Sold"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Imported"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Unit"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Threshold"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Status"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4 text-center",
               children: "Actions"
             })]
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableBody, {
-          children: loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableBody, {
+          children: loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
               colSpan: 11,
               className: "text-center py-10",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
                 className: "spinner mx-auto"
               })
             })
-          }) : groupedInventory.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+          }) : groupedInventory.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
               colSpan: 11,
               className: "text-center py-10 text-muted-foreground",
               children: "No inventory found"
@@ -20545,12 +20603,8 @@ function StockTab() {
             var variantStorefront = hasVariants ? item.variants.reduce(function (s, v) {
               return s + Number(v.current_stock || 0);
             }, 0) : 0;
-            var totalSold = (hasVariants ? item.variants.reduce(function (s, v) {
-              return s + Number(v.total_sold || 0);
-            }, 0) : 0) + Number(item.total_sold || 0);
-            var totalImported = (hasVariants ? item.variants.reduce(function (s, v) {
-              return s + Number(v.total_imported || 0);
-            }, 0) : 0) + Number(item.total_imported || 0);
+            var totalSold = Number(item.total_sold || 0);
+            var totalImported = Number(item.total_imported || 0);
 
             // For the warehouse column: show ONLY base own stock (variants shown separately)
             var displayWarehouse = baseWarehouse;
@@ -20559,174 +20613,303 @@ function StockTab() {
             var isLow = hasVariants ? item.variants.some(function (v) {
               return Number(v.current_stock || 0) <= Number(v.reorder_threshold || 10);
             }) : Number(item.current_stock || 0) <= Number(item.reorder_threshold || 10);
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
                 className: hasVariants ? 'cursor-pointer hover:bg-secondary/30' : '',
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center text-[13px] font-semibold text-foreground",
                   children: item.barcode
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3",
-                  onClick: function onClick() {
-                    return hasVariants && toggleExpand(item.product_id || item.id);
-                  },
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
                     className: "flex items-center gap-2",
-                    children: [hasVariants && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
-                      className: "text-orange-500 font-bold text-lg mr-2",
-                      children: isExpanded ? '▼' : '▶'
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
                         className: "font-semibold text-foreground",
                         children: item.name
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
                         className: "text-[12px] text-muted-foreground",
                         children: item.supplier
                       })]
-                    })]
+                    })
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center text-muted-foreground",
-                  children: hasVariants ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                  children: hasVariants ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
                     variant: "secondary",
                     className: "font-semibold",
                     children: [item.variants.length, " Variant", item.variants.length !== 1 ? 's' : '']
                   }) : item.is_orphan && item.supplier_variant_count > 0 ? "Base (".concat(item.supplier_variant_count, " variants)") : 'Base Product'
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center font-bold text-primary",
-                  children: [formatNum(displayWarehouse), hasVariants && baseWarehouse > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+                  children: [formatNum(displayWarehouse), hasVariants && baseWarehouse > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
                     className: "text-[10px] text-muted-foreground font-normal",
                     children: ["base: ", formatNum(baseWarehouse)]
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center font-bold text-[15px] text-foreground",
                   children: formatNum(displayStorefront)
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
                     className: "font-semibold ".concat(totalSold > 0 ? 'text-success-foreground' : 'text-muted-foreground'),
                     children: formatNum(totalSold)
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
                     className: "font-semibold ".concat(totalImported > 0 ? 'text-info' : 'text-muted-foreground'),
                     children: formatNum(totalImported)
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center text-muted-foreground",
                   children: item.unit
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center font-semibold",
                   children: formatNum(item.reorder_threshold)
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center",
-                  children: isLow ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                  children: isLow ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
                     variant: "outline",
                     className: "border-destructive/30 bg-danger-light text-destructive",
                     children: "Low Stock"
-                  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
                     variant: "outline",
                     className: "border-success/30 bg-success-light text-success-foreground",
                     children: "Optimal"
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                   className: "px-4 py-3 text-center",
-                  children: baseWarehouse > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
-                    size: "sm",
-                    onClick: function onClick() {
-                      return openTransferModal(item);
-                    },
-                    children: "Transfer"
-                  })
-                })]
-              }), hasVariants && isExpanded && item.variants.map(function (variant) {
-                var variantParts = [];
-                if (variant.size && variant.size !== '-') variantParts.push(variant.size);
-                if (variant.color && variant.color !== '-') variantParts.push(variant.color);
-                if (variant.weight && variant.weight !== '-') variantParts.push(variant.weight);
-                var variantDetails = variantParts.join(' / ') || '';
-                var variantFullName = variantDetails ? "".concat(item.name, " (").concat(variantDetails, ")") : item.name;
-                var variantLow = variant.current_stock <= variant.reorder_threshold;
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
-                  className: "bg-secondary/10",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center text-[13px] font-semibold text-foreground",
-                    children: variant.barcode
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                      className: "flex items-center gap-2 ml-6",
-                      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                          className: "font-semibold text-foreground",
-                          children: variantFullName
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                          className: "text-[12px] text-muted-foreground",
-                          children: variant.supplier
-                        })]
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                    className: "flex items-center justify-center gap-2",
+                    children: [hasVariants && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+                      variant: "ghost",
+                      size: "sm",
+                      className: "h-8 w-8 p-0",
+                      onClick: function onClick() {
+                        return setViewVariantItem(item);
+                      },
+                      title: "View Details",
+                      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
+                        className: "h-4 w-4 text-blue-600"
                       })
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center text-muted-foreground",
-                    children: "Variant"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center font-bold text-primary",
-                    children: formatNum(variant.warehouse_stock)
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center font-bold text-[15px] text-foreground",
-                    children: formatNum(variant.current_stock)
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
-                      className: "font-semibold ".concat(variant.total_sold > 0 ? 'text-success-foreground' : 'text-muted-foreground'),
-                      children: formatNum(variant.total_sold)
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
-                      className: "font-semibold ".concat(variant.total_imported > 0 ? 'text-info' : 'text-muted-foreground'),
-                      children: formatNum(variant.total_imported)
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center text-muted-foreground",
-                    children: variant.unit
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center font-semibold",
-                    children: formatNum(variant.reorder_threshold)
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center",
-                    children: variantLow ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
-                      variant: "outline",
-                      className: "border-destructive/30 bg-danger-light text-destructive",
-                      children: "Low Stock"
-                    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
-                      variant: "outline",
-                      className: "border-success/30 bg-success-light text-success-foreground",
-                      children: "Optimal"
-                    })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
-                    className: "px-4 py-3 text-center",
-                    children: variant.warehouse_stock > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+                    }), baseWarehouse > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
                       size: "sm",
                       onClick: function onClick() {
-                        return openTransferModal(variant);
+                        return openTransferModal(item);
                       },
-                      children: "Transfer"
-                    })
-                  })]
-                }, variant.id);
-              })]
+                      children: "Display"
+                    })]
+                  })
+                })]
+              })
             }, item.id);
           })
         })]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_shared_Pagination__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_shared_Pagination__WEBPACK_IMPORTED_MODULE_4__["default"], {
       page: page,
       total: inventory.total,
       perPage: 15,
       onChange: setPage
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      isOpen: !!viewVariantItem && !transferModal.show,
+      onClose: function onClose() {
+        setViewVariantItem(null);
+        setVariantPage(1);
+      },
+      title: "Product Breakdown: ".concat(viewVariantItem === null || viewVariantItem === void 0 ? void 0 : viewVariantItem.name),
+      size: "xl",
+      hideFooter: true,
+      children: viewVariantItem && function () {
+        var ITEMS_PER_PAGE = 10;
+        var totalVariants = viewVariantItem.variants.length;
+        var startIndex = (variantPage - 1) * ITEMS_PER_PAGE;
+        var paginatedVariants = viewVariantItem.variants.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+          className: "space-y-6",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "bg-secondary/20 p-5 rounded-2xl border border-border flex justify-between items-center",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "text-sm font-bold text-primary uppercase tracking-wider mb-1 flex items-center gap-2",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  className: "h-4 w-4"
+                }), " ", viewVariantItem.category]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("h2", {
+                className: "text-2xl font-black text-foreground",
+                children: viewVariantItem.name
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "text-sm text-muted-foreground mt-1 flex items-center gap-3",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("strong", {
+                    children: "Barcode:"
+                  }), " ", viewVariantItem.barcode]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                  children: "\u2022"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("strong", {
+                    children: "Supplier:"
+                  }), " ", viewVariantItem.supplier]
+                })]
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "text-right",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                variant: "outline",
+                className: "text-lg px-4 py-1 font-bold",
+                children: [totalVariants, " Variant", totalVariants !== 1 ? 's' : '']
+              })
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "rounded-xl border border-border overflow-hidden bg-white shadow-sm",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.Table, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHeader, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+                  className: "bg-secondary/30 hover:bg-secondary/30 text-[11px] font-bold uppercase tracking-wider",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+                    className: "px-4 py-3",
+                    children: "Variant Details"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+                    className: "px-4 py-3 text-center",
+                    children: "Barcode"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+                    className: "px-4 py-3 text-center",
+                    children: "Warehouse"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+                    className: "px-4 py-3 text-center",
+                    children: "Storefront"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+                    className: "px-4 py-3 text-center",
+                    children: "Sold"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+                    className: "px-4 py-3 text-center",
+                    children: "Imported"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+                    className: "px-4 py-3 text-center",
+                    children: "Status"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableHead, {
+                    className: "px-4 py-3 text-center",
+                    children: "Actions"
+                  })]
+                })
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableBody, {
+                children: [variantPage === 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+                  className: "border-b border-border bg-blue-50/30",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    className: "px-4 py-4 font-bold text-foreground flex items-center gap-2",
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+                      className: "w-2 h-2 rounded-full bg-primary"
+                    }), "Base Product (Regular)"]
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    className: "px-4 py-4 text-center font-mono text-xs",
+                    children: viewVariantItem.barcode
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    className: "px-4 py-4 text-center font-black text-primary",
+                    children: formatNum(viewVariantItem.warehouse_stock)
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    className: "px-4 py-4 text-center font-bold text-foreground text-lg",
+                    children: formatNum(viewVariantItem.current_stock)
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    className: "px-4 py-4 text-center font-semibold text-success-foreground",
+                    children: formatNum(viewVariantItem.total_sold)
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    className: "px-4 py-4 text-center font-semibold text-info",
+                    children: formatNum(viewVariantItem.total_imported)
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    className: "px-4 py-4 text-center",
+                    children: Number(viewVariantItem.current_stock) <= Number(viewVariantItem.reorder_threshold) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                      variant: "outline",
+                      className: "border-destructive/30 bg-danger-light text-destructive",
+                      children: "Low Stock"
+                    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                      variant: "outline",
+                      className: "border-success/30 bg-success-light text-success-foreground",
+                      children: "Optimal"
+                    })
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    className: "px-4 py-4 text-center",
+                    children: viewVariantItem.warehouse_stock > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+                      size: "sm",
+                      onClick: function onClick() {
+                        return openTransferModal(viewVariantItem);
+                      },
+                      children: "Display"
+                    })
+                  })]
+                }), paginatedVariants.map(function (variant) {
+                  var variantParts = [];
+                  if (variant.size && variant.size !== '-') variantParts.push(variant.size);
+                  if (variant.color && variant.color !== '-') variantParts.push(variant.color);
+                  if (variant.weight && variant.weight !== '-') variantParts.push(variant.weight);
+                  var variantLabel = variantParts.join(' / ') || 'N/A';
+                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableRow, {
+                    className: "hover:bg-secondary/10 transition-colors",
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                      className: "px-4 py-4 font-semibold text-foreground pl-10",
+                      children: variantLabel
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                      className: "px-4 py-4 text-center font-mono text-xs text-muted-foreground",
+                      children: variant.barcode
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                      className: "px-4 py-4 text-center font-bold text-primary",
+                      children: formatNum(variant.warehouse_stock)
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                      className: "px-4 py-4 text-center font-bold text-foreground text-lg",
+                      children: formatNum(variant.current_stock)
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                      className: "px-4 py-4 text-center font-semibold text-success-foreground",
+                      children: formatNum(variant.total_sold)
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                      className: "px-4 py-4 text-center font-semibold text-info",
+                      children: formatNum(variant.total_imported)
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                      className: "px-4 py-4 text-center",
+                      children: Number(variant.current_stock) <= Number(variant.reorder_threshold) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                        variant: "outline",
+                        className: "border-destructive/30 bg-danger-light text-destructive text-[10px]",
+                        children: "Low Stock"
+                      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                        variant: "outline",
+                        className: "border-success/30 bg-success-light text-success-foreground text-[10px]",
+                        children: "Optimal"
+                      })
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                      className: "px-4 py-4 text-center",
+                      children: variant.warehouse_stock > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+                        size: "sm",
+                        onClick: function onClick() {
+                          return openTransferModal(variant);
+                        },
+                        children: "Display"
+                      })
+                    })]
+                  }, variant.id);
+                })]
+              })]
+            })
+          }), totalVariants > ITEMS_PER_PAGE && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "mt-2 text-center flex justify-center",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_shared_Pagination__WEBPACK_IMPORTED_MODULE_4__["default"], {
+              page: variantPage,
+              total: totalVariants,
+              perPage: ITEMS_PER_PAGE,
+              onChange: setVariantPage
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+            className: "flex justify-end gap-3 pt-4 border-t border-border",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+              variant: "outline",
+              onClick: function onClick() {
+                setViewVariantItem(null);
+                setVariantPage(1);
+              },
+              children: "Close View"
+            })
+          })]
+        });
+      }()
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_5__["default"], {
       isOpen: transferModal.show,
       onClose: function onClose() {
         return setTransferModal({
@@ -20736,8 +20919,8 @@ function StockTab() {
           allVariants: []
         });
       },
-      title: "Transfer to Storefront",
-      size: "xl",
+      title: "Display to Storefront",
+      size: "md",
       children: transferModal.item && function () {
         var item = transferModal.item;
         var isVariant = item.is_variant;
@@ -20749,53 +20932,52 @@ function StockTab() {
         }
         var variantLabel = variantParts.join(' / ');
         var profitPct = transferForm.sell_price > 0 && transferForm.purchase_price > 0 ? ((transferForm.sell_price - transferForm.purchase_price) / transferForm.sell_price * 100).toFixed(1) : '0';
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
           className: "space-y-5",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-            className: "flex items-start gap-4 p-4 rounded-xl bg-secondary/40 border border-border",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-border",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
               className: "flex-1 min-w-0",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "flex items-center gap-2 flex-wrap",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
-                  className: "font-bold text-foreground text-base",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "flex items-center gap-2",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                  className: "font-bold text-foreground text-sm truncate",
                   children: item.name.replace(' (Warehouse Only)', '')
-                }), isVariant && variantLabel && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
-                  variant: "secondary",
-                  className: "text-xs font-semibold",
-                  children: variantLabel
-                }), isVariant ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
-                  className: "bg-blue-100 text-blue-700 text-[10px] font-bold",
+                }), isVariant ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                  className: "bg-blue-100 text-blue-700 border-blue-200 text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter",
                   children: "Variant"
-                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
-                  className: "bg-orange-100 text-orange-700 text-[10px] font-bold",
+                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                  className: "bg-orange-100 text-orange-700 border-orange-200 text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter",
                   children: "Base Product"
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                className: "text-xs text-muted-foreground mt-1",
-                children: item.supplier !== '-' ? item.supplier : ''
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "flex items-center gap-2 mt-0.5",
+                children: [isVariant && variantLabel && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                  className: "text-[9px] font-bold text-muted-foreground bg-white/50 px-1.5 py-0.5 rounded border border-border/50",
+                  children: variantLabel
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                  className: "text-[10px] text-muted-foreground italic",
+                  children: item.supplier !== '-' ? item.supplier : ''
+                })]
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-              className: "text-right shrink-0",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                className: "text-[10px] uppercase tracking-widest text-muted-foreground font-bold",
-                children: "In Warehouse"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                className: "text-2xl font-black text-primary",
-                children: formatNum(item.warehouse_stock)
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("div", {
-                className: "text-xs text-muted-foreground",
-                children: item.unit || 'units'
-              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "text-right",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "text-[9px] uppercase font-bold text-muted-foreground mr-1",
+                children: ["Warehouse: ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
+                  className: "text-primary text-sm font-black",
+                  children: formatNum(item.warehouse_stock)
+                })]
+              })
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-            className: "grid grid-cols-3 gap-4",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "grid grid-cols-3 gap-3",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
               className: "space-y-1",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                className: "text-[11px] uppercase tracking-widest font-bold text-muted-foreground",
-                children: "Qty to Transfer"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                className: "text-[10px] uppercase font-bold text-muted-foreground",
+                children: "Quantity"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
                 type: "number",
                 min: "1",
                 max: item.warehouse_stock,
@@ -20813,19 +20995,14 @@ function StockTab() {
                     qty: isNaN(num) ? '1' : num.toString()
                   }));
                 },
-                onBlur: function onBlur() {
-                  if (!transferModal.qty || parseInt(transferModal.qty) < 1) setTransferModal(_objectSpread(_objectSpread({}, transferModal), {}, {
-                    qty: '1'
-                  }));
-                },
-                className: "h-12 text-xl font-bold text-center border-2 focus:border-primary"
+                className: "h-9 text-base font-bold text-center"
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
               className: "space-y-1",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                className: "text-[11px] uppercase tracking-widest font-bold text-orange-600",
-                children: "Retail Price (\u20B1) *"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                className: "text-[10px] uppercase font-bold text-orange-600",
+                children: "Retail Price"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
                 type: "number",
                 step: "0.01",
                 min: "0",
@@ -20835,146 +21012,143 @@ function StockTab() {
                     sell_price: e.target.value
                   }));
                 },
-                className: "h-12 text-xl font-bold text-center border-2 border-orange-300 focus:border-orange-500"
+                className: "h-9 text-base font-bold text-center border-orange-200"
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
               className: "space-y-1",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                className: "text-[11px] uppercase tracking-widest font-bold text-green-700",
-                children: "Profit Margin"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "h-12 flex items-center justify-center rounded-md border-2 font-black text-xl ".concat(parseFloat(profitPct) >= 0 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'),
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                className: "text-[10px] uppercase font-bold text-green-700",
+                children: "Profit"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "h-9 flex items-center justify-center rounded-md border font-black text-base ".concat(parseFloat(profitPct) >= 0 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'),
                 children: [profitPct, "%"]
               })]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
             className: "flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-600",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
               children: "Cost Price:"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("span", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("span", {
               className: "font-bold text-gray-900",
               children: ["\u20B1", Number(transferForm.purchase_price || 0).toFixed(2)]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("span", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
               className: "ml-auto text-xs text-muted-foreground",
               children: "Set retail price \u2265 cost to make profit"
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
             className: "rounded-xl border-2 border-orange-100 overflow-hidden",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-              className: "flex items-center justify-between px-5 py-3 bg-orange-50 border-b border-orange-100",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("h4", {
-                className: "font-bold text-gray-900 text-sm",
-                children: "Retail Storefront Settings"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
-                className: "bg-orange-500 text-white text-[10px] font-bold px-2",
-                children: "Admin Control"
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+              className: "flex items-center justify-between px-3 py-1.5 bg-orange-50 border-b border-orange-100",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("h4", {
+                className: "font-bold text-gray-900 text-[10px] uppercase",
+                children: "Storefront Listing"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                className: "bg-orange-500 text-white text-[8px] h-3 px-1",
+                children: "Admin Only"
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-              className: "p-5 bg-white grid grid-cols-1 md:grid-cols-2 gap-4",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "space-y-1",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                  className: "text-xs font-bold text-gray-700",
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+              className: "p-3 bg-white grid grid-cols-1 md:grid-cols-2 gap-2",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "space-y-0.5",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                  className: "text-[9px] font-bold text-gray-500 uppercase",
                   children: "Product Name"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
                   value: transferForm.name,
                   onChange: function onChange(e) {
                     return setTransferForm(_objectSpread(_objectSpread({}, transferForm), {}, {
                       name: e.target.value
                     }));
                   },
-                  placeholder: "Display name in store",
-                  className: "h-10 border-gray-300 focus:border-orange-500"
+                  className: "h-8 text-[13px] border-gray-200"
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "space-y-1",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                  className: "text-xs font-bold text-gray-700",
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "space-y-0.5",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                  className: "text-[9px] font-bold text-gray-500 uppercase",
                   children: "Barcode"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
                   value: transferForm.barcode,
                   onChange: function onChange(e) {
                     return setTransferForm(_objectSpread(_objectSpread({}, transferForm), {}, {
                       barcode: e.target.value
                     }));
                   },
-                  placeholder: "SKU / Barcode",
-                  className: "h-10 border-gray-300 focus:border-orange-500"
+                  className: "h-8 text-[13px] font-mono border-gray-200"
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "space-y-1",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                  className: "text-xs font-bold text-gray-700",
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "space-y-0.5",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                  className: "text-[9px] font-bold text-gray-500 uppercase",
                   children: "Category"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("select", {
-                  className: "flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("select", {
+                  className: "flex h-8 w-full rounded-md border border-gray-200 bg-white px-2 py-1 text-[13px] focus:outline-none",
                   value: transferForm.category_id,
                   onChange: function onChange(e) {
                     return setTransferForm(_objectSpread(_objectSpread({}, transferForm), {}, {
                       category_id: e.target.value
                     }));
                   },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("option", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("option", {
                     value: "",
                     children: "Select Category"
                   }), categories.map(function (c) {
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("option", {
+                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("option", {
                       value: c.id,
                       children: c.name
                     }, c.id);
                   })]
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "space-y-1",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                  className: "text-xs font-bold text-gray-700",
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "space-y-0.5",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                  className: "text-[9px] font-bold text-gray-500 uppercase",
                   children: "Unit Type"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("select", {
-                  className: "flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500",
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("select", {
+                  className: "flex h-8 w-full rounded-md border border-gray-200 bg-white px-2 py-1 text-[13px] focus:outline-none",
                   value: transferForm.unit_type_id,
                   onChange: function onChange(e) {
                     return setTransferForm(_objectSpread(_objectSpread({}, transferForm), {}, {
                       unit_type_id: e.target.value
                     }));
                   },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("option", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("option", {
                     value: "",
                     children: "Select Unit"
                   }), unitTypes.map(function (u) {
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("option", {
+                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("option", {
                       value: u.id,
                       children: [u.purchase_unit, " / ", u.sell_unit]
                     }, u.id);
                   })]
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-                className: "md:col-span-2 space-y-1",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                  className: "text-xs font-bold text-gray-700",
-                  children: "Product Description"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_textarea__WEBPACK_IMPORTED_MODULE_11__.Textarea, {
-                  rows: 3,
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+                className: "md:col-span-2 space-y-0.5",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                  className: "text-[9px] font-bold text-gray-500 uppercase",
+                  children: "Description"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_textarea__WEBPACK_IMPORTED_MODULE_11__.Textarea, {
+                  rows: 1,
                   value: transferForm.description,
                   onChange: function onChange(e) {
                     return setTransferForm(_objectSpread(_objectSpread({}, transferForm), {}, {
                       description: e.target.value
                     }));
                   },
-                  placeholder: "Add details for customers...",
-                  className: "border-gray-300 focus:border-orange-500 resize-none"
+                  className: "text-[12px] border-gray-200 resize-none h-12"
                 })]
               })]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("p", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("p", {
             className: "text-xs text-muted-foreground",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)("strong", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("strong", {
               children: "Note:"
-            }), " You can edit product details and set retail pricing before transferring to the customer storefront."]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-            className: "flex gap-3 pt-1",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+            }), " You can edit product details and set retail pricing before displaying to the customer storefront."]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
+            className: "flex justify-center gap-4 pt-2",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
               variant: "outline",
-              className: "flex-1 h-12 font-semibold border-2",
+              className: "px-10 h-10 font-bold border rounded-full transition-all hover:bg-secondary/20",
               onClick: function onClick() {
                 return setTransferModal({
                   show: false,
@@ -20985,11 +21159,11 @@ function StockTab() {
               },
               disabled: transferLoading,
               children: "Cancel"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
-              className: "flex-1 h-12 font-semibold bg-orange-500 hover:bg-orange-600 text-white",
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+              className: "px-12 h-10 font-black bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-200 rounded-full transition-all active:scale-95",
               onClick: handleTransfer,
               disabled: transferLoading || !transferModal.qty || parseInt(transferModal.qty) < 1 || parseInt(transferModal.qty) > item.warehouse_stock || !transferForm.unit_type_id || !transferForm.sell_price || parseFloat(transferForm.sell_price) <= 0,
-              children: transferLoading ? 'Transferring...' : "Transfer ".concat(transferModal.qty || 0, " to Storefront")
+              children: transferLoading ? 'Displaying...' : "Display ".concat(transferModal.qty || 0, " to Storefront")
             })]
           })]
         });
@@ -21203,12 +21377,9 @@ function Landing() {
               className: "text-xs font-black text-primary-foreground",
               children: "H"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
             className: "text-lg font-bold tracking-tight text-foreground",
-            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-              className: "text-primary",
-              children: "Pro"
-            })]
+            children: "HRMS"
           })]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
           className: "hidden md:flex items-center gap-8",
@@ -21470,12 +21641,9 @@ function Landing() {
               className: "text-[10px] font-black text-primary-foreground",
               children: "H"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
             className: "text-[15px] font-bold text-foreground",
-            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-              className: "text-primary",
-              children: "Pro"
-            })]
+            children: "HRMS"
           })]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("p", {
           className: "text-sm text-muted-foreground",
@@ -21646,12 +21814,9 @@ function Sidebar(_ref4) {
               className: "text-[13px] font-black text-white",
               children: "H"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
             className: "text-[17px] font-bold tracking-tight text-white",
-            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-              className: "text-[#FF6B35]",
-              children: "Pro"
-            })]
+            children: "HRMS"
           })]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
           className: "rounded-full bg-[#FF6B35] px-2 py-0.5 text-[10px] font-black text-white",
@@ -21685,7 +21850,7 @@ function Sidebar(_ref4) {
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(NavItem, {
           to: "/supplier-catalog",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"],
-          children: "Supplier Catalog"
+          children: "Supplier Available Products"
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(NavItem, {
           to: "/returns",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"],
@@ -21794,17 +21959,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/bell.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/chevron-down.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/folder-open.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/layout-dashboard.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/log-out.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/menu.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/plus.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/settings.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-cart.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/x.js");
-/* harmony import */ var _lib_utils__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../../lib/utils */ "./resources/js/lib/utils.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/clipboard-list.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/folder-open.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/layout-dashboard.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/log-out.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/menu.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/plus.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/settings.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-cart.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/x.js");
+/* harmony import */ var _lib_utils__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../../lib/utils */ "./resources/js/lib/utils.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -21877,6 +22043,7 @@ function SupplierLayout() {
     var path = location.pathname;
     if (path === '/supplier/dashboard') return 'Dashboard';
     if (path.startsWith('/supplier/products')) return 'My Products';
+    if (path.startsWith('/supplier/requests')) return 'Request Orders';
     if (path.startsWith('/supplier/orders')) return 'Purchase Orders';
     if (path.startsWith('/supplier/settings')) return 'Settings';
     return 'Supplier Portal';
@@ -21886,89 +22053,89 @@ function SupplierLayout() {
     navigate('/login');
   };
   var navItem = function navItem(to, Icon, label) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
       to: to,
       className: function className(_ref) {
         var isActive = _ref.isActive;
-        return (0,_lib_utils__WEBPACK_IMPORTED_MODULE_16__.cn)('flex items-center gap-2.5 px-5 py-2.5 text-sm font-medium rounded-none transition-all duration-200', 'border-l-[3px] border-transparent', isActive ? 'text-white bg-white/10 border-l-[#FF6B35]' : 'text-white/60 hover:text-white hover:bg-white/[0.06]');
+        return (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('flex items-center gap-2.5 px-5 py-2.5 text-sm font-medium rounded-none transition-all duration-200', 'border-l-[3px] border-transparent', isActive ? 'text-white bg-white/10 border-l-[#FF6B35]' : 'text-white/60 hover:text-white hover:bg-white/[0.06]');
       },
       onClick: function onClick() {
         return setSidebarOpen(false);
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(Icon, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(Icon, {
         className: "h-[18px] w-[18px] shrink-0"
       }), label]
     });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
     className: "flex min-h-screen bg-background",
-    children: [sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+    children: [sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
       className: "fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm lg:hidden",
       onClick: function onClick() {
         return setSidebarOpen(false);
       }
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("aside", {
-      className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_16__.cn)('fixed top-0 left-0 z-[100] flex h-screen w-[260px] flex-col bg-[#0F172A] transition-transform duration-300', sidebarOpen ? 'translate-x-0 shadow-[8px_0_30px_rgba(0,0,0,0.2)]' : '-translate-x-full lg:translate-x-0'),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("aside", {
+      className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('fixed top-0 left-0 z-[100] flex h-screen w-[260px] flex-col bg-[#0F172A] transition-transform duration-300', sidebarOpen ? 'translate-x-0 shadow-[8px_0_30px_rgba(0,0,0,0.2)]' : '-translate-x-full lg:translate-x-0'),
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
         className: "flex items-center justify-between border-b border-white/[0.08] px-5 py-5",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
           className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
             className: "flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B35]",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
               className: "text-[13px] font-black text-white",
               children: "H"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("span", {
             className: "text-[17px] font-bold tracking-tight text-white",
-            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
+            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
               className: "text-[#FF6B35]",
               children: "Supplier"
             })]
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("button", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("button", {
           className: "lg:hidden flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:text-white",
           onClick: function onClick() {
             return setSidebarOpen(false);
           },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
             className: "h-4 w-4"
           })
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("nav", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("nav", {
         className: "flex-1 overflow-y-auto py-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
           className: "px-5 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30",
           children: "Main"
-        }), navItem('/supplier/dashboard', lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], 'Dashboard'), navItem('/supplier/products', lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], 'My Products'), navItem('/supplier/orders', lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], 'Purchase Orders'), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("button", {
+        }), navItem('/supplier/dashboard', lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], 'Dashboard'), navItem('/supplier/products', lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], 'My Products'), navItem('/supplier/requests', lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], 'Request Orders'), navItem('/supplier/orders', lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], 'Purchase Orders'), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("button", {
           onClick: function onClick() {
             return setCatsOpen(!catsOpen);
           },
-          className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_16__.cn)('flex w-full items-center justify-between px-5 py-2.5 text-sm font-medium transition-all duration-200', 'border-l-[3px] border-transparent text-white/60 hover:text-white hover:bg-white/[0.06]'),
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("span", {
+          className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('flex w-full items-center justify-between px-5 py-2.5 text-sm font-medium transition-all duration-200', 'border-l-[3px] border-transparent text-white/60 hover:text-white hover:bg-white/[0.06]'),
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("span", {
             className: "flex items-center gap-2.5",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
               className: "h-[18px] w-[18px] shrink-0"
             }), "Category"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
-            className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_16__.cn)('h-4 w-4 transition-transform duration-200', catsOpen && 'rotate-180')
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
+            className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('h-4 w-4 transition-transform duration-200', catsOpen && 'rotate-180')
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
-          className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_16__.cn)('overflow-hidden transition-all duration-250', catsOpen ? 'max-h-60' : 'max-h-0'),
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
+          className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('overflow-hidden transition-all duration-250', catsOpen ? 'max-h-60' : 'max-h-0'),
           children: categories.map(function (cat) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
               className: "flex items-center",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
                 to: "/supplier/products?category_id=".concat(cat.id),
                 className: function className(_ref2) {
                   var isActive = _ref2.isActive;
-                  return (0,_lib_utils__WEBPACK_IMPORTED_MODULE_16__.cn)('flex flex-1 items-center py-2 pl-[3.25rem] pr-3 text-[13px] transition-colors duration-200', isActive ? 'text-[#FF6B35] font-semibold' : 'text-white/55 hover:text-white');
+                  return (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('flex flex-1 items-center py-2 pl-[3.25rem] pr-3 text-[13px] transition-colors duration-200', isActive ? 'text-[#FF6B35] font-semibold' : 'text-white/55 hover:text-white');
                 },
                 onClick: function onClick() {
                   return setSidebarOpen(false);
                 },
                 children: cat.name
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("button", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("button", {
                 title: "Add Product to this Category",
                 onClick: function onClick(e) {
                   e.preventDefault();
@@ -21977,94 +22144,94 @@ function SupplierLayout() {
                   setSidebarOpen(false);
                 },
                 className: "mr-3 flex h-6 w-6 items-center justify-center rounded text-white/40 hover:bg-white/10 hover:text-white",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
                   className: "h-3.5 w-3.5"
                 })
               })]
             }, cat.id);
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
           className: "px-5 pt-4 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30",
           children: "System"
-        }), navItem('/supplier/settings', lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], 'Settings')]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+        }), navItem('/supplier/settings', lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], 'Settings')]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
         className: "border-t border-white/[0.08] p-4",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
           className: "flex items-center gap-3 px-1",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
             className: "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FF6B35]/20 text-[#FF6B35] text-sm font-bold",
             children: (supplier === null || supplier === void 0 || (_supplier$name = supplier.name) === null || _supplier$name === void 0 ? void 0 : _supplier$name.charAt(0)) || 'S'
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
             className: "flex-1 min-w-0",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
               className: "truncate text-sm font-semibold text-white",
               children: (supplier === null || supplier === void 0 ? void 0 : supplier.name) || 'Supplier'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
               className: "truncate text-[11px] text-white/40",
               children: (supplier === null || supplier === void 0 ? void 0 : supplier.email) || ''
             })]
           })]
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
       className: "flex flex-1 flex-col lg:pl-[260px]",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("header", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("header", {
         className: "fixed top-0 left-0 right-0 lg:left-[260px] z-[90] flex h-16 items-center justify-between border-b border-border bg-white px-5 shadow-sm",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
           className: "flex items-center gap-3",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("button", {
             className: "relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-border bg-white text-muted-foreground transition-all hover:bg-secondary hover:text-foreground lg:hidden",
             onClick: function onClick() {
               return setSidebarOpen(!sidebarOpen);
             },
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], {
               className: "h-[18px] w-[18px]"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("h1", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("h1", {
             className: "text-[17px] font-bold tracking-tight text-foreground",
             children: getPageTitle()
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
           className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
             className: "relative",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("button", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("button", {
               className: "relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-border bg-white text-muted-foreground transition-all hover:bg-secondary hover:text-foreground",
               onClick: function onClick() {
                 setNotiOpen(!notiOpen);
                 setProfileOpen(false);
               },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
                 className: "h-[18px] w-[18px]"
-              }), unreadNoti > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
+              }), unreadNoti > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
                 className: "absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-white border-2 border-white",
                 children: unreadNoti > 9 ? '9+' : unreadNoti
               })]
-            }), notiOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.Fragment, {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+            }), notiOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.Fragment, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
                 className: "fixed inset-0 z-[299]",
                 onClick: function onClick() {
                   return setNotiOpen(false);
                 }
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
                 className: "absolute right-0 top-[calc(100%+8px)] z-[300] w-[300px] max-h-[360px] flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-xl",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
                   className: "border-b border-border px-4 py-3 font-bold text-foreground",
                   children: "Notifications"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
                   className: "flex-1 overflow-y-auto",
-                  children: notifications.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+                  children: notifications.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
                     className: "flex flex-col items-center justify-center py-8 text-muted-foreground",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
                       className: "h-7 w-7 mb-2 opacity-30"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
                       className: "text-sm",
                       children: "No notifications"
                     })]
                   }) : notifications.map(function (n) {
                     var _n$data2;
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
-                      className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_16__.cn)('cursor-pointer border-b border-border/60 px-4 py-3 text-[13px] hover:bg-gray-50 transition-colors', !n.read_at && 'bg-[#EFF6FF] font-semibold'),
+                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+                      className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('cursor-pointer border-b border-border/60 px-4 py-3 text-[13px] hover:bg-gray-50 transition-colors', !n.read_at && 'bg-[#EFF6FF] font-semibold'),
                       onClick: function onClick() {
                         var _n$data;
                         if (!n.read_at) {
@@ -22084,16 +22251,16 @@ function SupplierLayout() {
                           navigate('/supplier/orders');
                         }
                       },
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
                         className: "flex justify-between items-center mb-1.5",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
+                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
                           className: "text-[10px] font-bold text-[#FF6B35] tracking-wider",
                           children: "HRMS"
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
+                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
                           className: "text-[10px] text-muted-foreground font-normal",
                           children: new Date(n.created_at).toLocaleString()
                         })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
                         className: "leading-snug",
                         children: (_n$data2 = n.data) === null || _n$data2 === void 0 ? void 0 : _n$data2.message
                       })]
@@ -22102,48 +22269,48 @@ function SupplierLayout() {
                 })]
               })]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
             className: "relative",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("button", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("button", {
               onClick: function onClick() {
                 setProfileOpen(!profileOpen);
                 setNotiOpen(false);
               },
               className: "flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#FFF1EB] text-[#FF6B35] font-bold text-sm transition-all hover:bg-[#FF6B35] hover:text-white",
               children: (supplier === null || supplier === void 0 || (_supplier$name2 = supplier.name) === null || _supplier$name2 === void 0 || (_supplier$name2 = _supplier$name2.charAt(0)) === null || _supplier$name2 === void 0 ? void 0 : _supplier$name2.toUpperCase()) || 'S'
-            }), profileOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.Fragment, {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+            }), profileOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.Fragment, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
                 className: "fixed inset-0 z-[299]",
                 onClick: function onClick() {
                   return setProfileOpen(false);
                 }
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
                 className: "absolute right-0 top-[calc(100%+8px)] z-[300] w-[220px] overflow-hidden rounded-2xl border border-border bg-white shadow-xl",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
                   className: "border-b border-border px-4 py-3.5",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
                     className: "font-semibold text-sm text-foreground",
                     children: supplier === null || supplier === void 0 ? void 0 : supplier.name
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
                     className: "text-[12px] text-muted-foreground truncate",
                     children: supplier === null || supplier === void 0 ? void 0 : supplier.email
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
                     className: "mt-1.5 inline-block rounded-full bg-[#FFF1EB] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FF6B35]",
                     children: "Supplier"
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("button", {
                   onClick: function onClick() {
                     setProfileOpen(false);
                     navigate('/supplier/settings');
                   },
                   className: "flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
                     className: "h-4 w-4"
                   }), " Settings"]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("button", {
                   onClick: handleLogout,
                   className: "flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#EF4444] transition-colors hover:bg-[#FEF2F2]",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
                     className: "h-4 w-4"
                   }), " Logout"]
                 })]
@@ -22151,9 +22318,9 @@ function SupplierLayout() {
             })]
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("main", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("main", {
         className: "flex-1 px-5 py-6 pt-[calc(64px+1.5rem)] lg:px-7 xl:px-8",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Outlet, {})
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Outlet, {})
       })]
     })]
   });
@@ -22243,7 +22410,7 @@ function Topbar(_ref) {
     if (path.startsWith('/users/riders')) return 'Riders';
     if (path.startsWith('/users')) return 'User Management';
     if (path.startsWith('/settings')) return 'System Settings';
-    if (path.startsWith('/supplier-catalog')) return 'Supplier Catalog';
+    if (path.startsWith('/supplier-catalog')) return 'Supplier Available Products';
     if (path.startsWith('/suppliers')) return 'Suppliers';
     return 'Admin Portal';
   };
@@ -23750,7 +23917,7 @@ function Products() {
             className: "bg-secondary/50 hover:bg-secondary/50",
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4",
-              children: "SKU / Image"
+              children: "Barcode / Image"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableHead, {
               className: "text-[11px] font-bold uppercase tracking-wider px-4",
               children: "Product Name"
@@ -25751,12 +25918,9 @@ function RiderApp() {
       className: "min-h-screen flex items-center justify-center p-8 bg-secondary/30",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_11__.Card, {
         className: "max-w-md w-full p-8 text-center",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsx)("div", {
           className: "text-lg font-black text-foreground mb-6",
-          children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsx)("span", {
-            className: "text-primary",
-            children: "Pro"
-          })]
+          children: "HRMS"
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsx)("div", {
           className: "mb-4",
           children: user.status === 'pending' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsx)(Clock, {
@@ -31874,10 +32038,10 @@ function SupplierDashboard() {
             }, 0);
             setStats({
               pending: pos.filter(function (p) {
-                return p.status === 'draft';
+                return p.status === 'pending';
               }).length,
               approved: pos.filter(function (p) {
-                return p.status === 'approved';
+                return p.status === 'pending_supplier';
               }).length,
               delivered: pos.filter(function (p) {
                 return p.status === 'supplier_delivered';
@@ -31909,20 +32073,22 @@ function SupplierDashboard() {
   }, [refreshTrigger]);
   var getStatusBadge = function getStatusBadge(status) {
     var variants = {
-      draft: 'secondary',
-      approved: 'default',
+      pending: 'secondary',
+      pending_supplier: 'default',
+      accepted: 'default',
       supplier_delivered: 'outline',
       received: 'default'
     };
     var labels = {
-      draft: 'Draft',
-      approved: 'Approved',
+      pending: 'Draft',
+      pending_supplier: 'Awaiting Response',
+      accepted: 'Accepted',
       supplier_delivered: 'Delivered',
       received: 'Received'
     };
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_6__.Badge, {
       variant: variants[status] || 'secondary',
-      className: status === 'received' ? 'bg-green-100 text-green-700 border-green-200' : status === 'supplier_delivered' ? 'bg-orange-100 text-orange-700 border-orange-200' : status === 'approved' ? 'bg-blue-100 text-blue-700 border-blue-200' : '',
+      className: status === 'received' ? 'bg-green-100 text-green-700 border-green-200' : status === 'supplier_delivered' ? 'bg-orange-100 text-orange-700 border-orange-200' : status === 'pending_supplier' ? 'bg-blue-100 text-blue-700 border-blue-200' : '',
       children: labels[status] || status
     });
   };
@@ -31975,7 +32141,7 @@ function SupplierDashboard() {
           children: (supplier === null || supplier === void 0 ? void 0 : supplier.name) || 'Supplier'
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
           className: "text-sm text-white/80 max-w-xl leading-relaxed mb-6",
-          children: "Manage your products, track purchase orders, and grow your business with HRMS Pro."
+          children: "Manage your products, track purchase orders, and grow your business with HRMS."
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
           className: "flex flex-wrap gap-3",
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
@@ -32262,8 +32428,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
-function SupplierOrders() {
+function SupplierOrders(_ref) {
   var _orders$data2, _orders$data3, _rejectModal$items, _selectedOrder$items, _selectedOrder$items2;
+  var _ref$mode = _ref.mode,
+    mode = _ref$mode === void 0 ? 'completed' : _ref$mode;
+  var isRequestMode = mode === 'requests';
   var _useToast = (0,_context_ToastContext__WEBPACK_IMPORTED_MODULE_4__.useToast)(),
     showToast = _useToast.showToast;
   var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_2__.useNavigate)();
@@ -32349,7 +32518,7 @@ function SupplierOrders() {
     setRejectError = _useState20[1];
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     fetchOrders(orders.data.length > 0);
-  }, [page, statusFilter, refreshTrigger]);
+  }, [page, statusFilter, refreshTrigger, mode]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var _orders$data;
     if (highlightId && ((_orders$data = orders.data) === null || _orders$data === void 0 ? void 0 : _orders$data.length) > 0 && !selectedOrder) {
@@ -32362,7 +32531,7 @@ function SupplierOrders() {
     }
   }, [highlightId, orders.data]);
   var fetchOrders = /*#__PURE__*/function () {
-    var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var silent,
         params,
         res,
@@ -32376,7 +32545,8 @@ function SupplierOrders() {
             _context.p = 1;
             params = {
               page: page,
-              per_page: 15
+              per_page: 15,
+              tab: mode
             };
             if (statusFilter) params.status = statusFilter;
             _context.n = 2;
@@ -32401,11 +32571,11 @@ function SupplierOrders() {
       }, _callee, null, [[1, 3, 4, 5]]);
     }));
     return function fetchOrders() {
-      return _ref.apply(this, arguments);
+      return _ref2.apply(this, arguments);
     };
   }();
   var performAccept = /*#__PURE__*/function () {
-    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(order) {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(order) {
       var _err$response, _t2;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.p = _context2.n) {
@@ -32435,7 +32605,7 @@ function SupplierOrders() {
       }, _callee2, null, [[1, 3, 4, 5]]);
     }));
     return function performAccept(_x) {
-      return _ref2.apply(this, arguments);
+      return _ref3.apply(this, arguments);
     };
   }();
   var handleAccept = function handleAccept(order) {
@@ -32449,7 +32619,7 @@ function SupplierOrders() {
     setRejectError('');
   };
   var handleReject = /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
       var _err$response2, _t3;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
@@ -32489,11 +32659,11 @@ function SupplierOrders() {
       }, _callee3, null, [[2, 4, 5, 6]]);
     }));
     return function handleReject() {
-      return _ref3.apply(this, arguments);
+      return _ref4.apply(this, arguments);
     };
   }();
   var handleDeliver = /*#__PURE__*/function () {
-    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
       var _err$response3, _t4;
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.p = _context4.n) {
@@ -32532,7 +32702,7 @@ function SupplierOrders() {
       }, _callee4, null, [[2, 4, 5, 6]]);
     }));
     return function handleDeliver() {
-      return _ref4.apply(this, arguments);
+      return _ref5.apply(this, arguments);
     };
   }();
   var getStatusBadge = function getStatusBadge(status) {
@@ -32581,25 +32751,28 @@ function SupplierOrders() {
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("h2", {
           className: "text-xl font-extrabold text-foreground",
-          children: "Purchase Orders"
+          children: isRequestMode ? "Request Orders" : "Purchase Orders"
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("p", {
           className: "text-sm text-muted-foreground mt-0.5",
-          children: "Track and manage your purchase orders"
+          children: isRequestMode ? "Track and respond to new purchase requests from admin" : "History of finalized purchase transactions"
         })]
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_5__["default"], {
       filters: [{
         value: statusFilter,
         onChange: setStatusFilter,
-        options: [{
+        options: isRequestMode ? [{
           value: '',
-          label: 'All Statuses'
+          label: 'All Active Requests'
         }, {
           value: 'pending_supplier',
           label: 'Awaiting Your Response'
         }, {
           value: 'accepted',
           label: 'Accepted'
+        }] : [{
+          value: '',
+          label: 'All Finalized'
         }, {
           value: 'rejected',
           label: 'Rejected'
@@ -32643,7 +32816,7 @@ function SupplierOrders() {
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_14__.TableCell, {
               colSpan: 6,
               className: "text-center py-8 text-muted-foreground",
-              children: "No purchase orders found"
+              children: isRequestMode ? "No active request orders found" : "No finalized purchase orders found"
             })
           }) : (_orders$data3 = orders.data) === null || _orders$data3 === void 0 ? void 0 : _orders$data3.map(function (order) {
             var _order$items;
@@ -34918,15 +35091,12 @@ function SupplierRegister() {
       className: "flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
         className: "w-full max-w-lg",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
           className: "text-xl font-black text-foreground mb-6 cursor-pointer",
           onClick: function onClick() {
             return navigate('/');
           },
-          children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("span", {
-            className: "text-primary",
-            children: "Pro"
-          })]
+          children: "HRMS"
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("h1", {
           className: "text-2xl font-extrabold text-foreground mb-1",
           children: "Supplier Partner Program"
@@ -35116,7 +35286,7 @@ function SupplierRegister() {
           children: "\uD83C\uDFED"
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("h2", {
           className: "text-2xl font-extrabold mb-3",
-          children: "Grow with HRMS Pro"
+          children: "Grow with HRMS"
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
           className: "text-white/70 mb-8",
           children: "Join thousands of hardware suppliers streamlining their fulfillment through our automated retail engine."
@@ -37164,10 +37334,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_ui_input__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @/components/ui/input */ "./resources/js/components/ui/input.jsx");
 /* harmony import */ var _components_ui_label__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @/components/ui/label */ "./resources/js/components/ui/label.jsx");
 /* harmony import */ var _components_ui_checkbox__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @/components/ui/checkbox */ "./resources/js/components/ui/checkbox.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/store.js");
-/* harmony import */ var _shared_VariantSelector__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../shared/VariantSelector */ "./resources/js/components/shared/VariantSelector.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/circle-check.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/minus.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/plus.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-cart.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/store.js");
+/* harmony import */ var _shared_VariantSelector__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../shared/VariantSelector */ "./resources/js/components/shared/VariantSelector.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -37309,7 +37483,7 @@ function SupplierCatalog() {
           case 3:
             _context.p = 3;
             _t = _context.v;
-            showToast('Failed to load supplier catalog', 'error');
+            showToast('Failed to load supplier available products', 'error');
           case 4:
             _context.p = 4;
             setLoading(false);
@@ -37379,7 +37553,7 @@ function SupplierCatalog() {
               weight: ''
             });
             setOrderQty(1);
-            // Refresh catalog so new stock counts are visible immediately
+            // Refresh list so new stock counts are visible immediately
             fetchProducts();
             _context2.n = 7;
             break;
@@ -37400,24 +37574,24 @@ function SupplierCatalog() {
       return _ref2.apply(this, arguments);
     };
   }();
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
     className: "relative",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
       className: "flex items-center justify-between mb-6 flex-wrap gap-3 relative z-0",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("h2", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("h2", {
           className: "text-xl font-bold text-foreground tracking-tight flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"], {
             className: "h-6 w-6 text-primary"
-          }), " Supplier Product Catalog"]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
+          }), " Supplier Available Products"]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
           className: "text-sm text-muted-foreground mt-0.5",
           children: "Browse products promoted by your suppliers. Create POs directly from here."
         })]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
       className: "mb-4",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_3__["default"], {
         search: search,
         onSearchChange: function onSearchChange(v) {
           setSearch(v);
@@ -37455,83 +37629,83 @@ function SupplierCatalog() {
           })))
         }]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
       className: "flex items-center gap-2 mb-4",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_checkbox__WEBPACK_IMPORTED_MODULE_12__.Checkbox, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_checkbox__WEBPACK_IMPORTED_MODULE_12__.Checkbox, {
         id: "promoted",
         checked: promotedOnly,
         onCheckedChange: function onCheckedChange(checked) {
           setPromotedOnly(!!checked);
           setPage(1);
         }
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_11__.Label, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_11__.Label, {
         htmlFor: "promoted",
         className: "text-sm font-semibold cursor-pointer",
         children: "Show Promoted Products Only"
       })]
-    }), loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+    }), loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
       className: "text-center py-12",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
         className: "spinner mx-auto"
       })
-    }) : ((_products$data = products.data) === null || _products$data === void 0 ? void 0 : _products$data.length) === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_8__.Card, {
+    }) : ((_products$data = products.data) === null || _products$data === void 0 ? void 0 : _products$data.length) === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_8__.Card, {
       className: "text-center py-16 px-8",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"], {
         className: "h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("h3", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("h3", {
         className: "text-base font-bold text-foreground mb-1",
         children: "No Supplier Products Found"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
         className: "text-sm text-muted-foreground",
         children: "Suppliers haven't added any products yet."
       })]
-    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
       className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5",
       children: products.data.map(function (p) {
         var _p$supplier, _p$category, _p$variants, _p$variants2;
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_8__.Card, {
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_8__.Card, {
           onClick: function onClick() {
             return setViewProduct(p);
           },
           className: "overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 ".concat(p.is_promoted ? 'border-2 border-primary shadow-md shadow-primary/10' : ''),
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
             className: "h-[180px] bg-secondary flex items-center justify-center relative overflow-hidden",
-            children: [p.image_path ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("img", {
+            children: [p.image_path ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("img", {
               src: "/storage/".concat(p.image_path),
               alt: p.name,
               className: "w-full h-full object-cover"
-            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
               className: "h-12 w-12 opacity-20 text-muted-foreground"
-            }), p.is_promoted && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+            }), p.is_promoted && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
               className: "absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-white text-center py-1 text-[10px] font-bold tracking-wider uppercase",
               children: "Promoted by Supplier"
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
             className: "p-4",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
               className: "font-bold text-foreground mb-1",
               children: p.name
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
               className: "text-[12px] text-muted-foreground mb-1",
               children: ((_p$supplier = p.supplier) === null || _p$supplier === void 0 ? void 0 : _p$supplier.name) || 'Unknown Supplier'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
               className: "text-[12px] text-muted-foreground mb-2",
               children: [((_p$category = p.category) === null || _p$category === void 0 ? void 0 : _p$category.name) || 'Uncategorized', " \u2022 ", ((_p$variants = p.variants) === null || _p$variants === void 0 ? void 0 : _p$variants.length) || 0, " variant", ((_p$variants2 = p.variants) === null || _p$variants2 === void 0 ? void 0 : _p$variants2.length) !== 1 ? 's' : '']
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
               className: "mb-3",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
                 variant: p.total_stock > 0 ? "default" : "destructive",
                 className: "text-[10px] font-bold",
                 children: p.total_stock > 0 ? "\u2713 ".concat(p.total_stock, " Available") : '✗ Out of Stock'
               })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
               className: "flex items-center justify-between",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("span", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("span", {
                 className: "font-bold text-lg text-primary",
                 children: ["\u20B1", Number(p.price).toLocaleString(undefined, {
                   minimumFractionDigits: 2
                 })]
-              }), p.min_order_qty > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("span", {
+              }), p.min_order_qty > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("span", {
                 className: "text-[11px] text-muted-foreground font-medium",
                 children: ["Min: ", p.min_order_qty, " units"]
               })]
@@ -37539,12 +37713,12 @@ function SupplierCatalog() {
           })]
         }, p.id);
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_Pagination__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_shared_Pagination__WEBPACK_IMPORTED_MODULE_4__["default"], {
       page: page,
       total: products.total,
       perPage: 20,
       onChange: setPage
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_5__["default"], {
       isOpen: !!viewProduct,
       onClose: function onClose() {
         setViewProduct(null);
@@ -37557,9 +37731,10 @@ function SupplierCatalog() {
         setOrderQty(1);
         setActiveGalleryImage(null);
       },
-      title: "Product Details",
+      title: "",
       size: "lg",
       hideFooter: true,
+      hideTitle: true,
       children: viewProduct && function (_viewProduct$category, _viewProduct$supplier) {
         var variants = (viewProduct.variants || []).map(function (v) {
           return {
@@ -37596,114 +37771,122 @@ function SupplierCatalog() {
         var additionalImages = selectedVariant ? selectedVariant.additional_images || [] : viewProduct.additional_images || [];
         var allImages = [mainImage].concat(_toConsumableArray(additionalImages)).filter(Boolean);
         var displayImage = activeGalleryImage || mainImage;
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-          className: "grid grid-cols-1 md:grid-cols-[1.2fr,1fr] gap-0",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-            className: "bg-secondary/10 p-6 flex flex-col items-center border-r border-border",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-              className: "w-full aspect-square relative rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center overflow-hidden mb-6",
-              children: displayImage ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("img", {
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+          className: "flex flex-col md:flex-row overflow-hidden bg-white text-gray-900 border-none shadow-none",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+            className: "md:w-[50%] p-8 flex flex-col items-center justify-center bg-gray-50/20",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+              className: "w-full aspect-square relative rounded-2xl bg-white shadow-lg shadow-gray-200/50 border border-gray-100 flex items-center justify-center overflow-hidden mb-4",
+              children: displayImage ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("img", {
                 src: "/storage/".concat(displayImage),
                 alt: viewProduct.name,
-                className: "w-full h-full object-contain p-4"
-              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                className: "w-full h-full object-contain p-3"
+              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
                 className: "h-24 w-24 opacity-10 text-muted-foreground"
               })
-            }), allImages.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+            }), allImages.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
               className: "flex flex-wrap justify-center gap-3",
               children: allImages.map(function (img, i) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("button", {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("button", {
                   onClick: function onClick() {
                     return setActiveGalleryImage(img);
                   },
-                  className: "w-16 h-16 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ".concat(displayImage === img ? 'border-orange-500 shadow-md ring-2 ring-orange-100' : 'border-border hover:border-orange-200'),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("img", {
+                  className: "w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ".concat(displayImage === img ? 'border-orange-500 shadow-md ring-2 ring-orange-100' : 'border-gray-200 hover:border-orange-200'),
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("img", {
                     src: "/storage/".concat(img),
                     className: "w-full h-full object-contain rounded-lg"
                   })
                 }, i);
               })
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-            className: "p-6 flex flex-col",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-              className: "mb-4",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                className: "text-xs font-bold uppercase tracking-wider text-orange-500 mb-1",
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+            className: "md:w-[50%] p-8 flex flex-col overflow-y-auto max-h-[85vh]",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+              className: "mb-3",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+                className: "text-[10px] font-bold uppercase tracking-widest text-[#FF5A1F] mb-0.5",
                 children: ((_viewProduct$category = viewProduct.category) === null || _viewProduct$category === void 0 ? void 0 : _viewProduct$category.name) || 'SUPPLIES'
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("h2", {
-                className: "text-2xl font-bold text-foreground mb-2 leading-tight",
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("h2", {
+                className: "text-xl font-black text-gray-900 mb-1 leading-tight tracking-tight",
                 children: viewProduct.name
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-                className: "text-3xl font-bold text-orange-500",
-                children: ["\u20B1", Number(currentPrice).toFixed(2)]
+              }), viewProduct.description && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
+                className: "text-xs text-gray-500 leading-relaxed mb-2",
+                children: viewProduct.description
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
               className: "mb-4",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
-                variant: isOutOfStock ? "destructive" : "success",
-                className: "text-sm px-3 py-1",
-                children: isOutOfStock ? 'Out of Stock' : "".concat(currentStock, " units in stock")
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+                className: "inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold ".concat(isOutOfStock ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'),
+                children: isOutOfStock ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.Fragment, {
+                  children: "Out of Stock"
+                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.Fragment, {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                    className: "w-3.5 h-3.5"
+                  }), "In Stock ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("span", {
+                    className: "text-gray-900 ml-1",
+                    children: [currentStock, " units"]
+                  })]
+                })
               })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-              className: "space-y-2 mb-4 text-sm",
-              children: [viewProduct.barcode && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-                className: "flex items-center gap-2",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("span", {
-                  className: "text-muted-foreground font-semibold",
-                  children: "Barcode:"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("span", {
-                  className: "font-mono text-foreground",
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+              className: "mb-4 bg-[#FFF9F6] border border-[#FFE7DB] rounded-xl p-4 relative overflow-hidden",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+                className: "flex items-baseline gap-2",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("span", {
+                  className: "text-3xl font-black text-[#FF5A1F]",
+                  children: ["\u20B1", Number(currentPrice).toFixed(2)]
+                })
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+              className: "grid grid-cols-1 gap-2 mb-4 p-3 bg-gray-50 rounded-lg",
+              children: [viewProduct.barcode && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+                className: "flex justify-between items-center text-xs",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("span", {
+                  className: "text-gray-400 font-bold uppercase tracking-wider",
+                  children: "Barcode"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("span", {
+                  className: "font-mono font-bold text-gray-700",
                   children: viewProduct.barcode
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-                className: "flex items-center gap-2",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("span", {
-                  className: "text-muted-foreground font-semibold",
-                  children: "MIN ORDER QTY:"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("span", {
-                  className: "text-foreground",
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+                className: "flex justify-between items-center text-xs",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("span", {
+                  className: "text-gray-400 font-bold uppercase tracking-wider",
+                  children: "Min Order"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("span", {
+                  className: "font-bold text-gray-700",
                   children: [viewProduct.min_order_qty || 1, " units"]
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-                className: "flex items-center gap-2",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("span", {
-                  className: "text-muted-foreground font-semibold",
-                  children: "SUPPLIER:"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("span", {
-                  className: "text-foreground",
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+                className: "flex justify-between items-center text-xs text-right",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("span", {
+                  className: "text-gray-400 font-bold uppercase tracking-wider",
+                  children: "Supplier"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("span", {
+                  className: "font-bold text-gray-700",
                   children: (_viewProduct$supplier = viewProduct.supplier) === null || _viewProduct$supplier === void 0 ? void 0 : _viewProduct$supplier.name
                 })]
               })]
-            }), viewProduct.description && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+            }), hasVariants && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
               className: "mb-4",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                className: "text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2",
-                children: "DESCRIPTION"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
-                className: "text-sm text-foreground leading-relaxed",
-                children: viewProduct.description
-              })]
-            }), hasVariants && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-              className: "mb-4",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                className: "text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+                className: "text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2",
                 children: "SELECT OPTION"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
                 className: "flex flex-wrap gap-2",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("button", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("button", {
                   type: "button",
                   onClick: function onClick() {
                     setSelectedVariant(null);
                     setOrderQty(viewProduct.min_order_qty || 1);
                     setActiveGalleryImage(null);
                   },
-                  className: "px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ".concat(selectedVariant === null ? 'bg-white text-orange-500 border-orange-500 shadow-sm' : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'),
+                  className: "px-4 py-1.5 rounded-lg border-2 text-xs font-bold transition-all ".concat(selectedVariant === null ? 'bg-[#FF5A1F] text-white border-[#FF5A1F] shadow-md shadow-orange-200 scale-105' : 'bg-white text-gray-700 border-gray-100 hover:border-orange-200'),
                   children: "Regular"
                 }), variants.map(function (v) {
                   var isSelected = (selectedVariant === null || selectedVariant === void 0 ? void 0 : selectedVariant.id) === v.id;
                   var isOOS = v.stock <= 0;
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("button", {
+                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("button", {
                     type: "button",
                     disabled: isOOS,
                     onClick: function onClick() {
@@ -37716,69 +37899,59 @@ function SupplierCatalog() {
                       setOrderQty(viewProduct.min_order_qty || 1);
                       setActiveGalleryImage(null);
                     },
-                    className: "px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ".concat(isOOS ? 'opacity-40 cursor-not-allowed bg-secondary/50 border-transparent text-muted-foreground' : isSelected ? 'bg-white text-orange-500 border-orange-500 shadow-sm' : 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600'),
+                    className: "px-4 py-1.5 rounded-lg border-2 text-xs font-bold transition-all ".concat(isOOS ? 'opacity-40 cursor-not-allowed bg-gray-100 border-transparent text-gray-400' : isSelected ? 'bg-[#FF5A1F] text-white border-[#FF5A1F] shadow-md shadow-orange-200 scale-105' : 'bg-white text-gray-700 border-gray-100 hover:border-orange-200'),
                     children: getVariantLabel(v)
                   }, v.id);
                 })]
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-              className: "mt-auto pt-4 border-t border-border",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-                className: "flex items-center gap-3 mb-3",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-                  className: "flex items-center border-2 border-gray-300 rounded-lg overflow-hidden",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("button", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+              className: "mb-6",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+                className: "text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2",
+                children: "QUANTITY"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+                className: "flex items-center gap-3",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+                  className: "flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm ring-1 ring-black/5",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("button", {
                     onClick: function onClick() {
                       return setOrderQty(function (q) {
                         return Math.max(viewProduct.min_order_qty || 1, q - 1);
                       });
                     },
-                    className: "px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold",
-                    children: "\u2212"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("input", {
-                    type: "number",
-                    value: orderQty,
-                    onChange: function onChange(e) {
-                      var val = parseInt(e.target.value) || 1;
-                      var minQty = viewProduct.min_order_qty || 1;
-                      var maxQty = currentStock;
-                      setOrderQty(Math.max(minQty, Math.min(maxQty, val)));
-                    },
-                    min: viewProduct.min_order_qty || 1,
-                    max: currentStock,
-                    className: "w-16 text-center border-x-2 border-gray-300 py-2 font-bold text-lg focus:outline-none"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("button", {
+                    className: "w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-500",
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
+                      className: "w-3.5 h-3.5"
+                    })
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+                    className: "w-10 text-center font-bold text-gray-900 border-x border-gray-100 text-sm",
+                    children: orderQty
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("button", {
                     onClick: function onClick() {
                       return setOrderQty(function (q) {
                         return Math.min(currentStock, q + 1);
                       });
                     },
-                    className: "px-3 py-2 hover:bg-secondary transition-colors text-lg font-bold",
+                    className: "w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-500",
                     disabled: orderQty >= currentStock,
-                    children: "+"
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
+                      className: "w-3.5 h-3.5"
+                    })
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("span", {
-                  className: "text-sm text-muted-foreground",
-                  children: [currentStock, " unit", currentStock !== 1 ? 's' : '', " in stock"]
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
-                className: "w-full h-12 text-base font-bold bg-orange-500 hover:bg-orange-600 text-white",
+                })
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+              className: "mt-auto",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+                className: "w-full h-12 rounded-xl text-base font-black bg-[#FF5A1F] hover:bg-[#e44e18] text-white shadow-lg shadow-orange-100 transition-all flex items-center justify-center gap-3 active:scale-95",
                 onClick: handleOrder,
                 disabled: actionLoading || isOutOfStock,
-                children: ["\uD83D\uDED2 ", actionLoading ? 'Sending...' : "Order (\u20B1".concat(subtotal.toFixed(2), ")")]
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-              className: "flex justify-between items-center mt-4 pt-4 border-t border-border",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
-                variant: "ghost",
-                onClick: function onClick() {
-                  return setViewProduct(null);
-                },
-                children: "Cancel"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
-                variant: "outline",
-                children: "View Full Specs"
-              })]
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
+                  className: "w-5 h-5"
+                }), actionLoading ? 'PROCESSING...' : isOutOfStock ? 'OUT OF STOCK' : "Order \u2014 \u20B1".concat(subtotal.toLocaleString(undefined, {
+                  minimumFractionDigits: 2
+                }))]
+              })
             })]
           })]
         });
@@ -39591,16 +39764,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_ui_select__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/components/ui/select */ "./resources/js/components/ui/select.jsx");
 /* harmony import */ var _components_ui_RatingStars__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/components/ui/RatingStars */ "./resources/js/components/ui/RatingStars.jsx");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/circle-check-big.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/funnel.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/message-square.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/star.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/thumbs-up.js");
-/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
-/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_14__);
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/message-square.js");
+/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
+/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -39632,7 +39806,7 @@ var ProductReviewList = function ProductReviewList(_ref) {
   var productId = _ref.productId,
     variantId = _ref.variantId,
     productVariants = _ref.productVariants;
-  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_12__.useSilentRefresh)('product_reviews'),
+  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_9__.useSilentRefresh)('product_reviews'),
     refreshTrigger = _useSilentRefresh.refreshTrigger;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState2 = _slicedToArray(_useState, 2),
@@ -39658,9 +39832,18 @@ var ProductReviewList = function ProductReviewList(_ref) {
     _useState10 = _slicedToArray(_useState1, 2),
     selectedVariant = _useState10[0],
     setSelectedVariant = _useState10[1];
+  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1),
+    _useState12 = _slicedToArray(_useState11, 2),
+    currentPage = _useState12[0],
+    setCurrentPage = _useState12[1];
+  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    _useState14 = _slicedToArray(_useState13, 2),
+    totalCount = _useState14[0],
+    setTotalCount = _useState14[1];
+  var perPage = 10;
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     fetchReviews(reviews.length > 0);
-  }, [productId, selectedVariant, sortBy, refreshTrigger]);
+  }, [productId, selectedVariant, sortBy, refreshTrigger, currentPage]);
   var fetchReviews = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var silent,
@@ -39668,6 +39851,7 @@ var ProductReviewList = function ProductReviewList(_ref) {
         response,
         data,
         _data$data$reviews,
+        _data$data$reviews2,
         _args = arguments,
         _t;
       return _regenerator().w(function (_context) {
@@ -39676,14 +39860,15 @@ var ProductReviewList = function ProductReviewList(_ref) {
             silent = _args.length > 0 && _args[0] !== undefined ? _args[0] : false;
             if (!silent) setLoading(true);
             _context.p = 1;
-            url = selectedVariant && selectedVariant !== 'all' ? "/products/".concat(productId, "/reviews?variant=").concat(selectedVariant, "&sort=").concat(sortBy) : "/products/".concat(productId, "/reviews?sort=").concat(sortBy);
+            url = "/products/".concat(productId, "/reviews?sort=").concat(sortBy, "&page=").concat(currentPage, "&per_page=").concat(perPage).concat(selectedVariant && selectedVariant !== 'all' ? "&variant=".concat(selectedVariant) : '');
             _context.n = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_14___default().get(url);
+            return axios__WEBPACK_IMPORTED_MODULE_11___default().get(url);
           case 2:
             response = _context.v;
             data = response.data;
             if (data.status === 'success' || data.data) {
               setReviews(((_data$data$reviews = data.data.reviews) === null || _data$data$reviews === void 0 ? void 0 : _data$data$reviews.data) || []);
+              setTotalCount(((_data$data$reviews2 = data.data.reviews) === null || _data$data$reviews2 === void 0 ? void 0 : _data$data$reviews2.total) || 0);
               setSummary(data.data.summary);
             }
             _context.n = 4;
@@ -39691,6 +39876,7 @@ var ProductReviewList = function ProductReviewList(_ref) {
           case 3:
             _context.p = 3;
             _t = _context.v;
+            console.error('Error fetching reviews:', _t);
           case 4:
             _context.p = 4;
             if (!silent) setLoading(false);
@@ -39712,7 +39898,7 @@ var ProductReviewList = function ProductReviewList(_ref) {
           case 0:
             _context2.p = 0;
             _context2.n = 1;
-            return axios__WEBPACK_IMPORTED_MODULE_14___default().post("/reviews/".concat(reviewId, "/helpful"), {
+            return axios__WEBPACK_IMPORTED_MODULE_11___default().post("/reviews/".concat(reviewId, "/helpful"), {
               is_helpful: isHelpful
             }, {
               headers: {
@@ -39723,7 +39909,7 @@ var ProductReviewList = function ProductReviewList(_ref) {
             response = _context2.v;
             if (response.data.status === 'success' || response.data.data) {
               data = response.data;
-              (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_13__.markStale)('product_reviews');
+              (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_10__.markStale)('product_reviews');
               setHelpfulVotes(function (prev) {
                 return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, reviewId, data.data.helpful_count));
               });
@@ -39746,213 +39932,246 @@ var ProductReviewList = function ProductReviewList(_ref) {
   var formatDate = function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'short',
+      month: 'long',
       day: 'numeric'
     });
   };
-  var renderRatingBreakdown = function renderRatingBreakdown() {
-    if (!summary) return null;
-    var total = summary.total_reviews;
-    var percentages = {};
-    for (var i = 5; i >= 1; i--) {
-      var count = summary.rating_breakdown[i] || 0;
-      percentages[i] = total > 0 ? count / total * 100 : 0;
-    }
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-      className: "space-y-2",
-      children: [5, 4, 3, 2, 1].map(function (rating) {
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-          className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
-            className: "text-sm w-3",
-            children: rating
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
-            className: "w-4 h-4 text-yellow-400 fill-yellow-400"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-            className: "flex-1 bg-gray-200 rounded-full h-2",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-              className: "bg-yellow-400 h-2 rounded-full",
-              style: {
-                width: "".concat(percentages[rating], "%")
-              }
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
-            className: "text-sm text-gray-600 w-8 text-right",
-            children: summary.rating_breakdown[rating] || 0
-          })]
-        }, rating);
-      })
-    });
-  };
   if (loading) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_1__.Card, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_1__.CardContent, {
-        className: "p-6",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-          className: "animate-pulse space-y-4",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-            className: "h-4 bg-gray-200 rounded w-1/4"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-            className: "h-3 bg-gray-200 rounded w-full"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-            className: "h-3 bg-gray-200 rounded w-full"
-          })]
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_1__.Card, {
+      className: "border-none shadow-none bg-transparent",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_1__.CardContent, {
+        className: "p-0 space-y-8",
+        children: [1, 2, 3].map(function (i) {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+            className: "animate-pulse bg-white p-8 rounded-[2rem] border border-gray-100 space-y-4",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+              className: "flex gap-4",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+                className: "w-12 h-12 bg-gray-100 rounded-full"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+                className: "flex-1 space-y-2",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+                  className: "h-4 bg-gray-100 rounded w-1/4"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+                  className: "h-3 bg-gray-100 rounded w-1/3"
+                })]
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+              className: "h-4 bg-gray-100 rounded w-full"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+              className: "h-4 bg-gray-100 rounded w-3/4"
+            })]
+          }, i);
         })
       })
     });
   }
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-    className: "space-y-6",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-      className: "flex items-center justify-between",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("h3", {
-        className: "text-lg font-semibold",
-        children: "Reviews"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-        className: "flex items-center gap-2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
-          className: "w-4 h-4 text-gray-500"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("select", {
-          value: sortBy,
-          onChange: function onChange(e) {
-            return setSortBy(e.target.value);
-          },
-          className: "border border-gray-300 rounded px-3 py-1 text-sm",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("option", {
-            value: "recent",
-            children: "Most Recent"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("option", {
-            value: "helpful",
-            children: "Most Helpful"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("option", {
-            value: "rating_high",
-            children: "Highest Rating"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("option", {
-            value: "rating_low",
-            children: "Lowest Rating"
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+    className: "space-y-10 mb-20",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+      className: "flex flex-wrap items-center justify-between gap-6 pb-6 border-b border-gray-100",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+        className: "flex items-center gap-6",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+          className: "flex items-center gap-3",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("span", {
+            className: "text-[10px] font-black uppercase tracking-[0.2em] text-gray-400",
+            children: "Variant"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.Select, {
+            value: selectedVariant,
+            onValueChange: function onValueChange(val) {
+              setSelectedVariant(val);
+              setCurrentPage(1);
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectTrigger, {
+              className: "w-48 h-11 rounded-xl bg-gray-50 border-gray-100 text-xs font-bold ring-offset-white focus:ring-1 focus:ring-orange-200",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectValue, {
+                placeholder: "All Variants"
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectContent, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
+                value: "all",
+                children: "All Reviews"
+              }), productVariants.map(function (variant) {
+                var _variant$size_value, _variant$color_value, _variant$weight_value;
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
+                  value: variant.id.toString(),
+                  children: [((_variant$size_value = variant.size_value) === null || _variant$size_value === void 0 ? void 0 : _variant$size_value.label) || '', (_variant$color_value = variant.color_value) !== null && _variant$color_value !== void 0 && _variant$color_value.label ? " ".concat(variant.color_value.label) : '', (_variant$weight_value = variant.weight_value) !== null && _variant$weight_value !== void 0 && _variant$weight_value.label ? " ".concat(variant.weight_value.label) : '']
+                }, variant.id);
+              })]
+            })]
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+          className: "flex items-center gap-3",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("span", {
+            className: "text-[10px] font-black uppercase tracking-[0.2em] text-gray-400",
+            children: "Sort"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.Select, {
+            value: sortBy,
+            onValueChange: function onValueChange(val) {
+              setSortBy(val);
+              setCurrentPage(1);
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectTrigger, {
+              className: "w-48 h-11 rounded-xl bg-gray-50 border-gray-100 text-xs font-bold ring-offset-white focus:ring-1 focus:ring-orange-200",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectValue, {
+                placeholder: "Most Recent"
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectContent, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
+                value: "recent",
+                children: "Most Recent"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
+                value: "helpful",
+                children: "Most Helpful"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
+                value: "rating_high",
+                children: "Highest Rating"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
+                value: "rating_low",
+                children: "Lowest Rating"
+              })]
+            })]
           })]
         })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+        className: "text-[11px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-5 py-2 rounded-full border border-gray-100",
+        children: [totalCount, " total voices shared"]
       })]
-    }), productVariants && productVariants.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-      className: "flex items-center gap-4",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
-        className: "text-sm font-medium text-gray-700",
-        children: "Filter by variant:"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.Select, {
-        value: selectedVariant,
-        onValueChange: setSelectedVariant,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectTrigger, {
-          className: "w-64",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectValue, {
-            placeholder: "Select variant"
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectContent, {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
-            value: "all",
-            children: "All Reviews"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
-            value: "base",
-            children: "Base Product Only"
-          }), productVariants.map(function (variant) {
-            var _variant$size_value, _variant$color_value, _variant$weight_value;
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_5__.SelectItem, {
-              value: variant.id.toString(),
-              children: [((_variant$size_value = variant.size_value) === null || _variant$size_value === void 0 ? void 0 : _variant$size_value.label) || '', (_variant$color_value = variant.color_value) !== null && _variant$color_value !== void 0 && _variant$color_value.label ? " - ".concat(variant.color_value.label) : '', (_variant$weight_value = variant.weight_value) !== null && _variant$weight_value !== void 0 && _variant$weight_value.label ? " - ".concat(variant.weight_value.label) : '']
-            }, variant.id);
-          })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+      className: "grid grid-cols-1 gap-8",
+      children: !reviews || reviews.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+        className: "py-32 text-center bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
+          className: "w-16 h-16 text-gray-200 mx-auto mb-6"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("h4", {
+          className: "text-xl font-black text-gray-400 uppercase tracking-[0.2em]",
+          children: "Silence from the community"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("p", {
+          className: "text-sm text-gray-400 mt-2",
+          children: "Be the first to share your thoughts on this product."
         })]
-      })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-      className: "space-y-4",
-      children: !reviews || reviews.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_1__.Card, {
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_1__.CardContent, {
-          className: "p-6 text-center",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
-            className: "w-12 h-12 text-gray-400 mx-auto mb-4"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("p", {
-            className: "text-gray-600",
-            children: "No reviews yet. Be the first to review this product!"
-          })]
-        })
-      }) : (reviews || []).map(function (review) {
-        var _review$customer, _review$customer2, _review$product_varia, _review$product_varia2, _review$product_varia3, _review$product_varia4, _review$product_varia5, _review$product_varia6;
-        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_1__.Card, {
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_1__.CardContent, {
-            className: "p-6",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-              className: "flex items-start justify-between mb-4",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-                className: "flex items-start gap-3",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-                  className: "w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("span", {
-                    className: "text-orange-600 font-semibold text-sm",
-                    children: ((_review$customer = review.customer) === null || _review$customer === void 0 || (_review$customer = _review$customer.name) === null || _review$customer === void 0 || (_review$customer = _review$customer.charAt(0)) === null || _review$customer === void 0 ? void 0 : _review$customer.toUpperCase()) || 'U'
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-                  className: "flex-1",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("p", {
-                    className: "text-sm text-gray-600",
-                    children: [((_review$customer2 = review.customer) === null || _review$customer2 === void 0 ? void 0 : _review$customer2.name) || 'Anonymous Customer', " on ", formatDate(review.created_at)]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
-                    className: "flex items-center gap-2 mb-2",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_RatingStars__WEBPACK_IMPORTED_MODULE_6__["default"], {
-                      rating: review.rating,
-                      size: "sm"
-                    }), review.is_verified_purchase && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_3__.Badge, {
-                      variant: "secondary",
-                      className: "text-xs",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
-                        className: "w-3 h-3 mr-1"
-                      }), "Verified Purchase"]
-                    }), review.product_variant && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_3__.Badge, {
-                      variant: "outline",
-                      className: "text-xs",
-                      children: [((_review$product_varia = review.product_variant.size_value) === null || _review$product_varia === void 0 ? void 0 : _review$product_varia.label) || '', (_review$product_varia2 = review.product_variant.color_value) !== null && _review$product_varia2 !== void 0 && _review$product_varia2.label ? " - ".concat(review.product_variant.color_value.label) : '', (_review$product_varia3 = review.product_variant.weight_value) !== null && _review$product_varia3 !== void 0 && _review$product_varia3.label ? " - ".concat(review.product_variant.weight_value.label) : '']
-                    })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("h4", {
-                    className: "font-semibold text-gray-900",
-                    children: review.product_variant ? "".concat(((_review$product_varia4 = review.product_variant.size_value) === null || _review$product_varia4 === void 0 ? void 0 : _review$product_varia4.label) || '').concat((_review$product_varia5 = review.product_variant.color_value) !== null && _review$product_varia5 !== void 0 && _review$product_varia5.label ? " ".concat(review.product_variant.color_value.label) : '').concat((_review$product_varia6 = review.product_variant.weight_value) !== null && _review$product_varia6 !== void 0 && _review$product_varia6.label ? " ".concat(review.product_variant.weight_value.label) : '', " variant") : 'Product default'
+      }) : reviews.map(function (review) {
+        var _review$customer, _review$customer2, _review$product_varia, _review$product_varia2, _review$product_varia3;
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+          className: "group bg-white p-8 lg:p-10 rounded-[2.5rem] border border-gray-100 hover:border-orange-100 hover:shadow-2xl hover:shadow-orange-500/5 transition-all duration-300",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+            className: "flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+              className: "flex items-start gap-5",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+                className: "w-14 h-14 rounded-full flex items-center justify-center text-white text-lg font-black shadow-lg\n                    ".concat(['bg-orange-500', 'bg-blue-500', 'bg-indigo-500', 'bg-rose-500', 'bg-emerald-500'][review.id % 5], "\n                  "),
+                children: ((_review$customer = review.customer) === null || _review$customer === void 0 || (_review$customer = _review$customer.name) === null || _review$customer === void 0 || (_review$customer = _review$customer.charAt(0)) === null || _review$customer === void 0 ? void 0 : _review$customer.toUpperCase()) || 'U'
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+                  className: "flex items-center gap-3 mb-1",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("h4", {
+                    className: "text-lg font-black text-gray-900 tracking-tight",
+                    children: ((_review$customer2 = review.customer) === null || _review$customer2 === void 0 ? void 0 : _review$customer2.name) || 'Community Member'
+                  }), review.is_verified_purchase && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+                    className: "flex items-center gap-1 text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100",
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
+                      className: "w-3 h-3"
+                    }), "Verified"]
+                  })]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+                  className: "flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-bold text-gray-400",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("span", {
+                    children: formatDate(review.created_at)
+                  }), review.product_variant && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("span", {
+                    className: "flex items-center gap-1.5 opacity-60",
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+                      className: "w-1 h-1 rounded-full bg-gray-300"
+                    }), ((_review$product_varia = review.product_variant.size_value) === null || _review$product_varia === void 0 ? void 0 : _review$product_varia.label) || '', (_review$product_varia2 = review.product_variant.color_value) !== null && _review$product_varia2 !== void 0 && _review$product_varia2.label ? " \xB7 ".concat(review.product_variant.color_value.label) : '', (_review$product_varia3 = review.product_variant.weight_value) !== null && _review$product_varia3 !== void 0 && _review$product_varia3.label ? " \xB7 ".concat(review.product_variant.weight_value.label) : '']
                   })]
                 })]
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+              className: "flex items-center gap-0.5 scale-125 md:pt-2",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_components_ui_RatingStars__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                rating: review.rating,
+                size: "sm"
               })
-            }), review.review_text && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("p", {
-              className: "text-gray-700 mb-4 leading-relaxed",
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+            className: "pl-0 md:pl-[4.5rem]",
+            children: [review.review_title && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("h5", {
+              className: "text-xl font-black text-gray-900 mb-3 tracking-tight",
+              children: review.review_title
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("p", {
+              className: "text-lg text-gray-600 leading-relaxed font-medium mb-8 max-w-5xl",
               children: review.review_text
-            }), review.images && review.images.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-              className: "flex gap-2 mb-4",
-              children: review.images.map(function (image, index) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("img", {
-                  src: "/storage/".concat(image),
-                  alt: "Review image ".concat(index + 1),
-                  className: "w-20 h-20 object-cover rounded border"
-                }, index);
+            }), review.images && review.images.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+              className: "flex flex-wrap gap-4 mb-8",
+              children: review.images.map(function (image, idx) {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+                  className: "group/img relative w-24 h-24 rounded-2xl overflow-hidden border border-gray-100 hover:border-orange-200 transition-colors cursor-zoom-in",
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("img", {
+                    src: "/storage/".concat(image),
+                    className: "w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
+                  })
+                }, idx);
               })
-            }), review.admin_response && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-              className: "bg-blue-50 border border-blue-200 rounded p-3 mb-4",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("p", {
-                className: "text-sm text-blue-800",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("strong", {
-                  children: "Response:"
-                }), " ", review.admin_response]
-              })
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
-              className: "flex items-center gap-4",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_2__.Button, {
-                variant: "outline",
-                size: "sm",
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+              className: "flex items-center gap-3",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("span", {
+                className: "text-[10px] font-black text-gray-300 uppercase tracking-widest",
+                children: "Helpful?"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("button", {
                 onClick: function onClick() {
                   return handleHelpful(review.id, true);
                 },
-                className: "flex items-center gap-1",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], {
-                  className: "w-4 h-4"
-                }), "Helpful (", helpfulVotes[review.id] || review.helpful_count || 0, ")"]
-              })
+                className: "flex items-center gap-2.5 bg-gray-50 border border-gray-100 hover:border-orange-100 hover:bg-orange-50 text-gray-600 hover:text-orange-600 py-2 px-4 rounded-xl transition-all font-black text-[11px] active:scale-95 group/btn",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("span", {
+                  className: "group-hover/btn:scale-125 transition-transform",
+                  children: "\uD83D\uDC4D"
+                }), helpfulVotes[review.id] || review.helpful_count || 0]
+              })]
+            }), review.admin_response && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+              className: "mt-8 p-6 bg-blue-50/50 border border-blue-100 rounded-3xl",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+                className: "text-[9px] font-black uppercase tracking-[0.2em] text-blue-400 mb-2",
+                children: "Team Clarification"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("p", {
+                className: "text-sm text-blue-800 leading-relaxed italic",
+                children: ["\u201C", review.admin_response, "\u201D"]
+              })]
             })]
-          })
+          })]
         }, review.id);
       })
+    }), totalCount > perPage && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+      className: "flex items-center justify-center gap-3 py-10 border-t border-gray-100",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("button", {
+        disabled: currentPage === 1,
+        onClick: function onClick() {
+          return setCurrentPage(function (prev) {
+            return prev - 1;
+          });
+        },
+        className: "w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all",
+        children: "\u2190"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
+        className: "flex items-center gap-2",
+        children: _toConsumableArray(Array(Math.ceil(totalCount / perPage))).map(function (_, i) {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("button", {
+            onClick: function onClick() {
+              return setCurrentPage(i + 1);
+            },
+            className: "w-12 h-12 rounded-full text-xs font-black transition-all\n                  ".concat(currentPage === i + 1 ? 'bg-gray-900 text-white shadow-xl shadow-gray-200' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-900', "\n                "),
+            children: i + 1
+          }, i + 1);
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("button", {
+        disabled: currentPage === Math.ceil(totalCount / perPage),
+        onClick: function onClick() {
+          return setCurrentPage(function (prev) {
+            return prev + 1;
+          });
+        },
+        className: "w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all",
+        children: "\u2192"
+      })]
     })]
   });
 };
@@ -43703,7 +43922,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
-// Admin: Supplier Catalog
+// Admin: Supplier Available Products
 
 
 // Admin: Returns
@@ -43819,6 +44038,11 @@ function AppRouter() {
           tab: "sales"
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        path: "/inventory/requests",
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_17__["default"], {
+          tab: "requests"
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/inventory/purchase",
         element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_17__["default"], {
           tab: "purchase"
@@ -43898,8 +44122,15 @@ function AppRouter() {
         path: "/supplier/products",
         element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(_components_supplier_SupplierProducts__WEBPACK_IMPORTED_MODULE_37__["default"], {})
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        path: "/supplier/requests",
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(_components_supplier_SupplierOrders__WEBPACK_IMPORTED_MODULE_36__["default"], {
+          mode: "requests"
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier/orders",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(_components_supplier_SupplierOrders__WEBPACK_IMPORTED_MODULE_36__["default"], {})
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(_components_supplier_SupplierOrders__WEBPACK_IMPORTED_MODULE_36__["default"], {
+          mode: "completed"
+        })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier/settings",
         element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_43__.jsx)(_components_supplier_SupplierSettings__WEBPACK_IMPORTED_MODULE_38__["default"], {})
@@ -60746,6 +60977,47 @@ const Eye = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("ey
 
 /***/ },
 
+/***/ "./node_modules/lucide-react/dist/esm/icons/file-check.js"
+/*!****************************************************************!*\
+  !*** ./node_modules/lucide-react/dist/esm/icons/file-check.js ***!
+  \****************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   __iconNode: () => (/* binding */ __iconNode),
+/* harmony export */   "default": () => (/* binding */ FileCheck)
+/* harmony export */ });
+/* harmony import */ var _createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../createLucideIcon.js */ "./node_modules/lucide-react/dist/esm/createLucideIcon.js");
+/**
+ * @license lucide-react v0.577.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+
+const __iconNode = [
+  [
+    "path",
+    {
+      d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
+      key: "1oefj6"
+    }
+  ],
+  ["path", { d: "M14 2v5a1 1 0 0 0 1 1h5", key: "wfsgrz" }],
+  ["path", { d: "m9 15 2 2 4-4", key: "1grp1n" }]
+];
+const FileCheck = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("file-check", __iconNode);
+
+
+//# sourceMappingURL=file-check.js.map
+
+
+/***/ },
+
 /***/ "./node_modules/lucide-react/dist/esm/icons/file-text.js"
 /*!***************************************************************!*\
   !*** ./node_modules/lucide-react/dist/esm/icons/file-text.js ***!
@@ -61016,6 +61288,59 @@ const Info = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("i
 
 
 //# sourceMappingURL=info.js.map
+
+
+/***/ },
+
+/***/ "./node_modules/lucide-react/dist/esm/icons/layers.js"
+/*!************************************************************!*\
+  !*** ./node_modules/lucide-react/dist/esm/icons/layers.js ***!
+  \************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   __iconNode: () => (/* binding */ __iconNode),
+/* harmony export */   "default": () => (/* binding */ Layers)
+/* harmony export */ });
+/* harmony import */ var _createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../createLucideIcon.js */ "./node_modules/lucide-react/dist/esm/createLucideIcon.js");
+/**
+ * @license lucide-react v0.577.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+
+const __iconNode = [
+  [
+    "path",
+    {
+      d: "M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z",
+      key: "zw3jo"
+    }
+  ],
+  [
+    "path",
+    {
+      d: "M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12",
+      key: "1wduqc"
+    }
+  ],
+  [
+    "path",
+    {
+      d: "M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17",
+      key: "kqbvx6"
+    }
+  ]
+];
+const Layers = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("layers", __iconNode);
+
+
+//# sourceMappingURL=layers.js.map
 
 
 /***/ },
@@ -61757,54 +62082,6 @@ const RefreshCw = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"
 
 /***/ },
 
-/***/ "./node_modules/lucide-react/dist/esm/icons/rocket.js"
-/*!************************************************************!*\
-  !*** ./node_modules/lucide-react/dist/esm/icons/rocket.js ***!
-  \************************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   __iconNode: () => (/* binding */ __iconNode),
-/* harmony export */   "default": () => (/* binding */ Rocket)
-/* harmony export */ });
-/* harmony import */ var _createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../createLucideIcon.js */ "./node_modules/lucide-react/dist/esm/createLucideIcon.js");
-/**
- * @license lucide-react v0.577.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-
-const __iconNode = [
-  ["path", { d: "M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5", key: "qeys4" }],
-  [
-    "path",
-    {
-      d: "M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09",
-      key: "u4xsad"
-    }
-  ],
-  [
-    "path",
-    {
-      d: "M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z",
-      key: "676m9"
-    }
-  ],
-  ["path", { d: "M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05", key: "92ym6u" }]
-];
-const Rocket = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("rocket", __iconNode);
-
-
-//# sourceMappingURL=rocket.js.map
-
-
-/***/ },
-
 /***/ "./node_modules/lucide-react/dist/esm/icons/rotate-ccw.js"
 /*!****************************************************************!*\
   !*** ./node_modules/lucide-react/dist/esm/icons/rotate-ccw.js ***!
@@ -62349,46 +62626,6 @@ const Target = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])(
 
 
 //# sourceMappingURL=target.js.map
-
-
-/***/ },
-
-/***/ "./node_modules/lucide-react/dist/esm/icons/thumbs-up.js"
-/*!***************************************************************!*\
-  !*** ./node_modules/lucide-react/dist/esm/icons/thumbs-up.js ***!
-  \***************************************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   __iconNode: () => (/* binding */ __iconNode),
-/* harmony export */   "default": () => (/* binding */ ThumbsUp)
-/* harmony export */ });
-/* harmony import */ var _createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../createLucideIcon.js */ "./node_modules/lucide-react/dist/esm/createLucideIcon.js");
-/**
- * @license lucide-react v0.577.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-
-
-
-const __iconNode = [
-  [
-    "path",
-    {
-      d: "M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z",
-      key: "emmmcr"
-    }
-  ],
-  ["path", { d: "M7 10v12", key: "1qc93n" }]
-];
-const ThumbsUp = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("thumbs-up", __iconNode);
-
-
-//# sourceMappingURL=thumbs-up.js.map
 
 
 /***/ },

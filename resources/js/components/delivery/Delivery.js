@@ -17,7 +17,8 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale } from '../../store/dataStore';
 
 const STATUS_CONFIG = {
-    pending: { label: 'Pending', color: '#F59E0B', bgColor: '#FEF3C7' },
+    waiting: { label: 'Waiting for Confirmation', color: '#6B7280', bgColor: '#F3F4F6' },
+    pending: { label: 'Ready for Pickup', color: '#F59E0B', bgColor: '#FEF3C7' },
     in_progress: { label: 'In Progress', color: '#3B82F6', bgColor: '#EFF6FF' },
     delivered: { label: 'Delivered', color: '#22C55E', bgColor: '#F0FDF4' },
     failed: { label: 'Failed', color: '#EF4444', bgColor: '#FEF2F2' }
@@ -332,21 +333,6 @@ export default function Delivery() {
                                                 <Button variant="ghost" size="sm" onClick={() => setViewDeliveryId(d.id)} className="h-7 px-2 gap-1">
                                                     <Eye className="h-3.5 w-3.5" /> View
                                                 </Button>
-                                                {d.status === 'pending' && d.rider_id && (
-                                                    <Button size="sm" onClick={() => handleStatus(d.id, 'in_progress')} className="h-7 px-2 gap-1">
-                                                        <Rocket className="h-3.5 w-3.5" /> Start
-                                                    </Button>
-                                                )}
-                                                {d.status === 'in_progress' && (
-                                                    <>
-                                                        <Button size="sm" onClick={() => handleStatus(d.id, 'delivered')} className="h-7 px-2 gap-1 bg-success hover:bg-success/90">
-                                                            <CheckCircle2 className="h-3.5 w-3.5" /> Delivered
-                                                        </Button>
-                                                        <Button variant="destructive" size="sm" onClick={() => showConfirm('Mark Failed', 'Mark as failed?', () => handleStatus(d.id, 'failed'), 'destructive')} className="h-7 px-2 gap-1">
-                                                            <XCircle className="h-3.5 w-3.5" /> Failed
-                                                        </Button>
-                                                    </>
-                                                )}
                                                 {d.status === 'pending' && (
                                                     <Button variant="destructive" size="sm" onClick={() => showConfirm('Delete Delivery', 'Are you sure you want to delete this delivery? Only pending deliveries can be deleted.', () => handleDeleteDelivery(d.id), 'destructive')} className="h-7 px-2">
                                                         <Trash2 className="h-3.5 w-3.5" />

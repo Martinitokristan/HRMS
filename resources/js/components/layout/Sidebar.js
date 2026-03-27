@@ -65,7 +65,7 @@ export default function Sidebar({ isOpen, onClose }) {
                             <span className="text-[13px] font-black text-white">H</span>
                         </div>
                         <span className="text-[17px] font-bold tracking-tight text-white">
-                            HRMS <span className="text-[#FF6B35]">Pro</span>
+                            HRMS
                         </span>
                     </div>
                     <span className="rounded-full bg-[#FF6B35] px-2 py-0.5 text-[10px] font-black text-white">v8</span>
@@ -81,7 +81,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     </NavItem>
                     <NavItem to="/delivery" icon={Truck}>Delivery</NavItem>
                     <NavItem to="/suppliers" icon={Handshake}>Suppliers</NavItem>
-                    <NavItem to="/supplier-catalog" icon={Store}>Supplier Catalog</NavItem>
+                    <NavItem to="/supplier-catalog" icon={Store}>Supplier Available Products</NavItem>
                     <NavItem to="/returns" icon={RotateCcw}>Returns</NavItem>
 
                     <SectionLabel>Analytics</SectionLabel>

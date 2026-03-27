@@ -34,7 +34,7 @@ export default function SupplierLogin() {
             {/* Left - Form */}
             <div className="flex-1 flex items-center justify-center p-8 bg-white">
                 <div className="w-full max-w-md">
-                    <div className="text-xl font-black text-foreground mb-8 cursor-pointer" onClick={() => navigate('/')}>HRMS <span className="text-primary">Pro</span></div>
+                    <div className="text-xl font-black text-foreground mb-8 cursor-pointer" onClick={() => navigate('/')}>HRMS</div>
                     <h1 className="text-2xl font-extrabold text-foreground mb-1">Supplier Portal</h1>
                     <p className="text-muted-foreground mb-8">Secure access to the fulfillment network.</p>
 

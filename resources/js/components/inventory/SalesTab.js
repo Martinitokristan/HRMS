@@ -124,8 +124,8 @@ export default function SalesTab() {
     const getNextStatuses = (currentStatus) => {
         const flow = {
             pending: ['confirmed', 'cancelled'],
-            confirmed: ['out_for_delivery', 'cancelled'],
-            out_for_delivery: ['delivered'],
+            confirmed: ['cancelled'], // Restricted: Rider must handle the Out for Delivery step
+            out_for_delivery: [],     // Restricted: Rider must handle the Delivered step
             delivered: [],
             returned: [],
             cancelled: [],

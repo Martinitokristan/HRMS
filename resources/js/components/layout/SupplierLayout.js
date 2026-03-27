@@ -4,7 +4,7 @@ import { useSupplierAuth } from '../../context/SupplierAuthContext';
 import axios from 'axios';
 import {
     LayoutDashboard, Package, ShoppingCart, FolderOpen,
-    Settings, Bell, LogOut, Menu, ChevronDown, Plus, X
+    Settings, Bell, LogOut, Menu, ChevronDown, Plus, X, ClipboardList
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -38,6 +38,7 @@ export default function SupplierLayout() {
         const path = location.pathname;
         if (path === '/supplier/dashboard') return 'Dashboard';
         if (path.startsWith('/supplier/products')) return 'My Products';
+        if (path.startsWith('/supplier/requests')) return 'Request Orders';
         if (path.startsWith('/supplier/orders')) return 'Purchase Orders';
         if (path.startsWith('/supplier/settings')) return 'Settings';
         return 'Supplier Portal';
@@ -103,6 +104,7 @@ export default function SupplierLayout() {
                     <p className="px-5 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30">Main</p>
                     {navItem('/supplier/dashboard', LayoutDashboard, 'Dashboard')}
                     {navItem('/supplier/products', Package, 'My Products')}
+                    {navItem('/supplier/requests', ClipboardList, 'Request Orders')}
                     {navItem('/supplier/orders', ShoppingCart, 'Purchase Orders')}
 
                     {/* Category Accordion */}

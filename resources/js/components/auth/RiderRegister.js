@@ -209,7 +209,7 @@ export default function RiderRegister() {
             {/* Left - Form */}
             <div className="flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto">
                 <div className="w-full max-w-lg">
-                    <div className="text-xl font-black text-foreground mb-6 cursor-pointer" onClick={() => navigate('/')}>HRMS <span className="text-primary">Pro</span></div>
+                    <div className="text-xl font-black text-foreground mb-6 cursor-pointer" onClick={() => navigate('/')}>HRMS</div>
                     <h1 className="text-2xl font-extrabold text-foreground mb-1">Rider Fleet Application</h1>
                     <p className="text-muted-foreground mb-8">Apply to become a professional logistics partner.</p>
 

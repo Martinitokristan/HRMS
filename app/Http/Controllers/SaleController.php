@@ -172,7 +172,7 @@ class SaleController extends Controller
             Delivery::create([
                 'sale_id'         => $sale->id,
                 'tracking_number' => $trackingNumber,
-                'status'          => 'pending',
+                'status'          => 'waiting', // New status: Hidden from Riders until Admin confirms
                 'address'         => $data['address'] ?? 'TBD',
                 'latitude'        => $customerProfile->latitude ?? null,
                 'longitude'       => $customerProfile->longitude ?? null,
@@ -204,7 +204,7 @@ class SaleController extends Controller
         $sale = Sale::with(['delivery'])->findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:pending,confirmed,out_for_delivery,delivered,returned,cancelled',
+            'status' => 'required|in:pending,confirmed,cancelled',
         ]);
 
         $newStatus = $request->status;

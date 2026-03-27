@@ -183,7 +183,7 @@ export default function SupplierRegister() {
 
             <div className="flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto">
                 <div className="w-full max-w-lg">
-                    <div className="text-xl font-black text-foreground mb-6 cursor-pointer" onClick={() => navigate('/')}>HRMS <span className="text-primary">Pro</span></div>
+                    <div className="text-xl font-black text-foreground mb-6 cursor-pointer" onClick={() => navigate('/')}>HRMS</div>
                     <h1 className="text-2xl font-extrabold text-foreground mb-1">Supplier Partner Program</h1>
                     <p className="text-muted-foreground mb-8">
                         Create your supplier account to start providing products to HRMS.
@@ -268,7 +268,7 @@ export default function SupplierRegister() {
             <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-12 text-white" style={{ backgroundImage: 'linear-gradient(rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.9)), url("/images/hero-banner.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <div className="max-w-md text-center">
                     <div className="text-6xl mb-6">🏭</div>
-                    <h2 className="text-2xl font-extrabold mb-3">Grow with HRMS Pro</h2>
+                    <h2 className="text-2xl font-extrabold mb-3">Grow with HRMS</h2>
                     <p className="text-white/70 mb-8">Join thousands of hardware suppliers streamlining their fulfillment through our automated retail engine.</p>
                     <div className="space-y-3 text-left">
                         {[
