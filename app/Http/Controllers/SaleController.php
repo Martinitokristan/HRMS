@@ -47,7 +47,6 @@ class SaleController extends Controller
             'items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity'   => 'required|numeric|min:1',
             'items.*.price'      => 'nullable|numeric|min:0',
-            'items.*.variants'   => 'nullable|array',
             'payment_method'     => 'required|in:cod,cash,gcash,bank_transfer',
             'discount_pct'   => 'nullable|numeric|between:0,100',
             'notes'          => 'nullable|string',
@@ -105,7 +104,6 @@ class SaleController extends Controller
                     'quantity'   => $item['quantity'],
                     'unit_price' => $unitPrice,
                     'subtotal'   => $lineTotal,
-                    'variants'   => $item['variants'] ?? null,
                 ];
 
                 // Deduct stock
@@ -172,7 +170,7 @@ class SaleController extends Controller
             Delivery::create([
                 'sale_id'         => $sale->id,
                 'tracking_number' => $trackingNumber,
-                'status'          => 'waiting', // Admin confirmation required first
+                'status'          => 'waiting', // New status: Hidden from Riders until Admin confirms
                 'address'         => $data['address'] ?? 'TBD',
                 'latitude'        => $customerProfile->latitude ?? null,
                 'longitude'       => $customerProfile->longitude ?? null,

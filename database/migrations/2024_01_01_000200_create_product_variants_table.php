@@ -21,10 +21,10 @@ return new class extends Migration
             $table->foreignId('weight_value_id')->nullable()->constrained('variant_values')->onDelete('set null');
             $table->integer('stock')->default(0);
             $table->decimal('price_override', 10, 2)->nullable();
-            $table->string('barcode')->nullable(false); // Required barcode
+            $table->string('barcode')->nullable(); // Changed from barcode_suffix to barcode
             $table->decimal('sale_percentage', 5, 2)->default(0); // Added sale percentage field
-            $table->string('image_path')->nullable(false); // Required main image
-            $table->json('additional_images')->nullable(false); // Required additional images (exactly 2)
+            $table->string('image_path')->nullable();
+            $table->json('additional_images')->nullable();
             $table->timestamps();
         });
     }

@@ -779,17 +779,12 @@ export default function StockTab() {
                                     />
                                 </div>
                                 <div className="space-y-0.5">
-                                    <Label className="text-[9px] font-bold text-gray-500 uppercase">Barcode {isVariant ? '(From Supplier)' : ''}</Label>
+                                    <Label className="text-[9px] font-bold text-gray-500 uppercase">Barcode</Label>
                                     <Input
                                         value={transferForm.barcode}
                                         onChange={e => setTransferForm({ ...transferForm, barcode: e.target.value })}
                                         className="h-8 text-[13px] font-mono border-gray-200"
-                                        readOnly={isVariant}
-                                        placeholder={isVariant ? 'Supplier barcode' : ''}
                                     />
-                                    {isVariant && (
-                                        <p className="text-[8px] text-gray-500 mt-1">Variant barcode comes from supplier</p>
-                                    )}
                                 </div>
                                 <div className="space-y-0.5">
                                     <Label className="text-[9px] font-bold text-gray-500 uppercase">Category</Label>

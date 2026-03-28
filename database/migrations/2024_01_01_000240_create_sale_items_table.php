@@ -16,7 +16,6 @@ class CreateSaleItemsTable extends Migration
             $table->decimal('quantity', 10, 2);
             $table->decimal('unit_price', 10, 2);
             $table->decimal('subtotal', 12, 2);
-            $table->json('variants')->nullable();
         });
     }
 

@@ -15,13 +15,6 @@ class ProductVariant extends Model
         'additional_images' => 'array',
     ];
 
-    public static $rules = [
-        'barcode' => 'required|string|max:50',
-        'image_path' => 'required|string',
-        'additional_images' => 'required|array|size:2',
-        'additional_images.*' => 'required|string|distinct'
-    ];
-
     public function product()
     {
         return $this->belongsTo(Product::class);

@@ -7,11 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SaleItem extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['sale_id', 'product_id', 'product_variant_id', 'quantity', 'unit_price', 'subtotal', 'variants'];
-
-    protected $casts = [
-        'variants' => 'array',
-    ];
+    protected $fillable = ['sale_id', 'product_id', 'product_variant_id', 'quantity', 'unit_price', 'subtotal'];
 
     public function sale()
     {

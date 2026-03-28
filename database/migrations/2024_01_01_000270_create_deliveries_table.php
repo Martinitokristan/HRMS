@@ -13,7 +13,7 @@ class CreateDeliveriesTable extends Migration
             $table->foreignId('sale_id')->unique()->constrained('sales')->onDelete('cascade');
             $table->foreignId('rider_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('tracking_number', 20)->nullable()->unique();
-            $table->enum('status', ['waiting', 'pending', 'confirmed', 'in_progress', 'delivered', 'failed'])->default('waiting');
+            $table->enum('status', ['waiting', 'pending', 'assigned', 'confirmed', 'in_progress', 'delivered', 'failed'])->default('pending');
             $table->text('address');
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();

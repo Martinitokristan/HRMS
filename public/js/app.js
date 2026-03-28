@@ -21070,9 +21070,9 @@ function StockTab() {
                 })]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
                 className: "space-y-0.5",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
                   className: "text-[9px] font-bold text-gray-500 uppercase",
-                  children: ["Barcode ", isVariant ? '(From Supplier)' : '']
+                  children: "Barcode"
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
                   value: transferForm.barcode,
                   onChange: function onChange(e) {
@@ -21080,12 +21080,7 @@ function StockTab() {
                       barcode: e.target.value
                     }));
                   },
-                  className: "h-8 text-[13px] font-mono border-gray-200",
-                  readOnly: isVariant,
-                  placeholder: isVariant ? 'Supplier barcode' : ''
-                }), isVariant && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("p", {
-                  className: "text-[8px] text-gray-500 mt-1",
-                  children: "Variant barcode comes from supplier"
+                  className: "h-8 text-[13px] font-mono border-gray-200"
                 })]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
                 className: "space-y-0.5",
@@ -33634,10 +33629,7 @@ function SupplierProducts() {
         weight: '',
         stock: 0,
         price_override: '',
-        barcode: '',
-        // Required barcode
-        existing_image_path: null,
-        existing_additional_images: [] // Exactly 2 additional images
+        existing_image_path: null
       }]);
     });
   };
@@ -33811,7 +33803,7 @@ function SupplierProducts() {
   };
   var handleSubmit = /*#__PURE__*/function () {
     var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(e) {
-      var validVariants, i, _v$barcode, _variantExtraImages$i, _v$existing_additiona, v, newAdditionalCount, existingAdditionalCount, totalAdditionalImages, _form$additional_imag, fd, _err$response, _t4;
+      var validVariants, _form$additional_imag, fd, _err$response, _t4;
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.p = _context4.n) {
           case 0:
@@ -33829,44 +33821,8 @@ function SupplierProducts() {
             showToast('Please fill in at least one field for each variant or remove empty variants', 'error');
             return _context4.a(2);
           case 1:
-            i = 0;
-          case 2:
-            if (!(i < validVariants.length)) {
-              _context4.n = 6;
-              break;
-            }
-            v = validVariants[i]; // Check barcode
-            if ((_v$barcode = v.barcode) !== null && _v$barcode !== void 0 && _v$barcode.trim()) {
-              _context4.n = 3;
-              break;
-            }
-            showToast("Variant ".concat(i + 1, ": Barcode is required"), 'error');
-            return _context4.a(2);
-          case 3:
-            if (!(!variantImages[i] && !v.existing_image_path)) {
-              _context4.n = 4;
-              break;
-            }
-            showToast("Variant ".concat(i + 1, ": Main image is required"), 'error');
-            return _context4.a(2);
-          case 4:
-            // Check exactly 2 additional images
-            newAdditionalCount = ((_variantExtraImages$i = variantExtraImages[i]) === null || _variantExtraImages$i === void 0 ? void 0 : _variantExtraImages$i.length) || 0;
-            existingAdditionalCount = ((_v$existing_additiona = v.existing_additional_images) === null || _v$existing_additiona === void 0 ? void 0 : _v$existing_additiona.length) || 0;
-            totalAdditionalImages = newAdditionalCount + existingAdditionalCount;
-            if (!(totalAdditionalImages !== 2)) {
-              _context4.n = 5;
-              break;
-            }
-            showToast("Variant ".concat(i + 1, ": Exactly 2 additional images are required (currently ").concat(totalAdditionalImages, ")"), 'error');
-            return _context4.a(2);
-          case 5:
-            i++;
-            _context4.n = 2;
-            break;
-          case 6:
             setSubmitting(true);
-            _context4.p = 7;
+            _context4.p = 2;
             fd = new FormData();
             fd.append('name', form.name);
             fd.append('barcode', form.barcode);
@@ -33893,63 +33849,59 @@ function SupplierProducts() {
               fd.append('variants', JSON.stringify(validVariants));
               // Append variant images and extras
               validVariants.forEach(function (v, idx) {
-                var _variantExtraImages$i2, _v$existing_additiona2;
+                var _variantExtraImages$i;
                 if (variantImages[idx]) {
                   fd.append("variant_image_".concat(idx), variantImages[idx]);
                 }
-                if (((_variantExtraImages$i2 = variantExtraImages[idx]) === null || _variantExtraImages$i2 === void 0 ? void 0 : _variantExtraImages$i2.length) > 0) {
+                if (((_variantExtraImages$i = variantExtraImages[idx]) === null || _variantExtraImages$i === void 0 ? void 0 : _variantExtraImages$i.length) > 0) {
                   variantExtraImages[idx].forEach(function (img) {
                     return fd.append("variant_extra_images_".concat(idx, "[]"), img);
                   });
                 }
-                // Append existing additional images
-                if (((_v$existing_additiona2 = v.existing_additional_images) === null || _v$existing_additiona2 === void 0 ? void 0 : _v$existing_additiona2.length) > 0) {
-                  fd.append("variant_existing_additional_images_".concat(idx), JSON.stringify(v.existing_additional_images));
-                }
               });
             }
             if (!editing) {
-              _context4.n = 9;
+              _context4.n = 4;
               break;
             }
             fd.append('_method', 'PUT');
-            _context4.n = 8;
+            _context4.n = 3;
             return axios__WEBPACK_IMPORTED_MODULE_2___default().post("/supplier/products/".concat(editing.id), fd, {
               headers: {
                 'Content-Type': 'multipart/form-data'
               }
             });
-          case 8:
+          case 3:
             showToast('Product updated!', 'success');
-            _context4.n = 11;
+            _context4.n = 6;
             break;
-          case 9:
-            _context4.n = 10;
+          case 4:
+            _context4.n = 5;
             return axios__WEBPACK_IMPORTED_MODULE_2___default().post('/supplier/products', fd, {
               headers: {
                 'Content-Type': 'multipart/form-data'
               }
             });
-          case 10:
+          case 5:
             showToast('Product created!', 'success');
-          case 11:
+          case 6:
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.markStale)('supplier_products', 'admin_products', 'customer_shop');
             setFormOpen(false);
             fetchProducts(true);
-            _context4.n = 13;
+            _context4.n = 8;
             break;
-          case 12:
-            _context4.p = 12;
+          case 7:
+            _context4.p = 7;
             _t4 = _context4.v;
             showToast(((_err$response = _t4.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to save product', 'error');
-          case 13:
-            _context4.p = 13;
+          case 8:
+            _context4.p = 8;
             setSubmitting(false);
-            return _context4.f(13);
-          case 14:
+            return _context4.f(8);
+          case 9:
             return _context4.a(2);
         }
-      }, _callee4, null, [[7, 12, 13, 14]]);
+      }, _callee4, null, [[2, 7, 8, 9]]);
     }));
     return function handleSubmit(_x) {
       return _ref4.apply(this, arguments);
@@ -34334,7 +34286,7 @@ function SupplierProducts() {
                           })]
                         })
                       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
-                        className: "flex-1 grid grid-cols-4 gap-3",
+                        className: "flex-1 grid grid-cols-3 gap-3",
                         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
                             className: "text-[10px] text-muted-foreground mb-1",
@@ -34398,19 +34350,6 @@ function SupplierProducts() {
                         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
                             className: "text-[10px] text-muted-foreground mb-1",
-                            children: "Barcode *"
-                          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
-                            className: "h-8 text-sm",
-                            type: "text",
-                            placeholder: "Required",
-                            value: v.barcode,
-                            onChange: function onChange(e) {
-                              return updateVariant(idx, 'barcode', e.target.value);
-                            }
-                          })]
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
-                          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
-                            className: "text-[10px] text-muted-foreground mb-1",
                             children: "Stock"
                           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_9__.Input, {
                             className: "h-8 text-sm",
@@ -34436,7 +34375,7 @@ function SupplierProducts() {
                             }
                           })]
                         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
-                          className: "flex items-end col-span-2",
+                          className: "flex items-end",
                           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_7__.Button, {
                             type: "button",
                             variant: "destructive",
@@ -34495,7 +34434,7 @@ function SupplierProducts() {
                     children: "Add Product Photo"
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                     className: "text-[10px] mt-1 opacity-50 text-muted-foreground",
-                    children: "Main + Exactly 2 Gallery Photos"
+                    children: "Main + 3 Gallery Photos"
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("input", {
                     type: "file",
                     accept: "image/*",
@@ -34612,11 +34551,11 @@ function SupplierProducts() {
                 }), " Extra Gallery Photos"]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
                 className: "text-[10px] font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full",
-                children: "Exactly 2 Required"
+                children: "Max 3"
               })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
-              className: "grid grid-cols-2 gap-6",
-              children: [0, 1].map(function (i) {
+              className: "grid grid-cols-3 gap-6",
+              children: [0, 1, 2].map(function (i) {
                 var preview = null;
                 var isExisting = false;
                 if (imageModalTarget === 'base') {

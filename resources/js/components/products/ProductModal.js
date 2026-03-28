@@ -255,7 +255,7 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
                                                 <th style={{ width: '18%' }}>Weight/Grams</th>
                                                 <th style={{ width: '12%' }}>Stock *</th>
                                                 <th style={{ width: '15%' }}>Price Over.</th>
-                                                <th style={{ width: '14%' }}>Barcode Suf.</th>
+                                                <th style={{ width: '14%' }}>SKU Suf.</th>
                                                 <th style={{ width: '5%' }}></th>
                                             </tr>
                                         </thead>

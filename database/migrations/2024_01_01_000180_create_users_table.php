@@ -14,7 +14,6 @@ class CreateUsersTable extends Migration
             $table->string('email', 150)->unique()->index();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('email_verification_token', 64)->nullable();
-            $table->timestamp('email_verification_expires_at')->nullable();
             $table->string('photo')->nullable();
             $table->string('phone', 20)->nullable();
             $table->enum('role', ['admin', 'customer', 'rider'])->default('customer');
