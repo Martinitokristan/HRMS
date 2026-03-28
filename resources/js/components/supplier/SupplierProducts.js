@@ -191,9 +191,7 @@ export default function SupplierProducts() {
             weight: '', 
             stock: 0, 
             price_override: '', 
-            barcode: '', // Required barcode
-            existing_image_path: null,
-            existing_additional_images: [] // Exactly 2 additional images
+            existing_image_path: null
         }]);
     };
 
@@ -339,33 +337,6 @@ export default function SupplierProducts() {
             return;
         }
         
-        // Validate each variant has required barcode and images
-        for (let i = 0; i < validVariants.length; i++) {
-            const v = validVariants[i];
-            
-            // Check barcode
-            if (!v.barcode?.trim()) {
-                showToast(`Variant ${i + 1}: Barcode is required`, 'error');
-                return;
-            }
-            
-            // Check main image
-            if (!variantImages[i] && !v.existing_image_path) {
-                showToast(`Variant ${i + 1}: Main image is required`, 'error');
-                return;
-            }
-            
-            // Check exactly 2 additional images
-            const newAdditionalCount = variantExtraImages[i]?.length || 0;
-            const existingAdditionalCount = v.existing_additional_images?.length || 0;
-            const totalAdditionalImages = newAdditionalCount + existingAdditionalCount;
-            
-            if (totalAdditionalImages !== 2) {
-                showToast(`Variant ${i + 1}: Exactly 2 additional images are required (currently ${totalAdditionalImages})`, 'error');
-                return;
-            }
-        }
-        
         setSubmitting(true);
         try {
             const fd = new FormData();
@@ -398,10 +369,6 @@ export default function SupplierProducts() {
                     }
                     if (variantExtraImages[idx]?.length > 0) {
                         variantExtraImages[idx].forEach(img => fd.append(`variant_extra_images_${idx}[]`, img));
-                    }
-                    // Append existing additional images
-                    if (v.existing_additional_images?.length > 0) {
-                        fd.append(`variant_existing_additional_images_${idx}`, JSON.stringify(v.existing_additional_images));
                     }
                 });
             }
@@ -641,7 +608,7 @@ export default function SupplierProducts() {
                                                         )}
                                                     </div>
 
-                                                    <div className="flex-1 grid grid-cols-4 gap-3">
+                                                    <div className="flex-1 grid grid-cols-3 gap-3">
                                                         <div>
                                                             <Label className="text-[10px] text-muted-foreground mb-1">Size</Label>
                                                             <select 
@@ -682,16 +649,6 @@ export default function SupplierProducts() {
                                                             </select>
                                                         </div>
                                                         <div>
-                                                            <Label className="text-[10px] text-muted-foreground mb-1">Barcode *</Label>
-                                                            <Input 
-                                                                className="h-8 text-sm" 
-                                                                type="text" 
-                                                                placeholder="Required" 
-                                                                value={v.barcode} 
-                                                                onChange={e => updateVariant(idx, 'barcode', e.target.value)} 
-                                                            />
-                                                        </div>
-                                                        <div>
                                                             <Label className="text-[10px] text-muted-foreground mb-1">Stock</Label>
                                                             <Input className="h-8 text-sm" type="number" placeholder="0" value={v.stock} onChange={e => updateVariant(idx, 'stock', e.target.value)} />
                                                         </div>
@@ -699,7 +656,7 @@ export default function SupplierProducts() {
                                                             <Label className="text-[10px] text-muted-foreground mb-1">Price Override (₱)</Label>
                                                             <Input className="h-8 text-sm" type="number" step="0.01" placeholder="Optional" value={v.price_override} onChange={e => updateVariant(idx, 'price_override', e.target.value)} />
                                                         </div>
-                                                        <div className="flex items-end col-span-2">
+                                                        <div className="flex items-end">
                                                             <Button
                                                                 type="button"
                                                                 variant="destructive"
