@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw, Map, Navigation } from 'lucide-react';
+import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw, Map, Navigation, ChevronDown } from 'lucide-react';
 import CustomerOrderTracking from './CustomerOrderTracking';
 import { useToast } from '../../context/ToastContext';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
@@ -52,6 +52,7 @@ export default function OrderHistory() {
     const [returnItems, setReturnItems] = useState([]);
     const [submittingReturn, setSubmittingReturn] = useState(false);
     const [visibleTrackers, setVisibleTrackers] = useState({}); // Tracking which order maps are visible
+    const [expandedOrders, setExpandedOrders] = useState({}); // Tracking which orders are expanded
 
     const { refreshTrigger } = useSilentRefresh('customer_orders');
 
@@ -71,6 +72,13 @@ export default function OrderHistory() {
 
     const toggleTracker = (orderId) => {
         setVisibleTrackers(prev => ({
+            ...prev,
+            [orderId]: !prev[orderId]
+        }));
+    };
+
+    const toggleOrder = (orderId) => {
+        setExpandedOrders(prev => ({
             ...prev,
             [orderId]: !prev[orderId]
         }));
@@ -206,12 +214,12 @@ export default function OrderHistory() {
     };
 
     const STATUS_MAP = {
-        pending: { label: "Pending", color: "#eab308", step: 0 },
-        confirmed: { label: "Confirmed", color: "#3b82f6", step: 1 },
-        out_for_delivery: { label: "Out for Delivery", color: "#6366f1", step: 2 },
-        delivered: { label: "Delivered", color: "#10b981", step: 3 },
-        returned: { label: "Returned", color: "#ef4444", step: -1 },
-        cancelled: { label: "Cancelled", color: "#6b7280", step: -1 },
+        pending: { label: "Pending", color: "#eab308", step: 0, badge: "bg-yellow-50 text-yellow-700 border-yellow-200" },
+        confirmed: { label: "Confirmed", color: "#3b82f6", step: 1, badge: "bg-blue-50 text-blue-700 border-blue-100" },
+        out_for_delivery: { label: "Out for Delivery", color: "#3b82f6", step: 2, badge: "bg-blue-50 text-blue-700 border-blue-100" },
+        delivered: { label: "Delivered", color: "#10b981", step: 3, badge: "bg-green-50 text-green-700 border-green-200" },
+        returned: { label: "Returned", color: "#ef4444", step: -1, badge: "bg-red-50 text-red-700 border-red-200" },
+        cancelled: { label: "Cancelled", color: "#ef4444", step: -1, badge: "bg-red-100 text-red-800 border-red-200" },
     };
 
     const steps = [
@@ -231,7 +239,7 @@ export default function OrderHistory() {
 
     return (
         <div className="min-h-screen bg-secondary/30 py-12 px-4">
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="flex items-end justify-between mb-10">
                     <div>
@@ -251,268 +259,255 @@ export default function OrderHistory() {
                         <Button onClick={() => navigate("/shop")}>Start Shopping</Button>
                     </Card>
                 ) : (
-                    <div className="flex flex-col gap-8">
+                    <div className="flex flex-col gap-3">
                         {orders.map((order) => {
                             const currentStatus = STATUS_MAP[order.status] || STATUS_MAP.pending;
                             const currentStep = currentStatus.step;
                             const isDelivered = order.status === 'delivered';
                             const isPending = order.status === 'pending';
                             const isCancelled = order.status === 'cancelled';
+                            const isReturned = order.status === 'returned';
                             const hasRating = order.delivery?.rating;
+                            const isExpanded = expandedOrders[order.id];
+                            
+                            const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
+                            const otherItemsCount = order.items ? order.items.length - 1 : 0;
 
                             return (
                                 <Card
                                     key={order.id}
-                                    className={`overflow-hidden rounded-3xl transition-all ${isCancelled ? 'opacity-70 border-destructive/30' : ''}`}
+                                    className={`overflow-hidden rounded-[2rem] border border-border shadow-sm transition-all duration-300 ${isCancelled ? 'opacity-60 grayscale-[0.3]' : ''} ${isExpanded ? 'ring-2 ring-primary/10 shadow-xl scale-[1.01]' : 'hover:border-primary/20 hover:shadow-md'}`}
                                 >
-                                    {/* Order Header Card */}
-                                    <div className={`p-6 border-b border-border ${isCancelled ? 'bg-destructive/5' : 'bg-secondary/30'}`}>
-                                        <div className="flex justify-between items-start flex-wrap gap-4">
-                                            <div>
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <span className="text-xs font-extrabold text-primary uppercase tracking-widest">Order #{order.order_number}</span>
-                                                    <StatusBadge status={order.status} />
-                                                </div>
-                                                <div className="text-sm text-muted-foreground">
-                                                    Purchased on {new Date(order.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
-                                                </div>
-                                                {order.delivery?.tracking_number && (
-                                                    <div className="text-xs text-muted-foreground mt-0.5">
-                                                        Tracking: <span className="font-bold text-primary">{order.delivery.tracking_number}</span>
-                                                    </div>
+                                    {/* COMPACT COLLAPSED ROW */}
+                                    <div 
+                                        className={`p-4 md:p-6 cursor-pointer flex items-center gap-4 transition-colors ${isExpanded ? 'bg-primary/[0.02]' : 'bg-white hover:bg-secondary/10'}`}
+                                        onClick={() => toggleOrder(order.id)}
+                                    >
+                                        {/* Status Dot */}
+                                        <div className="flex-shrink-0 w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: currentStatus.color }} />
+                                        
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                <span className="text-[11px] font-black text-foreground uppercase tracking-wider">#{order.order_number}</span>
+                                                <Badge 
+                                                    variant="outline" 
+                                                    className={`text-[9px] font-black uppercase px-2 py-0 h-5 border shadow-none ${currentStatus.badge}`}
+                                                >
+                                                    {currentStatus.label}
+                                                </Badge>
+                                                {isDelivered && !hasRating && (
+                                                    <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest animate-pulse">
+                                                        · Rate now
+                                                    </span>
                                                 )}
                                             </div>
-                                            <div className="text-right">
-                                                <div className="text-2xl font-black text-foreground">₱{Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                                                <div className="text-xs text-muted-foreground">{order.items?.length} Items Total</div>
-                                                <div className="text-[10px] text-muted-foreground mt-0.5 uppercase">
-                                                    {order.payment_method === 'cod' ? 'COD' : order.payment_method === 'gcash' ? 'GCash' : order.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'Cash'}
-                                                </div>
+                                            <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-bold truncate">
+                                                <span className="truncate">
+                                                    {firstItem ? `${Number(firstItem.quantity)}x ${firstItem.product?.name}` : 'Order Summary'} 
+                                                    {otherItemsCount > 0 ? ` +${otherItemsCount} more` : ''}
+                                                </span>
+                                                <span className="text-gray-300">|</span>
+                                                <span className="whitespace-nowrap">
+                                                    {new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                </span>
                                             </div>
+                                        </div>
+
+                                        <div className="text-right ml-4">
+                                            <div className="text-sm font-black text-foreground">₱{Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                            <div className="text-[10px] font-black text-muted-foreground uppercase">{order.items?.length} {order.items?.length === 1 ? 'Item' : 'Items'}</div>
+                                        </div>
+
+                                        <div className={`ml-2 transform transition-transform duration-300 text-muted-foreground ${isExpanded ? 'rotate-180' : ''}`}>
+                                            <ChevronDown className="h-5 w-5" />
                                         </div>
                                     </div>
 
-                                    <div className="p-6">
-                                        {/* Delivery Tracker */}
-                                        {currentStep >= 0 && (
-                                            <div className="mb-8">
-                                                <div className="flex justify-between relative mb-4">
-                                                    <div className="absolute top-3 left-[10%] right-[10%] h-0.5 bg-border z-0" />
-                                                    <div className="absolute top-3 left-[10%] h-0.5 bg-primary z-[1] transition-all duration-500" style={{ width: `${(currentStep / (steps.length - 1)) * 80}%` }} />
-                                                    {steps.map((step, idx) => (
-                                                        <div key={idx} className="relative z-[2] text-center w-1/4">
-                                                            <div className={`w-6 h-6 rounded-full mx-auto mb-2 flex items-center justify-center text-[10px] transition-all ${idx <= currentStep ? 'bg-primary text-white ring-4 ring-primary/10' : 'bg-white border-2 border-border'
-                                                                } ${idx === currentStep ? 'ring-4 ring-primary/20' : ''}`}>
-                                                                {idx < currentStep ? "✓" : ""}
+                                    {/* EXPANDED CONTENT */}
+                                    {isExpanded && (
+                                        <div className="px-6 pb-8 pt-2 border-t border-dashed border-border/60 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            
+                                            {/* Progress Tracker - Only show for active orders */}
+                                            {currentStep >= 0 && !isDelivered && !isCancelled && !isReturned && (
+                                                <div className="py-8 px-4 mb-8 bg-secondary/10 rounded-[1.5rem]">
+                                                    <div className="flex justify-between relative">
+                                                        <div className="absolute top-2.5 left-[12%] right-[12%] h-[2px] bg-border z-0" />
+                                                        <div className="absolute top-2.5 left-[12%] h-[2px] bg-primary z-[1] transition-all duration-700 ease-out shadow-[0_0_8px_rgba(99,102,241,0.5)]" 
+                                                             style={{ width: `${(currentStep / (steps.length - 1)) * 76}%` }} />
+                                                        
+                                                        {steps.map((step, idx) => (
+                                                            <div key={idx} className="relative z-[2] text-center w-1/4">
+                                                                <div className={`w-5 h-5 rounded-full mx-auto mb-2.5 flex items-center justify-center text-[8px] transition-all duration-500
+                                                                    ${idx <= currentStep ? 'bg-primary text-white ring-8 ring-primary/5' : 'bg-white border-2 border-border'}`}>
+                                                                    {idx < currentStep ? "✓" : ""}
+                                                                </div>
+                                                                <span className={`text-[9px] uppercase tracking-widest ${idx <= currentStep ? 'font-black text-foreground' : 'font-bold text-muted-foreground'}`}>
+                                                                    {step.label}
+                                                                </span>
                                                             </div>
-                                                            <span className={`text-xs ${idx <= currentStep ? 'font-extrabold text-foreground' : 'font-medium text-muted-foreground'}`}>
-                                                                {step.label}
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Cancelled Banner */}
-                                        {isCancelled && (
-                                            <Card className="bg-destructive/5 border-destructive/20 p-4 mb-6 flex items-center gap-3">
-                                                <XCircle className="h-6 w-6 text-destructive shrink-0" />
-                                                <div>
-                                                    <div className="font-bold text-destructive text-sm">Order Cancelled</div>
-                                                    {order.cancellation_reason && (
-                                                        <div className="text-xs text-muted-foreground">
-                                                            Reason: {CANCEL_REASONS.find(r => r.value === order.cancellation_reason)?.label || order.cancellation_reason}
-                                                        </div>
-                                                    )}
-                                                    {order.cancellation_notes && (
-                                                        <div className="text-xs text-muted-foreground italic mt-0.5">"{order.cancellation_notes}"</div>
-                                                    )}
-                                                    {!order.cancellation_reason && (
-                                                        <div className="text-xs text-muted-foreground">This order has been cancelled and stock has been restored.</div>
-                                                    )}
-                                                </div>
-                                            </Card>
-                                        )}
-
-                                        {/* Rider Component */}
-                                        {order.delivery?.rider && (
-                                            <Card className="bg-primary/5 border-primary/10 p-5 flex items-center gap-4 mb-6">
-                                                <div className="relative">
-                                                    <img
-                                                        src={order.delivery.rider.photo ? (order.delivery.rider.photo.startsWith('http') ? order.delivery.rider.photo : `/storage/${order.delivery.rider.photo}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(order.delivery.rider.name)}&background=6366f1&color=fff&size=80`}
-                                                        alt={order.delivery.rider.name}
-                                                        className="w-16 h-16 rounded-full object-cover border-3 border-white shadow-lg"
-                                                    />
-                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full animate-pulse"></div>
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="font-bold text-primary text-sm">{order.delivery.rider.name}</div>
-                                                    <div className="text-xs text-muted-foreground">Your delivery rider</div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <a href={`tel:${order.delivery.rider.phone}`} className="bg-primary text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1">
-                                                        <Phone className="h-3 w-3" />
-                                                        Call
-                                                    </a>
-                                                </div>
-                                            </Card>
-                                        )}
-
-                                        {/* Live Order Tracking Toggle Button */}
-                                        {order.delivery && order.delivery.rider && ['accepted', 'in_progress', 'out_for_delivery'].includes(order.delivery.status) && (
-                                            <div className="mb-4">
-                                                <Button
-                                                    variant={visibleTrackers[order.id] ? "default" : "secondary"}
-                                                    size="sm"
-                                                    onClick={() => toggleTracker(order.id)}
-                                                    className="w-full flex items-center justify-center gap-2 rounded-xl py-5"
-                                                >
-                                                    {visibleTrackers[order.id] ? (
-                                                        <>
-                                                            <XCircle className="h-4 w-4" />
-                                                            Hide Map Tracker
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Map className="h-4 w-4" />
-                                                            Track Order Live
-                                                        </>
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        )}
-
-                                        {/* Live Order Tracking Map */}
-                                        {order.delivery && order.delivery.rider && ['accepted', 'in_progress', 'out_for_delivery'].includes(order.delivery.status) && visibleTrackers[order.id] && (
-                                            <div className="mb-6 rounded-3xl overflow-hidden border border-border shadow-sm">
-                                                <CustomerOrderTracking delivery={order.delivery} />
-                                            </div>
-                                        )}
-
-                                        {/* Rating Display (already rated) */}
-                                        {isDelivered && hasRating && (
-                                            <Card className="bg-amber-50 border-amber-200 p-4 mb-6 flex items-center gap-3">
-                                                <Star className="h-8 w-8 text-amber-500 fill-amber-500 shrink-0" />
-                                                <div className="flex-1">
-                                                    <div className="font-bold text-amber-800 text-sm mb-0.5">Your Rating: {order.delivery.rating}/5</div>
-                                                    <div className="flex gap-0.5 mb-0.5">
-                                                        {[1, 2, 3, 4, 5].map(star => (
-                                                            <span key={star} className={`text-lg ${star <= order.delivery.rating ? 'text-amber-400' : 'text-gray-300'}`}>★</span>
                                                         ))}
                                                     </div>
-                                                    {order.delivery.rating_comment && (
-                                                        <div className="text-xs text-muted-foreground italic">"{order.delivery.rating_comment}"</div>
-                                                    )}
                                                 </div>
-                                            </Card>
-                                        )}
+                                            )}
 
-                                        {/* Rate Button (delivered but not yet rated) */}
-                                        {isDelivered && !hasRating && order.delivery && (
-                                            <div className="rounded-2xl p-6 mb-6 text-center bg-gradient-to-br from-indigo-500 to-purple-600">
-                                                <div className="text-2xl mb-2">🌟</div>
-                                                <div className="text-white font-bold text-lg mb-1">How was your delivery?</div>
-                                                <div className="text-white/80 text-sm mb-4">Your feedback helps us improve our service</div>
-                                                <Button variant="secondary" className="font-bold" onClick={() => { setRatingOrder(order); setRatingValue(0); setRatingComment(""); }}>
-                                                    Rate Delivery
-                                                </Button>
-                                            </div>
-                                        )}
+                                            {/* Cancelled/Returned Banner simplified */}
+                                            {(isCancelled || isReturned) && (
+                                                <div className={`p-4 mb-6 rounded-2xl flex items-center gap-3 border ${isCancelled ? 'bg-red-50 border-red-100 text-red-900' : 'bg-orange-50 border-orange-100 text-orange-900'}`}>
+                                                    <AlertTriangle className="h-5 w-5 shrink-0" />
+                                                    <div className="text-xs font-bold leading-tight">
+                                                        {isCancelled ? `Order Cancelled: ${order.cancellation_reason ? CANCEL_REASONS.find(r => r.value === order.cancellation_reason)?.label || order.cancellation_reason : 'No reason provided'}` : 'Order has been returned'}
+                                                        {order.cancellation_notes && <div className="mt-1 font-medium opacity-70 italic text-[10px]">"{order.cancellation_notes}"</div>}
+                                                    </div>
+                                                </div>
+                                            )}
 
-                                        {/* Item List */}
-                                        <Card className="bg-secondary/30 p-5 border-border">
-                                            <h4 className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-4">Order Details</h4>
-                                            <div className="space-y-3">
-                                                {order.items?.map((item) => (
-                                                    <div key={item.id} className="flex justify-between items-center">
+                                            {/* Rider Component with Inline Rating */}
+                                            {order.delivery?.rider && (
+                                                <div className="flex items-center gap-4 py-4 px-5 bg-primary/5 rounded-[1.5rem] border border-primary/10 mb-6">
+                                                    <div className="relative flex-shrink-0">
+                                                        <img
+                                                            src={order.delivery.rider.photo ? (order.delivery.rider.photo.startsWith('http') ? order.delivery.rider.photo : `/storage/${order.delivery.rider.photo}`) : `https://ui-avatars.com/api/?name=${encodeURIComponent(order.delivery.rider.name)}&background=6366f1&color=fff&size=80`}
+                                                            alt={order.delivery.rider.name}
+                                                            className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                                                        />
+                                                        <div className="absolute top-0 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                                                    </div>
+                                                    <div className="flex-1 flex items-center justify-between min-w-0">
                                                         <div>
-                                                            <div className="text-sm font-bold text-foreground">{item.quantity}x {item.product?.name}</div>
-                                                            {item.variants && Object.keys(item.variants).length > 0 && (
-                                                                <div className="text-xs text-muted-foreground mt-0.5">
-                                                                    {Object.values(item.variants).filter(v => v?.label).map(v => v.label).join(", ")}
-                                                                </div>
+                                                            <div className="text-xs font-black text-gray-900 leading-none mb-1">{order.delivery.rider.name}</div>
+                                                            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                                                Delivery Rider
+                                                                {hasRating && (
+                                                                    <div className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">
+                                                                        <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500" />
+                                                                        <span className="text-[9px] font-black">{order.delivery.rating}/5</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            {!isDelivered && !isCancelled && (
+                                                                <a href={`tel:${order.delivery.rider.phone}`} className="h-9 px-4 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95">
+                                                                    <Phone className="h-3.5 w-3.5 shadow-xl" />
+                                                                    Call
+                                                                </a>
+                                                            )}
+                                                            {['accepted', 'in_progress', 'out_for_delivery'].includes(order.delivery.status) && (
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); toggleTracker(order.id); }}
+                                                                    className={`h-9 w-9 flex items-center justify-center rounded-xl border transition-all ${visibleTrackers[order.id] ? 'bg-primary text-white border-primary' : 'bg-white text-muted-foreground border-border hover:border-primary/30'}`}
+                                                                >
+                                                                    {visibleTrackers[order.id] ? <XCircle className="h-4 w-4" /> : <Map className="h-4 w-4" />}
+                                                                </button>
                                                             )}
                                                         </div>
-                                                        <div className="font-bold text-foreground text-sm">₱{Number(item.subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        </Card>
-
-                                        {/* Cancel Button for pending orders */}
-                                        {isPending && (
-                                            <div className="mt-5 text-center">
-                                                <Button
-                                                    variant="outline"
-                                                    className="border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive font-bold"
-                                                    onClick={() => openCancelModal(order)}
-                                                    disabled={cancellingId === order.id}
-                                                >
-                                                    Cancel Order
-                                                </Button>
-                                            </div>
-                                        )}
-
-                                        {/* Return Button for delivered orders */}
-                                        {isDelivered && !order.has_return && (
-                                            <div className="mt-5 text-center">
-                                                <Button
-                                                    variant="outline"
-                                                    className="border-amber-400/50 text-amber-700 hover:bg-amber-50 hover:text-amber-800 font-bold"
-                                                    onClick={() => openReturnModal(order)}
-                                                >
-                                                    <RotateCcw className="h-4 w-4 mr-2" />
-                                                    Request Return
-                                                </Button>
-                                            </div>
-                                        )}
-
-                                        {/* Write Review Button for delivered orders */}
-                                        {isDelivered && (
-                                            <div className="mt-3 text-center">
-                                                <Button
-                                                    variant="outline"
-                                                    className="border-blue-400/50 text-blue-700 hover:bg-blue-50 hover:text-blue-800 font-bold"
-                                                    onClick={() => {
-                                                        // Navigate to reviews page for the first product in the order
-                                                        if (order.items && order.items.length > 0) {
-                                                            const firstItem = order.items[0];
-                                                            const url = firstItem.product_variant_id
-                                                                ? `/shop/products/${firstItem.product_id}/reviews#write?variant=${firstItem.product_variant_id}`
-                                                                : `/shop/products/${firstItem.product_id}/reviews#write`;
-                                                            window.location.href = url;
-                                                        }
-                                                    }}
-                                                >
-                                                    <Star className="h-4 w-4 mr-2" />
-                                                    Write Review
-                                                </Button>
-                                            </div>
-                                        )}
-
-                                        {/* Return Submitted Banner */}
-                                        {order.has_return && order.status !== 'returned' && (
-                                            <Card className="bg-amber-50 border-amber-200 p-4 mt-5 flex items-center gap-3">
-                                                <RotateCcw className="h-5 w-5 text-amber-600 shrink-0" />
-                                                <div>
-                                                    <div className="font-bold text-amber-800 text-sm">Return Requested</div>
-                                                    <div className="text-xs text-muted-foreground">Your return request is being reviewed by our team.</div>
                                                 </div>
-                                            </Card>
-                                        )}
+                                            )}
 
-                                        {/* Returned Banner */}
-                                        {order.status === 'returned' && (
-                                            <Card className="bg-orange-50 border-orange-200 p-4 mt-5 flex items-center gap-3">
-                                                <RotateCcw className="h-5 w-5 text-orange-600 shrink-0" />
-                                                <div>
-                                                    <div className="font-bold text-orange-800 text-sm">Order Returned</div>
-                                                    <div className="text-xs text-muted-foreground">This order has been returned. Check your notifications for refund details.</div>
+                                            {/* Live Order Tracking Map Inline */}
+                                            {order.delivery && order.delivery.rider && visibleTrackers[order.id] && (
+                                                <div className="mb-6 rounded-[1.5rem] overflow-hidden border border-border bg-slate-100 h-64 shadow-inner">
+                                                    <CustomerOrderTracking delivery={order.delivery} />
                                                 </div>
-                                            </Card>
-                                        )}
-                                    </div>
+                                            )}
+
+                                            {/* Price Breakdown */}
+                                            <div className="mb-8 px-4 space-y-2 border-l-2 border-primary/20 ml-2">
+                                                <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                                    <span>Subtotal (Net)</span>
+                                                    <span>₱{Number(order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                </div>
+                                                {order.discount_pct > 0 && (
+                                                    <div className="flex justify-between items-center text-[10px] font-black text-green-600 uppercase tracking-widest">
+                                                        <span>Discount ({order.discount_pct}%)</span>
+                                                        <span>-₱{Number((order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0) * (order.discount_pct / 100)) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                                    <span>Vat (12%)</span>
+                                                    <span>₱{Number(order.total_amount - (order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0) * (1 - (order.discount_pct || 0) / 100))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                </div>
+                                                <div className="pt-2 flex justify-between items-center text-sm font-black text-foreground">
+                                                    <span className="uppercase tracking-[0.2em] text-[10px]">Grand Total</span>
+                                                    <span className="text-primary">₱{Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Expanded Panel Actions Footer */}
+                                            <div className="flex flex-wrap gap-2 justify-center pt-6 mt-6 border-t border-dashed border-border/60">
+                                                {/* Only for Pending Orders */}
+                                                {isPending && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-[10px] font-black uppercase text-red-500 hover:text-red-600 hover:bg-red-50 tracking-widest h-10 px-6"
+                                                        onClick={(e) => { e.stopPropagation(); openCancelModal(order); }}
+                                                        disabled={cancellingId === order.id}
+                                                    >
+                                                        {cancellingId === order.id ? "Cancelling..." : "Cancel Order"}
+                                                    </Button>
+                                                )}
+
+                                                {/* Only for Delivered Orders */}
+                                                {isDelivered && (
+                                                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                                                        {!order.has_return && (
+                                                            <Button
+                                                                variant="outline"
+                                                                className="flex-1 md:flex-none h-10 px-6 rounded-xl border-amber-200 text-amber-700 bg-amber-50/30 hover:bg-amber-50 text-[10px] font-black uppercase tracking-widest"
+                                                                onClick={(e) => { e.stopPropagation(); openReturnModal(order); }}
+                                                            >
+                                                                <RotateCcw className="h-3.5 w-3.5 mr-2" />
+                                                                Return
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            variant="outline"
+                                                            className="flex-1 md:flex-none h-10 px-6 rounded-xl border-blue-200 text-blue-700 bg-blue-50/30 hover:bg-blue-50 text-[10px] font-black uppercase tracking-widest"
+                                                            onClick={(e) => { 
+                                                                e.stopPropagation();
+                                                                if (order.items && order.items.length > 0) {
+                                                                    const item = order.items[0];
+                                                                    const url = item.product_variant_id
+                                                                        ? `/shop/products/${item.product_id}/reviews#write?variant=${item.product_variant_id}`
+                                                                        : `/shop/products/${item.product_id}/reviews#write`;
+                                                                    window.location.href = url;
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Star className="h-3.5 w-3.5 mr-2" />
+                                                            Review
+                                                        </Button>
+                                                        {!hasRating && order.delivery && (
+                                                            <Button 
+                                                                className="flex-1 md:flex-none h-10 px-8 rounded-xl bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20 text-[10px] font-black uppercase tracking-[0.15em]" 
+                                                                onClick={(e) => { e.stopPropagation(); setRatingOrder(order); setRatingValue(0); setRatingComment(""); }}
+                                                            >
+                                                                Rate Delivery
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Sub-footer Line for tracking and payment */}
+                                            <div className="mt-4 flex flex-wrap items-center justify-between gap-4 px-2 py-4 bg-secondary/20 rounded-2xl border border-secondary/30">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Tracking:</span>
+                                                    <span className="text-[9px] font-black text-primary uppercase select-all">
+                                                        {order.delivery?.tracking_number || "Awaiting Assignment"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Payment:</span>
+                                                    <span className="text-[9px] font-black text-foreground uppercase">
+                                                        {order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method === 'gcash' ? 'GCash' : order.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'Direct Payment'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </Card>
                             );
                         })}

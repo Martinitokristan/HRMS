@@ -15,7 +15,7 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale } from '../../store/dataStore';
 
 export default function Products() {
-    const { categories, unitTypes, settings, refreshCategories, refreshSettings } = useAuth();
+    const { categories, unitTypes, settings, refreshCategories, refreshSettings, refreshUnitTypes } = useAuth();
     const { refreshTrigger } = useSilentRefresh('admin_products');
     const [products, setProducts] = useState({ data: [], total: 0, current_page: 1 });
     const [suppliers, setSuppliers] = useState([]);
@@ -51,6 +51,7 @@ export default function Products() {
     useEffect(() => {
         refreshCategories();
         refreshSettings();
+        refreshUnitTypes();
         
         let isMounted = true;
         axios.get('/suppliers', { params: { no_pagination: 1 } })

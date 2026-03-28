@@ -10,13 +10,14 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [settings, setSettings] = useState({});
     const [categories, setCategories] = useState([]);
+    const [unitTypes, setUnitTypes] = useState([]);
     // Start as true — we DON'T know yet if the token is valid
     const [loading, setLoading] = useState(true);
 
     const refreshSettings = async () => {
         try {
-            const res = await axios.get('/settings');
-            setSettings(res.data);
+            const res = await axios.get('/settings', { params: { include_masterlist: 1, include_variants: 1 } });
+            setSettings(res.data?.data || res.data || {});
         } catch (e) {}
     };
 
@@ -24,6 +25,13 @@ export function AuthProvider({ children }) {
         try {
             const res = await axios.get('/categories');
             setCategories(res.data?.data || []);
+        } catch (e) {}
+    };
+    
+    const refreshUnitTypes = async () => {
+        try {
+            const res = await axios.get('/unit-types');
+            setUnitTypes(res.data?.data || res.data || []);
         } catch (e) {}
     };
 
@@ -87,7 +95,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, loginWithToken, settings, refreshSettings, categories, refreshCategories }}>
+        <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, loginWithToken, settings, refreshSettings, categories, refreshCategories, unitTypes, refreshUnitTypes }}>
             {children}
         </AuthContext.Provider>
     );

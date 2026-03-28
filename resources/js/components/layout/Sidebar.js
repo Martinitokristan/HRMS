@@ -85,7 +85,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     <NavItem to="/returns" icon={RotateCcw}>Returns</NavItem>
 
                     <SectionLabel>Analytics</SectionLabel>
-                    <NavItem to="/reports" icon={BarChart3}>Reports</NavItem>
+                    <NavItem to="/reports" icon={BarChart3} end>Reports</NavItem>
                     <NavItem to="/reports/rating-analytics" icon={Star}>Rating Analytics</NavItem>
                     <NavItem to="/reviews" icon={MessageSquare}>Reviews</NavItem>
 
@@ -138,17 +138,6 @@ export default function Sidebar({ isOpen, onClose }) {
                     <NavItem to="/settings" icon={Settings}>Settings</NavItem>
                 </nav>
 
-                {/* Footer */}
-                <div className="border-t border-white/[0.08] p-4">
-                    <NavLink
-                        to="/shop"
-                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 py-2.5 text-sm font-semibold text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
-                    >
-                        <ShoppingBag className="h-4 w-4" />
-                        Customer Portal
-                        <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-                    </NavLink>
-                </div>
             </aside>
         </>
     );

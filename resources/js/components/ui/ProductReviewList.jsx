@@ -15,7 +15,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
   const [reviews, setReviews] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(reviews.length === 0);
-  const [sortBy, setSortBy] = useState('recent');
+  const [filterBy, setFilterBy] = useState('recent');
   const [helpfulVotes, setHelpfulVotes] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(variantId || 'all');
 
@@ -25,17 +25,17 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
 
   useEffect(() => {
     fetchReviews(reviews.length > 0);
-  }, [productId, selectedVariant, sortBy, refreshTrigger, currentPage]);
+  }, [productId, selectedVariant, filterBy, refreshTrigger, currentPage]);
 
   const fetchReviews = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const url = `/products/${productId}/reviews?sort=${sortBy}&page=${currentPage}&per_page=${perPage}${
-        selectedVariant && selectedVariant !== 'all' ? `&variant=${selectedVariant}` : ''
-      }`;
+      let url = `/products/${productId}/reviews?filter=${filterBy}&page=${currentPage}&per_page=${perPage}`;
+      if (selectedVariant && selectedVariant !== 'all') url += `&variant=${selectedVariant}`;
+
       const response = await axios.get(url);
       const data = response.data;
-      
+
       if (data.status === 'success' || data.data) {
         setReviews(data.data.reviews?.data || []);
         setTotalCount(data.data.reviews?.total || 0);
@@ -98,23 +98,81 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
       </Card>
     );
   }
-
   return (
     <div className="space-y-10 mb-20">
+      {/* Rating Summary Section */}
+      {summary && (
+        <div className="mb-12 bg-white rounded-[3rem] p-8 lg:p-12 border border-gray-100 shadow-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Side: Average Rating */}
+            <div className="lg:col-span-4 text-center lg:border-r border-gray-100 lg:pr-12">
+              <div className="text-7xl font-black text-gray-900 mb-2 leading-none">
+                {Number(summary.average_rating).toFixed(1)}
+              </div>
+              <div className="flex justify-center mb-4">
+                <RatingStars rating={summary.average_rating} size="lg" />
+              </div>
+              <p className="text-sm font-black text-gray-400 uppercase tracking-widest">
+                Based on {summary.total_reviews} reviews
+              </p>
+            </div>
+
+            {/* Right Side: Distribution Bars */}
+            <div className="lg:col-span-8 flex flex-col gap-3">
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count = summary.rating_breakdown?.[star] || 0;
+                const percentage = summary.total_reviews > 0 ? (count / summary.total_reviews) * 100 : 0;
+                return (
+                  <div
+                    key={star}
+                    className={`flex items-center gap-4 cursor-pointer group/bar p-1 rounded-xl transition-colors
+                        ${(filterBy === `rating_${star}` || (star === 5 && filterBy === 'rating_high') || (star === 1 && filterBy === 'rating_low')) ? 'bg-orange-50/50' : 'hover:bg-gray-50'}
+                      `}
+                    onClick={() => {
+                      const ratingKey = star === 5 ? 'rating_high' :
+                        star === 1 ? 'rating_low' :
+                          `rating_${star}`;
+                      setFilterBy(filterBy === ratingKey ? 'recent' : ratingKey);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <div className="flex items-center gap-2 w-16">
+                      <span className="text-xs font-black text-gray-600">{star}</span>
+                      <Star className={`w-3 h-3 ${count > 0 ? 'text-orange-400 fill-orange-400' : 'text-gray-300'}`} />
+                    </div>
+                    <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-orange-400 rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="w-12 text-right">
+                      <span className="text-xs font-black text-gray-400 group-hover/bar:text-orange-500 transition-colors">
+                        {count}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Search and Filters Strip */}
       <div className="flex flex-wrap items-center justify-between gap-6 pb-6 border-b border-gray-100">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Variant</span>
             <Select value={selectedVariant} onValueChange={(val) => { setSelectedVariant(val); setCurrentPage(1); }}>
-              <SelectTrigger className="w-48 h-11 rounded-xl bg-gray-50 border-gray-100 text-xs font-bold ring-offset-white focus:ring-1 focus:ring-orange-200">
+              <SelectTrigger className="w-44 h-11 rounded-xl bg-gray-50 border-gray-100 text-xs font-bold ring-offset-white focus:ring-1 focus:ring-orange-200">
                 <SelectValue placeholder="All Variants" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[100000]">
                 <SelectItem value="all">All Reviews</SelectItem>
                 {productVariants.map(variant => (
                   <SelectItem key={variant.id} value={variant.id.toString()}>
-                    {variant.size_value?.label || ''} 
+                    {variant.size_value?.label || ''}
                     {variant.color_value?.label ? ` ${variant.color_value.label}` : ''}
                     {variant.weight_value?.label ? ` ${variant.weight_value.label}` : ''}
                   </SelectItem>
@@ -122,14 +180,14 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Sort</span>
-            <Select value={sortBy} onValueChange={(val) => { setSortBy(val); setCurrentPage(1); }}>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Filter By</span>
+            <Select value={filterBy} onValueChange={(val) => { setFilterBy(val); setCurrentPage(1); }}>
               <SelectTrigger className="w-48 h-11 rounded-xl bg-gray-50 border-gray-100 text-xs font-bold ring-offset-white focus:ring-1 focus:ring-orange-200">
                 <SelectValue placeholder="Most Recent" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[100000]">
                 <SelectItem value="recent">Most Recent</SelectItem>
                 <SelectItem value="helpful">Most Helpful</SelectItem>
                 <SelectItem value="rating_high">Highest Rating</SelectItem>
@@ -141,7 +199,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
 
         {/* Results Counter */}
         <div className="text-[11px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-5 py-2 rounded-full border border-gray-100">
-          {totalCount} total voices shared
+          {totalCount} total results
         </div>
       </div>
 
@@ -151,7 +209,20 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
           <div className="py-32 text-center bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100">
             <MessageSquare className="w-16 h-16 text-gray-200 mx-auto mb-6" />
             <h4 className="text-xl font-black text-gray-400 uppercase tracking-[0.2em]">Silence from the community</h4>
-            <p className="text-sm text-gray-400 mt-2">Be the first to share your thoughts on this product.</p>
+            <p className="text-sm text-gray-400 mt-2">
+              {filterBy.startsWith('rating_')
+                ? `No reviews with this star rating found.`
+                : "Be the first to share your thoughts on this product."}
+            </p>
+            {filterBy.startsWith('rating_') && (
+              <Button
+                variant="ghost"
+                className="mt-6 font-black text-xs uppercase tracking-widest"
+                onClick={() => setFilterBy('recent')}
+              >
+                Clear Filter
+              </Button>
+            )}
           </div>
         ) : (
           reviews.map(review => (
@@ -164,7 +235,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
                   `}>
                     {review.customer?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
-                  
+
                   <div>
                     <div className="flex items-center gap-3 mb-1">
                       <h4 className="text-lg font-black text-gray-900 tracking-tight">{review.customer?.name || 'Community Member'}</h4>
@@ -180,7 +251,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
                       {review.product_variant && (
                         <span className="flex items-center gap-1.5 opacity-60">
                           <div className="w-1 h-1 rounded-full bg-gray-300"></div>
-                          {review.product_variant.size_value?.label || ''} 
+                          {review.product_variant.size_value?.label || ''}
                           {review.product_variant.color_value?.label ? ` · ${review.product_variant.color_value.label}` : ''}
                           {review.product_variant.weight_value?.label ? ` · ${review.product_variant.weight_value.label}` : ''}
                         </span>
@@ -209,8 +280,8 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
                   <div className="flex flex-wrap gap-4 mb-8">
                     {review.images.map((image, idx) => (
                       <div key={idx} className="group/img relative w-24 h-24 rounded-2xl overflow-hidden border border-gray-100 hover:border-orange-200 transition-colors cursor-zoom-in">
-                        <img 
-                          src={`/storage/${image}`} 
+                        <img
+                          src={`/storage/${image}`}
                           className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
                         />
                       </div>
@@ -220,8 +291,8 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
 
                 {/* Helpful Action */}
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Helpful?</span>
-                  <button 
+                  <span className="text-[10px] font-black text-black uppercase tracking-widest">Helpful?</span>
+                  <button
                     onClick={() => handleHelpful(review.id, true)}
                     className="flex items-center gap-2.5 bg-gray-50 border border-gray-100 hover:border-orange-100 hover:bg-orange-50 text-gray-600 hover:text-orange-600 py-2 px-4 rounded-xl transition-all font-black text-[11px] active:scale-95 group/btn"
                   >
@@ -248,22 +319,22 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
       {/* Pagination Controls */}
       {totalCount > perPage && (
         <div className="flex items-center justify-center gap-3 py-10 border-t border-gray-100">
-          <button 
+          <button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(prev => prev - 1)}
             className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
             ←
           </button>
-          
+
           <div className="flex items-center gap-2">
             {[...Array(Math.ceil(totalCount / perPage))].map((_, i) => (
               <button
                 key={i + 1}
                 onClick={() => setCurrentPage(i + 1)}
                 className={`w-12 h-12 rounded-full text-xs font-black transition-all
-                  ${currentPage === i + 1 
-                    ? 'bg-gray-900 text-white shadow-xl shadow-gray-200' 
+                  ${currentPage === i + 1
+                    ? 'bg-gray-900 text-white shadow-xl shadow-gray-200'
                     : 'text-gray-400 hover:bg-gray-100 hover:text-gray-900'
                   }
                 `}
@@ -273,7 +344,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
             ))}
           </div>
 
-          <button 
+          <button
             disabled={currentPage === Math.ceil(totalCount / perPage)}
             onClick={() => setCurrentPage(prev => prev + 1)}
             className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-30 disabled:hover:bg-transparent transition-all"

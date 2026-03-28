@@ -34,9 +34,10 @@ class CreateSupplierProductsTable extends Migration
             $table->string('weight')->nullable();
             $table->decimal('price_override', 12, 2)->nullable();
             $table->integer('stock')->default(0);
+            $table->string('barcode', 50)->nullable(false); // Required barcode field
             $table->string('barcode_suffix', 30)->nullable();
-            $table->string('image_path')->nullable();
-            $table->json('additional_images')->nullable();
+            $table->string('image_path')->nullable(false); // Required main image
+            $table->json('additional_images')->nullable(false); // Required additional images (exactly 2)
             $table->timestamps();
         });
     }

@@ -403,8 +403,11 @@ class InventoryController extends Controller
                             $inv->product_variant_id = $existingVariant->id;
                         } else {
                             // Create new variant only if it doesn't exist
-                            // Generate unique barcode for variant (different from parent product)
-                            $variantBarcode = $generateUniqueBarcode('VAR-'); // Use VAR- prefix for variants
+                            // Use supplier variant's barcode (not generated)
+                            if (empty($spVariant->barcode)) {
+                                throw new \Exception("Variant barcode is required for transfer");
+                            }
+                            $variantBarcode = $spVariant->barcode;
                             
                             $newVariant = \App\Models\ProductVariant::create([
                                 'product_id' => $productId,
@@ -413,7 +416,7 @@ class InventoryController extends Controller
                                 'weight_value_id' => $weightValueId,
                                 'stock' => 0,
                                 'price_override' => $priceOverride,
-                                'barcode' => $variantBarcode, // Use generated unique barcode
+                                'barcode' => $variantBarcode, // Use supplier variant barcode
                                 'sale_percentage' => 0,
                                 'image_path' => $spVariant->image_path,
                                 'additional_images' => $spVariant->additional_images,

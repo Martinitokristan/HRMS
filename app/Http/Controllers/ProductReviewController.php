@@ -183,7 +183,45 @@ class ProductReviewController extends Controller
         }
     }
 
-    $reviews = $query->latest()->paginate(10);
+    // Filter by rating if specified
+    if ($request->has('rating') && $request->rating !== 'all') {
+        $query->where('rating', $request->rating);
+    }
+
+    // Apply filtering/sorting logic based on the unified filter parameter
+    $filter = $request->get('filter', $request->get('sort', 'recent'));
+    
+    switch ($filter) {
+        case 'helpful':
+            $query->orderBy('helpful_count', 'desc')
+                ->orderBy('created_at', 'desc');
+            break;
+        case 'rating_high':
+            // Highest Rating is now defined as 4-5 stars
+            $query->where('rating', '>=', 4)
+                ->orderBy('created_at', 'desc');
+            break;
+        case 'rating_low':
+            // Lowest Rating is now defined as 3 stars and below
+            $query->where('rating', '<=', 3)
+                ->orderBy('created_at', 'desc');
+            break;
+        case 'rating_4':
+            $query->where('rating', 4)->orderBy('created_at', 'desc');
+            break;
+        case 'rating_3':
+            $query->where('rating', 3)->orderBy('created_at', 'desc');
+            break;
+        case 'rating_2':
+            $query->where('rating', 2)->orderBy('created_at', 'desc');
+            break;
+        case 'recent':
+        default:
+            $query->orderBy('created_at', 'desc');
+            break;
+    }
+
+    $reviews = $query->paginate(10);
 
     // Calculate rating distribution for all approved reviews of this product
     $ratingDistribution = ProductReview::where('product_id', $productId)
@@ -212,38 +250,64 @@ class ProductReviewController extends Controller
 }
 
     public function checkEligibility($productId, Request $request)
-{
-    $customerId = request()->user()->id;
-    $variantId = $request->query('variant_id');
+    {
+        $customerId = request()->user()->id;
+        $variantId = $request->query('variant_id');
 
-    // Check if customer has a delivered order with this product
-    $hasDeliveredOrder = Sale::where('customer_id', $customerId)
-        ->where('status', 'delivered')
-        ->whereHas('items', function ($q) use ($productId, $variantId) {
-            $q->where('product_id', $productId);
-            if ($variantId) {
-                $q->where('product_variant_id', $variantId);
-            }
-        })
-        ->exists();
+        // Check if customer has a delivered order with this product
+        $hasDeliveredOrder = Sale::where('customer_id', $customerId)
+            ->where('status', 'delivered')
+            ->whereHas('items', function ($q) use ($productId, $variantId) {
+                $q->where('product_id', $productId);
+                if ($variantId) {
+                    $q->where('product_variant_id', $variantId);
+                }
+            })
+            ->exists();
 
-    // Check if customer already reviewed this product/variant combination
-    $alreadyReviewedQuery = ProductReview::where('customer_id', $customerId)
-        ->where('product_id', $productId);
-    
-    if ($variantId) {
-        $alreadyReviewedQuery->where('product_variant_id', $variantId);
-    } else {
-        $alreadyReviewedQuery->whereNull('product_variant_id');
+        // Check if customer already reviewed this product/variant combination
+        $alreadyReviewedQuery = ProductReview::where('customer_id', $customerId)
+            ->where('product_id', $productId);
+        
+        if ($variantId) {
+            $alreadyReviewedQuery->where('product_variant_id', $variantId);
+        } else {
+            $alreadyReviewedQuery->whereNull('product_variant_id');
+        }
+        
+        $alreadyReviewed = $alreadyReviewedQuery->exists();
+
+        return response()->json([
+            'can_review' => $hasDeliveredOrder && !$alreadyReviewed,
+            'has_delivered_order' => $hasDeliveredOrder,
+            'already_reviewed' => $alreadyReviewed,
+            'status' => 'success'
+        ]);
     }
-    
-    $alreadyReviewed = $alreadyReviewedQuery->exists();
 
-    return response()->json([
-        'can_review' => $hasDeliveredOrder && !$alreadyReviewed,
-        'has_delivered_order' => $hasDeliveredOrder,
-        'already_reviewed' => $alreadyReviewed,
-        'status' => 'success'
-    ]);
-}
+    public function markHelpful($id, Request $request)
+    {
+        $review = ProductReview::findOrFail($id);
+        $customerId = $request->user()->id;
+        $isHelpful = $request->input('is_helpful', true);
+
+        // Update or create the helpfulness record
+        ReviewHelpfulness::updateOrCreate(
+            ['review_id' => $id, 'customer_id' => $customerId],
+            ['is_helpful' => $isHelpful]
+        );
+
+        // Recalculate total helpful count for this review
+        $count = ReviewHelpfulness::where('review_id', $id)
+            ->where('is_helpful', true)
+            ->count();
+
+        $review->update(['helpful_count' => $count]);
+
+        return response()->json([
+            'data' => ['helpful_count' => $count],
+            'status' => 'success',
+            'message' => 'Your feedback has been recorded!'
+        ]);
+    }
 }

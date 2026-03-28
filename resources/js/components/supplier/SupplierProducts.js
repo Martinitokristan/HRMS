@@ -185,7 +185,16 @@ export default function SupplierProducts() {
     };
 
     const addVariant = () => {
-        setVariants(prev => [...prev, { size: '', color: '', weight: '', stock: 0, price_override: '', existing_image_path: null }]);
+        setVariants(prev => [...prev, { 
+            size: '', 
+            color: '', 
+            weight: '', 
+            stock: 0, 
+            price_override: '', 
+            barcode: '', // Required barcode
+            existing_image_path: null,
+            existing_additional_images: [] // Exactly 2 additional images
+        }]);
     };
 
     const removeVariant = (idx) => {
@@ -330,6 +339,33 @@ export default function SupplierProducts() {
             return;
         }
         
+        // Validate each variant has required barcode and images
+        for (let i = 0; i < validVariants.length; i++) {
+            const v = validVariants[i];
+            
+            // Check barcode
+            if (!v.barcode?.trim()) {
+                showToast(`Variant ${i + 1}: Barcode is required`, 'error');
+                return;
+            }
+            
+            // Check main image
+            if (!variantImages[i] && !v.existing_image_path) {
+                showToast(`Variant ${i + 1}: Main image is required`, 'error');
+                return;
+            }
+            
+            // Check exactly 2 additional images
+            const newAdditionalCount = variantExtraImages[i]?.length || 0;
+            const existingAdditionalCount = v.existing_additional_images?.length || 0;
+            const totalAdditionalImages = newAdditionalCount + existingAdditionalCount;
+            
+            if (totalAdditionalImages !== 2) {
+                showToast(`Variant ${i + 1}: Exactly 2 additional images are required (currently ${totalAdditionalImages})`, 'error');
+                return;
+            }
+        }
+        
         setSubmitting(true);
         try {
             const fd = new FormData();
@@ -362,6 +398,10 @@ export default function SupplierProducts() {
                     }
                     if (variantExtraImages[idx]?.length > 0) {
                         variantExtraImages[idx].forEach(img => fd.append(`variant_extra_images_${idx}[]`, img));
+                    }
+                    // Append existing additional images
+                    if (v.existing_additional_images?.length > 0) {
+                        fd.append(`variant_existing_additional_images_${idx}`, JSON.stringify(v.existing_additional_images));
                     }
                 });
             }
@@ -601,7 +641,7 @@ export default function SupplierProducts() {
                                                         )}
                                                     </div>
 
-                                                    <div className="flex-1 grid grid-cols-3 gap-3">
+                                                    <div className="flex-1 grid grid-cols-4 gap-3">
                                                         <div>
                                                             <Label className="text-[10px] text-muted-foreground mb-1">Size</Label>
                                                             <select 
@@ -642,6 +682,16 @@ export default function SupplierProducts() {
                                                             </select>
                                                         </div>
                                                         <div>
+                                                            <Label className="text-[10px] text-muted-foreground mb-1">Barcode *</Label>
+                                                            <Input 
+                                                                className="h-8 text-sm" 
+                                                                type="text" 
+                                                                placeholder="Required" 
+                                                                value={v.barcode} 
+                                                                onChange={e => updateVariant(idx, 'barcode', e.target.value)} 
+                                                            />
+                                                        </div>
+                                                        <div>
                                                             <Label className="text-[10px] text-muted-foreground mb-1">Stock</Label>
                                                             <Input className="h-8 text-sm" type="number" placeholder="0" value={v.stock} onChange={e => updateVariant(idx, 'stock', e.target.value)} />
                                                         </div>
@@ -649,7 +699,7 @@ export default function SupplierProducts() {
                                                             <Label className="text-[10px] text-muted-foreground mb-1">Price Override (₱)</Label>
                                                             <Input className="h-8 text-sm" type="number" step="0.01" placeholder="Optional" value={v.price_override} onChange={e => updateVariant(idx, 'price_override', e.target.value)} />
                                                         </div>
-                                                        <div className="flex items-end">
+                                                        <div className="flex items-end col-span-2">
                                                             <Button
                                                                 type="button"
                                                                 variant="destructive"
@@ -697,7 +747,7 @@ export default function SupplierProducts() {
                                                 <Upload className="h-6 w-6 text-orange-500" />
                                              </div>
                                              <div className="text-sm font-bold text-foreground">Add Product Photo</div>
-                                             <div className="text-[10px] mt-1 opacity-50 text-muted-foreground">Main + 3 Gallery Photos</div>
+                                             <div className="text-[10px] mt-1 opacity-50 text-muted-foreground">Main + Exactly 2 Gallery Photos</div>
                                              <input
                                                 type="file"
                                                 accept="image/*"
@@ -793,10 +843,10 @@ export default function SupplierProducts() {
                                 <Label className="text-sm font-bold flex items-center gap-2">
                                     <Plus className="h-4 w-4 text-orange-500" /> Extra Gallery Photos
                                 </Label>
-                                <span className="text-[10px] font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">Max 3</span>
+                                <span className="text-[10px] font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">Exactly 2 Required</span>
                             </div>
-                            <div className="grid grid-cols-3 gap-6">
-                                {[0, 1, 2].map(i => {
+                            <div className="grid grid-cols-2 gap-6">
+                                {[0, 1].map(i => {
                                     let preview = null;
                                     let isExisting = false;
                                     

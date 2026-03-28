@@ -42,8 +42,15 @@ export function ToastProvider({ children }) {
         setToasts(prev => prev.filter(t => t.id !== id));
     };
 
+    const toast = {
+        success: (msg) => showToast(msg, 'success'),
+        error: (msg) => showToast(msg, 'error'),
+        info: (msg) => showToast(msg, 'info'),
+        warning: (msg) => showToast(msg, 'warning'),
+    };
+
     return (
-        <ToastContext.Provider value={{ showToast }}>
+        <ToastContext.Provider value={{ showToast, toast }}>
             {children}
             <div className="fixed bottom-5 right-5 z-[600] flex flex-col gap-2.5 w-[340px] max-w-[calc(100vw-2rem)]">
                 {toasts.map(t => {
@@ -75,5 +82,9 @@ export function ToastProvider({ children }) {
 }
 
 export function useToast() {
-    return useContext(ToastContext);
+    const context = useContext(ToastContext);
+    if (!context) {
+        throw new Error('useToast must be used within a ToastProvider');
+    }
+    return context;
 }

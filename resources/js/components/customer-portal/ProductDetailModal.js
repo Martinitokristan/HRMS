@@ -135,6 +135,9 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
 
     if (!product) return null;
 
+    const baseStock = Number(product.available_stock || product.inventory?.current_stock || 0);
+    const allVariants = product.product_variants || product.variants || [];
+
     // Show reviews view
     if (showReviews) {
         return (
@@ -169,7 +172,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                         {/* Summary Score */}
                         <div className="px-12 flex flex-col items-center">
                             <div className="text-7xl font-black text-[#FF5A1F] tracking-tighter mb-2 leading-none">
-                                {productRating?.average_rating?.toFixed(1) || '0.0'}
+                                {Number(productRating?.average_rating || 0).toFixed(1)}
                             </div>
                             <div className="flex items-center gap-0.5 mb-2 scale-110">
                                 <RatingStars rating={productRating?.average_rating || 0} size="sm" />
@@ -216,7 +219,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                         <ProductReviewList
                             productId={product.id}
                             variantId={selectedVariant?.id}
-                            productVariants={product.product_variants || []}
+                            productVariants={allVariants}
                         />
                     </div>
                 </div>
@@ -225,8 +228,6 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
     }
 
     try {
-        const baseStock = Number(product.available_stock || product.inventory?.current_stock || 0);
-        const allVariants = product.product_variants || product.variants || [];
         const hasOriginalVariants = allVariants.length > 0;
 
         const variantOptions = allVariants.map(v => ({
@@ -429,7 +430,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                                 <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100 shadow-sm">
                                     <RatingStars rating={productRating.average_rating || 0} size="sm" />
                                     <span className="text-[10px] font-black text-gray-400 ml-1 mt-0.5">
-                                        {productRating.average_rating?.toFixed(1) || '0.0'}
+                                        {Number(productRating.average_rating || 0).toFixed(1)}
                                     </span>
                                 </div>
                                 <div className="h-4 w-[1px] bg-gray-200"></div>

@@ -100,18 +100,47 @@ class SupplierProductController extends Controller
                 $variants = json_decode($request->variants, true);
                 if (is_array($variants)) {
                     foreach ($variants as $index => $v) {
+                        // Validate required barcode
+                        if (empty($v['barcode'])) {
+                            throw \Illuminate\Validation\ValidationException::withMessages([
+                                "variants.{$index}.barcode" => "Variant barcode is required"
+                            ]);
+                        }
+                        
+                        // Validate main image
                         $variantImage = null;
                         $fileKey = "variant_image_{$index}";
+                        if (!$request->hasFile($fileKey) && empty($v['existing_image_path'])) {
+                            throw \Illuminate\Validation\ValidationException::withMessages([
+                                "variants.{$index}.image" => "Variant main image is required"
+                            ]);
+                        }
+                        
                         if ($request->hasFile($fileKey)) {
                             $variantImage = $request->file($fileKey)->store('supplier-product-variants', 'public');
                         }
 
+                        // Validate exactly 2 additional images
                         $variantExtras = [];
                         $extraKey = "variant_extra_images_{$index}";
+                        $existingAdditional = $v['existing_additional_images'] ?? [];
+                        
                         if ($request->hasFile($extraKey)) {
                             foreach ($request->file($extraKey) as $file) {
                                 $variantExtras[] = $file->store('supplier-product-variants', 'public');
                             }
+                        }
+                        
+                        $totalAdditionalImages = count($variantExtras) + count($existingAdditional);
+                        if ($totalAdditionalImages !== 2) {
+                            throw \Illuminate\Validation\ValidationException::withMessages([
+                                "variants.{$index}.additional_images" => "Exactly 2 additional images are required"
+                            ]);
+                        }
+                        
+                        // Merge existing and new additional images
+                        if (!empty($existingAdditional)) {
+                            $variantExtras = array_merge($existingAdditional, $variantExtras);
                         }
 
                         $product->variants()->create([
@@ -120,6 +149,7 @@ class SupplierProductController extends Controller
                             'weight'            => $v['weight'] ?? null,
                             'stock'             => $v['stock'] ?? 0,
                             'price_override'    => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
+                            'barcode'           => $v['barcode'],
                             'barcode_suffix'    => $v['barcode_suffix'] ?? null,
                             'image_path'        => $variantImage,
                             'additional_images' => $variantExtras,
@@ -190,14 +220,27 @@ class SupplierProductController extends Controller
                 $variants = json_decode($request->variants, true);
                 if (is_array($variants)) {
                     foreach ($variants as $index => $v) {
+                        // Validate required barcode
+                        if (empty($v['barcode'])) {
+                            throw \Illuminate\Validation\ValidationException::withMessages([
+                                "variants.{$index}.barcode" => "Variant barcode is required"
+                            ]);
+                        }
+                        
+                        // Validate main image
                         $variantImage = null;
                         $fileKey = "variant_image_{$index}";
                         if ($request->hasFile($fileKey)) {
                             $variantImage = $request->file($fileKey)->store('supplier-product-variants', 'public');
                         } elseif (!empty($v['existing_image_path'])) {
                             $variantImage = $v['existing_image_path'];
+                        } elseif (empty($v['existing_image_path'])) {
+                            throw \Illuminate\Validation\ValidationException::withMessages([
+                                "variants.{$index}.image" => "Variant main image is required"
+                            ]);
                         }
 
+                        // Validate exactly 2 additional images
                         $variantExtras = [];
                         if (isset($v['existing_extra_images']) && is_array($v['existing_extra_images'])) {
                             $variantExtras = $v['existing_extra_images'];
@@ -209,12 +252,20 @@ class SupplierProductController extends Controller
                             }
                         }
                         
+                        $totalAdditionalImages = count($variantExtras);
+                        if ($totalAdditionalImages !== 2) {
+                            throw \Illuminate\Validation\ValidationException::withMessages([
+                                "variants.{$index}.additional_images" => "Exactly 2 additional images are required"
+                            ]);
+                        }
+                        
                         $product->variants()->create([
                             'size'              => $v['size'] ?? null,
                             'color'             => $v['color'] ?? null,
                             'weight'            => $v['weight'] ?? null,
                             'stock'             => $v['stock'] ?? 0,
                             'price_override'    => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
+                            'barcode'           => $v['barcode'],
                             'barcode_suffix'    => $v['barcode_suffix'] ?? null,
                             'image_path'        => $variantImage,
                             'additional_images' => $variantExtras,

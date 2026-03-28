@@ -337,7 +337,7 @@ export default function Register() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="reg-email">Email Address</Label>
-                                        <Input id="reg-email" name="email" type="email" value={formData.email} required onChange={handleChange} placeholder="name@email.com" className={`h-11 ${errors.email ? 'border-red-500' : ''}`} />
+                                        <Input id="reg-email" name="email" type="email" value={formData.email} required onChange={handleChange} placeholder="" className={`h-11 ${errors.email ? 'border-red-500' : ''}`} />
                                         {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-2">

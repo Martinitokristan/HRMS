@@ -82,10 +82,10 @@ export default function Landing() {
 
             {/* Nav */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
-                <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+                <div className="max-w-[1500px] mx-auto px-10 md:px-16 flex items-center justify-between h-16">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                            <span className="text-xs font-black text-primary-foreground">H</span>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF5A1F]">
+                            <span className="text-xs font-black text-white">H</span>
                         </div>
                         <span className="text-lg font-bold tracking-tight text-foreground">
                             HRMS
@@ -96,7 +96,7 @@ export default function Landing() {
                         <a href="#products" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Store</a>
                         <a href="#about" className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">Partners</a>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-6">
                         <Button variant="ghost" asChild>
                             <Link to="/login">Log in</Link>
                         </Button>
@@ -113,7 +113,7 @@ export default function Landing() {
             <header className="relative pt-16 overflow-hidden" style={{
                 background: 'linear-gradient(135deg, #0F172A 0%, #1e293b 100%)',
             }}>
-                <div className="max-w-7xl mx-auto px-6 py-24 md:py-32 relative z-10">
+                <div className="max-w-[1500px] mx-auto px-10 md:px-16 py-32 md:py-48 relative z-10">
                     <Badge variant="outline" className="border-primary/25 bg-primary/15 text-primary mb-8 px-4 py-1.5 text-[13px] font-extrabold uppercase tracking-wider">
                         <Star className="h-3.5 w-3.5 mr-2 fill-current" />
                         Premium Hardware Solutions
@@ -158,8 +158,8 @@ export default function Landing() {
             </header>
 
             {/* Product Catalog */}
-            <section id="products" className="py-20 md:py-28 px-6 bg-background">
-                <div className="max-w-7xl mx-auto">
+            <section id="products" className="py-20 md:py-28 px-10 md:px-16 bg-background">
+                <div className="max-w-[1500px] mx-auto">
                     <div className="text-center mb-16">
                         <Badge variant="secondary" className="text-primary font-extrabold uppercase tracking-[0.15em] mb-3">Our Catalog</Badge>
                         <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">Professional Hardware Catalog</h2>
@@ -206,8 +206,8 @@ export default function Landing() {
             </section>
 
             {/* Features */}
-            <section id="features" className="py-20 md:py-28 px-6 bg-secondary">
-                <div className="max-w-7xl mx-auto">
+            <section id="features" className="py-32 md:py-40 px-10 md:px-16 bg-secondary">
+                <div className="max-w-[1500px] mx-auto">
                     <div className="text-center mb-16">
                         <Badge variant="secondary" className="text-primary font-extrabold uppercase tracking-[0.15em] mb-3 bg-primary/10">Capabilities</Badge>
                         <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">Everything you need to scale</h2>
@@ -235,8 +235,8 @@ export default function Landing() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-border bg-background py-10 px-6">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <footer className="border-t border-border bg-background py-16 px-10 md:px-16">
+                <div className="max-w-[1500px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
                             <span className="text-[10px] font-black text-primary-foreground">H</span>

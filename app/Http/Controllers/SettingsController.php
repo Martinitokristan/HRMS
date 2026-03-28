@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Optimized: Cache static data and only return what's requested
         $settings = Setting::all()->groupBy('group')->map(function ($group) {
@@ -20,7 +20,7 @@ class SettingsController extends Controller
         });
 
         // Only load masterlist data if needed (check for cache headers or specific params)
-        $includeMasterlist = request()->get('include_masterlist', false);
+        $includeMasterlist = $request->get('include_masterlist', false);
         
         $response = [
             'data' => [
@@ -32,10 +32,10 @@ class SettingsController extends Controller
         if ($includeMasterlist) {
             // Optimized: Load only essential masterlist data
             $response['data']['categories'] = Category::all(['id', 'name']);
-            $response['data']['unitTypes'] = UnitType::all(['id', 'name']);
+            $response['data']['unitTypes'] = UnitType::all(['id', 'purchase_unit', 'sell_unit']);
             
             // Only load variants if specifically requested
-            if (request()->get('include_variants', false)) {
+            if ($request->get('include_variants', false)) {
                 $response['data']['variants'] = Variant::with('values')->get();
             }
         }

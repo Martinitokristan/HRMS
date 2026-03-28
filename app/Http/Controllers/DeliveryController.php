@@ -406,11 +406,19 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Can only rate delivered orders'], 400);
         }
 
-        $delivery->update([
+        \Log::info('Submitting rating for delivery ID: ' . $id, [
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+            'rider_id' => $delivery->rider_id
+        ]);
+
+        $success = $delivery->update([
             'rating' => $request->rating,
             'rating_comment' => $request->comment,
             'rated_at' => now(),
         ]);
+
+        \Log::info('Rating update result: ' . ($success ? 'Success' : 'Failed'));
 
         // Notify Rider
         if ($delivery->rider) {

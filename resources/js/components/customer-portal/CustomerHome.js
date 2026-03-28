@@ -206,17 +206,17 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 </div>
 
                 {/* Social Proof Row - Tucked Closely */}
-                <div className="flex items-center gap-2 pt-1 border-t border-gray-100/30">
-                    <div className="flex items-center gap-1">
-                        <div className="scale-75 origin-left -ml-1">
-                            <RatingStars rating={productRating?.average_rating || 0} size="xs" />
+                <div className="flex items-center gap-3 pt-1 border-t border-gray-100/30">
+                    <div className="flex items-center gap-1.5">
+                        <div className="scale-90 origin-left -ml-0.5">
+                            <RatingStars rating={productRating?.average_rating || 0} size="sm" showCount={false} />
                         </div>
-                        <span className="text-[8.5px] font-black text-gray-900 leading-none">
-                            {productRating?.average_rating?.toFixed(1) || '0.0'}
+                        <span className="text-[11px] font-black text-gray-900 leading-none">
+                            {Number(productRating?.average_rating || 0).toFixed(1)}
                         </span>
                     </div>
-                    <div className="w-0.5 h-0.5 rounded-full bg-gray-300"></div>
-                    <span className="text-[8.5px] font-black text-gray-900 uppercase tracking-widest leading-none whitespace-nowrap">
+                    <div className="w-1 h-1 rounded-full bg-gray-300"></div>
+                    <span className="text-[11px] font-black text-gray-900 uppercase tracking-widest leading-none whitespace-nowrap">
                         {soldCount || 0} SOLD
                     </span>
                 </div>
@@ -445,10 +445,10 @@ export default function CustomerHome() {
         <div className="min-h-screen bg-white">
             {/* ===== STICKY HEADER ===== */}
             <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-6">
+                <div className="max-w-[1500px] mx-auto px-6 h-14 flex items-center justify-between gap-6">
                     {/* Logo */}
                     <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => navigate('/shop')}>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white font-bold text-sm">H</div>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF5A1F] text-white font-bold text-sm">H</div>
                         <div className="text-base font-bold text-gray-900">HRMS</div>
                     </div>
 
@@ -470,7 +470,7 @@ export default function CustomerHome() {
                     </div>
 
                     {/* Right Actions */}
-                    <div className="flex items-center gap-4 shrink-0">
+                    <div className="flex items-center gap-8 shrink-0">
                         {/* Cart */}
                         <button id="cart-icon-btn" className="relative flex items-center gap-2 text-gray-700 hover:text-gray-900" onClick={() => navigate('/shop/cart')}>
                             <div className="relative">
@@ -577,7 +577,7 @@ export default function CustomerHome() {
 
             {/* ===== CATEGORY TABS ===== */}
             <div className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6">
+                <div className="max-w-[1500px] mx-auto px-6">
                     <div className="flex gap-1 overflow-x-auto scrollbar-hide">
                         <button
                             className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${!categoryFilter
@@ -605,7 +605,7 @@ export default function CustomerHome() {
             </div>
 
             {/* ===== PRODUCT GRID ===== */}
-            <main className="max-w-7xl mx-auto px-6 py-6">
+            <main className="max-w-[1500px] mx-auto px-6 py-6">
                 <div className="mb-5">
                     <h2 className="text-xl font-bold text-gray-900">
                         {categoryFilter ? categories.find(c => c.id == categoryFilter)?.name || 'Products' : 'Product Catalog'}

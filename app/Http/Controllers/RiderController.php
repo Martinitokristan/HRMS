@@ -72,9 +72,13 @@ class RiderController extends Controller
     {
         $riderId = $request->user()->id;
         
+        \Log::info('Fetching rating stats for rider: ' . $riderId);
+        
         $ratings = Delivery::where('rider_id', $riderId)
             ->whereNotNull('rating')
             ->get(['rating', 'rating_comment', 'rated_at']);
+
+        \Log::info('Found ratings count: ' . $ratings->count());
         
         $averageRating = $ratings->avg('rating') ? round($ratings->avg('rating'), 2) : 0;
         $totalRatings = $ratings->count();

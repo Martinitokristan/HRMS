@@ -240,7 +240,7 @@ export default function RiderRegister() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <Label>Email Address *</Label>
-                                        <Input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} required placeholder="email@example.com" className={errors.email ? 'border-red-500' : ''} />
+                                        <Input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} required placeholder="" className={errors.email ? 'border-red-500' : ''} />
                                         {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-1.5">

@@ -20,6 +20,7 @@ class CreateRiderProfilesTable extends Migration
             $table->string('emergency_contact', 20)->nullable();
             $table->decimal('current_latitude', 10, 7)->nullable();
             $table->decimal('current_longitude', 10, 7)->nullable();
+            $table->float('current_heading')->default(0)->after('current_longitude');
             $table->string('valid_id_type')->nullable();
             $table->string('valid_id_path')->nullable();
             $table->string('license_number')->nullable();

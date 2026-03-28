@@ -21,8 +21,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
     const [variantValues, setVariantValues] = useState({ sizes: [], colors: [], weights: [] });
     
     useEffect(() => { 
-        // Disabled API call for now - using hardcoded mapping
-        // fetchVariantValues(); 
+        fetchVariantValues(); 
     }, []);
 
     // Fetch variant values for fallback when relationships fail
@@ -102,9 +101,9 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                 setVariantRows(pvs.map(pv => {
                     return {
                         id: pv.id || Math.random(),
-                        size_value: pv.sizeValue?.label || getVariantLabelById(pv.size_value_id, 'size'),
-                        color_value: pv.colorValue?.label || getVariantLabelById(pv.color_value_id, 'color'),
-                        weight_value: pv.weightValue?.label || getVariantLabelById(pv.weight_value_id, 'weight'),
+                        size_value: pv.size_value?.label || getVariantLabelById(pv.size_value_id, 'size'),
+                        color_value: pv.color_value?.label || getVariantLabelById(pv.color_value_id, 'color'),
+                        weight_value: pv.weight_value?.label || getVariantLabelById(pv.weight_value_id, 'weight'),
                         stock: pv.stock || 0,
                         price_override: pv.price_override || '',
                         barcode: pv.barcode || pv.barcode_suffix || product.barcode || 'No Barcode',
@@ -328,7 +327,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                             <SelectValue placeholder="Select Category" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {categories.map(c => (
+                                            {(categories || []).map(c => (
                                                 <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
                                             ))}
                                         </SelectContent>
@@ -347,7 +346,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                             <SelectValue placeholder="Select Supplier" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {suppliers.map(s => (
+                                            {(suppliers || []).map(s => (
                                                 <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
                                             ))}
                                         </SelectContent>
@@ -365,7 +364,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                             <SelectValue placeholder="Select Unit Type" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {unitTypes.map(u => (
+                                            {(unitTypes || []).map(u => (
                                                 <SelectItem key={u.id} value={u.id.toString()}>
                                                     {u.purchase_unit} / {u.sell_unit}
                                                 </SelectItem>
@@ -541,7 +540,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {variantRows.map((row, index) => (
+                                                {(variantRows || []).map((row, index) => (
                                                     <tr key={row.id} className="border-t">
                                                         <td className="px-4 py-2">
                                                             <div className="flex items-center justify-center">

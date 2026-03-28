@@ -225,7 +225,7 @@ export default function SupplierRegister() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <Label>Email *</Label>
-                                        <Input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="business@email.com" className={errors.email ? 'border-red-500' : ''} />
+                                        <Input name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="" className={errors.email ? 'border-red-500' : ''} />
                                         {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-1.5">

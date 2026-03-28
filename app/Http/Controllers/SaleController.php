@@ -172,7 +172,7 @@ class SaleController extends Controller
             Delivery::create([
                 'sale_id'         => $sale->id,
                 'tracking_number' => $trackingNumber,
-                'status'          => 'waiting', // New status: Hidden from Riders until Admin confirms
+                'status'          => 'waiting', // Admin confirmation required first
                 'address'         => $data['address'] ?? 'TBD',
                 'latitude'        => $customerProfile->latitude ?? null,
                 'longitude'       => $customerProfile->longitude ?? null,

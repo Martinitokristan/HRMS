@@ -41,7 +41,7 @@ export default function SupplierLogin() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-1.5">
                             <Label>Email Address</Label>
-                            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="name@company.com" />
+                            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="" />
                         </div>
                         <div className="space-y-1.5">
                             <Label>Password</Label>
