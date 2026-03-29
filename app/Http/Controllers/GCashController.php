@@ -17,9 +17,11 @@ class GCashController extends Controller
      */
     public function smsWebhook(Request $request)
     {
-        // 1. Verify Secret Header
+        // 1. Verify Secret Header or URL Parameter
         $secret = env('GCASH_SMS_SECRET');
-        if (empty($secret) || $request->header('X-SMS-Secret') !== $secret) {
+        $providedSecret = $request->header('X-SMS-Secret') ?? $request->query('secret');
+        
+        if (empty($secret) || $providedSecret !== $secret) {
             Log::warning('Unauthorized SMS Webhook attempt', ['ip' => $request->ip()]);
             return response()->json(['error' => 'Unauthorized'], 401);
         }
