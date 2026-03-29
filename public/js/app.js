@@ -7960,12 +7960,26 @@ function GCashLogs() {
     filter = _useState0[0],
     setFilter = _useState0[1]; // 'all', 'matched', 'unmatched'
 
-  // Clean doubled SMS body: "You have received money in GCash! You have received PHP..." → "You have received PHP..."
+  // Clean doubled SMS body and highlight amount
   var cleanSmsBody = function cleanSmsBody(text) {
     if (!text) return text;
-    var idx = text.indexOf('You have received PHP');
-    if (idx > 0) return text.substring(idx);
-    return text;
+    var cleaned = text;
+    var idx = cleaned.indexOf('You have received PHP');
+    if (idx > 0) {
+      cleaned = cleaned.substring(idx);
+    }
+
+    // Highlight the amount (e.g. PHP 1.46)
+    var parts = cleaned.split(/(PHP\s*[0-9,]+\.[0-9]{2})/i);
+    return parts.map(function (part, index) {
+      if (part.toUpperCase().startsWith('PHP')) {
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+          className: "font-bold underline",
+          children: part
+        }, index);
+      }
+      return part;
+    });
   };
   var fetchLogs = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
@@ -8131,7 +8145,7 @@ function GCashLogs() {
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("td", {
                   className: "px-6 py-4 whitespace-nowrap",
                   children: log.parsed_amount ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("span", {
-                    className: "font-extrabold text-[#007DFE] underline decoration-2 underline-offset-2",
+                    className: "font-bold text-slate-800",
                     children: ["\u20B1", parseFloat(log.parsed_amount).toFixed(2)]
                   }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
                     className: "text-slate-400 text-xs italic",

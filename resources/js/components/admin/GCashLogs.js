@@ -12,12 +12,23 @@ export default function GCashLogs() {
     const [totalPages, setTotalPages] = useState(1);
     const [filter, setFilter] = useState('all'); // 'all', 'matched', 'unmatched'
 
-    // Clean doubled SMS body: "You have received money in GCash! You have received PHP..." → "You have received PHP..."
+    // Clean doubled SMS body and highlight amount
     const cleanSmsBody = (text) => {
         if (!text) return text;
-        const idx = text.indexOf('You have received PHP');
-        if (idx > 0) return text.substring(idx);
-        return text;
+        let cleaned = text;
+        const idx = cleaned.indexOf('You have received PHP');
+        if (idx > 0) {
+            cleaned = cleaned.substring(idx);
+        }
+        
+        // Highlight the amount (e.g. PHP 1.46)
+        const parts = cleaned.split(/(PHP\s*[0-9,]+\.[0-9]{2})/i);
+        return parts.map((part, index) => {
+            if (part.toUpperCase().startsWith('PHP')) {
+                return <span key={index} className="font-bold underline">{part}</span>;
+            }
+            return part;
+        });
     };
 
     const fetchLogs = async () => {
@@ -138,9 +149,7 @@ export default function GCashLogs() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {log.parsed_amount ? (
-                                            <span className="font-extrabold text-[#007DFE] underline decoration-2 underline-offset-2">
-                                                ₱{parseFloat(log.parsed_amount).toFixed(2)}
-                                            </span>
+                                            <span className="font-bold text-slate-800">₱{parseFloat(log.parsed_amount).toFixed(2)}</span>
                                         ) : (
                                             <span className="text-slate-400 text-xs italic">Unparsed</span>
                                         )}
