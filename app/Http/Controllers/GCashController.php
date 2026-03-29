@@ -63,19 +63,66 @@ class GCashController extends Controller
 
         Log::info("Parsed GCash amount: {$amount}");
 
-        // 3. Find matching pending_payment sale
-        // To be safe, look for exactly one match
-        $matchingSales = Sale::where('status', 'pending_payment')
-                             ->where('payment_method', 'gcash')
-                             ->where('fingerprint_amount', $amount)
-                             ->get();
+        // 3. Parse sender phone number from notification
+        // Format: "You have received PHP 1.16 of GCash from K** RI**Y S. 09070574360."
+        $parsedPhone = null;
+        $phoneMatches = [];
+        if (preg_match('/(09\d{9})/', $smsBody, $phoneMatches)) {
+            $parsedPhone = $phoneMatches[1];
+        } elseif (preg_match('/(\+639\d{9})/', $smsBody, $phoneMatches)) {
+            $parsedPhone = '0' . substr($phoneMatches[1], 3); // Convert +639 → 09
+        }
 
-        if ($matchingSales->count() === 0) {
-            Log::warning("No pending order found for amount: {$amount}");
+        // Optionally parse reference number (if GCash includes it in future)
+        $parsedRef = null;
+        $refMatches = [];
+        if (preg_match('/(?:Ref\.?\s*(?:No\.?|Number)?:?\s*)(\d{10,20})/i', $smsBody, $refMatches)) {
+            $parsedRef = $refMatches[1];
+        }
+
+        Log::info("Parsed GCash phone: {$parsedPhone}, amount: {$amount}");
+
+        // 4. Find matching pending_payment sale by PHONE + AMOUNT
+        $matchingSale = null;
+
+        if ($parsedPhone) {
+            // Normalize: try both 09XX and +639XX formats
+            $phoneVariants = [
+                $parsedPhone,                                    // 09070574360
+                '+63' . substr($parsedPhone, 1),                 // +639070574360
+                str_replace('+63', '0', $parsedPhone),           // safety fallback
+            ];
+
+            $matchingSale = Sale::where('status', 'pending_payment')
+                                ->where('payment_method', 'gcash')
+                                ->where('total_amount', $amount)
+                                ->whereHas('customer', function ($q) use ($phoneVariants) {
+                                    $q->whereIn('phone', $phoneVariants);
+                                })
+                                ->orderBy('created_at', 'asc')
+                                ->first();
+        }
+
+        // Fallback: amount-only match if phone wasn't parsed
+        if (!$matchingSale) {
+            $matchingSale = Sale::where('status', 'pending_payment')
+                                ->where('payment_method', 'gcash')
+                                ->where('total_amount', $amount)
+                                ->orderBy('created_at', 'asc')
+                                ->first();
+
+            if ($matchingSale && $parsedPhone) {
+                Log::info("Phone match failed, fell back to amount-only match for order #{$matchingSale->order_number}");
+            }
+        }
+
+        if (!$matchingSale) {
+            Log::warning("No pending order found for phone: {$parsedPhone}, amount: {$amount}");
             
             GCashTransaction::create([
                 'sms_body' => $smsBody,
                 'parsed_amount' => $amount,
+                'parsed_ref' => $parsedRef,
                 'raw_payload' => json_encode($request->all()),
                 'matched' => false
             ]);
@@ -83,24 +130,9 @@ class GCashController extends Controller
             return response()->json(['status' => 'ignored', 'reason' => 'no_matching_order']);
         }
 
-        if ($matchingSales->count() > 1) {
-            // Very rare: two orders pending with exactly the same fingerprint amount.
-            // Should be prevented by the DB lock during creation, but handle if it happens.
-            Log::error("CRITICAL: Multiple pending orders found for amount: {$amount}", ['sales' => $matchingSales->pluck('id')]);
-            
-            GCashTransaction::create([
-                'sms_body' => $smsBody,
-                'parsed_amount' => $amount,
-                'raw_payload' => json_encode($request->all()),
-                'matched' => false
-            ]);
+        $sale = $matchingSale;
 
-            return response()->json(['status' => 'error', 'reason' => 'multiple_matches_found_admin_action_required'], 500);
-        }
-
-        $sale = $matchingSales->first();
-
-        // 4. Update the order to confirmed inside a transaction
+        // 5. Update the order to confirmed inside a transaction
         DB::beginTransaction();
         try {
             $sale->status = 'confirmed';
@@ -112,6 +144,7 @@ class GCashController extends Controller
                 'sale_id' => $sale->id,
                 'sms_body' => $smsBody,
                 'parsed_amount' => $amount,
+                'parsed_ref' => $parsedRef,
                 'matched' => true,
                 'auto_confirmed' => true,
                 'raw_payload' => json_encode($request->all())
@@ -120,20 +153,18 @@ class GCashController extends Controller
             // Update delivery status from created (or null) to pending, if it exists
             $delivery = $sale->delivery;
             if ($delivery) {
-                // If the delivery is already created, make sure it is in 'pending' status so riders can see it
                 if (in_array($delivery->status, ['created', 'waiting'])) {
                     $delivery->status = 'pending';
                     $delivery->save();
                 }
             } else {
-                // Create the delivery record so it shows up for riders
                 $delivery = Delivery::create([
                     'sale_id' => $sale->id,
                     'status' => 'pending',
                 ]);
             }
 
-            // Optional: send standard system notification to customer
+            // Send notification to customer
             CustomerNotification::create([
                 'customer_id' => $sale->customer_id,
                 'delivery_id' => $delivery ? $delivery->id : null,

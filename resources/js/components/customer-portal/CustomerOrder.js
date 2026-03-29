@@ -267,8 +267,8 @@ export default function CustomerOrder() {
                 })),
             });
 
-            if (payment === "gcash" && orderResponse.data.data.fingerprint_amount) {
-                setGcashAmount(orderResponse.data.data.fingerprint_amount);
+            if (payment === "gcash") {
+                setGcashAmount(orderResponse.data.data.total_amount);
                 setGcashBasePayload(orderResponse.data.gcash_payload);
                 setGcashModal(true);
                 return; // Wait for user to pay before completing
@@ -476,7 +476,7 @@ export default function CustomerOrder() {
                                                 </div>
                                                 📱 GCash
                                             </div>
-                                            <div className="text-xs text-muted-foreground mt-1 ml-6">Scan exact amount to auto-confirm</div>
+                                            <div className="text-xs text-muted-foreground mt-1 ml-6">Pay via QR code with reference verification</div>
                                         </div>
                                     </div>
                                 </div>
@@ -542,8 +542,7 @@ export default function CustomerOrder() {
                                 ₱{parseFloat(gcashAmount || 0).toFixed(2)}
                             </div>
                             <p className="text-blue-100 text-sm italic mt-2">
-                                Note: This amount has a unique cent matching code (e.g. .01, .02) to automatically verify your payment.
-                                Do not round it off!
+                                Pay this exact amount via GCash.
                             </p>
                         </div>
 
@@ -582,18 +581,30 @@ export default function CustomerOrder() {
                             <ol className="list-decimal list-inside space-y-1.5 text-muted-foreground pl-1">
                                 <li><strong>Save</strong> the QR Code image above.</li>
                                 <li>Open your <strong>GCash App</strong>.</li>
-                                <li>Tap <strong>Scan</strong> and click the "Upload QR" icon icon.</li>
+                                <li>Tap <strong>Scan</strong> and click the "Upload QR" icon.</li>
                                 <li>Select the saved QR image from your gallery.</li>
-                                <li>The exact amount will be locked. <strong>Confirm Payment</strong>.</li>
+                                <li><strong>Confirm Payment</strong>. Your order will be auto-verified.</li>
                             </ol>
                         </div>
 
-                        <Button
-                            className="w-full h-14 text-lg font-bold shadow-lg shadow-primary/20"
-                            onClick={completeOrderSuccess}
-                        >
-                            <CheckCircle2 className="h-5 w-5 mr-2" /> Done, I have Paid!
-                        </Button>
+                        <div className="flex flex-col gap-3">
+                            <Button
+                                className="w-full h-14 text-lg font-bold shadow-lg shadow-primary/20"
+                                onClick={completeOrderSuccess}
+                            >
+                                <CheckCircle2 className="h-5 w-5 mr-2" /> Done, I have Paid!
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="w-full text-muted-foreground"
+                                onClick={() => {
+                                    setGcashModal(false);
+                                    navigate("/shop");
+                                }}
+                            >
+                                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Shop
+                            </Button>
+                        </div>
                     </div>
                 </Modal>
             </div>

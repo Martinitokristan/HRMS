@@ -9,7 +9,7 @@ class Sale extends Model
     protected $fillable = [
         'order_number', 'customer_id', 'processed_by', 'discount_pct',
         'total_amount', 'payment_method', 'status', 'notes',
-        'fingerprint_amount', 'payment_confirmed_at',
+        'payment_confirmed_at',
         'cancellation_reason', 'cancellation_notes', 'cancelled_by', 'cancelled_at',
     ];
 

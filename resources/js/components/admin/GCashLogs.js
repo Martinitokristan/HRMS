@@ -95,6 +95,9 @@ export default function GCashLogs() {
                                     Algorithm Match
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    Parsed Ref
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                                     Order Ref
                                 </th>
                             </tr>
@@ -102,7 +105,7 @@ export default function GCashLogs() {
                         <tbody className="bg-white divide-y divide-slate-200">
                             {loading && logs.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
+                                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
                                         <div className="flex justify-center mb-2">
                                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#007DFE]"></div>
                                         </div>
@@ -111,7 +114,7 @@ export default function GCashLogs() {
                                 </tr>
                             ) : logs.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500 bg-slate-50/50">
+                                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500 bg-slate-50/50">
                                         <div className="flex flex-col items-center">
                                             <AlertCircle className="h-8 w-8 text-slate-300 mb-2" />
                                             <p>No GCash transaction logs found.</p>
@@ -146,6 +149,13 @@ export default function GCashLogs() {
                                                 <XCircle className="w-3 h-3 mr-1" />
                                                 Unmatched
                                             </Badge>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {log.parsed_ref ? (
+                                            <span className="font-mono text-xs text-slate-700">{log.parsed_ref}</span>
+                                        ) : (
+                                            <span className="text-slate-400 text-xs italic">-</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

@@ -146,25 +146,7 @@ class SaleController extends Controller
             $lastNumber = Sale::lockForUpdate()->max('id');
             $orderNumber = 'ORD-' . str_pad(($lastNumber ?? 0) + 1, 5, '0', STR_PAD_LEFT);
 
-            $status = 'pending';
-            $fingerprintAmount = null;
-
-            if ($data['payment_method'] === 'gcash') {
-                $status = 'pending_payment';
-
-                // Find the max fingerprint amount for the exact same base amount
-                $maxPendingAmount = Sale::where('status', 'pending_payment')
-                                        ->where('payment_method', 'gcash')
-                                        ->where('total_amount', $totalWithVat)
-                                        ->lockForUpdate()
-                                        ->max('fingerprint_amount');
-
-                if ($maxPendingAmount && $maxPendingAmount >= $totalWithVat) {
-                    $fingerprintAmount = $maxPendingAmount + 0.01;
-                } else {
-                    $fingerprintAmount = $totalWithVat;
-                }
-            }
+            $status = $data['payment_method'] === 'gcash' ? 'pending_payment' : 'pending';
 
             $sale = Sale::create([
                 'order_number'       => $orderNumber,
@@ -175,7 +157,6 @@ class SaleController extends Controller
                 'payment_method'     => $data['payment_method'],
                 'status'             => $status,
                 'notes'              => $data['notes'] ?? null,
-                'fingerprint_amount' => $fingerprintAmount,
             ]);
 
             foreach ($itemsData as $item) {

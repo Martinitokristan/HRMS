@@ -15,7 +15,6 @@ class CreateSalesTable extends Migration
             $table->foreignId('processed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->decimal('discount_pct', 5, 2)->nullable();
             $table->decimal('total_amount', 12, 2);
-            $table->decimal('fingerprint_amount', 10, 2)->nullable();
             $table->enum('payment_method', ['cod', 'gcash', 'bank_transfer']);
             $table->enum('status', ['pending_payment', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'returned', 'cancelled'])->default('pending');
             $table->timestamp('payment_confirmed_at')->nullable();

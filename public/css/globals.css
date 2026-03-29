@@ -4694,6 +4694,11 @@ input, select, textarea {
   border-color: rgb(156 163 175 / var(--tw-border-opacity));
 }
 
+.focus\:border-blue-500:focus{
+  --tw-border-opacity: 1;
+  border-color: rgb(59 130 246 / var(--tw-border-opacity));
+}
+
 .focus\:bg-accent:focus{
   background-color: hsl(var(--accent));
 }
@@ -4748,6 +4753,11 @@ input, select, textarea {
 
 .focus\:ring-ring:focus{
   --tw-ring-color: hsl(var(--ring));
+}
+
+.focus\:ring-blue-200:focus{
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(191 219 254 / var(--tw-ring-opacity));
 }
 
 .focus\:ring-offset-2:focus{

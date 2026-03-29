@@ -8077,6 +8077,10 @@ function GCashLogs() {
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("th", {
                 scope: "col",
                 className: "px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider",
+                children: "Parsed Ref"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("th", {
+                scope: "col",
+                className: "px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider",
                 children: "Order Ref"
               })]
             })
@@ -8084,7 +8088,7 @@ function GCashLogs() {
             className: "bg-white divide-y divide-slate-200",
             children: loading && logs.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("tr", {
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("td", {
-                colSpan: "5",
+                colSpan: "6",
                 className: "px-6 py-12 text-center text-slate-500",
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
                   className: "flex justify-center mb-2",
@@ -8095,7 +8099,7 @@ function GCashLogs() {
               })
             }) : logs.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("tr", {
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("td", {
-                colSpan: "5",
+                colSpan: "6",
                 className: "px-6 py-12 text-center text-slate-500 bg-slate-50/50",
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                   className: "flex flex-col items-center",
@@ -8142,6 +8146,15 @@ function GCashLogs() {
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
                       className: "w-3 h-3 mr-1"
                     }), "Unmatched"]
+                  })
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("td", {
+                  className: "px-6 py-4 whitespace-nowrap",
+                  children: log.parsed_ref ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+                    className: "font-mono text-xs text-slate-700",
+                    children: log.parsed_ref
+                  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+                    className: "text-slate-400 text-xs italic",
+                    children: "-"
                   })
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("td", {
                   className: "px-6 py-4 whitespace-nowrap text-sm font-medium",
@@ -14276,11 +14289,11 @@ function CustomerOrder() {
             });
           case 7:
             orderResponse = _context.v;
-            if (!(payment === "gcash" && orderResponse.data.data.fingerprint_amount)) {
+            if (!(payment === "gcash")) {
               _context.n = 8;
               break;
             }
-            setGcashAmount(orderResponse.data.data.fingerprint_amount);
+            setGcashAmount(orderResponse.data.data.total_amount);
             setGcashBasePayload(orderResponse.data.gcash_payload);
             setGcashModal(true);
             return _context.a(2);
@@ -14632,7 +14645,7 @@ function CustomerOrder() {
                       }), "\uD83D\uDCF1 GCash"]
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
                       className: "text-xs text-muted-foreground mt-1 ml-6",
-                      children: "Scan exact amount to auto-confirm"
+                      children: "Pay via QR code with reference verification"
                     })]
                   })]
                 })]
@@ -14740,7 +14753,7 @@ function CustomerOrder() {
               children: ["\u20B1", parseFloat(gcashAmount || 0).toFixed(2)]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("p", {
               className: "text-blue-100 text-sm italic mt-2",
-              children: "Note: This amount has a unique cent matching code (e.g. .01, .02) to automatically verify your payment. Do not round it off!"
+              children: "Pay this exact amount via GCash."
             })]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
             className: "bg-white p-4 rounded-xl border-2 border-dashed border-gray-300 w-fit mx-auto shadow-sm flex flex-col items-center",
@@ -14790,21 +14803,34 @@ function CustomerOrder() {
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("li", {
                 children: ["Tap ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("strong", {
                   children: "Scan"
-                }), " and click the \"Upload QR\" icon icon."]
+                }), " and click the \"Upload QR\" icon."]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("li", {
                 children: "Select the saved QR image from your gallery."
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("li", {
-                children: ["The exact amount will be locked. ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("strong", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("strong", {
                   children: "Confirm Payment"
-                }), "."]
+                }), ". Your order will be auto-verified."]
               })]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_11__.Button, {
-            className: "w-full h-14 text-lg font-bold shadow-lg shadow-primary/20",
-            onClick: completeOrderSuccess,
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
-              className: "h-5 w-5 mr-2"
-            }), " Done, I have Paid!"]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+            className: "flex flex-col gap-3",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_11__.Button, {
+              className: "w-full h-14 text-lg font-bold shadow-lg shadow-primary/20",
+              onClick: completeOrderSuccess,
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
+                className: "h-5 w-5 mr-2"
+              }), " Done, I have Paid!"]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_11__.Button, {
+              variant: "ghost",
+              className: "w-full text-muted-foreground",
+              onClick: function onClick() {
+                setGcashModal(false);
+                navigate("/shop");
+              },
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_20__["default"], {
+                className: "h-4 w-4 mr-2"
+              }), " Back to Shop"]
+            })]
           })]
         })
       })]

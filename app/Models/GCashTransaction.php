@@ -10,7 +10,7 @@ class GCashTransaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'sale_id', 'sms_body', 'parsed_amount', 'matched', 'auto_confirmed', 'raw_payload'
+        'sale_id', 'sms_body', 'parsed_amount', 'parsed_ref', 'matched', 'auto_confirmed', 'raw_payload'
     ];
 
     protected $casts = [

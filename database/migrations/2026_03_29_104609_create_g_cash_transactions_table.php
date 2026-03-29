@@ -18,6 +18,7 @@ class CreateGCashTransactionsTable extends Migration
             $table->foreignId('sale_id')->nullable()->constrained('sales')->nullOnDelete();
             $table->text('sms_body');
             $table->decimal('parsed_amount', 10, 2)->nullable();
+            $table->string('parsed_ref')->nullable();
             $table->boolean('matched')->default(false);
             $table->boolean('auto_confirmed')->default(false);
             $table->text('raw_payload')->nullable();
