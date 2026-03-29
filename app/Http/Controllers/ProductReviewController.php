@@ -13,8 +13,13 @@ class ProductReviewController extends Controller
     public function index(Request $request)
     {
         $query = ProductReview::with(['product', 'customer', 'productVariant'])
-            ->when($request->status && $request->status !== 'all', function ($q) use ($request) {
-                return $q->where('status', $request->status);
+            ->when($request->rating_filter && $request->rating_filter !== 'all', function ($q) use ($request) {
+                if ($request->rating_filter === 'good') {
+                    return $q->where('rating', '>=', 4);
+                } elseif ($request->rating_filter === 'low') {
+                    return $q->where('rating', '<=', 3);
+                }
+                return $q;
             })
             ->when($request->product_id, function ($q) use ($request) {
                 return $q->where('product_id', $request->product_id);
@@ -28,10 +33,19 @@ class ProductReviewController extends Controller
             })
             ->latest();
 
-        $reviews = $query->paginate($request->get('per_page', 15));
+        $reviews = $query->paginate($request->get('per_page', 10)); // Changed to 10 per page limit
+
+        // Get global review stats
+        $stats = [
+            'total' => ProductReview::count(),
+            'good' => ProductReview::where('rating', '>=', 4)->count(),
+            'low' => ProductReview::where('rating', '<=', 3)->count(),
+            'average' => round(ProductReview::avg('rating') ?? 0, 1),
+        ];
 
         return response()->json([
             'data' => $reviews,
+            'stats' => $stats,
             'status' => 'success',
         ]);
     }
@@ -87,7 +101,7 @@ class ProductReviewController extends Controller
             'product_variant_id' => $data['product_variant_id'] ?? null,
             'rating' => $data['rating'],
             'title' => $data['title'] ?? null,
-            'review_text' => $data['review'] ?? null, // Map 'review' to 'review_text'
+            'review_text' => $data['review'] ?? null,
             'status' => 'approved', // Auto-approve for delivered orders
         ];
 

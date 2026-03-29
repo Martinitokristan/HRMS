@@ -4,7 +4,7 @@ import {
     LayoutDashboard, Package, Warehouse, Truck, Handshake,
     Store, BarChart3, Users, Settings, ChevronDown,
     ShoppingBag, UserCheck, Bike, ExternalLink, Star, RotateCcw,
-    MessageSquare,
+    MessageSquare, Smartphone
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -83,6 +83,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     <NavItem to="/suppliers" icon={Handshake}>Suppliers</NavItem>
                     <NavItem to="/supplier-catalog" icon={Store}>Supplier Available Products</NavItem>
                     <NavItem to="/returns" icon={RotateCcw}>Returns</NavItem>
+                    <NavItem to="/gcash-logs" icon={Smartphone}>GCash Payments</NavItem>
 
                     <SectionLabel>Analytics</SectionLabel>
                     <NavItem to="/reports" icon={BarChart3} end>Reports</NavItem>

@@ -58,6 +58,9 @@ import SupplierCatalog from './components/suppliers/SupplierCatalog';
 // Admin: Returns
 import Returns from './components/admin/Returns';
 
+// Admin: GCash Logs
+import GCashLogs from './components/admin/GCashLogs';
+
 function ProtectedRoute({ children, roles }) {
     const { user, loading } = useAuth();
     if (loading) return <div className="loading-page"><div className="spinner" /></div>;
@@ -128,6 +131,7 @@ export default function AppRouter() {
                 <Route path="/reviews" element={<Reviews />} />
                 <Route path="/supplier-catalog" element={<SupplierCatalog />} />
                 <Route path="/returns" element={<Returns />} />
+                <Route path="/gcash-logs" element={<GCashLogs />} />
             </Route>
 
             {/* Customer Portal */}

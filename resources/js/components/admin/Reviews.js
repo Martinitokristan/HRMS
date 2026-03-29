@@ -2,24 +2,23 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Star, MessageSquare, ThumbsUp, CheckCircle, XCircle, Clock, Filter, Search, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Star, MessageSquare, ThumbsUp, ThumbsDown, Search, ArrowLeft, ArrowRight, Table } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import ConfirmModal from '../shared/ConfirmModal';
 import StatCard from '../shared/StatCard';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 
 export default function Reviews() {
     const [reviews, setReviews] = useState([]);
+    const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
+    const [stats, setStats] = useState({ total: 0, good: 0, low: 0, average: 0 });
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('pending');
     const [selectedReview, setSelectedReview] = useState(null);
-    const [responseText, setResponseText] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [ratingFilter, setRatingFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('admin_reviews');
 
     const [confirmModal, setConfirmModal] = useState({
         show: false,
@@ -38,24 +37,29 @@ export default function Reviews() {
     };
 
     useEffect(() => {
-        fetchReviews();
-    }, [activeTab, statusFilter, searchTerm]);
+        fetchReviews(1);
+    }, [ratingFilter, refreshTrigger]);
 
-    const fetchReviews = async () => {
+    // Added local search handler instead of fetching on every keystroke
+    const handleSearch = (e) => {
+        if (e.key === 'Enter') {
+            fetchReviews(1);
+        }
+    };
+
+    const fetchReviews = async (page = 1) => {
         setLoading(true);
         const token = localStorage.getItem('hrms_token');
         
         try {
             const params = new URLSearchParams();
-            if (activeTab !== 'all') params.append('status', activeTab);
-            if (statusFilter !== 'all') params.append('status', statusFilter);
+            if (ratingFilter !== 'all') params.append('rating_filter', ratingFilter);
             if (searchTerm) params.append('search', searchTerm);
+            params.append('page', page);
 
             const response = await axios.get(`/reviews?${params.toString()}`);
             
-            // If response is HTML, it means we probably hit a redirect or 404/500 page
             if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-                console.error('🔍 [Reviews] Received HTML instead of JSON. Check API routes.');
                 showToast('Failed to load reviews: Server returned an invalid format', 'error');
                 setReviews([]);
                 return;
@@ -63,70 +67,33 @@ export default function Reviews() {
 
             const data = response.data;
             
-            // Handle the response structure properly with multiple fallbacks
-            if (data && data.data && data.data.data && Array.isArray(data.data.data)) {
-                setReviews(data.data.data);
-            } else if (data && data.data && Array.isArray(data.data)) {
-                setReviews(data.data);
-            } else if (data && Array.isArray(data)) {
-                setReviews(data);
+            if (data.stats) {
+                setStats(data.stats);
+            }
+            
+            if (data && data.data) {
+                const reviewsPage = data.data;
+                // If standard laravel pagination object
+                if (reviewsPage.data) {
+                    setReviews(reviewsPage.data);
+                    setPagination({
+                        current_page: reviewsPage.current_page,
+                        last_page: reviewsPage.last_page,
+                        total: reviewsPage.total
+                    });
+                } else if (Array.isArray(reviewsPage)) {
+                    setReviews(reviewsPage);
+                    setPagination({ current_page: 1, last_page: 1, total: reviewsPage.length });
+                }
             } else {
-                console.warn('🔍 [Reviews] Unexpected data structure:', data);
                 setReviews([]);
             }
         } catch (error) {
             console.error('Failed to fetch reviews:', error);
-            const msg = error.response?.data?.message || 'Failed to load reviews';
-            showToast(msg, 'error');
+            showToast('Failed to load reviews', 'error');
             setReviews([]);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const updateReviewStatus = async (reviewId, status) => {
-        const performUpdate = async () => {
-            closeConfirm();
-            try {
-                await axios.put(`/reviews/${reviewId}/status`, { status });
-                showToast(`Review ${status} successfully`);
-                fetchReviews();
-                setSelectedReview(null);
-            } catch (error) {
-                console.error('Failed to update review status:', error);
-                showToast('Failed to update review status', 'error');
-            }
-        };
-
-        if (status === 'rejected') {
-            showConfirm(
-                'Reject Review',
-                'Are you sure you want to reject this review? It will be hidden from the storefront.',
-                performUpdate,
-                'destructive'
-            );
-        } else {
-            performUpdate();
-        }
-    };
-
-    const respondToReview = async (reviewId) => {
-        if (!responseText.trim()) {
-            showToast('Please enter a response', 'error');
-            return;
-        }
-
-        try {
-            await axios.post(`/reviews/${reviewId}/respond`, {
-                response: responseText
-            });
-            showToast('Response sent successfully');
-            setResponseText('');
-            fetchReviews();
-            setSelectedReview(null);
-        } catch (error) {
-            console.error('Failed to respond to review:', error);
-            showToast('Failed to send response', 'error');
         }
     };
 
@@ -139,7 +106,7 @@ export default function Reviews() {
                 try {
                     await axios.delete(`/reviews/${reviewId}`);
                     showToast('Review deleted successfully');
-                    fetchReviews();
+                    fetchReviews(pagination.current_page);
                     setSelectedReview(null);
                 } catch (error) {
                     console.error('Failed to delete review:', error);
@@ -150,274 +117,244 @@ export default function Reviews() {
         );
     };
 
-    const getStatusBadge = (status) => {
-        const variants = {
-            pending: 'secondary',
-            approved: 'default',
-            rejected: 'destructive'
-        };
-        const labels = {
-            pending: 'Pending',
-            approved: 'Approved',
-            rejected: 'Rejected'
-        };
-        return <Badge variant={variants[status]}>{labels[status]}</Badge>;
-    };
-
     const renderStars = (rating) => {
-        return Array.from({ length: 5 }, (_, i) => (
-            <Star
-                key={i}
-                className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-            />
-        ));
-    };
-
-    if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="flex">
+                {Array.from({ length: 5 }, (_, i) => (
+                    <Star
+                        key={i}
+                        className={`h-4 w-4 ${i < rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+                    />
+                ))}
             </div>
         );
-    }
+    };
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Reviews Management</h1>
-                    <p className="text-muted-foreground">Manage customer reviews and feedback</p>
+                    <h1 className="text-2xl font-bold">Product Review Analytics</h1>
+                    <p className="text-muted-foreground">Monitor and analyze customer product feedback</p>
                 </div>
             </div>
 
             {/* Stats Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard 
                     label="Total Reviews" 
-                    value={reviews.length} 
+                    value={stats.total} 
                     icon={MessageSquare} 
-                    accentColor="accent" 
+                    accentColor="blue" 
                 />
                 <StatCard 
-                    label="Pending Approval" 
-                    value={reviews.filter(r => r.status === 'pending').length} 
-                    icon={Clock} 
+                    label="Average Rating" 
+                    value={`${stats.average} / 5`} 
+                    icon={Star} 
                     accentColor="amber" 
                 />
                 <StatCard 
-                    label="Approved Content" 
-                    value={reviews.filter(r => r.status === 'approved').length} 
-                    icon={ShieldCheck} 
+                    label="Good Reviews (4-5)" 
+                    value={stats.good} 
+                    icon={ThumbsUp} 
                     accentColor="green" 
+                />
+                <StatCard 
+                    label="Low Reviews (1-3)" 
+                    value={stats.low} 
+                    icon={ThumbsDown} 
+                    accentColor="red" 
                 />
             </div>
 
             {/* Filters */}
             <Card>
                 <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
-                            <div className="relative">
+                    <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                        <div className="flex-1 w-full max-w-md">
+                            <div className="relative flex">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <input
                                     type="text"
-                                    placeholder="Search reviews..."
+                                    placeholder="Search by product or customer... (Press Enter to search)"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                                    onKeyDown={handleSearch}
+                                    className="w-full pl-10 pr-4 py-2 border rounded-l-md focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
+                                <Button 
+                                    onClick={() => fetchReviews(1)} 
+                                    className="rounded-l-none"
+                                >
+                                    Search
+                                </Button>
                             </div>
                         </div>
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-full sm:w-48">
-                                <SelectValue placeholder="Filter by status" />
+                        <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                            <SelectTrigger className="w-full sm:w-56">
+                                <SelectValue placeholder="Filter by Ratings" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="approved">Approved</SelectItem>
-                                <SelectItem value="rejected">Rejected</SelectItem>
+                                <SelectItem value="all">All Ratings</SelectItem>
+                                <SelectItem value="good">Good Reviews (4-5 Stars)</SelectItem>
+                                <SelectItem value="low">Low Reviews (1-3 Stars)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Reviews Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList>
-                    <TabsTrigger value="pending">Pending</TabsTrigger>
-                    <TabsTrigger value="approved">Approved</TabsTrigger>
-                    <TabsTrigger value="rejected">Rejected</TabsTrigger>
-                    <TabsTrigger value="all">All Reviews</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value={activeTab} className="space-y-4">
-                    {reviews.length === 0 ? (
-                        <Card>
-                            <CardContent className="p-8 text-center">
-                                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                <p className="text-muted-foreground">No reviews found</p>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <div className="grid gap-4">
-                            {reviews.map((review) => (
-                                <Card key={review.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <div className="flex items-center">
-                                                        {renderStars(review.rating)}
-                                                    </div>
-                                                    {getStatusBadge(review.status)}
-                                                </div>
-                                                <h4 className="font-semibold">{review.product?.name}</h4>
-                                                <p className="text-sm text-muted-foreground">
-                                                    By {review.customer?.name} • {new Date(review.created_at).toLocaleDateString()}
-                                                </p>
+            {/* Data Table */}
+            <Card>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left border-collapse">
+                        <thead className="bg-muted text-muted-foreground border-b">
+                            <tr>
+                                <th className="p-4 font-semibold">Product</th>
+                                <th className="p-4 font-semibold">Customer</th>
+                                <th className="p-4 font-semibold text-center">Rating</th>
+                                <th className="p-4 font-semibold">Feedback</th>
+                                <th className="p-4 font-semibold">Date</th>
+                                <th className="p-4 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="6" className="h-48 text-center">
+                                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                    </td>
+                                </tr>
+                            ) : reviews.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="h-48 text-center text-muted-foreground">
+                                        <Table className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                                        No reviews found
+                                    </td>
+                                </tr>
+                            ) : (
+                                reviews.map((review) => (
+                                    <tr key={review.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
+                                        <td className="p-4 font-medium max-w-[200px] truncate" title={review.product?.name}>
+                                            {review.product?.name || 'Unknown Product'}
+                                        </td>
+                                        <td className="p-4">
+                                            {review.customer?.name || 'Guest'}
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="flex justify-center">
+                                                {renderStars(review.rating)}
                                             </div>
-                                            <div className="flex gap-2">
-                                                {review.status === 'pending' && (
-                                                    <>
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => updateReviewStatus(review.id, 'approved')}
-                                                            className="bg-green-600 hover:bg-green-700"
-                                                        >
-                                                            <CheckCircle className="h-4 w-4 mr-1" />
-                                                            Approve
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="destructive"
-                                                            onClick={() => updateReviewStatus(review.id, 'rejected')}
-                                                        >
-                                                            <XCircle className="h-4 w-4 mr-1" />
-                                                            Reject
-                                                        </Button>
-                                                    </>
-                                                )}
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => setSelectedReview(review)}
-                                                >
-                                                    View Details
-                                                </Button>
-                                            </div>
-                                        </div>
+                                        </td>
+                                        <td className="p-4 max-w-[300px]">
+                                            <p className="truncate text-muted-foreground" title={review.review_text}>
+                                                {review.review_text || <span className="italic">No text provided</span>}
+                                            </p>
+                                        </td>
+                                        <td className="p-4 whitespace-nowrap text-muted-foreground">
+                                            {new Date(review.created_at).toLocaleDateString()}
+                                        </td>
+                                        <td className="p-4 text-right">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => setSelectedReview(review)}
+                                            >
+                                                View
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-                                        {review.review && (
-                                            <p className="text-sm mb-3 line-clamp-2">{review.review}</p>
-                                        )}
-
-                                        {review.admin_response && (
-                                            <div className="bg-muted p-3 rounded-md">
-                                                <p className="text-sm font-semibold text-primary">Admin Response:</p>
-                                                <p className="text-sm">{review.admin_response}</p>
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ))}
+                {/* Pagination Controls */}
+                {!loading && pagination.last_page > 1 && (
+                    <div className="p-4 border-t flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">
+                            Showing page {pagination.current_page} of {pagination.last_page} ({pagination.total} total reviews)
+                        </p>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={pagination.current_page === 1}
+                                onClick={() => fetchReviews(pagination.current_page - 1)}
+                            >
+                                <ArrowLeft className="h-4 w-4 mr-1" /> Prev
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={pagination.current_page === pagination.last_page}
+                                onClick={() => fetchReviews(pagination.current_page + 1)}
+                            >
+                                Next <ArrowRight className="h-4 w-4 ml-1" />
+                            </Button>
                         </div>
-                    )}
-                </TabsContent>
-            </Tabs>
+                    </div>
+                )}
+            </Card>
 
             {/* Review Details Modal */}
             {selectedReview && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <CardHeader>
+                    <Card className="w-full max-w-lg shadow-xl">
+                        <CardHeader className="border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <CardTitle>Review Details</CardTitle>
                                 <Button
                                     variant="ghost"
-                                    size="sm"
+                                    size="icon"
                                     onClick={() => setSelectedReview(null)}
                                 >
                                     ×
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                {renderStars(selectedReview.rating)}
-                                {getStatusBadge(selectedReview.status)}
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="flex justify-between items-center">
+                                <div className="space-y-1">
+                                    <h4 className="font-semibold text-lg">{selectedReview.product?.name || 'Unknown Product'}</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                        By {selectedReview.customer?.name || 'Guest'} • {new Date(selectedReview.created_at).toLocaleString()}
+                                    </p>
+                                </div>
+                                <div className="flex bg-muted p-2 rounded-md">
+                                    {renderStars(selectedReview.rating)}
+                                </div>
                             </div>
 
-                            <div>
-                                <h4 className="font-semibold">{selectedReview.product?.name}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                    By {selectedReview.customer?.name} • {new Date(selectedReview.created_at).toLocaleDateString()}
-                                </p>
+                            <div className="bg-muted/30 p-4 rounded-lg border min-h-[100px]">
+                                {selectedReview.review_text ? (
+                                    <p className="text-sm leading-relaxed">{selectedReview.review_text}</p>
+                                ) : (
+                                    <p className="text-sm italic text-muted-foreground">No written feedback provided.</p>
+                                )}
                             </div>
 
-                            {selectedReview.review && (
-                                <div>
-                                    <h5 className="font-semibold mb-2">Review:</h5>
-                                    <p className="text-sm">{selectedReview.review}</p>
-                                </div>
-                            )}
-
-                            {selectedReview.admin_response && (
-                                <div>
-                                    <h5 className="font-semibold mb-2">Previous Admin Response:</h5>
-                                    <p className="text-sm bg-muted p-3 rounded-md">{selectedReview.admin_response}</p>
-                                </div>
-                            )}
-
-                            {/* Admin Response Form */}
-                            <div>
-                                <h5 className="font-semibold mb-2">Admin Response:</h5>
-                                <Textarea
-                                    placeholder="Write your response..."
-                                    value={responseText}
-                                    onChange={(e) => setResponseText(e.target.value)}
-                                    rows={3}
-                                />
-                                <div className="flex gap-2 mt-2">
-                                    <Button
-                                        onClick={() => respondToReview(selectedReview.id)}
-                                        disabled={!responseText.trim()}
-                                    >
-                                        Send Response
-                                    </Button>
-                                    {selectedReview.status === 'pending' && (
-                                        <>
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => updateReviewStatus(selectedReview.id, 'approved')}
-                                                className="border-green-600 text-green-600 hover:bg-green-50"
-                                            >
-                                                Approve
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => updateReviewStatus(selectedReview.id, 'rejected')}
-                                                className="border-red-600 text-red-600 hover:bg-red-50"
-                                            >
-                                                Reject
-                                            </Button>
-                                        </>
-                                    )}
-                                    <Button
-                                        variant="destructive"
-                                        onClick={() => deleteReview(selectedReview.id)}
-                                    >
-                                        Delete Review
-                                    </Button>
-                                </div>
+                            <div className="flex justify-end gap-2 pt-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setSelectedReview(null)}
+                                >
+                                    Close
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => deleteReview(selectedReview.id)}
+                                >
+                                    Delete Review
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             )}
-            {/* Confirm Modal */}
+
             <ConfirmModal
                 modal={confirmModal || { show: false }}
                 onClose={closeConfirm}

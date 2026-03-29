@@ -21,6 +21,7 @@ use App\Http\Controllers\RouteController;
 use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\CartReservationController;
 use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\GCashController;
 
 // Auth (public)
 Route::post('/auth/register', [AuthController::class , 'register']);
@@ -45,6 +46,9 @@ Route::get('/products/{id}/sold-count', [ProductReviewController::class , 'soldC
 
 // Route API proxy (public - no auth needed)
 Route::middleware(['throttle:60,1'])->post('/route', [RouteController::class , 'getRoute']);
+
+// GCash Public Webhook (No Auth - SMS Forwarder)
+Route::post('/gcash/sms-webhook', [\App\Http\Controllers\GCashController::class, 'smsWebhook']);
 
 // Test route
 Route::get('/test', function () {
@@ -85,6 +89,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sales/{id}', [SaleController::class , 'show']);
     Route::put('/sales/{id}/status', [SaleController::class , 'updateStatus']);
     Route::post('/sales/{id}/return', [SaleController::class , 'processReturn']);
+
+    Route::get('/gcash/status/{saleId}', [\App\Http\Controllers\GCashController::class, 'checkStatus']);
 
     // Returns Management (Admin)
     Route::get('/returns', [ReturnController::class , 'index']);
@@ -129,6 +135,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/analytics/customer-behavior', [ReportController::class , 'customerBehavior']);
     Route::get('/analytics/inventory-forecast', [ReportController::class , 'inventoryForecast']);
     Route::get('/analytics/profit-margins', [ReportController::class , 'profitMargins']);
+
+    // GCash Logs
+    Route::get('/gcash-logs', [GCashController::class, 'index']);
 
     // Users
     Route::get('/users', [UserController::class , 'index']);

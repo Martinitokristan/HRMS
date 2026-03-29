@@ -12,9 +12,51 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle, Navigation, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle, Navigation, Loader2, Download, Smartphone } from 'lucide-react';
+import { QRCodeCanvas } from "qrcode.react";
 
 import "leaflet/dist/leaflet.css";
+
+// EMVCo CRC-16 (CCITT-FALSE) calculation
+function crc16(data) {
+    let crc = 0xFFFF;
+    for (let i = 0; i < data.length; i++) {
+        crc ^= data.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+            if ((crc & 0x8000) > 0) {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc = crc << 1;
+            }
+        }
+    }
+    return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+}
+
+function generateDynamicQRPayload(basePayload, amount) {
+    if (!basePayload) return "";
+    const amountStr = parseFloat(amount).toFixed(2);
+
+    // Tag 54 is Transaction Amount
+    const tag = "54";
+    const length = amountStr.length.toString().padStart(2, '0');
+    const amountPayload = `${tag}${length}${amountStr}`;
+
+    // Convert static flag (010211) -> dynamic flag (010212)
+    let payload = basePayload.replace("010211", "010212");
+
+    // Inject before 6304
+    const crcIndex = payload.indexOf("6304");
+    if (crcIndex !== -1) {
+        payload = payload.substring(0, crcIndex) + amountPayload + "6304";
+    } else {
+        payload += amountPayload + "6304";
+    }
+
+    // append new CRC
+    const checksum = crc16(payload);
+    return payload + checksum;
+}
 
 // Helper component to center map when coordinates change
 function CheckoutMapController({ position, onMapClick }) {
@@ -46,6 +88,11 @@ export default function CustomerOrder() {
     const [orderSuccess, setOrderSuccess] = useState(false);
     const [checkoutPosition, setCheckoutPosition] = useState([7.0707, 125.608]);
     const [gpsLoading, setGpsLoading] = useState(false);
+
+    // GCash State
+    const [gcashModal, setGcashModal] = useState(false);
+    const [gcashAmount, setGcashAmount] = useState(null);
+    const [gcashBasePayload, setGcashBasePayload] = useState("");
 
     // Get current GPS location
     const handleGetLocation = () => {
@@ -220,31 +267,38 @@ export default function CustomerOrder() {
                 })),
             });
 
-            console.log('Order placed successfully!', orderResponse.data);
-            // Dispatch event to refresh product list on home page
-            window.dispatchEvent(new CustomEvent('orderPlaced', { detail: { items: cart } }));
-            // Remove placed items from localStorage cart
-            const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
-            const cartIdsToRemove = cart.map(i => i.cartId);
-            const remainingCart = saved.filter(item => !cartIdsToRemove.includes(item.cartId));
-
-            if (remainingCart.length > 0) {
-                localStorage.setItem("hrms_cart", JSON.stringify(remainingCart));
-            } else {
-                localStorage.removeItem("hrms_cart");
+            if (payment === "gcash" && orderResponse.data.data.fingerprint_amount) {
+                setGcashAmount(orderResponse.data.data.fingerprint_amount);
+                setGcashBasePayload(orderResponse.data.gcash_payload);
+                setGcashModal(true);
+                return; // Wait for user to pay before completing
             }
-            setOrderSuccess(true);
+
+            // Normal COD completion
+            completeOrderSuccess();
+
         } catch (err) {
             console.error('Order error:', err);
-            console.error('Error response:', err.response);
-            console.error('Error status:', err.response?.status);
-            console.error('Error data:', err.response?.data);
-            showToast(
-                err.response?.data?.message || "Failed to place order. Please try again.",
-                "error",
-            );
+            showToast(err.response?.data?.message || "Failed to place order. Please try again.", "error");
             setLoading(false);
         }
+    };
+
+    const completeOrderSuccess = () => {
+        // Dispatch event to refresh product list on home page
+        window.dispatchEvent(new CustomEvent('orderPlaced', { detail: { items: cart } }));
+        // Remove placed items from localStorage cart
+        const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
+        const cartIdsToRemove = cart.map(i => i.cartId);
+        const remainingCart = saved.filter(item => !cartIdsToRemove.includes(item.cartId));
+
+        if (remainingCart.length > 0) {
+            localStorage.setItem("hrms_cart", JSON.stringify(remainingCart));
+        } else {
+            localStorage.removeItem("hrms_cart");
+        }
+        setOrderSuccess(true);
+        setGcashModal(false);
     };
 
     if (cart.length === 0) return null;
@@ -395,6 +449,38 @@ export default function CustomerOrder() {
                                     </Card>
                                 )}
 
+                                {/* PAYMENT METHOD */}
+                                <div className="space-y-3 mb-6">
+                                    <Label className="text-sm font-semibold">Payment Method:</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div
+                                            className={`border rounded-lg p-3 cursor-pointer transition-all ${payment === "cod" ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-1" : "border-border hover:bg-secondary/50"}`}
+                                            onClick={() => setPayment("cod")}
+                                        >
+                                            <div className="flex items-center gap-2 font-semibold">
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${payment === "cod" ? "border-primary" : "border-muted-foreground"}`}>
+                                                    {payment === "cod" && <div className="w-2 h-2 rounded-full bg-primary" />}
+                                                </div>
+                                                💵 Cash on Delivery
+                                            </div>
+                                            <div className="text-xs text-muted-foreground mt-1 ml-6">Pay when your order arrives</div>
+                                        </div>
+
+                                        <div
+                                            className={`border rounded-lg p-3 cursor-pointer transition-all ${payment === "gcash" ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 ring-offset-1" : "border-border hover:bg-secondary/50"}`}
+                                            onClick={() => setPayment("gcash")}
+                                        >
+                                            <div className="flex items-center gap-2 font-semibold text-blue-700 dark:text-blue-400">
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${payment === "gcash" ? "border-blue-500" : "border-muted-foreground"}`}>
+                                                    {payment === "gcash" && <div className="w-2 h-2 rounded-full bg-blue-500" />}
+                                                </div>
+                                                📱 GCash
+                                            </div>
+                                            <div className="text-xs text-muted-foreground mt-1 ml-6">Scan exact amount to auto-confirm</div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2">
                                     <Label className="text-sm font-semibold">Confirm or Edit Delivery Address:</Label>
                                     <Textarea rows={3} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter complete delivery address" />
@@ -438,6 +524,76 @@ export default function CustomerOrder() {
                             <Button className="w-full h-12 text-base font-bold gap-2" onClick={() => navigate("/shop/history")}>Track Order <ArrowRight className="h-4 w-4" /></Button>
                             <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => navigate("/shop")}>Back to Shop</Button>
                         </div>
+                    </div>
+                </Modal>
+
+                {/* GCash Payment Modal */}
+                <Modal
+                    isOpen={gcashModal}
+                    onClose={() => { }} // Block normal close to enforce flow
+                    title="📱 GCash Automatic Payment"
+                    size="md"
+                    hideFooter
+                >
+                    <div className="pb-6 px-2 text-center">
+                        <div className="bg-blue-600 rounded-xl p-6 text-white text-center shadow-xl shadow-blue-500/20 mb-6">
+                            <h3 className="text-xl font-bold mb-2">Total Amount to Pay</h3>
+                            <div className="text-5xl font-black tracking-tighter mb-1">
+                                ₱{parseFloat(gcashAmount || 0).toFixed(2)}
+                            </div>
+                            <p className="text-blue-100 text-sm italic mt-2">
+                                Note: This amount has a unique cent matching code (e.g. .01, .02) to automatically verify your payment.
+                                Do not round it off!
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-xl border-2 border-dashed border-gray-300 w-fit mx-auto shadow-sm flex flex-col items-center">
+                            {gcashAmount && gcashBasePayload && (
+                                <QRCodeCanvas
+                                    id="dynamic-gcash-qr"
+                                    value={generateDynamicQRPayload(gcashBasePayload, gcashAmount)}
+                                    size={220}
+                                    level={"M"}
+                                    includeMargin={true}
+                                />
+                            )}
+                            <div className="mt-4 flex gap-2 w-full">
+                                <Button
+                                    variant="outline"
+                                    className="w-full gap-2 border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800"
+                                    onClick={() => {
+                                        const canvas = document.getElementById('dynamic-gcash-qr');
+                                        if (canvas) {
+                                            const url = canvas.toDataURL('image/png');
+                                            const link = document.createElement('a');
+                                            link.download = `GCash-Payment-${parseFloat(gcashAmount).toFixed(2)}.png`;
+                                            link.href = url;
+                                            link.click();
+                                        }
+                                    }}
+                                >
+                                    <Download className="h-4 w-4" /> Save QR Code
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 text-left space-y-3 bg-secondary/50 p-4 rounded-xl text-sm mb-8">
+                            <p className="font-bold flex items-center gap-2"><Smartphone className="h-4 w-4 text-primary" /> How to pay:</p>
+                            <ol className="list-decimal list-inside space-y-1.5 text-muted-foreground pl-1">
+                                <li><strong>Save</strong> the QR Code image above.</li>
+                                <li>Open your <strong>GCash App</strong>.</li>
+                                <li>Tap <strong>Scan</strong> and click the "Upload QR" icon icon.</li>
+                                <li>Select the saved QR image from your gallery.</li>
+                                <li>The exact amount will be locked. <strong>Confirm Payment</strong>.</li>
+                            </ol>
+                        </div>
+
+                        <Button
+                            className="w-full h-14 text-lg font-bold shadow-lg shadow-primary/20"
+                            onClick={completeOrderSuccess}
+                        >
+                            <CheckCircle2 className="h-5 w-5 mr-2" /> Done, I have Paid!
+                        </Button>
                     </div>
                 </Modal>
             </div>

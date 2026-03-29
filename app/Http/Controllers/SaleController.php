@@ -146,15 +146,36 @@ class SaleController extends Controller
             $lastNumber = Sale::lockForUpdate()->max('id');
             $orderNumber = 'ORD-' . str_pad(($lastNumber ?? 0) + 1, 5, '0', STR_PAD_LEFT);
 
+            $status = 'pending';
+            $fingerprintAmount = null;
+
+            if ($data['payment_method'] === 'gcash') {
+                $status = 'pending_payment';
+
+                // Find the max fingerprint amount for the exact same base amount
+                $maxPendingAmount = Sale::where('status', 'pending_payment')
+                                        ->where('payment_method', 'gcash')
+                                        ->where('total_amount', $totalWithVat)
+                                        ->lockForUpdate()
+                                        ->max('fingerprint_amount');
+
+                if ($maxPendingAmount && $maxPendingAmount >= $totalWithVat) {
+                    $fingerprintAmount = $maxPendingAmount + 0.01;
+                } else {
+                    $fingerprintAmount = $totalWithVat;
+                }
+            }
+
             $sale = Sale::create([
-                'order_number'   => $orderNumber,
-                'customer_id'    => $data['customer_id'],
-                'processed_by'   => $request->user()->id,
-                'discount_pct'   => $data['discount_pct'] ?? null,
-                'total_amount'   => $totalWithVat,
-                'payment_method' => $data['payment_method'],
-                'status'         => 'pending',
-                'notes'          => $data['notes'] ?? null,
+                'order_number'       => $orderNumber,
+                'customer_id'        => $data['customer_id'],
+                'processed_by'       => $request->user()->id,
+                'discount_pct'       => $data['discount_pct'] ?? null,
+                'total_amount'       => $totalWithVat,
+                'payment_method'     => $data['payment_method'],
+                'status'             => $status,
+                'notes'              => $data['notes'] ?? null,
+                'fingerprint_amount' => $fingerprintAmount,
             ]);
 
             foreach ($itemsData as $item) {
@@ -185,9 +206,10 @@ class SaleController extends Controller
         });
 
         return response()->json([
-            'data'    => $sale->load(['customer', 'items.product', 'delivery']),
-            'message' => 'Order created successfully',
-            'status'  => 'success',
+            'data'          => $sale->load(['customer', 'items.product', 'delivery']),
+            'gcash_payload' => env('GCASH_BASE_PAYLOAD', ''),
+            'message'       => 'Order created successfully',
+            'status'        => 'success',
         ], 201);
     }
 

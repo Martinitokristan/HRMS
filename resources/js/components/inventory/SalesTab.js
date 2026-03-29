@@ -124,6 +124,7 @@ export default function SalesTab() {
     const getNextStatuses = (currentStatus) => {
         const flow = {
             pending: ['confirmed', 'cancelled'],
+            pending_payment: ['confirmed', 'cancelled'],
             confirmed: ['cancelled'], // Restricted: Rider must handle the Out for Delivery step
             out_for_delivery: [],     // Restricted: Rider must handle the Delivered step
             delivered: [],
@@ -153,7 +154,8 @@ export default function SalesTab() {
                             value: statusFilter, onChange: v => { setStatusFilter(v); setPage(1); },
                             options: [
                                 { value: '', label: 'All Statuses' },
-                                { value: 'pending', label: 'Pending' },
+                                { value: 'pending', label: 'Pending (COD)' },
+                                { value: 'pending_payment', label: 'Pending Payment (GCash)' },
                                 { value: 'confirmed', label: 'Confirmed' },
                                 { value: 'out_for_delivery', label: 'Out for Delivery' },
                                 { value: 'delivered', label: 'Delivered' },

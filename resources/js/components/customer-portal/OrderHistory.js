@@ -214,6 +214,7 @@ export default function OrderHistory() {
     };
 
     const STATUS_MAP = {
+        pending_payment: { label: "Awaiting GCash Payment", color: "#22c55e", step: 0, badge: "bg-green-50 text-green-700 border-green-200" },
         pending: { label: "Pending", color: "#eab308", step: 0, badge: "bg-yellow-50 text-yellow-700 border-yellow-200" },
         confirmed: { label: "Confirmed", color: "#3b82f6", step: 1, badge: "bg-blue-50 text-blue-700 border-blue-100" },
         out_for_delivery: { label: "Out for Delivery", color: "#3b82f6", step: 2, badge: "bg-blue-50 text-blue-700 border-blue-100" },

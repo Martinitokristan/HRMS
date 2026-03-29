@@ -36,6 +36,7 @@ export const SupplierAuthProvider = ({ children }) => {
             const res = await axios.get('/supplier/auth/profile');
             if (isMounted) {
                 setSupplier(res.data.data);
+                refreshSettings();
             }
         } catch (err) {
             if (isMounted) {
@@ -57,6 +58,7 @@ export const SupplierAuthProvider = ({ children }) => {
         localStorage.setItem('supplier_token', token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setSupplier(supplier);
+        refreshSettings();
         return supplier;
     };
 
@@ -73,6 +75,7 @@ export const SupplierAuthProvider = ({ children }) => {
         localStorage.setItem('supplier_token', token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setSupplier(supplier);
+        refreshSettings();
     };
 
     const value = {
