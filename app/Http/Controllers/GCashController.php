@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Sale;
+use App\Models\User;
 use App\Models\GCashTransaction;
 use App\Models\Delivery;
 use App\Models\CustomerNotification;
+use App\Notifications\GCashPaymentReceived;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -173,6 +175,12 @@ class GCashController extends Controller
                 'type' => 'payment_confirmed',
                 'is_read' => false
             ]);
+
+            // Send notification to admin users about GCash payment
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new GCashPaymentReceived($sale, $smsBody, $amount, $parsedPhone));
+            }
 
             DB::commit();
             Log::info("Successfully auto-confirmed order #{$sale->order_number} for ₱{$amount}");

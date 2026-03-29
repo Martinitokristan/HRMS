@@ -368,6 +368,25 @@ class RiderController extends Controller
         return response()->json(['status' => 'success']);
     }
 
+    public function deleteNotification(Request $request, $id)
+    {
+        $request->user()->notifications()->where('id', $id)->delete();
+        return response()->json(['status' => 'success']);
+    }
+
+    public function deleteBatchNotifications(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        $request->user()->notifications()->whereIn('id', $request->ids)->delete();
+        return response()->json(['status' => 'success']);
+    }
+
+    public function deleteAllNotifications(Request $request)
+    {
+        $request->user()->notifications()->delete();
+        return response()->json(['status' => 'success']);
+    }
+
     public function updateLocation(Request $request)
     {
         $request->validate([

@@ -12,6 +12,14 @@ export default function GCashLogs() {
     const [totalPages, setTotalPages] = useState(1);
     const [filter, setFilter] = useState('all'); // 'all', 'matched', 'unmatched'
 
+    // Clean doubled SMS body: "You have received money in GCash! You have received PHP..." → "You have received PHP..."
+    const cleanSmsBody = (text) => {
+        if (!text) return text;
+        const idx = text.indexOf('You have received PHP');
+        if (idx > 0) return text.substring(idx);
+        return text;
+    };
+
     const fetchLogs = async () => {
         setLoading(true);
         try {
@@ -128,7 +136,7 @@ export default function GCashLogs() {
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-700 min-w-[300px]">
                                         <div className="bg-slate-100 p-2 rounded text-xs break-words break-all border border-slate-200 max-w-sm">
-                                            {log.sms_body || <span className="text-slate-400 italic">No SMS body</span>}
+                                            {log.sms_body ? cleanSmsBody(log.sms_body) : <span className="text-slate-400 italic">No SMS body</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">

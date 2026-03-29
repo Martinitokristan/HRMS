@@ -7,6 +7,7 @@ import {
     Settings, Bell, LogOut, Menu, ChevronDown, Plus, X, ClipboardList
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import NotificationPanel from '../shared/NotificationPanel';
 
 export default function SupplierLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -196,47 +197,32 @@ export default function SupplierLayout() {
                                     </span>
                                 )}
                             </button>
-                            {notiOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-[299]" onClick={() => setNotiOpen(false)} />
-                                    <div className="absolute right-0 top-[calc(100%+8px)] z-[300] w-[300px] max-h-[360px] flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-xl">
-                                        <div className="border-b border-border px-4 py-3 font-bold text-foreground">Notifications</div>
-                                        <div className="flex-1 overflow-y-auto">
-                                            {notifications.length === 0 ? (
-                                                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                                                    <Bell className="h-7 w-7 mb-2 opacity-30" />
-                                                    <p className="text-sm">No notifications</p>
-                                                </div>
-                                            ) : notifications.map(n => (
-                                                <div 
-                                                    key={n.id} 
-                                                    className={cn('cursor-pointer border-b border-border/60 px-4 py-3 text-[13px] hover:bg-gray-50 transition-colors', !n.read_at && 'bg-[#EFF6FF] font-semibold')}
-                                                    onClick={() => {
-                                                        if (!n.read_at) {
-                                                            axios.post('/notifications/mark-all-read').then(() => {
-                                                                setNotifications(prev => prev.map(notif => ({ ...notif, read_at: new Date().toISOString() })));
-                                                                setUnreadNoti(0);
-                                                            });
-                                                        }
-                                                        setNotiOpen(false);
-                                                        if (n.data?.type === 'purchase_order_request') {
-                                                            navigate('/supplier/orders');
-                                                        }
-                                                    }}
-                                                >
-                                                    <div className="flex justify-between items-center mb-1.5">
-                                                        <span className="text-[10px] font-bold text-[#FF6B35] tracking-wider">HRMS</span>
-                                                        <span className="text-[10px] text-muted-foreground font-normal">
-                                                            {new Date(n.created_at).toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="leading-snug">{n.data?.message}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </>
-                            )}
+                            <NotificationPanel
+                                notifications={notifications}
+                                setNotifications={setNotifications}
+                                unreadCount={unreadNoti}
+                                setUnreadCount={setUnreadNoti}
+                                isOpen={notiOpen}
+                                onClose={() => setNotiOpen(false)}
+                                apiPrefix="/notifications"
+                                renderMessage={(n) => n.data?.message || 'New notification'}
+                                renderLabel={(n) => n.data?.title || 'HRMS'}
+                                isRead={(n) => !!n.read_at}
+                                markReadUrl="/notifications/mark-all-read"
+                                onRefresh={() => {
+                                    axios.get('/notifications').then(res => {
+                                        const data = res.data.data || [];
+                                        setNotifications(data.slice(0, 10));
+                                        setUnreadNoti(data.filter(n => !n.read_at).length);
+                                    }).catch(() => {});
+                                }}
+                                onNotificationClick={(n) => {
+                                    if (n.data?.type === 'purchase_order_request') {
+                                        navigate('/supplier/orders');
+                                    }
+                                    setNotiOpen(false);
+                                }}
+                            />
                         </div>
 
                         {/* Profile */}

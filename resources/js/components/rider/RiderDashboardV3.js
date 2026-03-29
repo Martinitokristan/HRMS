@@ -21,6 +21,7 @@ import {
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
+import NotificationPanel from '../shared/NotificationPanel';
 
 // Add custom CSS for markers
 const markerStyles = `
@@ -690,69 +691,23 @@ export default function RiderDashboardV3() {
                             )}
                         </button>
 
-                        {showNotifications && (
-                            <>
-                                <div style={{ position: 'fixed', inset: 0, zIndex: 90 }} onClick={() => setShowNotifications(false)} />
-                                <div style={{
-                                    position: 'absolute',
-                                    top: 'calc(100% + 10px)',
-                                    right: 0,
-                                    width: '320px',
-                                    maxHeight: '400px',
-                                    backgroundColor: '#fff',
-                                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                                    borderRadius: '16px',
-                                    border: '1px solid #e5e7eb',
-                                    zIndex: 100,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{ padding: '15px 20px', borderBottom: '1px solid #e5e7eb', fontWeight: 'bold' }}>Notifications</div>
-                                    <div style={{ flex: 1, overflowY: 'auto' }}>
-                                        {notifications.length === 0 ? (
-                                            <div style={{ padding: '30px', textAlign: 'center', color: '#9ca3af', fontSize: '14px' }}>
-                                                No notifications
-                                            </div>
-                                        ) : notifications.map(notif => (
-                                            <div
-                                                key={notif.id}
-                                                style={{
-                                                    padding: '15px 20px',
-                                                    borderBottom: '1px solid #f3f4f6',
-                                                    backgroundColor: notif.read_at ? '#fff' : '#eff6ff',
-                                                    cursor: 'pointer',
-                                                    transition: 'background-color 0.2s'
-                                                }}
-                                                onMouseEnter={(e) => { if (notif.read_at) e.currentTarget.style.backgroundColor = '#f9fafb'; }}
-                                                onMouseLeave={(e) => { if (notif.read_at) e.currentTarget.style.backgroundColor = '#fff'; }}
-                                                onClick={() => {
-                                                    if (!notif.read_at) {
-                                                        axios.post('/notifications/mark-all-read').then(() => {
-                                                            setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
-                                                            setUnreadCount(0);
-                                                        });
-                                                    }
-                                                    setShowNotifications(false);
-                                                }}
-                                            >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                                    <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#FF6B35', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                                                        {notif.data?.sender_name || 'HRMS'}
-                                                    </span>
-                                                    <span style={{ fontSize: '10px', color: '#9ca3af', fontWeight: 'normal' }}>
-                                                        {new Date(notif.created_at).toLocaleString()}
-                                                    </span>
-                                                </div>
-                                                <div style={{ fontSize: '13px', color: '#111827', lineHeight: '1.4', fontWeight: notif.read_at ? 'normal' : '600' }}>
-                                                    {notif.data?.message}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </>
-                        )}
+                        <NotificationPanel
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                            unreadCount={unreadCount}
+                            setUnreadCount={setUnreadCount}
+                            isOpen={showNotifications}
+                            onClose={() => setShowNotifications(false)}
+                            apiPrefix="/riders/me/notifications"
+                            markReadUrl="/riders/me/notifications/read"
+                            renderMessage={(n) => n.data?.message || 'New notification'}
+                            renderLabel={(n) => n.data?.sender_name || 'HRMS'}
+                            isRead={(n) => !!n.read_at}
+                            onRefresh={fetchNotifications}
+                            onNotificationClick={(n) => {
+                                setShowNotifications(false);
+                            }}
+                        />
                     </div>
                 </div>
                 {/* Dashboard View */}

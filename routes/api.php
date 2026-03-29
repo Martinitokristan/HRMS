@@ -192,6 +192,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/riders/me/security', [RiderController::class , 'updateSecurity']);
     Route::get('/riders/me/notifications', [RiderController::class , 'getNotifications']);
     Route::post('/riders/me/notifications/read', [RiderController::class , 'markNotificationsRead']);
+    Route::delete('/riders/me/notifications/{id}', [RiderController::class , 'deleteNotification']);
+    Route::post('/riders/me/notifications/delete-batch', [RiderController::class , 'deleteBatchNotifications']);
+    Route::post('/riders/me/notifications/delete-all', [RiderController::class , 'deleteAllNotifications']);
     Route::get('/riders/me/rating-stats', [RiderController::class , 'getRatingStats']);
 
     // Rider proximity notification
@@ -201,6 +204,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/notifications', [DeliveryController::class , 'customerNotifications']);
     Route::get('/customer/delivery/{id}/rider-location', [DeliveryController::class , 'getRiderLocation']);
     Route::post('/customer/notifications/read', [DeliveryController::class , 'markNotificationsRead']);
+    Route::delete('/customer/notifications/{id}', [DeliveryController::class , 'deleteNotification']);
+    Route::post('/customer/notifications/delete-batch', [DeliveryController::class , 'deleteBatchNotifications']);
+    Route::post('/customer/notifications/delete-all', [DeliveryController::class , 'deleteAllNotifications']);
 
     // Settings
     Route::get('/settings', [SettingsController::class , 'index']);
@@ -222,6 +228,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notifications
     Route::get('/notifications', [SettingsController::class , 'getNotifications']);
     Route::post('/notifications/mark-all-read', [SettingsController::class , 'markAllNotificationsRead']);
+    Route::delete('/notifications/{id}', [SettingsController::class , 'deleteNotification']);
+    Route::post('/notifications/delete-batch', [SettingsController::class , 'deleteBatchNotifications']);
+    Route::post('/notifications/delete-all', [SettingsController::class , 'deleteAllNotifications']);
 
     // Admin: Supplier Product Catalog (view supplier promoted products)
     Route::get('/supplier-catalog', [SupplierProductController::class , 'adminIndex']);

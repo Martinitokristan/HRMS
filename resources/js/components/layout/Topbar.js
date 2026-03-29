@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Bell, Settings, LogOut, Menu } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import NotificationPanel from '../shared/NotificationPanel';
 
 export default function Topbar({ toggleSidebar }) {
     const { user, logout } = useAuth();
@@ -32,47 +33,24 @@ export default function Topbar({ toggleSidebar }) {
         return 'Admin Portal';
     };
 
+    const fetchNotifications = async () => {
+        try {
+            const res = await axios.get('/notifications');
+            const data = res.data.data || res.data || [];
+            setNotifications(Array.isArray(data) ? data.slice(0, 30) : []);
+            setUnreadCount(Array.isArray(data) ? data.filter(n => !n.read_at).length : 0);
+        } catch (e) { }
+    };
+
     useEffect(() => {
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 5000);
         return () => clearInterval(interval);
     }, []);
 
-    const fetchNotifications = async () => {
-        try {
-            const res = await axios.get('/notifications');
-            const data = res.data.data || res.data || [];
-            setNotifications(Array.isArray(data) ? data.slice(0, 20) : []);
-            setUnreadCount(Array.isArray(data) ? data.filter(n => !n.read_at).length : 0);
-        } catch (e) {
-            // notifications endpoint may not exist yet
-        }
-    };
-
-    const markAllRead = async () => {
-        try {
-            await axios.post('/notifications/mark-all-read');
-            setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
-            setUnreadCount(0);
-        } catch (e) {
-            setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
-            setUnreadCount(0);
-        }
-    };
-
     const handleLogout = async () => {
         await logout();
         navigate('/login');
-    };
-
-    const timeAgo = (date) => {
-        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-        if (seconds < 60) return 'Just now';
-        const mins = Math.floor(seconds / 60);
-        if (mins < 60) return `${mins}m ago`;
-        const hrs = Math.floor(mins / 60);
-        if (hrs < 24) return `${hrs}h ago`;
-        return `${Math.floor(hrs / 24)}d ago`;
     };
 
     const topbarBtn = cn(
@@ -104,50 +82,29 @@ export default function Topbar({ toggleSidebar }) {
                         )}
                     </button>
 
-                    {notiOpen && (
-                        <>
-                            <div className="fixed inset-0 z-[299]" onClick={() => setNotiOpen(false)} />
-                            <div className="absolute right-0 top-[calc(100%+8px)] z-[300] flex w-[360px] max-h-[480px] flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-modal">
-                                <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                                    <h3 className="font-bold text-foreground">Notifications</h3>
-                                    {unreadCount > 0 && (
-                                        <button
-                                            onClick={markAllRead}
-                                            className="text-[13px] font-semibold text-[#FF6B35] hover:underline"
-                                        >
-                                            Mark all read
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="flex-1 overflow-y-auto">
-                                    {notifications.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                                            <Bell className="h-8 w-8 mb-2 opacity-30" />
-                                            <p className="text-sm">No notifications yet</p>
-                                        </div>
-                                    ) : notifications.map((n, i) => (
-                                        <div
-                                            key={n.id || i}
-                                            className={cn(
-                                                'border-b border-border/60 px-5 py-3.5 transition-colors hover:bg-secondary/50',
-                                                !n.read_at && 'bg-[#EFF6FF]'
-                                            )}
-                                        >
-                                            <div className="flex justify-between items-center mb-1.5">
-                                                <span className="text-[10px] font-bold text-[#FF6B35] tracking-wider uppercase">
-                                                    {n.data?.supplier_name || 'HRMS'}
-                                                </span>
-                                                <span className="text-[10px] text-muted-foreground">{n.created_at ? timeAgo(n.created_at) : 'Just now'}</span>
-                                            </div>
-                                            <p className={cn('text-[13px] text-foreground leading-snug', !n.read_at && 'font-semibold')}>
-                                                {n.data?.message || n.message || 'New notification'}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </>
-                    )}
+                    <NotificationPanel
+                        notifications={notifications}
+                        setNotifications={setNotifications}
+                        unreadCount={unreadCount}
+                        setUnreadCount={setUnreadCount}
+                        isOpen={notiOpen}
+                        onClose={() => setNotiOpen(false)}
+                        apiPrefix="/notifications"
+                        renderMessage={(n) => n.data?.message || n.message || 'New notification'}
+                        renderLabel={(n) => {
+                            if (n.data?.type === 'gcash_payment') return '💰 GCash';
+                            return n.data?.supplier_name || n.data?.title || 'HRMS';
+                        }}
+                        isRead={(n) => !!n.read_at}
+                        markReadUrl="/notifications/mark-all-read"
+                        onRefresh={fetchNotifications}
+                        onNotificationClick={(n) => {
+                            if (n.data?.type === 'gcash_payment') {
+                                navigate('/inventory?tab=gcash');
+                            }
+                            setNotiOpen(false);
+                        }}
+                    />
                 </div>
 
                 {/* Profile */}

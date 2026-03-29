@@ -12,6 +12,7 @@ import RatingStars from '../ui/RatingStars';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
+import NotificationPanel from '../shared/NotificationPanel';
 
 // Product card component (removed memo to allow stock updates)
 const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
@@ -490,7 +491,6 @@ export default function CustomerHome() {
                                         className="relative flex items-center gap-2 text-gray-700 hover:text-gray-900"
                                         onClick={() => {
                                             setNotifOpen(!notifOpen);
-                                            if (!notifOpen && unreadCount > 0) markRead();
                                         }}
                                     >
                                         <div className="relative">
@@ -503,43 +503,35 @@ export default function CustomerHome() {
                                         </div>
                                     </button>
 
-                                    {notifOpen && (
-                                        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-xl py-2 z-50 max-h-96 overflow-y-auto">
-                                            <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0 z-10">
-                                                <span className="font-bold text-gray-900">Notifications</span>
-                                            </div>
-                                            {notifications.length === 0 ? (
-                                                <div className="px-4 py-8 text-center text-sm text-gray-500">
-                                                    No notifications yet
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col">
-                                                    {notifications.map((n, i) => (
-                                                        <div key={i} className={`px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors ${!n.is_read ? 'bg-blue-50/50' : ''}`}>
-                                                            {/* HRMS | Time Format */}
-                                                            <div className="flex justify-between items-center mb-1">
-                                                                <span className="text-[10px] font-bold text-orange-500 tracking-wider uppercase">
-                                                                    {n.meta?.sender_name || 'HRMS'}
-                                                                </span>
-                                                                <span className="text-[10px] text-gray-400">{new Date(n.created_at).toLocaleString()}</span>
-                                                            </div>
-                                                            <div className="text-sm font-semibold text-gray-900 mb-1 leading-snug">{n.title}</div>
-                                                            <div className="text-xs text-gray-600 mb-2 leading-relaxed">{n.message}</div>
-
-                                                            {n.meta?.proof_url && (
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); setProofModalUrl(n.meta.proof_url); }}
-                                                                    className="mt-1 w-full flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold py-1.5 px-3 rounded-md transition-colors"
-                                                                >
-                                                                    <Package className="h-3 w-3" /> View Proof
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                    <NotificationPanel
+                                        notifications={notifications}
+                                        setNotifications={setNotifications}
+                                        unreadCount={unreadCount}
+                                        setUnreadCount={setUnreadCount}
+                                        isOpen={notifOpen}
+                                        onClose={() => setNotifOpen(false)}
+                                        apiPrefix="/customer/notifications"
+                                        renderMessage={(n) => {
+                                            let msg = '';
+                                            if (n.title) msg += n.title;
+                                            if (n.message) msg += (msg ? ': ' : '') + n.message;
+                                            return msg || 'New notification';
+                                        }}
+                                        renderLabel={(n) => n.meta?.sender_name || 'HRMS'}
+                                        isRead={(n) => !!n.is_read}
+                                        onRefresh={() => {
+                                            axios.get('/customer/notifications').then(r => {
+                                                setNotifications(r.data?.data || []);
+                                                setUnreadCount(r.data?.unread || 0);
+                                            }).catch(() => {});
+                                        }}
+                                        onNotificationClick={(n) => {
+                                            if (n.meta?.proof_url) {
+                                                setProofModalUrl(n.meta.proof_url);
+                                            }
+                                            setNotifOpen(false);
+                                        }}
+                                    />
                                 </div>
 
                                 <button className="flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-medium hidden sm:flex" onClick={() => navigate('/shop/history')}>

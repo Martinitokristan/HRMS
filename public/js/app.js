@@ -7960,6 +7960,13 @@ function GCashLogs() {
     filter = _useState0[0],
     setFilter = _useState0[1]; // 'all', 'matched', 'unmatched'
 
+  // Clean doubled SMS body: "You have received money in GCash! You have received PHP..." → "You have received PHP..."
+  var cleanSmsBody = function cleanSmsBody(text) {
+    if (!text) return text;
+    var idx = text.indexOf('You have received PHP');
+    if (idx > 0) return text.substring(idx);
+    return text;
+  };
   var fetchLogs = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var url, queryPath, res, _t;
@@ -8120,7 +8127,7 @@ function GCashLogs() {
                   className: "px-6 py-4 text-sm text-slate-700 min-w-[300px]",
                   children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
                     className: "bg-slate-100 p-2 rounded text-xs break-words break-all border border-slate-200 max-w-sm",
-                    children: log.sms_body || /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
+                    children: log.sms_body ? cleanSmsBody(log.sms_body) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
                       className: "text-slate-400 italic",
                       children: "No SMS body"
                     })
@@ -12896,7 +12903,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
 /* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
 /* harmony import */ var _shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../shared/ConfirmModal */ "./resources/js/components/shared/ConfirmModal.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../shared/NotificationPanel */ "./resources/js/components/shared/NotificationPanel.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -12917,6 +12925,7 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 
 
@@ -13123,14 +13132,14 @@ var ProductCard = function ProductCard(_ref) {
       return _ref3.apply(this, arguments);
     };
   }();
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
     className: "group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-gray-300/10 hover:-translate-y-1",
     onClick: function onClick() {
       return setSelectedProduct(product);
     },
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
       className: "relative aspect-[1.1/1] overflow-hidden bg-gray-50/50 border-b border-gray-100/50",
-      children: [imgSrc ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("img", {
+      children: [imgSrc ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("img", {
         src: imgSrc,
         alt: product.name,
         loading: "lazy",
@@ -13139,90 +13148,90 @@ var ProductCard = function ProductCard(_ref) {
           e.target.style.display = 'none';
           e.target.nextSibling.style.display = 'flex';
         }
-      }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+      }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
         className: "w-full h-full flex items-center justify-center bg-gray-50",
         style: {
           display: imgSrc ? 'none' : 'flex'
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
           className: "h-10 w-10 text-gray-200"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
         className: "absolute top-3 left-3 right-3 flex justify-between items-start",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("span", {
           className: "bg-[#FF5A1F] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-orange-500/20",
           children: ((_product$category = product.category) === null || _product$category === void 0 ? void 0 : _product$category.name) || 'Hand Tools'
-        }), saleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+        }), saleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("span", {
           className: "bg-[#FF4D4D] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-red-500/20",
           children: ["SALE -", saleInfo.salePercentage, "%"]
         })]
-      }), !inStock && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+      }), !inStock && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
         className: "absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center pointer-events-none",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("span", {
           className: "bg-gray-900 text-white text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full shadow-2xl",
           children: "Sold Out"
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
       className: "p-4 space-y-3",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
         className: "min-h-[60px]",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("h3", {
           className: "text-base font-black text-gray-900 mb-1 leading-tight group-hover:text-[#FF5A1F] transition-colors line-clamp-1",
           children: product.name
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("p", {
           className: "text-[9px] text-gray-500 leading-normal line-clamp-2 font-medium",
           children: product.description || "Premium quality product designed for durability and high performance in all specific applications."
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
         className: "inline-flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100/50",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("span", {
           className: "text-[8.5px] font-black text-emerald-600 uppercase tracking-widest leading-none",
           children: "Stock"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("span", {
           className: "text-[8.5px] font-black text-gray-900 uppercase tracking-widest leading-none",
           children: [totalStock, " units"]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
         className: "pt-1.5 pb-0.5",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
           className: "flex items-end gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
             className: "text-lg font-black text-[#FF5A1F] leading-none tracking-tighter",
             children: ["\u20B1", saleInfo.isOnSale ? saleInfo.salePrice.toFixed(2) : saleInfo.originalPrice.toFixed(2)]
-          }), saleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+          }), saleInfo.isOnSale && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("span", {
             className: "text-[9px] text-gray-400 line-through font-bold leading-none mb-0.5",
             children: ["\u20B1", saleInfo.originalPrice.toFixed(2)]
           })]
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
         className: "flex items-center gap-3 pt-1 border-t border-gray-100/30",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
           className: "flex items-center gap-1.5",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
             className: "scale-90 origin-left -ml-0.5",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(_ui_RatingStars__WEBPACK_IMPORTED_MODULE_17__["default"], {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(_ui_RatingStars__WEBPACK_IMPORTED_MODULE_17__["default"], {
               rating: (productRating === null || productRating === void 0 ? void 0 : productRating.average_rating) || 0,
               size: "sm",
               showCount: false
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("span", {
             className: "text-[11px] font-black text-gray-900 leading-none",
             children: Number((productRating === null || productRating === void 0 ? void 0 : productRating.average_rating) || 0).toFixed(1)
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
           className: "w-1 h-1 rounded-full bg-gray-300"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("span", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("span", {
           className: "text-[11px] font-black text-gray-900 uppercase tracking-widest leading-none whitespace-nowrap",
           children: [soldCount || 0, " SOLD"]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("button", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("button", {
         disabled: !inStock || addingToCart,
         onClick: handleAddToCart,
         className: "w-full h-9 bg-[#FF5A1F] hover:bg-orange-600 active:scale-95 text-white rounded-lg transition-all duration-300 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 disabled:bg-gray-100 disabled:text-gray-300",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
           className: "w-3.5 h-3.5"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("span", {
           className: "text-[9px] font-black uppercase tracking-[0.1em]",
           children: addingToCart ? 'Wait...' : 'Add to Cart'
         })]
@@ -13567,29 +13576,29 @@ function CustomerHome() {
   var cartCount = cart.reduce(function (s, i) {
     return s + i.qty;
   }, 0);
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
     className: "min-h-screen bg-white",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("header", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("header", {
       className: "sticky top-0 z-50 bg-white border-b border-gray-200",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
         className: "max-w-[1500px] mx-auto px-6 h-14 flex items-center justify-between gap-6",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
           className: "flex items-center gap-2 cursor-pointer shrink-0",
           onClick: function onClick() {
             return navigate('/shop');
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
             className: "flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF5A1F] text-white font-bold text-sm",
             children: "H"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
             className: "text-base font-bold text-gray-900",
             children: "HRMS"
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
           className: "flex-1 max-w-xl mx-auto relative",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
             className: "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("input", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("input", {
             type: "text",
             placeholder: "Search products...",
             value: search,
@@ -13597,176 +13606,167 @@ function CustomerHome() {
               return setSearch(e.target.value);
             },
             className: "w-full h-9 pl-9 pr-8 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400"
-          }), search && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("button", {
+          }), search && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("button", {
             className: "absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
             onClick: function onClick() {
               return setSearch('');
             },
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
               className: "h-4 w-4"
             })
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
           className: "flex items-center gap-8 shrink-0",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("button", {
             id: "cart-icon-btn",
             className: "relative flex items-center gap-2 text-gray-700 hover:text-gray-900",
             onClick: function onClick() {
               return navigate('/shop/cart');
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
               className: "relative",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
                 className: "h-5 w-5"
-              }), cartCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+              }), cartCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("span", {
                 id: "cart-count-badge",
                 className: "absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center",
                 children: cartCount
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("span", {
               className: "text-sm font-medium hidden sm:inline",
               children: "Cart"
             })]
-          }), user ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.Fragment, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+          }), user ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.Fragment, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
               ref: notifRef,
               className: "relative",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("button", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("button", {
                 className: "relative flex items-center gap-2 text-gray-700 hover:text-gray-900",
                 onClick: function onClick() {
                   setNotifOpen(!notifOpen);
-                  if (!notifOpen && unreadCount > 0) markRead();
                 },
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
                   className: "relative",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
                     className: "h-5 w-5"
-                  }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
+                  }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("span", {
                     className: "absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center",
                     children: unreadCount
                   })]
                 })
-              }), notifOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-                className: "absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-xl py-2 z-50 max-h-96 overflow-y-auto",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-                  className: "px-4 py-2 border-b border-gray-100 flex justify-between items-center bg-gray-50 sticky top-0 z-10",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-                    className: "font-bold text-gray-900",
-                    children: "Notifications"
-                  })
-                }), notifications.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-                  className: "px-4 py-8 text-center text-sm text-gray-500",
-                  children: "No notifications yet"
-                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-                  className: "flex flex-col",
-                  children: notifications.map(function (n, i) {
-                    var _n$meta, _n$meta2;
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-                      className: "px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors ".concat(!n.is_read ? 'bg-blue-50/50' : ''),
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
-                        className: "flex justify-between items-center mb-1",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-                          className: "text-[10px] font-bold text-orange-500 tracking-wider uppercase",
-                          children: ((_n$meta = n.meta) === null || _n$meta === void 0 ? void 0 : _n$meta.sender_name) || 'HRMS'
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("span", {
-                          className: "text-[10px] text-gray-400",
-                          children: new Date(n.created_at).toLocaleString()
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-                        className: "text-sm font-semibold text-gray-900 mb-1 leading-snug",
-                        children: n.title
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
-                        className: "text-xs text-gray-600 mb-2 leading-relaxed",
-                        children: n.message
-                      }), ((_n$meta2 = n.meta) === null || _n$meta2 === void 0 ? void 0 : _n$meta2.proof_url) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("button", {
-                        onClick: function onClick(e) {
-                          e.stopPropagation();
-                          setProofModalUrl(n.meta.proof_url);
-                        },
-                        className: "mt-1 w-full flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold py-1.5 px-3 rounded-md transition-colors",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
-                          className: "h-3 w-3"
-                        }), " View Proof"]
-                      })]
-                    }, i);
-                  })
-                })]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(_shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_21__["default"], {
+                notifications: notifications,
+                setNotifications: setNotifications,
+                unreadCount: unreadCount,
+                setUnreadCount: setUnreadCount,
+                isOpen: notifOpen,
+                onClose: function onClose() {
+                  return setNotifOpen(false);
+                },
+                apiPrefix: "/customer/notifications",
+                renderMessage: function renderMessage(n) {
+                  var msg = '';
+                  if (n.title) msg += n.title;
+                  if (n.message) msg += (msg ? ': ' : '') + n.message;
+                  return msg || 'New notification';
+                },
+                renderLabel: function renderLabel(n) {
+                  var _n$meta;
+                  return ((_n$meta = n.meta) === null || _n$meta === void 0 ? void 0 : _n$meta.sender_name) || 'HRMS';
+                },
+                isRead: function isRead(n) {
+                  return !!n.is_read;
+                },
+                onRefresh: function onRefresh() {
+                  axios__WEBPACK_IMPORTED_MODULE_1___default().get('/customer/notifications').then(function (r) {
+                    var _r$data5, _r$data6;
+                    setNotifications(((_r$data5 = r.data) === null || _r$data5 === void 0 ? void 0 : _r$data5.data) || []);
+                    setUnreadCount(((_r$data6 = r.data) === null || _r$data6 === void 0 ? void 0 : _r$data6.unread) || 0);
+                  })["catch"](function () {});
+                },
+                onNotificationClick: function onNotificationClick(n) {
+                  var _n$meta2;
+                  if ((_n$meta2 = n.meta) !== null && _n$meta2 !== void 0 && _n$meta2.proof_url) {
+                    setProofModalUrl(n.meta.proof_url);
+                  }
+                  setNotifOpen(false);
+                }
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("button", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("button", {
               className: "flex items-center gap-2 text-gray-700 hover:text-gray-900 text-sm font-medium hidden sm:flex",
               onClick: function onClick() {
                 return navigate('/shop/history');
               },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
                 className: "h-5 w-5"
               }), " My Orders"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
               ref: profileRef,
               className: "relative",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
                 className: "flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white text-sm font-bold cursor-pointer",
                 onClick: function onClick() {
                   return setProfileOpen(!profileOpen);
                 },
                 children: (_user$name = user.name) === null || _user$name === void 0 || (_user$name = _user$name.charAt(0)) === null || _user$name === void 0 ? void 0 : _user$name.toUpperCase()
-              }), profileOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+              }), profileOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
                 className: "absolute right-0 top-full mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
                   className: "px-3 py-2 border-b border-gray-200",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
                     className: "text-xs font-semibold text-gray-900 truncate",
                     children: user.name
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
                     className: "text-[11px] text-gray-500 truncate",
                     children: user.email
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("button", {
                   onClick: function onClick() {
                     navigate('/shop/history');
                     setProfileOpen(false);
                   },
                   className: "flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full text-left sm:hidden",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
                     className: "h-4 w-4"
                   }), " My Orders"]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("button", {
                   onClick: function onClick() {
                     logout();
                     navigate('/');
                     setProfileOpen(false);
                   },
                   className: "flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-gray-50 transition-colors w-full text-left",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], {
                     className: "h-4 w-4"
                   }), " Sign Out"]
                 })]
               })]
             })]
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
             size: "sm",
             className: "bg-orange-500 hover:bg-orange-600 text-white",
             asChild: true,
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
               to: "/login",
               children: "Sign In"
             })
           })]
         })]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
       className: "bg-white border-b border-gray-200",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
         className: "max-w-[1500px] mx-auto px-6",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
           className: "flex gap-1 overflow-x-auto scrollbar-hide",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("button", {
             className: "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ".concat(!categoryFilter ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-600 hover:text-gray-900'),
             onClick: function onClick() {
               return setCategoryFilter('');
             },
             children: "All Products"
           }), categories.map(function (c) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("button", {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("button", {
               className: "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ".concat(categoryFilter == c.id ? 'text-orange-500 border-b-2 border-orange-500' : 'text-gray-600 hover:text-gray-900'),
               onClick: function onClick() {
                 return setCategoryFilter(c.id);
@@ -13776,51 +13776,51 @@ function CustomerHome() {
           })]
         })
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("main", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("main", {
       className: "max-w-[1500px] mx-auto px-6 py-6",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
         className: "mb-5",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("h2", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("h2", {
           className: "text-xl font-bold text-gray-900",
           children: categoryFilter ? ((_categories$find = categories.find(function (c) {
             return c.id == categoryFilter;
           })) === null || _categories$find === void 0 ? void 0 : _categories$find.name) || 'Products' : 'Product Catalog'
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("p", {
           className: "text-sm text-gray-500 mt-0.5",
           children: [(products === null || products === void 0 ? void 0 : products.length) || 0, " items available"]
         })]
-      }), loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+      }), loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
         className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6",
         children: _toConsumableArray(Array(12)).map(function (_, i) {
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
             className: "bg-white border border-gray-200 rounded-2xl overflow-hidden animate-pulse",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
               className: "aspect-[1.1/1] bg-gray-50"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
               className: "p-4 space-y-3",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
                 className: "h-5 bg-gray-50 rounded w-4/5"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
                 className: "h-3 bg-gray-50 rounded w-full"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
                 className: "h-4 bg-gray-50 rounded w-2/5"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
                 className: "h-8 bg-gray-50 rounded w-full mt-2"
               })]
             })]
           }, i);
         })
-      }) : !products || products.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+      }) : !products || products.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
         className: "text-center py-20 px-8 bg-white border border-gray-200 rounded-lg",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
           className: "h-12 w-12 mx-auto mb-4 text-gray-400 opacity-30"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("h3", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("h3", {
           className: "text-lg font-bold text-gray-900 mb-2",
           children: "No products found"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("p", {
           className: "text-sm text-gray-500 mb-6",
           children: "Try adjusting your search or category filter."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_6__.Button, {
           className: "bg-orange-500 hover:bg-orange-600 text-white",
           onClick: function onClick() {
             setSearch('');
@@ -13828,25 +13828,25 @@ function CustomerHome() {
           },
           children: "Clear Filters"
         })]
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
         className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6",
         children: (products || []).map(function (p) {
           var _p$inventory;
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(ProductCard, {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(ProductCard, {
             product: p,
             onAddToCart: addToCart,
             setSelectedProduct: setSelectedProduct
           }, "".concat(p.id, "-").concat(p.available_stock || ((_p$inventory = p.inventory) === null || _p$inventory === void 0 ? void 0 : _p$inventory.current_stock) || 0));
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(_ProductDetailModal__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(_ProductDetailModal__WEBPACK_IMPORTED_MODULE_5__["default"], {
       isOpen: !!selectedProduct,
       onClose: function onClose() {
         setSelectedProduct(null);
       },
       product: selectedProduct,
       onAddToCart: addToCart
-    }, (selectedProduct === null || selectedProduct === void 0 ? void 0 : selectedProduct.id) || 'modal'), flyingItem && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+    }, (selectedProduct === null || selectedProduct === void 0 ? void 0 : selectedProduct.id) || 'modal'), flyingItem && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
       className: "flying-item",
       style: {
         '--start-x': "".concat(flyingItem.startX, "px"),
@@ -13854,48 +13854,48 @@ function CustomerHome() {
         '--end-x': "".concat(flyingItem.endX, "px"),
         '--end-y': "".concat(flyingItem.endY, "px")
       },
-      children: flyingItem.img ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("img", {
+      children: flyingItem.img ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("img", {
         src: flyingItem.img,
         alt: ""
-      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
+      }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
         className: "h-8 w-8 text-primary"
       })
-    }), proofModalUrl && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+    }), proofModalUrl && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
       className: "fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4",
       onClick: function onClick() {
         return setProofModalUrl(null);
       },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
         className: "relative max-w-4xl max-h-[90vh] w-full bg-white rounded-xl overflow-hidden shadow-2xl flex flex-col pointer-events-auto",
         onClick: function onClick(e) {
           return e.stopPropagation();
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
           className: "p-4 border-b flex justify-between items-center bg-gray-50 shrink-0",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsxs)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("h3", {
             className: "font-bold text-gray-900 flex items-center gap-2 text-lg",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
               className: "h-5 w-5 text-orange-500"
             }), " Delivery Proof"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("button", {
             onClick: function onClick() {
               return setProofModalUrl(null);
             },
             className: "p-1.5 hover:bg-gray-200 rounded-full transition-colors bg-white border border-gray-200 shadow-sm",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
               className: "h-5 w-5 text-gray-700"
             })
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
           className: "p-0 overflow-auto flex-1 bg-[#111] flex items-center justify-center min-h-[400px]",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("img", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("img", {
             src: proofModalUrl,
             alt: "Full Delivery Proof",
             className: "max-w-full max-h-[75vh] object-contain shadow-lg"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
           className: "p-4 bg-white border-t flex justify-end shrink-0",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("button", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("button", {
             onClick: function onClick() {
               return setProofModalUrl(null);
             },
@@ -13904,7 +13904,7 @@ function CustomerHome() {
           })
         })]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_20__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_20__["default"], {
       modal: confirmModal,
       onClose: closeConfirm
     })]
@@ -22416,19 +22416,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-cart.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/x.js");
 /* harmony import */ var _lib_utils__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../../lib/utils */ "./resources/js/lib/utils.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/* harmony import */ var _shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../shared/NotificationPanel */ "./resources/js/components/shared/NotificationPanel.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 
 
@@ -22499,7 +22495,7 @@ function SupplierLayout() {
     navigate('/login');
   };
   var navItem = function navItem(to, Icon, label) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
       to: to,
       className: function className(_ref) {
         var isActive = _ref.isActive;
@@ -22508,70 +22504,70 @@ function SupplierLayout() {
       onClick: function onClick() {
         return setSidebarOpen(false);
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(Icon, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(Icon, {
         className: "h-[18px] w-[18px] shrink-0"
       }), label]
     });
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
     className: "flex min-h-screen bg-background",
-    children: [sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
+    children: [sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("div", {
       className: "fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm lg:hidden",
       onClick: function onClick() {
         return setSidebarOpen(false);
       }
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("aside", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("aside", {
       className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('fixed top-0 left-0 z-[100] flex h-screen w-[260px] flex-col bg-[#0F172A] transition-transform duration-300', sidebarOpen ? 'translate-x-0 shadow-[8px_0_30px_rgba(0,0,0,0.2)]' : '-translate-x-full lg:translate-x-0'),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
         className: "flex items-center justify-between border-b border-white/[0.08] px-5 py-5",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
           className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("div", {
             className: "flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B35]",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("span", {
               className: "text-[13px] font-black text-white",
               children: "H"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("span", {
             className: "text-[17px] font-bold tracking-tight text-white",
-            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
+            children: ["HRMS ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("span", {
               className: "text-[#FF6B35]",
               children: "Supplier"
             })]
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("button", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("button", {
           className: "lg:hidden flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:text-white",
           onClick: function onClick() {
             return setSidebarOpen(false);
           },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
             className: "h-4 w-4"
           })
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("nav", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("nav", {
         className: "flex-1 overflow-y-auto py-3",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("p", {
           className: "px-5 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30",
           children: "Main"
-        }), navItem('/supplier/dashboard', lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], 'Dashboard'), navItem('/supplier/products', lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], 'My Products'), navItem('/supplier/requests', lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], 'Request Orders'), navItem('/supplier/orders', lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], 'Purchase Orders'), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("button", {
+        }), navItem('/supplier/dashboard', lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], 'Dashboard'), navItem('/supplier/products', lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], 'My Products'), navItem('/supplier/requests', lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], 'Request Orders'), navItem('/supplier/orders', lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], 'Purchase Orders'), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("button", {
           onClick: function onClick() {
             return setCatsOpen(!catsOpen);
           },
           className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('flex w-full items-center justify-between px-5 py-2.5 text-sm font-medium transition-all duration-200', 'border-l-[3px] border-transparent text-white/60 hover:text-white hover:bg-white/[0.06]'),
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("span", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("span", {
             className: "flex items-center gap-2.5",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
               className: "h-[18px] w-[18px] shrink-0"
             }), "Category"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
             className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('h-4 w-4 transition-transform duration-200', catsOpen && 'rotate-180')
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("div", {
           className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('overflow-hidden transition-all duration-250', catsOpen ? 'max-h-60' : 'max-h-0'),
           children: categories.map(function (cat) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
               className: "flex items-center",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
                 to: "/supplier/products?category_id=".concat(cat.id),
                 className: function className(_ref2) {
                   var isActive = _ref2.isActive;
@@ -22581,7 +22577,7 @@ function SupplierLayout() {
                   return setSidebarOpen(false);
                 },
                 children: cat.name
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("button", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("button", {
                 title: "Add Product to this Category",
                 onClick: function onClick(e) {
                   e.preventDefault();
@@ -22590,173 +22586,150 @@ function SupplierLayout() {
                   setSidebarOpen(false);
                 },
                 className: "mr-3 flex h-6 w-6 items-center justify-center rounded text-white/40 hover:bg-white/10 hover:text-white",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
                   className: "h-3.5 w-3.5"
                 })
               })]
             }, cat.id);
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("p", {
           className: "px-5 pt-4 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30",
           children: "System"
         }), navItem('/supplier/settings', lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], 'Settings')]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("div", {
         className: "border-t border-white/[0.08] p-4",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
           className: "flex items-center gap-3 px-1",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("div", {
             className: "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FF6B35]/20 text-[#FF6B35] text-sm font-bold",
             children: (supplier === null || supplier === void 0 || (_supplier$name = supplier.name) === null || _supplier$name === void 0 ? void 0 : _supplier$name.charAt(0)) || 'S'
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
             className: "flex-1 min-w-0",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("p", {
               className: "truncate text-sm font-semibold text-white",
               children: (supplier === null || supplier === void 0 ? void 0 : supplier.name) || 'Supplier'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("p", {
               className: "truncate text-[11px] text-white/40",
               children: (supplier === null || supplier === void 0 ? void 0 : supplier.email) || ''
             })]
           })]
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
       className: "flex flex-1 flex-col lg:pl-[260px]",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("header", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("header", {
         className: "fixed top-0 left-0 right-0 lg:left-[260px] z-[90] flex h-16 items-center justify-between border-b border-border bg-white px-5 shadow-sm",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
           className: "flex items-center gap-3",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("button", {
             className: "relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-border bg-white text-muted-foreground transition-all hover:bg-secondary hover:text-foreground lg:hidden",
             onClick: function onClick() {
               return setSidebarOpen(!sidebarOpen);
             },
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], {
               className: "h-[18px] w-[18px]"
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("h1", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("h1", {
             className: "text-[17px] font-bold tracking-tight text-foreground",
             children: getPageTitle()
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
           className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
             className: "relative",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("button", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("button", {
               className: "relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-border bg-white text-muted-foreground transition-all hover:bg-secondary hover:text-foreground",
               onClick: function onClick() {
                 setNotiOpen(!notiOpen);
                 setProfileOpen(false);
               },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
                 className: "h-[18px] w-[18px]"
-              }), unreadNoti > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
+              }), unreadNoti > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("span", {
                 className: "absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-white border-2 border-white",
                 children: unreadNoti > 9 ? '9+' : unreadNoti
               })]
-            }), notiOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.Fragment, {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
-                className: "fixed inset-0 z-[299]",
-                onClick: function onClick() {
-                  return setNotiOpen(false);
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(_shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_18__["default"], {
+              notifications: notifications,
+              setNotifications: setNotifications,
+              unreadCount: unreadNoti,
+              setUnreadCount: setUnreadNoti,
+              isOpen: notiOpen,
+              onClose: function onClose() {
+                return setNotiOpen(false);
+              },
+              apiPrefix: "/notifications",
+              renderMessage: function renderMessage(n) {
+                var _n$data;
+                return ((_n$data = n.data) === null || _n$data === void 0 ? void 0 : _n$data.message) || 'New notification';
+              },
+              renderLabel: function renderLabel(n) {
+                var _n$data2;
+                return ((_n$data2 = n.data) === null || _n$data2 === void 0 ? void 0 : _n$data2.title) || 'HRMS';
+              },
+              isRead: function isRead(n) {
+                return !!n.read_at;
+              },
+              markReadUrl: "/notifications/mark-all-read",
+              onRefresh: function onRefresh() {
+                axios__WEBPACK_IMPORTED_MODULE_4___default().get('/notifications').then(function (res) {
+                  var data = res.data.data || [];
+                  setNotifications(data.slice(0, 10));
+                  setUnreadNoti(data.filter(function (n) {
+                    return !n.read_at;
+                  }).length);
+                })["catch"](function () {});
+              },
+              onNotificationClick: function onNotificationClick(n) {
+                var _n$data3;
+                if (((_n$data3 = n.data) === null || _n$data3 === void 0 ? void 0 : _n$data3.type) === 'purchase_order_request') {
+                  navigate('/supplier/orders');
                 }
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
-                className: "absolute right-0 top-[calc(100%+8px)] z-[300] w-[300px] max-h-[360px] flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-xl",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
-                  className: "border-b border-border px-4 py-3 font-bold text-foreground",
-                  children: "Notifications"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
-                  className: "flex-1 overflow-y-auto",
-                  children: notifications.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
-                    className: "flex flex-col items-center justify-center py-8 text-muted-foreground",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
-                      className: "h-7 w-7 mb-2 opacity-30"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
-                      className: "text-sm",
-                      children: "No notifications"
-                    })]
-                  }) : notifications.map(function (n) {
-                    var _n$data2;
-                    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
-                      className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.cn)('cursor-pointer border-b border-border/60 px-4 py-3 text-[13px] hover:bg-gray-50 transition-colors', !n.read_at && 'bg-[#EFF6FF] font-semibold'),
-                      onClick: function onClick() {
-                        var _n$data;
-                        if (!n.read_at) {
-                          axios__WEBPACK_IMPORTED_MODULE_4___default().post('/notifications/mark-all-read').then(function () {
-                            setNotifications(function (prev) {
-                              return prev.map(function (notif) {
-                                return _objectSpread(_objectSpread({}, notif), {}, {
-                                  read_at: new Date().toISOString()
-                                });
-                              });
-                            });
-                            setUnreadNoti(0);
-                          });
-                        }
-                        setNotiOpen(false);
-                        if (((_n$data = n.data) === null || _n$data === void 0 ? void 0 : _n$data.type) === 'purchase_order_request') {
-                          navigate('/supplier/orders');
-                        }
-                      },
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
-                        className: "flex justify-between items-center mb-1.5",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
-                          className: "text-[10px] font-bold text-[#FF6B35] tracking-wider",
-                          children: "HRMS"
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
-                          className: "text-[10px] text-muted-foreground font-normal",
-                          children: new Date(n.created_at).toLocaleString()
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
-                        className: "leading-snug",
-                        children: (_n$data2 = n.data) === null || _n$data2 === void 0 ? void 0 : _n$data2.message
-                      })]
-                    }, n.id);
-                  })
-                })]
-              })]
+                setNotiOpen(false);
+              }
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
             className: "relative",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("button", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("button", {
               onClick: function onClick() {
                 setProfileOpen(!profileOpen);
                 setNotiOpen(false);
               },
               className: "flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#FFF1EB] text-[#FF6B35] font-bold text-sm transition-all hover:bg-[#FF6B35] hover:text-white",
               children: (supplier === null || supplier === void 0 || (_supplier$name2 = supplier.name) === null || _supplier$name2 === void 0 || (_supplier$name2 = _supplier$name2.charAt(0)) === null || _supplier$name2 === void 0 ? void 0 : _supplier$name2.toUpperCase()) || 'S'
-            }), profileOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.Fragment, {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
+            }), profileOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.Fragment, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("div", {
                 className: "fixed inset-0 z-[299]",
                 onClick: function onClick() {
                   return setProfileOpen(false);
                 }
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
                 className: "absolute right-0 top-[calc(100%+8px)] z-[300] w-[220px] overflow-hidden rounded-2xl border border-border bg-white shadow-xl",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
                   className: "border-b border-border px-4 py-3.5",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("p", {
                     className: "font-semibold text-sm text-foreground",
                     children: supplier === null || supplier === void 0 ? void 0 : supplier.name
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("p", {
                     className: "text-[12px] text-muted-foreground truncate",
                     children: supplier === null || supplier === void 0 ? void 0 : supplier.email
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("span", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("span", {
                     className: "mt-1.5 inline-block rounded-full bg-[#FFF1EB] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FF6B35]",
                     children: "Supplier"
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("button", {
                   onClick: function onClick() {
                     setProfileOpen(false);
                     navigate('/supplier/settings');
                   },
                   className: "flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
                     className: "h-4 w-4"
                   }), " Settings"]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("button", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("button", {
                   onClick: handleLogout,
                   className: "flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#EF4444] transition-colors hover:bg-[#FEF2F2]",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
                     className: "h-4 w-4"
                   }), " Logout"]
                 })]
@@ -22764,9 +22737,9 @@ function SupplierLayout() {
             })]
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("main", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)("main", {
         className: "flex-1 px-5 py-6 pt-[calc(64px+1.5rem)] lg:px-7 xl:px-8",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Outlet, {})
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Outlet, {})
       })]
     })]
   });
@@ -22796,13 +22769,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/menu.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/settings.js");
 /* harmony import */ var _lib_utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../lib/utils */ "./resources/js/lib/utils.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/* harmony import */ var _shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../shared/NotificationPanel */ "./resources/js/components/shared/NotificationPanel.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
@@ -22813,6 +22781,7 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 
 
@@ -22860,13 +22829,6 @@ function Topbar(_ref) {
     if (path.startsWith('/suppliers')) return 'Suppliers';
     return 'Admin Portal';
   };
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    fetchNotifications();
-    var interval = setInterval(fetchNotifications, 5000);
-    return function () {
-      return clearInterval(interval);
-    };
-  }, []);
   var fetchNotifications = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var res, data, _t;
@@ -22879,7 +22841,7 @@ function Topbar(_ref) {
           case 1:
             res = _context.v;
             data = res.data.data || res.data || [];
-            setNotifications(Array.isArray(data) ? data.slice(0, 20) : []);
+            setNotifications(Array.isArray(data) ? data.slice(0, 30) : []);
             setUnreadCount(Array.isArray(data) ? data.filter(function (n) {
               return !n.read_at;
             }).length : 0);
@@ -22897,197 +22859,137 @@ function Topbar(_ref) {
       return _ref2.apply(this, arguments);
     };
   }();
-  var markAllRead = /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var _t2;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.p = _context2.n) {
-          case 0:
-            _context2.p = 0;
-            _context2.n = 1;
-            return axios__WEBPACK_IMPORTED_MODULE_3___default().post('/notifications/mark-all-read');
-          case 1:
-            setNotifications(function (prev) {
-              return prev.map(function (n) {
-                return _objectSpread(_objectSpread({}, n), {}, {
-                  read_at: new Date().toISOString()
-                });
-              });
-            });
-            setUnreadCount(0);
-            _context2.n = 3;
-            break;
-          case 2:
-            _context2.p = 2;
-            _t2 = _context2.v;
-            setNotifications(function (prev) {
-              return prev.map(function (n) {
-                return _objectSpread(_objectSpread({}, n), {}, {
-                  read_at: new Date().toISOString()
-                });
-              });
-            });
-            setUnreadCount(0);
-          case 3:
-            return _context2.a(2);
-        }
-      }, _callee2, null, [[0, 2]]);
-    }));
-    return function markAllRead() {
-      return _ref3.apply(this, arguments);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    fetchNotifications();
+    var interval = setInterval(fetchNotifications, 5000);
+    return function () {
+      return clearInterval(interval);
     };
-  }();
+  }, []);
   var handleLogout = /*#__PURE__*/function () {
-    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      return _regenerator().w(function (_context3) {
-        while (1) switch (_context3.n) {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.n) {
           case 0:
-            _context3.n = 1;
+            _context2.n = 1;
             return logout();
           case 1:
             navigate('/login');
           case 2:
-            return _context3.a(2);
+            return _context2.a(2);
         }
-      }, _callee3);
+      }, _callee2);
     }));
     return function handleLogout() {
-      return _ref4.apply(this, arguments);
+      return _ref3.apply(this, arguments);
     };
   }();
-  var timeAgo = function timeAgo(date) {
-    var seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    if (seconds < 60) return 'Just now';
-    var mins = Math.floor(seconds / 60);
-    if (mins < 60) return "".concat(mins, "m ago");
-    var hrs = Math.floor(mins / 60);
-    if (hrs < 24) return "".concat(hrs, "h ago");
-    return "".concat(Math.floor(hrs / 24), "d ago");
-  };
   var topbarBtn = (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)('relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-border bg-white', 'text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground');
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("header", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("header", {
     className: "fixed top-0 left-0 right-0 lg:left-[260px] z-[90] flex h-16 items-center justify-between border-b border-border bg-white px-5 shadow-sm",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
       className: "flex items-center gap-3",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("button", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("button", {
         className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)(topbarBtn, 'lg:hidden'),
         onClick: toggleSidebar,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
           className: "h-4.5 w-4.5"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("h1", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("h1", {
         className: "text-[17px] font-bold tracking-tight text-foreground",
         children: getPageTitle()
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
       className: "flex items-center gap-2",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
         className: "relative",
         ref: notiRef,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("button", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("button", {
           className: topbarBtn,
           onClick: function onClick() {
             setNotiOpen(!notiOpen);
             setProfileOpen(false);
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_4__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_4__["default"], {
             className: "h-[18px] w-[18px]"
-          }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("span", {
+          }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
             className: "absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-white border-2 border-white",
             children: unreadCount > 9 ? '9+' : unreadCount
           })]
-        }), notiOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.Fragment, {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("div", {
-            className: "fixed inset-0 z-[299]",
-            onClick: function onClick() {
-              return setNotiOpen(false);
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_9__["default"], {
+          notifications: notifications,
+          setNotifications: setNotifications,
+          unreadCount: unreadCount,
+          setUnreadCount: setUnreadCount,
+          isOpen: notiOpen,
+          onClose: function onClose() {
+            return setNotiOpen(false);
+          },
+          apiPrefix: "/notifications",
+          renderMessage: function renderMessage(n) {
+            var _n$data;
+            return ((_n$data = n.data) === null || _n$data === void 0 ? void 0 : _n$data.message) || n.message || 'New notification';
+          },
+          renderLabel: function renderLabel(n) {
+            var _n$data2, _n$data3, _n$data4;
+            if (((_n$data2 = n.data) === null || _n$data2 === void 0 ? void 0 : _n$data2.type) === 'gcash_payment') return '💰 GCash';
+            return ((_n$data3 = n.data) === null || _n$data3 === void 0 ? void 0 : _n$data3.supplier_name) || ((_n$data4 = n.data) === null || _n$data4 === void 0 ? void 0 : _n$data4.title) || 'HRMS';
+          },
+          isRead: function isRead(n) {
+            return !!n.read_at;
+          },
+          markReadUrl: "/notifications/mark-all-read",
+          onRefresh: fetchNotifications,
+          onNotificationClick: function onNotificationClick(n) {
+            var _n$data5;
+            if (((_n$data5 = n.data) === null || _n$data5 === void 0 ? void 0 : _n$data5.type) === 'gcash_payment') {
+              navigate('/inventory?tab=gcash');
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
-            className: "absolute right-0 top-[calc(100%+8px)] z-[300] flex w-[360px] max-h-[480px] flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-modal",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
-              className: "flex items-center justify-between border-b border-border px-5 py-4",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("h3", {
-                className: "font-bold text-foreground",
-                children: "Notifications"
-              }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("button", {
-                onClick: markAllRead,
-                className: "text-[13px] font-semibold text-[#FF6B35] hover:underline",
-                children: "Mark all read"
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("div", {
-              className: "flex-1 overflow-y-auto",
-              children: notifications.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
-                className: "flex flex-col items-center justify-center py-10 text-muted-foreground",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_4__["default"], {
-                  className: "h-8 w-8 mb-2 opacity-30"
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("p", {
-                  className: "text-sm",
-                  children: "No notifications yet"
-                })]
-              }) : notifications.map(function (n, i) {
-                var _n$data, _n$data2;
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
-                  className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)('border-b border-border/60 px-5 py-3.5 transition-colors hover:bg-secondary/50', !n.read_at && 'bg-[#EFF6FF]'),
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
-                    className: "flex justify-between items-center mb-1.5",
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("span", {
-                      className: "text-[10px] font-bold text-[#FF6B35] tracking-wider uppercase",
-                      children: ((_n$data = n.data) === null || _n$data === void 0 ? void 0 : _n$data.supplier_name) || 'HRMS'
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("span", {
-                      className: "text-[10px] text-muted-foreground",
-                      children: n.created_at ? timeAgo(n.created_at) : 'Just now'
-                    })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("p", {
-                    className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)('text-[13px] text-foreground leading-snug', !n.read_at && 'font-semibold'),
-                    children: ((_n$data2 = n.data) === null || _n$data2 === void 0 ? void 0 : _n$data2.message) || n.message || 'New notification'
-                  })]
-                }, n.id || i);
-              })
-            })]
-          })]
+            setNotiOpen(false);
+          }
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
         className: "relative",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("button", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("button", {
           onClick: function onClick() {
             setProfileOpen(!profileOpen);
             setNotiOpen(false);
           },
           className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)('flex h-9 w-9 items-center justify-center rounded-[10px]', 'bg-[#FFF1EB] text-[#FF6B35] font-bold text-sm', 'transition-all duration-200 hover:bg-[#FF6B35] hover:text-white'),
           children: (user === null || user === void 0 || (_user$name = user.name) === null || _user$name === void 0 || (_user$name = _user$name.charAt(0)) === null || _user$name === void 0 ? void 0 : _user$name.toUpperCase()) || 'A'
-        }), profileOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.Fragment, {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("div", {
+        }), profileOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
             className: "fixed inset-0 z-[299]",
             onClick: function onClick() {
               return setProfileOpen(false);
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
             className: "absolute right-0 top-[calc(100%+8px)] z-[300] w-[220px] overflow-hidden rounded-2xl border border-border bg-white shadow-modal",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
               className: "border-b border-border px-4 py-3.5",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("p", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
                 className: "font-semibold text-sm text-foreground",
                 children: user === null || user === void 0 ? void 0 : user.name
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("p", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
                 className: "text-[12px] text-muted-foreground truncate",
                 children: user === null || user === void 0 ? void 0 : user.email
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("span", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
                 className: "mt-1.5 inline-block rounded-full bg-[#FFF1EB] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FF6B35]",
                 children: user === null || user === void 0 ? void 0 : user.role
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("button", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("button", {
               onClick: function onClick() {
                 setProfileOpen(false);
                 navigate('/settings');
               },
               className: "flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
                 className: "h-4 w-4"
               }), " Settings"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsxs)("button", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("button", {
               onClick: handleLogout,
               className: "flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#EF4444] transition-colors hover:bg-[#FEF2F2]",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
                 className: "h-4 w-4"
               }), " Logout"]
             })]
@@ -26948,7 +26850,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
 /* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
 /* harmony import */ var _shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../shared/ConfirmModal */ "./resources/js/components/shared/ConfirmModal.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ../shared/NotificationPanel */ "./resources/js/components/shared/NotificationPanel.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
@@ -26971,6 +26874,7 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 
 
@@ -27790,14 +27694,14 @@ function RiderDashboardV3() {
     }
     return "https://ui-avatars.com/api/?name=".concat(encodeURIComponent((user === null || user === void 0 ? void 0 : user.name) || 'Rider'), "&background=111827&color=fff&size=48");
   }, [user]);
-  if (loading) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+  if (loading) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
     className: "loading-page",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
       className: "spinner"
     })
   });
   if (view === 'settings') {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_RiderSettings__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_RiderSettings__WEBPACK_IMPORTED_MODULE_3__["default"], {
       onBack: function onBack() {
         return setView('dashboard');
       }
@@ -27818,13 +27722,13 @@ function RiderDashboardV3() {
     label: 'Ratings',
     icon: lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"]
   }];
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
     style: {
       display: 'flex',
       minHeight: '100vh',
       backgroundColor: '#f3f4f6'
     },
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       style: {
         width: sidebarOpen ? '260px' : '60px',
         backgroundColor: '#1f2937',
@@ -27835,7 +27739,7 @@ function RiderDashboardV3() {
         zIndex: 1000,
         overflow: 'hidden'
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
         style: {
           padding: '1.5rem',
           borderBottom: '1px solid #374151',
@@ -27843,13 +27747,13 @@ function RiderDashboardV3() {
           alignItems: 'center',
           justifyContent: sidebarOpen ? 'space-between' : 'center'
         },
-        children: [sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        children: [sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("img", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("img", {
             src: getPhotoUrl(),
             alt: "",
             style: {
@@ -27858,14 +27762,14 @@ function RiderDashboardV3() {
               borderRadius: '10px',
               objectFit: 'cover'
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
               style: {
                 fontWeight: 700,
                 fontSize: '0.95rem'
               },
               children: (user === null || user === void 0 ? void 0 : user.name) || 'Rider'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
               style: {
                 fontSize: '0.75rem',
                 color: '#9ca3af'
@@ -27873,7 +27777,7 @@ function RiderDashboardV3() {
               children: "Rider"
             })]
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
           onClick: function onClick() {
             return setSidebarOpen(!sidebarOpen);
           },
@@ -27892,19 +27796,19 @@ function RiderDashboardV3() {
           onMouseLeave: function onMouseLeave(e) {
             return e.target.style.backgroundColor = 'transparent';
           },
-          children: sidebarOpen ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_19__["default"], {
+          children: sidebarOpen ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_19__["default"], {
             size: 20
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
             size: 20
           })
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("nav", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("nav", {
         style: {
           padding: '1rem 0'
         },
         children: menuItems.map(function (item) {
           var Icon = item.icon;
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("button", {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("button", {
             onClick: function onClick() {
               return setView(item.id);
             },
@@ -27927,22 +27831,22 @@ function RiderDashboardV3() {
             onMouseLeave: function onMouseLeave(e) {
               if (view !== item.id) e.target.style.backgroundColor = 'transparent';
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(Icon, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(Icon, {
               size: 20,
               style: {
                 flexShrink: 0
               }
-            }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+            }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
               children: item.label
             })]
           }, item.id);
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
         style: {
           padding: '1rem 1.5rem',
           marginTop: 'auto'
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("button", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("button", {
           onClick: logout,
           style: {
             width: '100%',
@@ -27964,14 +27868,14 @@ function RiderDashboardV3() {
           onMouseLeave: function onMouseLeave(e) {
             return e.target.style.backgroundColor = '#ef4444';
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
             size: 20
-          }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+          }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
             children: "Sign Out"
           })]
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       style: {
         flex: 1,
         marginLeft: sidebarOpen ? '260px' : '60px',
@@ -27979,18 +27883,18 @@ function RiderDashboardV3() {
         padding: '2rem',
         position: 'relative'
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
         style: {
           position: 'absolute',
           top: '2rem',
           right: '2rem',
           zIndex: 50
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             position: 'relative'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("button", {
             onClick: function onClick() {
               return setShowNotifications(!showNotifications);
             },
@@ -28014,10 +27918,10 @@ function RiderDashboardV3() {
             onMouseLeave: function onMouseLeave(e) {
               return e.currentTarget.style.backgroundColor = '#fff';
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
               size: 20,
               color: "#4b5563"
-            }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+            }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
               style: {
                 position: 'absolute',
                 top: '-4px',
@@ -28036,123 +27940,36 @@ function RiderDashboardV3() {
               },
               children: unreadCount > 9 ? '9+' : unreadCount
             })]
-          }), showNotifications && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.Fragment, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
-              style: {
-                position: 'fixed',
-                inset: 0,
-                zIndex: 90
-              },
-              onClick: function onClick() {
-                return setShowNotifications(false);
-              }
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-              style: {
-                position: 'absolute',
-                top: 'calc(100% + 10px)',
-                right: 0,
-                width: '320px',
-                maxHeight: '400px',
-                backgroundColor: '#fff',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                borderRadius: '16px',
-                border: '1px solid #e5e7eb',
-                zIndex: 100,
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
-              },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
-                style: {
-                  padding: '15px 20px',
-                  borderBottom: '1px solid #e5e7eb',
-                  fontWeight: 'bold'
-                },
-                children: "Notifications"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
-                style: {
-                  flex: 1,
-                  overflowY: 'auto'
-                },
-                children: notifications.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
-                  style: {
-                    padding: '30px',
-                    textAlign: 'center',
-                    color: '#9ca3af',
-                    fontSize: '14px'
-                  },
-                  children: "No notifications"
-                }) : notifications.map(function (notif) {
-                  var _notif$data, _notif$data2;
-                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-                    style: {
-                      padding: '15px 20px',
-                      borderBottom: '1px solid #f3f4f6',
-                      backgroundColor: notif.read_at ? '#fff' : '#eff6ff',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    },
-                    onMouseEnter: function onMouseEnter(e) {
-                      if (notif.read_at) e.currentTarget.style.backgroundColor = '#f9fafb';
-                    },
-                    onMouseLeave: function onMouseLeave(e) {
-                      if (notif.read_at) e.currentTarget.style.backgroundColor = '#fff';
-                    },
-                    onClick: function onClick() {
-                      if (!notif.read_at) {
-                        axios__WEBPACK_IMPORTED_MODULE_1___default().post('/notifications/mark-all-read').then(function () {
-                          setNotifications(function (prev) {
-                            return prev.map(function (n) {
-                              return _objectSpread(_objectSpread({}, n), {}, {
-                                read_at: new Date().toISOString()
-                              });
-                            });
-                          });
-                          setUnreadCount(0);
-                        });
-                      }
-                      setShowNotifications(false);
-                    },
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-                      style: {
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '6px'
-                      },
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
-                        style: {
-                          fontSize: '10px',
-                          fontWeight: 'bold',
-                          color: '#FF6B35',
-                          letterSpacing: '0.05em',
-                          textTransform: 'uppercase'
-                        },
-                        children: ((_notif$data = notif.data) === null || _notif$data === void 0 ? void 0 : _notif$data.sender_name) || 'HRMS'
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
-                        style: {
-                          fontSize: '10px',
-                          color: '#9ca3af',
-                          fontWeight: 'normal'
-                        },
-                        children: new Date(notif.created_at).toLocaleString()
-                      })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
-                      style: {
-                        fontSize: '13px',
-                        color: '#111827',
-                        lineHeight: '1.4',
-                        fontWeight: notif.read_at ? 'normal' : '600'
-                      },
-                      children: (_notif$data2 = notif.data) === null || _notif$data2 === void 0 ? void 0 : _notif$data2.message
-                    })]
-                  }, notif.id);
-                })
-              })]
-            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_23__["default"], {
+            notifications: notifications,
+            setNotifications: setNotifications,
+            unreadCount: unreadCount,
+            setUnreadCount: setUnreadCount,
+            isOpen: showNotifications,
+            onClose: function onClose() {
+              return setShowNotifications(false);
+            },
+            apiPrefix: "/riders/me/notifications",
+            markReadUrl: "/riders/me/notifications/read",
+            renderMessage: function renderMessage(n) {
+              var _n$data;
+              return ((_n$data = n.data) === null || _n$data === void 0 ? void 0 : _n$data.message) || 'New notification';
+            },
+            renderLabel: function renderLabel(n) {
+              var _n$data2;
+              return ((_n$data2 = n.data) === null || _n$data2 === void 0 ? void 0 : _n$data2.sender_name) || 'HRMS';
+            },
+            isRead: function isRead(n) {
+              return !!n.read_at;
+            },
+            onRefresh: fetchNotifications,
+            onNotificationClick: function onNotificationClick(n) {
+              setShowNotifications(false);
+            }
           })]
         })
-      }), view === 'dashboard' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("h1", {
+      }), view === 'dashboard' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h1", {
           style: {
             fontSize: '2rem',
             fontWeight: 800,
@@ -28160,7 +27977,7 @@ function RiderDashboardV3() {
             color: '#111827'
           },
           children: "Dashboard"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
           style: {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -28188,7 +28005,7 @@ function RiderDashboardV3() {
             color: '#6b7280',
             bg: '#f9fafb'
           }].map(function (stat, idx) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
               style: {
                 backgroundColor: '#fff',
                 borderRadius: '16px',
@@ -28196,14 +28013,14 @@ function RiderDashboardV3() {
                 border: '1px solid #e5e7eb',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
               },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                 style: {
                   fontSize: '0.875rem',
                   color: '#6b7280',
                   marginBottom: '0.5rem'
                 },
                 children: stat.label
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                 style: {
                   fontSize: '2rem',
                   fontWeight: 800,
@@ -28214,8 +28031,8 @@ function RiderDashboardV3() {
             }, idx);
           })
         })]
-      }), view === 'deliveries' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("h1", {
+      }), view === 'deliveries' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h1", {
           style: {
             fontSize: '2rem',
             fontWeight: 800,
@@ -28223,7 +28040,7 @@ function RiderDashboardV3() {
             color: '#111827'
           },
           children: "Active Deliveries"
-        }), deliveries.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        }), deliveries.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             backgroundColor: '#fff',
             borderRadius: '12px',
@@ -28231,25 +28048,25 @@ function RiderDashboardV3() {
             textAlign: 'center',
             border: '1px solid #e5e7eb'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
             size: 48,
             style: {
               color: '#9ca3af',
               margin: '0 auto 1rem'
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("p", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
             style: {
               color: '#6b7280'
             },
             children: "No active deliveries"
           })]
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
           style: {
             display: 'grid',
             gap: '1rem'
           },
           children: deliveries.map(function (delivery) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
               style: {
                 backgroundColor: '#fff',
                 borderRadius: '12px',
@@ -28257,24 +28074,24 @@ function RiderDashboardV3() {
                 border: '1px solid #e5e7eb',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
               },
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                 style: {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'start'
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                   style: {
                     flex: 1
                   },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                     style: {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.75rem',
                       marginBottom: '0.5rem'
                     },
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("span", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("span", {
                       style: {
                         fontSize: '0.875rem',
                         fontWeight: 700,
@@ -28284,7 +28101,7 @@ function RiderDashboardV3() {
                         borderRadius: '20px'
                       },
                       children: ["#", delivery.tracking_number]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
                       style: {
                         fontSize: '0.875rem',
                         fontWeight: 600,
@@ -28292,21 +28109,21 @@ function RiderDashboardV3() {
                       },
                       children: delivery.distance
                     })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("h3", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h3", {
                     style: {
                       fontSize: '1.125rem',
                       fontWeight: 600,
                       marginBottom: '0.25rem'
                     },
                     children: delivery.customer_name
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("p", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
                     style: {
                       color: '#6b7280',
                       fontSize: '0.875rem',
                       marginBottom: '0.5rem'
                     },
                     children: delivery.customer_address
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("p", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("p", {
                     style: {
                       color: '#059669',
                       fontSize: '0.875rem',
@@ -28314,12 +28131,12 @@ function RiderDashboardV3() {
                     },
                     children: ["ETA: ", delivery.eta]
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                   style: {
                     display: 'flex',
                     gap: '0.5rem'
                   },
-                  children: [delivery.status === 'confirmed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+                  children: [delivery.status === 'confirmed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
                     onClick: function onClick() {
                       return handleStatusChange(delivery.id, 'in_progress');
                     },
@@ -28334,8 +28151,8 @@ function RiderDashboardV3() {
                       fontSize: '0.875rem'
                     },
                     children: "Start Delivery"
-                  }), delivery.status === 'in_progress' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.Fragment, {
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+                  }), delivery.status === 'in_progress' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.Fragment, {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
                       onClick: function onClick() {
                         setFocusedDeliveryId(delivery.id);
                         setShowMap(true);
@@ -28351,7 +28168,7 @@ function RiderDashboardV3() {
                         fontSize: '0.875rem'
                       },
                       children: "Location"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
                       onClick: function onClick() {
                         return handleStatusChange(delivery.id, 'delivered');
                       },
@@ -28372,11 +28189,11 @@ function RiderDashboardV3() {
               })
             }, delivery.id);
           })
-        }), nearbyOrders.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        }), nearbyOrders.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             marginTop: '3rem'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("h1", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h1", {
             style: {
               fontSize: '2rem',
               fontWeight: 800,
@@ -28384,7 +28201,7 @@ function RiderDashboardV3() {
               color: '#111827'
             },
             children: "Nearby Orders"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
             style: {
               display: 'grid',
               gap: '1rem'
@@ -28393,7 +28210,7 @@ function RiderDashboardV3() {
               return a.distance_value - b.distance_value;
             }).map(function (order) {
               var _order$sale, _order$sale2;
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                 style: {
                   backgroundColor: '#fff',
                   borderRadius: '12px',
@@ -28401,24 +28218,24 @@ function RiderDashboardV3() {
                   border: '1px solid #e5e7eb',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                 },
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                   style: {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'start'
                   },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                     style: {
                       flex: 1
                     },
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                       style: {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.75rem',
                         marginBottom: '0.5rem'
                       },
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("span", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("span", {
                         style: {
                           fontSize: '0.875rem',
                           fontWeight: 700,
@@ -28428,7 +28245,7 @@ function RiderDashboardV3() {
                           borderRadius: '20px'
                         },
                         children: ["#", order.tracking_number]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("span", {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("span", {
                         style: {
                           fontSize: '0.875rem',
                           fontWeight: 600,
@@ -28436,28 +28253,28 @@ function RiderDashboardV3() {
                         },
                         children: [order.distance, " \u2022 ~", order.eta]
                       })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("h3", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h3", {
                       style: {
                         fontSize: '1.125rem',
                         fontWeight: 600,
                         marginBottom: '0.25rem'
                       },
                       children: order.customer_name
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("p", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
                       style: {
                         color: '#6b7280',
                         fontSize: '0.875rem',
                         marginBottom: '0.75rem'
                       },
                       children: order.customer_address
-                    }), ((_order$sale = order.sale) === null || _order$sale === void 0 ? void 0 : _order$sale.items) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                    }), ((_order$sale = order.sale) === null || _order$sale === void 0 ? void 0 : _order$sale.items) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                       style: {
                         backgroundColor: '#f9fafb',
                         padding: '0.75rem',
                         borderRadius: '8px',
                         marginBottom: '1rem'
                       },
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                         style: {
                           fontSize: '0.75rem',
                           fontWeight: 700,
@@ -28466,7 +28283,7 @@ function RiderDashboardV3() {
                           marginBottom: '0.25rem'
                         },
                         children: ["Order Items (", order.sale.items.length, ")"]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("ul", {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("ul", {
                         style: {
                           margin: 0,
                           paddingLeft: '1.25rem',
@@ -28475,27 +28292,27 @@ function RiderDashboardV3() {
                         },
                         children: order.sale.items.map(function (item, idx) {
                           var _item$product;
-                          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("li", {
+                          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("li", {
                             children: [item.quantity, "x ", (_item$product = item.product) === null || _item$product === void 0 ? void 0 : _item$product.name, item.product_variant_id && item.variants ? " (".concat([item.variants.size, item.variants.color, item.variants.weight].filter(Boolean).join('/'), ")") : '']
                           }, idx);
                         })
                       })]
                     })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                     style: {
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'flex-end',
                       gap: '1rem'
                     },
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                       style: {
                         fontSize: '1.25rem',
                         fontWeight: 800,
                         color: '#111827'
                       },
                       children: formatCurrency((_order$sale2 = order.sale) === null || _order$sale2 === void 0 ? void 0 : _order$sale2.total_amount)
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
                       onClick: function onClick() {
                         return handleSelfAssign(order.id);
                       },
@@ -28519,8 +28336,8 @@ function RiderDashboardV3() {
             })
           })]
         })]
-      }), view === 'ratings' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("h1", {
+      }), view === 'ratings' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h1", {
           style: {
             fontSize: '2rem',
             fontWeight: 800,
@@ -28528,14 +28345,14 @@ function RiderDashboardV3() {
             color: '#111827'
           },
           children: "Ratings & Reviews"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_RatingStatsCard__WEBPACK_IMPORTED_MODULE_4__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_RatingStatsCard__WEBPACK_IMPORTED_MODULE_4__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
           style: {
             marginTop: '2rem'
           },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_RatingNotificationsPanel__WEBPACK_IMPORTED_MODULE_5__["default"], {})
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_RatingNotificationsPanel__WEBPACK_IMPORTED_MODULE_5__["default"], {})
         })]
       })]
-    }), showMap && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+    }), showMap && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       style: {
         position: 'fixed',
         top: 0,
@@ -28545,14 +28362,14 @@ function RiderDashboardV3() {
         zIndex: 2000,
         backgroundColor: '#fff'
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
         style: {
           position: 'absolute',
           top: 20,
           left: 20,
           zIndex: 2001
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
           onClick: function onClick() {
             return setShowMap(false);
           },
@@ -28568,7 +28385,7 @@ function RiderDashboardV3() {
           },
           children: "\u2715 Close Map"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
         style: {
           position: 'absolute',
           bottom: 30,
@@ -28584,20 +28401,20 @@ function RiderDashboardV3() {
           flexDirection: 'column',
           gap: '8px'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             display: 'flex',
             alignItems: 'center',
             gap: '8px'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
             style: {
               width: 12,
               height: 12,
               borderRadius: '50%',
               backgroundColor: '#ef4444'
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
             style: {
               fontSize: '12px',
               fontWeight: 600,
@@ -28605,20 +28422,20 @@ function RiderDashboardV3() {
             },
             children: "Rider (You)"
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             display: 'flex',
             alignItems: 'center',
             gap: '8px'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
             style: {
               width: 12,
               height: 12,
               borderRadius: '50%',
               backgroundColor: '#3b82f6'
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
             style: {
               fontSize: '12px',
               fontWeight: 600,
@@ -28627,7 +28444,7 @@ function RiderDashboardV3() {
             children: "Customer"
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)(react_leaflet__WEBPACK_IMPORTED_MODULE_6__.MapContainer, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(react_leaflet__WEBPACK_IMPORTED_MODULE_6__.MapContainer, {
         center: riderPosition ? [riderPosition.lat, riderPosition.lng] : [7.0707, 125.6080],
         zoom: 13,
         style: {
@@ -28635,13 +28452,13 @@ function RiderDashboardV3() {
           width: '100%'
         },
         zoomControl: true,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_10__.TileLayer, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_10__.TileLayer, {
           url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
           attribution: "\xA9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
-        }), riderPosition && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_7__.Marker, {
+        }), riderPosition && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_7__.Marker, {
           position: [riderPosition.lat, riderPosition.lng],
           icon: createRiderIcon(riderPosition.heading),
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_9__.Popup, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_9__.Popup, {
             children: "You are here"
           })
         }), [].concat(_toConsumableArray(deliveries), _toConsumableArray(nearbyOrders)).filter(function (d) {
@@ -28651,22 +28468,22 @@ function RiderDashboardV3() {
           var roadRoute = roadRoutes[routeKey];
           if (!d.customer_latitude || !d.customer_longitude || !riderPosition) return null;
           var positions = roadRoute ? roadRoute.coordinates : [[riderPosition.lat, riderPosition.lng], [d.customer_latitude, d.customer_longitude]];
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_8__.Polyline, {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_8__.Polyline, {
               positions: positions,
               color: roadRoute ? "#10b981" : "#3b82f6",
               weight: 3,
               opacity: 0.8
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_7__.Marker, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_7__.Marker, {
               position: [d.customer_latitude, d.customer_longitude],
               icon: customerIcon,
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_9__.Popup, {
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("strong", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_9__.Popup, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("strong", {
                     children: ["Order #", d.tracking_number || d.order_id]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("br", {}), d.customer_address, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("small", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), d.customer_address, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("small", {
                     children: ["Distance: ", d.distance]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("small", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("small", {
                     children: ["ETA: ", d.eta]
                   })]
                 })
@@ -28675,7 +28492,7 @@ function RiderDashboardV3() {
           }, routeKey);
         })]
       })]
-    }), showProofModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+    }), showProofModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
       style: {
         position: 'fixed',
         top: 0,
@@ -28688,7 +28505,7 @@ function RiderDashboardV3() {
         justifyContent: 'center',
         zIndex: 3000
       },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
         style: {
           backgroundColor: '#fff',
           borderRadius: '12px',
@@ -28696,30 +28513,30 @@ function RiderDashboardV3() {
           width: '90%',
           maxWidth: '400px'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h3", {
           style: {
             fontSize: '1.25rem',
             fontWeight: 700,
             marginBottom: '0.5rem'
           },
           children: "Delivery Proof"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
           style: {
             color: '#6b7280',
             fontSize: '0.875rem',
             marginBottom: '1.5rem'
           },
           children: "Please provide a photo as proof of delivery to mark this order as delivered."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             marginBottom: '1.5rem'
           },
-          children: [proofPreview ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+          children: [proofPreview ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
             style: {
               position: 'relative',
               marginBottom: '1rem'
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("img", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("img", {
               src: proofPreview,
               alt: "Proof Preview",
               style: {
@@ -28729,7 +28546,7 @@ function RiderDashboardV3() {
                 objectFit: 'contain',
                 backgroundColor: '#f3f4f6'
               }
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
               onClick: function onClick() {
                 setProofFile(null);
                 setProofPreview(null);
@@ -28752,7 +28569,7 @@ function RiderDashboardV3() {
               },
               children: "\u2715"
             })]
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("label", {
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("label", {
             style: {
               display: 'flex',
               flexDirection: 'column',
@@ -28766,19 +28583,19 @@ function RiderDashboardV3() {
               color: '#6b7280',
               transition: 'all 0.2s'
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
               style: {
                 fontSize: '2rem',
                 marginBottom: '0.5rem'
               },
               children: "\uD83D\uDCF8"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
               style: {
                 fontSize: '0.875rem',
                 fontWeight: 500
               },
               children: "Tap to capture or upload photo"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("input", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("input", {
               type: "file",
               accept: "image/*",
               capture: "environment",
@@ -28787,7 +28604,7 @@ function RiderDashboardV3() {
                 display: 'none'
               }
             })]
-          }), proofError && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+          }), proofError && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
             style: {
               color: '#ef4444',
               fontSize: '0.875rem',
@@ -28796,12 +28613,12 @@ function RiderDashboardV3() {
             },
             children: proofError
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             display: 'flex',
             gap: '0.75rem'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
             onClick: function onClick() {
               setShowProofModal(false);
               setSelectedDeliveryToProof(null);
@@ -28821,7 +28638,7 @@ function RiderDashboardV3() {
               cursor: 'pointer'
             },
             children: "Cancel"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
             onClick: submitProof,
             disabled: isSubmittingProof,
             style: {
@@ -28839,7 +28656,7 @@ function RiderDashboardV3() {
           })]
         })]
       })
-    }), showDeclineModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+    }), showDeclineModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
       style: {
         position: 'fixed',
         top: 0,
@@ -28852,7 +28669,7 @@ function RiderDashboardV3() {
         justifyContent: 'center',
         zIndex: 3000
       },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
         style: {
           backgroundColor: '#fff',
           borderRadius: '12px',
@@ -28860,14 +28677,14 @@ function RiderDashboardV3() {
           width: '90%',
           maxWidth: '400px'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h3", {
           style: {
             fontSize: '1.25rem',
             fontWeight: 700,
             marginBottom: '1rem'
           },
           children: "Decline Order"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("textarea", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("textarea", {
           value: declineNote,
           onChange: function onChange(e) {
             return setDeclineNote(e.target.value);
@@ -28882,13 +28699,13 @@ function RiderDashboardV3() {
             resize: 'vertical',
             fontSize: '0.875rem'
           }
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           style: {
             display: 'flex',
             gap: '0.75rem',
             marginTop: '1rem'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
             onClick: function onClick() {
               setShowDeclineModal(false);
               setDeclineNote('');
@@ -28905,7 +28722,7 @@ function RiderDashboardV3() {
               cursor: 'pointer'
             },
             children: "Cancel"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
             onClick: confirmDecline,
             style: {
               flex: 1,
@@ -28921,7 +28738,7 @@ function RiderDashboardV3() {
           })]
         })]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_22__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_22__["default"], {
       modal: confirmModal,
       onClose: closeConfirm
     })]
@@ -31858,6 +31675,354 @@ function Modal(_ref) {
         children: footer
       })]
     })
+  });
+}
+
+/***/ },
+
+/***/ "./resources/js/components/shared/NotificationPanel.js"
+/*!*************************************************************!*\
+  !*** ./resources/js/components/shared/NotificationPanel.js ***!
+  \*************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ NotificationPanel)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/bell.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/check-check.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/trash-2.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/x.js");
+/* harmony import */ var _lib_utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../lib/utils */ "./resources/js/lib/utils.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+/**
+ * Shared NotificationPanel for all roles (admin, supplier, customer, rider)
+ * 
+ * Props:
+ * - notifications: array of notification objects
+ * - setNotifications: setter
+ * - unreadCount: number
+ * - setUnreadCount: setter
+ * - isOpen: boolean
+ * - onClose: function
+ * - apiPrefix: string — e.g. '/notifications', '/customer/notifications', '/riders/me/notifications'
+ * - renderMessage: function(notification) => string — extract message text
+ * - renderLabel: function(notification) => string — extract label text  
+ * - isRead: function(notification) => boolean — check if read
+ * - onNotificationClick: function(notification) — optional, fires on click
+ * - onRefresh: function — refetch notifications
+ */
+
+function NotificationPanel(_ref) {
+  var _ref$notifications = _ref.notifications,
+    notifications = _ref$notifications === void 0 ? [] : _ref$notifications,
+    setNotifications = _ref.setNotifications,
+    _ref$unreadCount = _ref.unreadCount,
+    unreadCount = _ref$unreadCount === void 0 ? 0 : _ref$unreadCount,
+    setUnreadCount = _ref.setUnreadCount,
+    isOpen = _ref.isOpen,
+    onClose = _ref.onClose,
+    _ref$apiPrefix = _ref.apiPrefix,
+    apiPrefix = _ref$apiPrefix === void 0 ? '/notifications' : _ref$apiPrefix,
+    _ref$renderMessage = _ref.renderMessage,
+    renderMessage = _ref$renderMessage === void 0 ? function (n) {
+      var _n$data;
+      return ((_n$data = n.data) === null || _n$data === void 0 ? void 0 : _n$data.message) || n.message || 'New notification';
+    } : _ref$renderMessage,
+    _ref$renderLabel = _ref.renderLabel,
+    renderLabel = _ref$renderLabel === void 0 ? function (n) {
+      var _n$data2, _n$data3;
+      return ((_n$data2 = n.data) === null || _n$data2 === void 0 ? void 0 : _n$data2.supplier_name) || ((_n$data3 = n.data) === null || _n$data3 === void 0 ? void 0 : _n$data3.title) || 'HRMS';
+    } : _ref$renderLabel,
+    _ref$isRead = _ref.isRead,
+    isRead = _ref$isRead === void 0 ? function (n) {
+      return n.read_at || n.is_read;
+    } : _ref$isRead,
+    onNotificationClick = _ref.onNotificationClick,
+    onRefresh = _ref.onRefresh,
+    markReadUrl = _ref.markReadUrl;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    deleteMode = _useState2[0],
+    setDeleteMode = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(new Set()),
+    _useState4 = _slicedToArray(_useState3, 2),
+    selected = _useState4[0],
+    setSelected = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState6 = _slicedToArray(_useState5, 2),
+    deleting = _useState6[0],
+    setDeleting = _useState6[1];
+  if (!isOpen) return null;
+  var timeAgo = function timeAgo(date) {
+    if (!date) return 'Just now';
+    var seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return 'Just now';
+    var mins = Math.floor(seconds / 60);
+    if (mins < 60) return "".concat(mins, "m ago");
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return "".concat(hrs, "h ago");
+    return "".concat(Math.floor(hrs / 24), "d ago");
+  };
+  var toggleSelect = function toggleSelect(id) {
+    setSelected(function (prev) {
+      var next = new Set(prev);
+      next.has(id) ? next["delete"](id) : next.add(id);
+      return next;
+    });
+  };
+  var toggleSelectAll = function toggleSelectAll() {
+    if (selected.size === notifications.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(notifications.map(function (n) {
+        return n.id;
+      })));
+    }
+  };
+  var markAllRead = /*#__PURE__*/function () {
+    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var readUrl, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            _context.p = 0;
+            readUrl = markReadUrl || "".concat(apiPrefix, "/read");
+            _context.n = 1;
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post(readUrl);
+          case 1:
+            if (onRefresh) onRefresh();
+            setUnreadCount(0);
+            _context.n = 3;
+            break;
+          case 2:
+            _context.p = 2;
+            _t = _context.v;
+            setUnreadCount(0);
+          case 3:
+            return _context.a(2);
+        }
+      }, _callee, null, [[0, 2]]);
+    }));
+    return function markAllRead() {
+      return _ref2.apply(this, arguments);
+    };
+  }();
+  var handleDeleteSelected = /*#__PURE__*/function () {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+      var _t2;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
+          case 0:
+            if (!(selected.size === 0)) {
+              _context2.n = 1;
+              break;
+            }
+            return _context2.a(2);
+          case 1:
+            setDeleting(true);
+            _context2.p = 2;
+            _context2.n = 3;
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("".concat(apiPrefix, "/delete-batch"), {
+              ids: Array.from(selected)
+            });
+          case 3:
+            setNotifications(function (prev) {
+              return prev.filter(function (n) {
+                return !selected.has(n.id);
+              });
+            });
+            setSelected(new Set());
+            setDeleteMode(false);
+            if (onRefresh) onRefresh();
+            _context2.n = 5;
+            break;
+          case 4:
+            _context2.p = 4;
+            _t2 = _context2.v;
+          case 5:
+            setDeleting(false);
+          case 6:
+            return _context2.a(2);
+        }
+      }, _callee2, null, [[2, 4]]);
+    }));
+    return function handleDeleteSelected() {
+      return _ref3.apply(this, arguments);
+    };
+  }();
+  var handleDeleteAll = /*#__PURE__*/function () {
+    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+      var _t3;
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.p = _context3.n) {
+          case 0:
+            setDeleting(true);
+            _context3.p = 1;
+            _context3.n = 2;
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post("".concat(apiPrefix, "/delete-all"));
+          case 2:
+            setNotifications([]);
+            setSelected(new Set());
+            setDeleteMode(false);
+            setUnreadCount(0);
+            if (onRefresh) onRefresh();
+            _context3.n = 4;
+            break;
+          case 3:
+            _context3.p = 3;
+            _t3 = _context3.v;
+          case 4:
+            setDeleting(false);
+          case 5:
+            return _context3.a(2);
+        }
+      }, _callee3, null, [[1, 3]]);
+    }));
+    return function handleDeleteAll() {
+      return _ref4.apply(this, arguments);
+    };
+  }();
+  var exitDeleteMode = function exitDeleteMode() {
+    setDeleteMode(false);
+    setSelected(new Set());
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+      className: "fixed inset-0 z-[299]",
+      onClick: onClose
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+      className: "absolute right-0 top-[calc(100%+8px)] z-[300] flex w-[360px] max-h-[480px] flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-[0_10px_40px_rgba(0,0,0,0.12)]",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+        className: "flex items-center justify-between border-b border-border px-4 py-3 bg-white",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("h3", {
+          className: "font-bold text-foreground text-[15px]",
+          children: "Notifications"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+          className: "flex items-center gap-1.5",
+          children: deleteMode ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("button", {
+              onClick: toggleSelectAll,
+              className: "text-[11px] font-semibold text-blue-600 hover:underline px-1.5 py-0.5",
+              children: selected.size === notifications.length ? 'Deselect All' : 'Select All'
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("button", {
+              onClick: handleDeleteSelected,
+              disabled: selected.size === 0 || deleting,
+              className: "text-[11px] font-semibold text-red-600 hover:underline px-1.5 py-0.5 disabled:opacity-40 disabled:no-underline",
+              children: ["Delete (", selected.size, ")"]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("button", {
+              onClick: handleDeleteAll,
+              disabled: notifications.length === 0 || deleting,
+              className: "text-[11px] font-semibold text-red-600 hover:underline px-1.5 py-0.5 disabled:opacity-40",
+              children: "Delete All"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("button", {
+              onClick: exitDeleteMode,
+              className: "flex h-6 w-6 items-center justify-center rounded-md hover:bg-gray-100 transition-colors",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
+                className: "h-3.5 w-3.5 text-gray-500"
+              })
+            })]
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
+            children: [unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("button", {
+              onClick: markAllRead,
+              className: "text-[11px] font-semibold text-[#FF6B35] hover:underline px-1.5 py-0.5 flex items-center gap-1",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_3__["default"], {
+                className: "h-3 w-3"
+              }), " Mark all read"]
+            }), notifications.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("button", {
+              onClick: function onClick() {
+                return setDeleteMode(true);
+              },
+              className: "flex h-7 w-7 items-center justify-center rounded-lg hover:bg-red-50 transition-colors group",
+              title: "Delete notifications",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_4__["default"], {
+                className: "h-3.5 w-3.5 text-gray-400 group-hover:text-red-500 transition-colors"
+              })
+            })]
+          })
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+        className: "flex-1 overflow-y-auto",
+        children: notifications.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+          className: "flex flex-col items-center justify-center py-12 text-muted-foreground",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_2__["default"], {
+            className: "h-8 w-8 mb-2 opacity-20"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("p", {
+            className: "text-sm font-medium",
+            children: "No notifications yet"
+          })]
+        }) : notifications.map(function (n, i) {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+            className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_6__.cn)('relative border-b border-border/60 px-4 py-3.5 transition-all hover:bg-secondary/50 cursor-pointer', !isRead(n) && 'bg-[#EFF6FF]', deleteMode && selected.has(n.id) && 'bg-red-50/70'),
+            onClick: function onClick() {
+              if (deleteMode) {
+                toggleSelect(n.id);
+              } else {
+                onNotificationClick === null || onNotificationClick === void 0 || onNotificationClick(n);
+              }
+            },
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+              className: "flex items-start gap-3",
+              children: [deleteMode && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+                className: "flex items-center pt-1",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("input", {
+                  type: "checkbox",
+                  checked: selected.has(n.id),
+                  onChange: function onChange() {
+                    return toggleSelect(n.id);
+                  },
+                  onClick: function onClick(e) {
+                    return e.stopPropagation();
+                  },
+                  className: "h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400 cursor-pointer accent-red-500"
+                })
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                className: "flex-1 min-w-0",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                  className: "flex justify-between items-center mb-1",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+                    className: "text-[10px] font-bold text-[#FF6B35] tracking-wider uppercase",
+                    children: renderLabel(n)
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+                    className: "text-[10px] text-muted-foreground",
+                    children: n.created_at ? timeAgo(n.created_at) : 'Just now'
+                  })]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("p", {
+                  className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_6__.cn)('text-[13px] text-foreground leading-snug', !isRead(n) && 'font-semibold'),
+                  children: renderMessage(n)
+                })]
+              }), !deleteMode && !isRead(n) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+                className: "flex items-center pt-2",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+                  className: "h-2 w-2 rounded-full bg-blue-500"
+                })
+              })]
+            })
+          }, n.id || i);
+        })
+      })]
+    })]
   });
 }
 

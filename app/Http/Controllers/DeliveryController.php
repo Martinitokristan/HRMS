@@ -384,6 +384,27 @@ class DeliveryController extends Controller
         return response()->json(['status' => 'success']);
     }
 
+    public function deleteNotification(Request $request, $id)
+    {
+        CustomerNotification::where('customer_id', $request->user()->id)
+            ->where('id', $id)->delete();
+        return response()->json(['status' => 'success']);
+    }
+
+    public function deleteBatchNotifications(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        CustomerNotification::where('customer_id', $request->user()->id)
+            ->whereIn('id', $request->ids)->delete();
+        return response()->json(['status' => 'success']);
+    }
+
+    public function deleteAllNotifications(Request $request)
+    {
+        CustomerNotification::where('customer_id', $request->user()->id)->delete();
+        return response()->json(['status' => 'success']);
+    }
+
     /**
      * Customer submits rating for delivery.
      */
