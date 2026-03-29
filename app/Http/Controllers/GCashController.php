@@ -127,7 +127,7 @@ class GCashController extends Controller
                 }
             } else {
                 // Create the delivery record so it shows up for riders
-                Delivery::create([
+                $delivery = Delivery::create([
                     'sale_id' => $sale->id,
                     'status' => 'pending',
                 ]);
@@ -136,7 +136,7 @@ class GCashController extends Controller
             // Optional: send standard system notification to customer
             CustomerNotification::create([
                 'customer_id' => $sale->customer_id,
-                'delivery_id' => clone $delivery ?? null ? $delivery->id : null,
+                'delivery_id' => $delivery ? $delivery->id : null,
                 'title' => 'Payment Confirmed',
                 'message' => "Your GCash payment of ₱" . number_format($amount, 2) . " for order #{$sale->order_number} has been received and confirmed.",
                 'type' => 'payment_confirmed',
