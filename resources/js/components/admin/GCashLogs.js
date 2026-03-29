@@ -94,7 +94,7 @@ export default function GCashLogs() {
                                     Date & Time
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    SMS Content
+                                    GCash Notification Message
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                                     Parsed Amount
@@ -103,17 +103,14 @@ export default function GCashLogs() {
                                     Algorithm Match
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                    Parsed Ref
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                                     Order Ref
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-slate-200">
+                                <tbody className="bg-white divide-y divide-slate-200">
                             {loading && logs.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
+                                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
                                         <div className="flex justify-center mb-2">
                                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#007DFE]"></div>
                                         </div>
@@ -122,7 +119,7 @@ export default function GCashLogs() {
                                 </tr>
                             ) : logs.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500 bg-slate-50/50">
+                                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500 bg-slate-50/50">
                                         <div className="flex flex-col items-center">
                                             <AlertCircle className="h-8 w-8 text-slate-300 mb-2" />
                                             <p>No GCash transaction logs found.</p>
@@ -136,12 +133,14 @@ export default function GCashLogs() {
                                     </td>
                                     <td className="px-6 py-4 text-sm text-slate-700 min-w-[300px]">
                                         <div className="bg-slate-100 p-2 rounded text-xs break-words break-all border border-slate-200 max-w-sm">
-                                            {log.sms_body ? cleanSmsBody(log.sms_body) : <span className="text-slate-400 italic">No SMS body</span>}
+                                            {log.sms_body ? cleanSmsBody(log.sms_body) : <span className="text-slate-400 italic">No message</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {log.parsed_amount ? (
-                                            <span className="font-bold text-slate-800">₱{parseFloat(log.parsed_amount).toFixed(2)}</span>
+                                            <span className="font-extrabold text-[#007DFE] underline decoration-2 underline-offset-2">
+                                                ₱{parseFloat(log.parsed_amount).toFixed(2)}
+                                            </span>
                                         ) : (
                                             <span className="text-slate-400 text-xs italic">Unparsed</span>
                                         )}
@@ -157,13 +156,6 @@ export default function GCashLogs() {
                                                 <XCircle className="w-3 h-3 mr-1" />
                                                 Unmatched
                                             </Badge>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {log.parsed_ref ? (
-                                            <span className="font-mono text-xs text-slate-700">{log.parsed_ref}</span>
-                                        ) : (
-                                            <span className="text-slate-400 text-xs italic">-</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

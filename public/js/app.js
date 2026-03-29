@@ -8072,7 +8072,7 @@ function GCashLogs() {
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("th", {
                 scope: "col",
                 className: "px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider",
-                children: "SMS Content"
+                children: "GCash Notification Message"
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("th", {
                 scope: "col",
                 className: "px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider",
@@ -8084,10 +8084,6 @@ function GCashLogs() {
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("th", {
                 scope: "col",
                 className: "px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider",
-                children: "Parsed Ref"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("th", {
-                scope: "col",
-                className: "px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider",
                 children: "Order Ref"
               })]
             })
@@ -8095,7 +8091,7 @@ function GCashLogs() {
             className: "bg-white divide-y divide-slate-200",
             children: loading && logs.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("tr", {
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("td", {
-                colSpan: "6",
+                colSpan: "5",
                 className: "px-6 py-12 text-center text-slate-500",
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
                   className: "flex justify-center mb-2",
@@ -8106,7 +8102,7 @@ function GCashLogs() {
               })
             }) : logs.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("tr", {
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("td", {
-                colSpan: "6",
+                colSpan: "5",
                 className: "px-6 py-12 text-center text-slate-500 bg-slate-50/50",
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                   className: "flex flex-col items-center",
@@ -8129,13 +8125,13 @@ function GCashLogs() {
                     className: "bg-slate-100 p-2 rounded text-xs break-words break-all border border-slate-200 max-w-sm",
                     children: log.sms_body ? cleanSmsBody(log.sms_body) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
                       className: "text-slate-400 italic",
-                      children: "No SMS body"
+                      children: "No message"
                     })
                   })
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("td", {
                   className: "px-6 py-4 whitespace-nowrap",
                   children: log.parsed_amount ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("span", {
-                    className: "font-bold text-slate-800",
+                    className: "font-extrabold text-[#007DFE] underline decoration-2 underline-offset-2",
                     children: ["\u20B1", parseFloat(log.parsed_amount).toFixed(2)]
                   }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
                     className: "text-slate-400 text-xs italic",
@@ -8153,15 +8149,6 @@ function GCashLogs() {
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
                       className: "w-3 h-3 mr-1"
                     }), "Unmatched"]
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("td", {
-                  className: "px-6 py-4 whitespace-nowrap",
-                  children: log.parsed_ref ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
-                    className: "font-mono text-xs text-slate-700",
-                    children: log.parsed_ref
-                  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
-                    className: "text-slate-400 text-xs italic",
-                    children: "-"
                   })
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("td", {
                   className: "px-6 py-4 whitespace-nowrap text-sm font-medium",
