@@ -84,7 +84,6 @@ class GCashController extends Controller
 
         Log::info("Parsed GCash phone: {$parsedPhone}, amount: {$amount}");
 
-        // 4. Find matching pending_payment sale by PHONE + AMOUNT
         $matchingSale = null;
 
         if ($parsedPhone) {
@@ -98,24 +97,11 @@ class GCashController extends Controller
             $matchingSale = Sale::where('status', 'pending_payment')
                                 ->where('payment_method', 'gcash')
                                 ->where('total_amount', $amount)
-                                ->whereHas('customer', function ($q) use ($phoneVariants) {
-                                    $q->whereIn('phone', $phoneVariants);
+                                ->where(function($q) use ($phoneVariants) {
+                                    $q->whereIn('payment_phone_number', $phoneVariants);
                                 })
                                 ->orderBy('created_at', 'asc')
                                 ->first();
-        }
-
-        // Fallback: amount-only match if phone wasn't parsed
-        if (!$matchingSale) {
-            $matchingSale = Sale::where('status', 'pending_payment')
-                                ->where('payment_method', 'gcash')
-                                ->where('total_amount', $amount)
-                                ->orderBy('created_at', 'asc')
-                                ->first();
-
-            if ($matchingSale && $parsedPhone) {
-                Log::info("Phone match failed, fell back to amount-only match for order #{$matchingSale->order_number}");
-            }
         }
 
         if (!$matchingSale) {

@@ -152,6 +152,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/profile', [CustomerController::class , 'myProfile']);
     Route::put('/customer/profile', [CustomerController::class , 'updateProfile']);
     Route::post('/customer/orders/{id}/cancel', [SaleController::class , 'cancelOrder']);
+    Route::post('/customer/orders/{id}/upload-proof', [SaleController::class , 'uploadGCashProof']);
     Route::get('/customer/orders/{id}/cancellation-policy', [SaleController::class , 'cancellationPolicy']);
     Route::post('/customer/returns', [ReturnController::class , 'store']);
     Route::get('/customer/returns', [ReturnController::class , 'customerReturns']);

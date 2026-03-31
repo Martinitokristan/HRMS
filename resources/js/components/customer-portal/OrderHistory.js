@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw, Map, Navigation, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, RotateCcw, Map, Navigation, ChevronDown, Upload, ImagePlus } from 'lucide-react';
 import CustomerOrderTracking from './CustomerOrderTracking';
 import { useToast } from '../../context/ToastContext';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
@@ -53,6 +53,11 @@ export default function OrderHistory() {
     const [submittingReturn, setSubmittingReturn] = useState(false);
     const [visibleTrackers, setVisibleTrackers] = useState({}); // Tracking which order maps are visible
     const [expandedOrders, setExpandedOrders] = useState({}); // Tracking which orders are expanded
+    
+    const [proofModal, setProofModal] = useState({ show: false, order: null });
+    const [proofFile, setProofFile] = useState(null);
+    const [proofRef, setProofRef] = useState('');
+    const [submittingProof, setSubmittingProof] = useState(false);
 
     const { refreshTrigger } = useSilentRefresh('customer_orders');
 
@@ -192,6 +197,40 @@ export default function OrderHistory() {
         }
     };
 
+    const openProofModal = (order) => {
+        setProofModal({ show: true, order });
+        setProofFile(null);
+        setProofRef('');
+    };
+
+    const closeProofModal = () => {
+        setProofModal({ show: false, order: null });
+        setProofFile(null);
+        setProofRef('');
+    };
+
+    const handleSubmitProof = async () => {
+        if (!proofModal.order || !proofFile) return;
+        setSubmittingProof(true);
+        const formData = new FormData();
+        formData.append('payment_proof', proofFile);
+        if (proofRef) formData.append('payment_reference', proofRef);
+
+        try {
+            await axios.post(`/customer/orders/${proofModal.order.id}/upload-proof`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            toast.success("Payment proof uploaded! Please wait for verification.");
+            markStale('customer_orders', 'admin_sales');
+            fetchData(true);
+            closeProofModal();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to upload proof");
+        } finally {
+            setSubmittingProof(false);
+        }
+    };
+
     const handleSubmitRating = async () => {
         if (!ratingOrder || ratingValue === 0) return;
         setSubmittingRating(true);
@@ -215,6 +254,7 @@ export default function OrderHistory() {
 
     const STATUS_MAP = {
         pending_payment: { label: "Awaiting GCash Payment", color: "#22c55e", step: 0, badge: "bg-green-50 text-green-700 border-green-200" },
+        verifying_payment: { label: "Verifying Payment", color: "#eab308", step: 0, badge: "bg-yellow-50 text-yellow-700 border-yellow-200" },
         pending: { label: "Pending", color: "#eab308", step: 0, badge: "bg-yellow-50 text-yellow-700 border-yellow-200" },
         confirmed: { label: "Confirmed", color: "#3b82f6", step: 1, badge: "bg-blue-50 text-blue-700 border-blue-100" },
         out_for_delivery: { label: "Out for Delivery", color: "#3b82f6", step: 2, badge: "bg-blue-50 text-blue-700 border-blue-100" },
@@ -438,16 +478,28 @@ export default function OrderHistory() {
                                             {/* Expanded Panel Actions Footer */}
                                             <div className="flex flex-wrap gap-2 justify-center pt-6 mt-6 border-t border-dashed border-border/60">
                                                 {/* Only for Pending Orders */}
-                                                {isPending && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-[10px] font-black uppercase text-red-500 hover:text-red-600 hover:bg-red-50 tracking-widest h-10 px-6"
-                                                        onClick={(e) => { e.stopPropagation(); openCancelModal(order); }}
-                                                        disabled={cancellingId === order.id}
-                                                    >
-                                                        {cancellingId === order.id ? "Cancelling..." : "Cancel Order"}
-                                                    </Button>
+                                                {(isPending || order.status === 'pending_payment') && (
+                                                    <div className="flex flex-wrap gap-2 justify-center w-full md:w-auto">
+                                                        {order.status === 'pending_payment' && order.payment_method === 'gcash' && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="text-[10px] font-black uppercase text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 tracking-widest h-10 px-6"
+                                                                onClick={(e) => { e.stopPropagation(); openProofModal(order); }}
+                                                            >
+                                                                <Upload className="h-4 w-4 mr-2" /> Upload Info
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-[10px] font-black uppercase text-red-500 hover:text-red-600 hover:bg-red-50 tracking-widest h-10 px-6"
+                                                            onClick={(e) => { e.stopPropagation(); openCancelModal(order); }}
+                                                            disabled={cancellingId === order.id}
+                                                        >
+                                                            {cancellingId === order.id ? "Cancelling..." : "Cancel Order"}
+                                                        </Button>
+                                                    </div>
                                                 )}
 
                                                 {/* Only for Delivered Orders */}
@@ -741,6 +793,63 @@ export default function OrderHistory() {
                                 disabled={!returnReason || returnItems.filter(i => i.selected).length === 0 || submittingReturn}
                             >
                                 {submittingReturn ? "Submitting..." : "Submit Return Request"}
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+            {/* Proof Upload Modal */}
+            {proofModal.show && proofModal.order && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={closeProofModal}>
+                    <Card className="max-w-md w-full p-8 rounded-3xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="text-center mb-6">
+                            <ImagePlus className="h-12 w-12 mx-auto text-blue-500 mb-3" />
+                            <h3 className="text-xl font-extrabold text-foreground mb-1">Submit Proof of Payment</h3>
+                            <p className="text-muted-foreground text-sm">Order #{proofModal.order.order_number}</p>
+                        </div>
+
+                        <Card className="bg-blue-50 border-blue-200 p-4 mb-6 leading-relaxed">
+                            <p className="text-xs text-blue-800 font-medium">
+                                If your payment was not automatically confirmed, please upload a screenshot of your GCash receipt and provide the Reference Number.
+                            </p>
+                        </Card>
+
+                        <div className="mb-4">
+                            <label className="text-sm font-bold text-foreground block mb-2">Reference Number (Optional)</label>
+                            <input
+                                type="text"
+                                className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+                                placeholder="e.g. 7000123456789"
+                                value={proofRef}
+                                onChange={(e) => setProofRef(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="text-sm font-bold text-foreground block mb-2">Screenshot <span className="text-destructive">*</span></label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="w-full"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files.length > 0) {
+                                        setProofFile(e.target.files[0]);
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            <Button variant="outline" className="flex-1" onClick={closeProofModal}>
+                                Cancel
+                            </Button>
+                            <Button
+                                className="flex-1 font-bold bg-blue-600 hover:bg-blue-700 text-white"
+                                onClick={handleSubmitProof}
+                                disabled={!proofFile || submittingProof}
+                            >
+                                {submittingProof ? "Uploading..." : "Submit Proof"}
                             </Button>
                         </div>
                     </Card>

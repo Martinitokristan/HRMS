@@ -125,6 +125,7 @@ export default function SalesTab() {
         const flow = {
             pending: ['confirmed', 'cancelled'],
             pending_payment: ['confirmed', 'cancelled'],
+            verifying_payment: ['confirmed', 'pending_payment', 'cancelled'],
             confirmed: ['cancelled'], // Restricted: Rider must handle the Out for Delivery step
             out_for_delivery: [],     // Restricted: Rider must handle the Delivered step
             delivered: [],
@@ -137,6 +138,7 @@ export default function SalesTab() {
     const statusButtonConfig = (status) => {
         const configs = {
             confirmed: { variant: 'default', className: 'bg-info hover:bg-info/90', label: 'Confirm Order' },
+            pending_payment: { variant: 'outline', className: 'text-amber-600 border-amber-300 hover:bg-amber-50', label: 'Reject Proof' },
             out_for_delivery: { variant: 'default', className: 'bg-violet hover:bg-violet/90', label: 'Mark Out for Delivery' },
             delivered: { variant: 'default', className: 'bg-success hover:bg-success/90', label: 'Mark Delivered' },
             cancelled: { variant: 'destructive', className: '', label: 'Cancel Order' },
@@ -156,6 +158,7 @@ export default function SalesTab() {
                                 { value: '', label: 'All Statuses' },
                                 { value: 'pending', label: 'Pending (COD)' },
                                 { value: 'pending_payment', label: 'Pending Payment (GCash)' },
+                                { value: 'verifying_payment', label: 'Verifying GCash Proof' },
                                 { value: 'confirmed', label: 'Confirmed' },
                                 { value: 'out_for_delivery', label: 'Out for Delivery' },
                                 { value: 'delivered', label: 'Delivered' },
@@ -192,7 +195,9 @@ export default function SalesTab() {
                         ) : sales.data.map(sale => (
                             <TableRow key={sale.id}>
                                 <TableCell className="px-4 py-3 font-semibold text-primary">{sale.order_number}</TableCell>
-                                <TableCell className="px-4 py-3 text-muted-foreground">{new Date(sale.created_at).toLocaleDateString()}</TableCell>
+                                <TableCell className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                                    {new Date(sale.created_at).toLocaleString('en-US', { disable12Hour: true, year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                </TableCell>
                                 <TableCell className="px-4 py-3">
                                     <div className="font-semibold text-foreground">{sale.customer?.name}</div>
                                     <div className="text-[12px] text-muted-foreground">{sale.customer?.email}</div>
@@ -228,6 +233,32 @@ export default function SalesTab() {
                                 <div className="flex justify-between mb-1 text-sm"><span className="text-muted-foreground">Payment:</span> <span className="font-semibold text-foreground">{viewOrder.payment_method.toUpperCase()}</span></div>
                                 <div className="flex justify-between font-bold text-lg mt-3 pt-3 border-t border-border"><span>Total:</span> <span className="text-primary">₱{Number(viewOrder.total_amount).toFixed(2)}</span></div>
                             </Card>
+
+                            {viewOrder.payment_method === 'gcash' && viewOrder.payment_phone_number && (
+                                <Card className="bg-blue-50 border-blue-200 p-4 sm:col-span-2">
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-blue-800 mb-2">GCash Payment Details</div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <div className="text-xs text-muted-foreground">Paying Phone Number</div>
+                                            <div className="font-bold text-blue-900">{viewOrder.payment_phone_number}</div>
+                                        </div>
+                                        {viewOrder.payment_reference && (
+                                            <div>
+                                                <div className="text-xs text-muted-foreground">Reference Number</div>
+                                                <div className="font-bold text-blue-900">{viewOrder.payment_reference}</div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {viewOrder.payment_proof_path && (
+                                        <div className="mt-3 pt-3 border-t border-blue-200/50">
+                                            <div className="text-xs text-muted-foreground mb-2">Payment Screenshot Proof</div>
+                                            <a href={`/storage/${viewOrder.payment_proof_path}`} target="_blank" rel="noreferrer" className="block w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden border border-blue-200 hover:opacity-90 transition-opacity">
+                                                <img src={`/storage/${viewOrder.payment_proof_path}`} alt="GCash Receipt" className="w-full h-full object-cover" />
+                                            </a>
+                                        </div>
+                                    )}
+                                </Card>
+                            )}
                         </div>
 
                         <div>

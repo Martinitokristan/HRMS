@@ -16,7 +16,10 @@ class CreateSalesTable extends Migration
             $table->decimal('discount_pct', 5, 2)->nullable();
             $table->decimal('total_amount', 12, 2);
             $table->enum('payment_method', ['cod', 'gcash', 'bank_transfer']);
-            $table->enum('status', ['pending_payment', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'returned', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending_payment', 'verifying_payment', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'returned', 'cancelled'])->default('pending');
+            $table->string('payment_phone_number')->nullable();
+            $table->string('payment_reference')->nullable();
+            $table->string('payment_proof_path')->nullable();
             $table->timestamp('payment_confirmed_at')->nullable();
             $table->text('notes')->nullable();
             $table->string('cancellation_reason')->nullable();

@@ -93,6 +93,14 @@ export default function CustomerOrder() {
     const [gcashModal, setGcashModal] = useState(false);
     const [gcashAmount, setGcashAmount] = useState(null);
     const [gcashBasePayload, setGcashBasePayload] = useState("");
+    const [paymentPhoneNumber, setPaymentPhoneNumber] = useState("");
+
+    // Initialize payment phone number with user's phone
+    useEffect(() => {
+        if (user?.phone) {
+            setPaymentPhoneNumber(user.phone);
+        }
+    }, [user]);
 
     // Get current GPS location
     const handleGetLocation = () => {
@@ -257,6 +265,7 @@ export default function CustomerOrder() {
                 latitude: checkoutPosition[0],
                 longitude: checkoutPosition[1],
                 payment_method: payment,
+                payment_phone_number: payment === 'gcash' ? paymentPhoneNumber : null,
                 customer_id: user?.id,
                 items: cart.map((i) => ({
                     product_id: i.id,
@@ -479,6 +488,23 @@ export default function CustomerOrder() {
                                             <div className="text-xs text-muted-foreground mt-1 ml-6">Pay via QR code with reference verification</div>
                                         </div>
                                     </div>
+
+                                    {payment === "gcash" && (
+                                        <div className="mt-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
+                                            <Label className="text-sm font-semibold text-blue-900 mb-1.5 block flex items-center gap-2">
+                                                <Smartphone className="h-4 w-4" /> GCash Number Used to Pay
+                                            </Label>
+                                            <p className="text-xs text-blue-700/80 mb-3 italic">
+                                                Please confirm the exact GCash number you will use to send the payment. This is required to verify your transaction automatically.
+                                            </p>
+                                            <Input
+                                                value={paymentPhoneNumber}
+                                                onChange={(e) => setPaymentPhoneNumber(e.target.value)}
+                                                placeholder="e.g. 09123456789"
+                                                className="bg-white border-blue-200 focus-visible:ring-blue-500 text-base py-5"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -556,7 +582,7 @@ export default function CustomerOrder() {
                                     includeMargin={true}
                                 />
                             )}
-                            <div className="mt-4 flex gap-2 w-full">
+                            <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full">
                                 <Button
                                     variant="outline"
                                     className="w-full gap-2 border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800"
@@ -568,22 +594,36 @@ export default function CustomerOrder() {
                                             link.download = `GCash-Payment-${parseFloat(gcashAmount).toFixed(2)}.png`;
                                             link.href = url;
                                             link.click();
+                                            showToast("QR code saved to your device!", "success");
                                         }
                                     }}
                                 >
-                                    <Download className="h-4 w-4" /> Save QR Code
+                                    <Download className="h-4 w-4" /> Save QR Image
+                                </Button>
+                                {/* Only show Open GCash on mobile view by using sm:hidden */}
+                                <Button
+                                    className="w-full gap-2 bg-blue-600 hover:bg-blue-700 sm:hidden"
+                                    onClick={() => {
+                                        window.location.href = "intent://#Intent;scheme=gcash;package=com.globe.gcash.android;end";
+                                        setTimeout(() => {
+                                            // Fallback to app store if GCash intent fails
+                                            window.open("https://play.google.com/store/apps/details?id=com.globe.gcash.android", "_blank");
+                                        }, 1000);
+                                    }}
+                                >
+                                    <Smartphone className="h-4 w-4" /> Open app
                                 </Button>
                             </div>
                         </div>
 
-                        <div className="mt-8 text-left space-y-3 bg-secondary/50 p-4 rounded-xl text-sm mb-8">
-                            <p className="font-bold flex items-center gap-2"><Smartphone className="h-4 w-4 text-primary" /> How to pay:</p>
-                            <ol className="list-decimal list-inside space-y-1.5 text-muted-foreground pl-1">
-                                <li><strong>Save</strong> the QR Code image above.</li>
-                                <li>Open your <strong>GCash App</strong>.</li>
-                                <li>Tap <strong>Scan</strong> and click the "Upload QR" icon.</li>
-                                <li>Select the saved QR image from your gallery.</li>
-                                <li><strong>Confirm Payment</strong>. Your order will be auto-verified.</li>
+                        <div className="mt-8 text-left space-y-3 bg-secondary/50 p-4 rounded-xl text-sm mb-8 border border-border/50">
+                            <p className="font-bold flex items-center gap-2 text-foreground"><Smartphone className="h-4 w-4 text-primary" /> How to pay on mobile:</p>
+                            <ol className="list-decimal list-inside space-y-2 text-muted-foreground pl-1">
+                                <li>Tap <strong>Save QR Image</strong> above.</li>
+                                <li>Tap <strong>Open app</strong> (or manually open GCash).</li>
+                                <li>In GCash, tap <strong>Scan</strong> or <strong>Pay QR</strong>.</li>
+                                <li>Select the "Upload image" icon to choose your downloaded QR.</li>
+                                <li>Ensure the number matches: <span className="font-bold text-blue-600">{paymentPhoneNumber}</span></li>
                             </ol>
                         </div>
 

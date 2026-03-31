@@ -48,6 +48,7 @@ class SaleController extends Controller
             'items.*.quantity'   => 'required|numeric|min:1',
             'items.*.price'      => 'nullable|numeric|min:0',
             'payment_method'     => 'required|in:cod,cash,gcash,bank_transfer',
+            'payment_phone_number'=> 'nullable|string|max:20',
             'discount_pct'   => 'nullable|numeric|between:0,100',
             'notes'          => 'nullable|string',
             'address'        => 'nullable|string',
@@ -155,6 +156,7 @@ class SaleController extends Controller
                 'discount_pct'       => $data['discount_pct'] ?? null,
                 'total_amount'       => $totalWithVat,
                 'payment_method'     => $data['payment_method'],
+                'payment_phone_number'=> $data['payment_phone_number'] ?? null,
                 'status'             => $status,
                 'notes'              => $data['notes'] ?? null,
             ]);
@@ -205,7 +207,7 @@ class SaleController extends Controller
         $sale = Sale::with(['delivery'])->findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:pending,confirmed,cancelled',
+            'status' => 'required|in:pending,confirmed,cancelled,pending_payment',
         ]);
 
         $newStatus = $request->status;
@@ -355,6 +357,39 @@ class SaleController extends Controller
             'data'    => $sale->fresh()->load(['items.product', 'delivery']),
             'message' => 'Order cancelled successfully. Stock has been restored.',
             'status'  => 'success',
+        ]);
+    }
+
+    public function uploadGCashProof(Request $request, $id)
+    {
+        $sale = Sale::findOrFail($id);
+        
+        // Authorization: must be owner
+        if ($sale->customer_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized', 'status' => 'error'], 403);
+        }
+
+        if ($sale->payment_method !== 'gcash') {
+            return response()->json(['message' => 'Only GCash orders can upload proof here.', 'status' => 'error'], 422);
+        }
+
+        $request->validate([
+            'payment_proof' => 'required|image|max:5120', // max 5MB
+            'payment_reference' => 'nullable|string|max:50',
+        ]);
+
+        $path = $request->file('payment_proof')->store('payment_proofs', 'public');
+
+        $sale->update([
+            'payment_proof_path' => $path,
+            'payment_reference' => $request->payment_reference,
+            'status' => 'verifying_payment'
+        ]);
+
+        return response()->json([
+            'data' => $sale->fresh(),
+            'message' => 'Payment proof uploaded successfully',
+            'status' => 'success'
         ]);
     }
 
