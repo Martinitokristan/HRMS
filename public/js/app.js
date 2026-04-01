@@ -46766,13 +46766,23 @@ var api = axios__WEBPACK_IMPORTED_MODULE_0___default().create({
     'Accept': 'application/json'
   }
 });
+
+// Attach supplier Bearer token when present
+api.interceptors.request.use(function (config) {
+  var supplierToken = sessionStorage.getItem('supplier_token');
+  if (supplierToken) {
+    config.headers['Authorization'] = "Bearer ".concat(supplierToken);
+  }
+  return config;
+});
 api.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   if (error.response && error.response.status === 401) {
-    // Trigger global login redirect without full page reload if possible
-    if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
-      window.location.href = '/login';
+    var isSupplierPage = window.location.pathname.startsWith('/supplier');
+    var loginPath = isSupplierPage ? '/supplier/login' : '/login';
+    if (window.location.pathname !== loginPath && window.location.pathname !== '/') {
+      window.location.href = loginPath;
     }
   }
   return Promise.reject(error);
@@ -46785,6 +46795,13 @@ var silentApi = axios__WEBPACK_IMPORTED_MODULE_0___default().create({
   headers: {
     'Accept': 'application/json'
   }
+});
+silentApi.interceptors.request.use(function (config) {
+  var supplierToken = sessionStorage.getItem('supplier_token');
+  if (supplierToken) {
+    config.headers['Authorization'] = "Bearer ".concat(supplierToken);
+  }
+  return config;
 });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (api);
 
@@ -46850,6 +46867,10 @@ var auth = {
             });
           case 2:
             res = _context2.v;
+            // If response contains a supplier_token, store it for Bearer auth
+            if (res.data.supplier_token) {
+              sessionStorage.setItem('supplier_token', res.data.supplier_token);
+            }
             return _context2.a(2, res.data);
         }
       }, _callee2);
@@ -46861,9 +46882,16 @@ var auth = {
   }(),
   logout: function () {
     var _logout = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+      var isSupplier;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
+            isSupplier = !!sessionStorage.getItem('supplier_token');
+            sessionStorage.removeItem('supplier_token');
+            if (isSupplier) {
+              _context3.n = 1;
+              break;
+            }
             _context3.n = 1;
             return _api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/logout');
           case 1:

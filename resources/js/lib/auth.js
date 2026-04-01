@@ -15,9 +15,14 @@ export const auth = {
     login: async (email, password) => {
         // CSRF handshake before attempting post
         await auth.csrf();
-        
-        // Post credentials exactly to the new LoginController
+
         const res = await api.post('/login', { email, password });
+
+        // If response contains a supplier_token, store it for Bearer auth
+        if (res.data.supplier_token) {
+            sessionStorage.setItem('supplier_token', res.data.supplier_token);
+        }
+
         return res.data;
     },
 

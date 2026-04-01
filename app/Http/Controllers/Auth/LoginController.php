@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Supplier;
 
 class LoginController extends Controller
 {
@@ -18,6 +20,7 @@ class LoginController extends Controller
 
     /**
      * Handle generic login via SPA cookies.
+     * Falls back to supplier table for unified portal access.
      */
     public function __invoke(Request $request): JsonResponse
     {
@@ -26,23 +29,50 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
+        // 1. Try regular user login (session-based)
         $user = $this->authService->attemptLogin($credentials);
 
-        if (!$user) {
+        if ($user) {
+            $request->session()->regenerate();
             return response()->json([
-                'message' => 'The provided credentials do not match our records.'
-            ], 422);
+                'id'     => $user->id,
+                'name'   => $user->name,
+                'email'  => $user->email,
+                'role'   => $user->role,
+                'status' => $user->status,
+            ], 200);
         }
 
-        // Regenerate session to protect against session fixation attacks
-        $request->session()->regenerate();
+        // 2. Fallback: check suppliers table (token-based)
+        $supplier = Supplier::where('email', $credentials['email'])->first();
+
+        if ($supplier && Hash::check($credentials['password'], $supplier->password)) {
+            if (!$supplier->email_verified_at) {
+                return response()->json([
+                    'message' => 'Please verify your email address before logging in.',
+                ], 403);
+            }
+
+            if ($supplier->status === 'inactive') {
+                return response()->json([
+                    'message' => 'Supplier account is inactive. Please contact administrator.',
+                ], 403);
+            }
+
+            $token = $supplier->createToken('supplier-token')->plainTextToken;
+
+            return response()->json([
+                'id'             => $supplier->id,
+                'name'           => $supplier->contact_name ?? $supplier->name,
+                'email'          => $supplier->email,
+                'role'           => 'supplier',
+                'status'         => $supplier->status,
+                'supplier_token' => $token,
+            ], 200);
+        }
 
         return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-            'status' => $user->status,
-        ], 200);
+            'message' => 'The provided credentials do not match our records.'
+        ], 422);
     }
 }
