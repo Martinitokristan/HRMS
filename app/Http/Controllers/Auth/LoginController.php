@@ -59,6 +59,11 @@ class LoginController extends Controller
                 ], 403);
             }
 
+            // Clear any existing web session so Sanctum uses Bearer token on /me calls
+            \Illuminate\Support\Facades\Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
             $token = $supplier->createToken('supplier-token')->plainTextToken;
 
             return response()->json([
