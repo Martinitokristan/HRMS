@@ -15,6 +15,7 @@ export default function Login() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [remember, setRemember] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -24,7 +25,7 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const user = await userLogin(email, password);
+            const user = await userLogin(email, password, remember);
             if (user.role === 'rider')         navigate('/rider',     { replace: true });
             else if (user.role === 'customer') navigate('/shop',      { replace: true });
             else if (user.role === 'supplier') navigate('/supplier/dashboard', { replace: true });
@@ -90,7 +91,7 @@ export default function Login() {
 
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <Checkbox id="remember" />
+                                <Checkbox id="remember" checked={remember} onCheckedChange={setRemember} />
                                 <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground cursor-pointer">Remember me</Label>
                             </div>
                             <a href="#" className="text-sm font-semibold text-primary hover:underline">Security Help?</a>
@@ -122,12 +123,12 @@ export default function Login() {
                     <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/15 border border-primary/25 mx-auto mb-8">
                         <ShieldCheck className="h-10 w-10 text-primary" />
                     </div>
-                    <h2 className="text-2xl font-black mb-3">Industrial Intelligence</h2>
+                    <h2 className="text-2xl font-black mb-3">Shop Smarter with HRMS</h2>
                     <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                        Access the core engine to streamline your inventory, sales, and logistics workflows.
+                        Your one-stop hardware store. Browse products, place orders, and track deliveries all from one account.
                     </p>
                     <div className="space-y-3 text-left">
-                        {['Multi-Role Permissions', 'End-to-End Fulfillment', 'Live Data & Analytics'].map((feat, i) => (
+                        {['Shop Anytime, Anywhere', 'Fast & Tracked Delivery', 'Easy Order Management'].map((feat, i) => (
                             <div key={i} className="flex items-center gap-3 rounded-lg bg-white/[0.06] border border-white/10 px-4 py-3">
                                 <CheckCircle className="h-4 w-4 text-success shrink-0" />
                                 <span className="text-sm font-semibold">{feat}</span>

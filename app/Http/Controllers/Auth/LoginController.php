@@ -25,12 +25,16 @@ class LoginController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
+            'remember' => ['boolean'],
         ]);
 
+        $remember = (bool) ($credentials['remember'] ?? false);
+        unset($credentials['remember']);
+
         // 1. Try regular user login (session-based)
-        $user = $this->authService->attemptLogin($credentials);
+        $user = $this->authService->attemptLogin($credentials, $remember);
 
         if ($user) {
             $request->session()->regenerate();

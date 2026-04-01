@@ -12,11 +12,11 @@ export const auth = {
         return await sessionClient.get('/sanctum/csrf-cookie');
     },
 
-    login: async (email, password) => {
+    login: async (email, password, remember = false) => {
         // CSRF handshake before attempting post
         await auth.csrf();
 
-        const res = await api.post('/login', { email, password });
+        const res = await api.post('/login', { email, password, remember });
 
         // If response contains a supplier_token, store it for Bearer auth
         if (res.data.supplier_token) {

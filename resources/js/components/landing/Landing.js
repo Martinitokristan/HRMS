@@ -116,15 +116,15 @@ export default function Landing() {
                 <div className="max-w-[1500px] mx-auto px-10 md:px-16 py-32 md:py-48 relative z-10">
                     <Badge variant="outline" className="border-primary/25 bg-primary/15 text-primary mb-8 px-4 py-1.5 text-[13px] font-extrabold uppercase tracking-wider">
                         <Star className="h-3.5 w-3.5 mr-2 fill-current" />
-                        Premium Hardware Solutions
+                        Your Trusted Hardware Store
                     </Badge>
                     <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-black text-white leading-[1.08] tracking-tight mb-6">
-                        Industrial Grade{' '}<br className="hidden md:block" />
-                        <span className="text-primary">Hardware</span> Retail<br className="hidden md:block" /> Management
+                        Quality Hardware,<br className="hidden md:block" />
+                        <span className="text-primary">Delivered</span> to<br className="hidden md:block" /> Your Door
                     </h1>
                     <p className="text-lg text-slate-400 max-w-2xl leading-relaxed mb-10">
-                        The ultimate full-stack solution built specifically for hardware retail businesses.
-                        Manage inventory, sales, and deliveries with precision and speed.
+                        Shop the widest selection of hardware, tools, and supplies for your construction,
+                        repair, and home improvement needs — all in one place.
                     </p>
                     <div className="flex flex-wrap gap-4">
                         <Button variant="outline" size="lg" className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white h-12 px-7 text-[15px]" onClick={triggerLoginNotice}>
@@ -140,10 +140,10 @@ export default function Landing() {
                     {/* Stats */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 pt-10 border-t border-white/10">
                         {[
-                            { val: '2M+', lbl: 'Products Managed' },
-                            { val: '99%', lbl: 'Uptime SLA' },
-                            { val: '24/7', lbl: 'Support' },
-                            { val: '10k+', lbl: 'Active Users' },
+                            { val: '500+', lbl: 'Products Available' },
+                            { val: 'Same-Day', lbl: 'Delivery Option' },
+                            { val: '24/7', lbl: 'Customer Support' },
+                            { val: '100%', lbl: 'Secure Checkout' },
                         ].map((s, i) => (
                             <div key={i} className="text-center md:text-left">
                                 <div className="text-3xl md:text-4xl font-black text-white">{s.val}</div>
@@ -162,8 +162,8 @@ export default function Landing() {
                 <div className="max-w-[1500px] mx-auto">
                     <div className="text-center mb-16">
                         <Badge variant="secondary" className="text-primary font-extrabold uppercase tracking-[0.15em] mb-3">Our Catalog</Badge>
-                        <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">Professional Hardware Catalog</h2>
-                        <p className="text-muted-foreground text-lg max-w-lg mx-auto">Preview our professional-grade tools and supplies.</p>
+                        <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">Shop Our Products</h2>
+                        <p className="text-muted-foreground text-lg max-w-lg mx-auto">Browse our wide selection of hardware, tools, and supplies.</p>
                     </div>
 
                     {loading ? (
@@ -210,15 +210,15 @@ export default function Landing() {
                 <div className="max-w-[1500px] mx-auto">
                     <div className="text-center mb-16">
                         <Badge variant="secondary" className="text-primary font-extrabold uppercase tracking-[0.15em] mb-3 bg-primary/10">Capabilities</Badge>
-                        <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">Everything you need to scale</h2>
-                        <p className="text-muted-foreground text-lg max-w-lg mx-auto">Powerful features to automate your day-to-day hardware store operations.</p>
+                        <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">Why Shop at HRMS?</h2>
+                        <p className="text-muted-foreground text-lg max-w-lg mx-auto">We make buying hardware easy, fast, and reliable — every time.</p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
-                            { icon: Package, title: 'Smart Inventory', desc: 'Track stock levels in real-time, get low-stock alerts, and auto-generate purchase orders.' },
-                            { icon: ShoppingCart, title: 'Omnichannel Sales', desc: 'Process walk-in POS transactions and online customer portal orders from a unified dashboard.' },
-                            { icon: Truck, title: 'Delivery Logistics', desc: 'Real-time GPS tracking, rider management, and Kanban-based fulfillment pipeline.' },
-                            { icon: BarChart3, title: 'Reports & Analytics', desc: 'Revenue trends, top products, conversion rates, and export-ready PDF reports.' },
+                            { icon: Package, title: 'Wide Product Range', desc: 'From hand tools to construction materials — find everything you need for any project, big or small.' },
+                            { icon: ShoppingCart, title: 'Easy Online Shopping', desc: 'Browse our catalog, add to cart, and checkout in just a few clicks from your phone or computer.' },
+                            { icon: Truck, title: 'Fast & Reliable Delivery', desc: 'Track your order in real time from our warehouse to your doorstep with our dedicated delivery team.' },
+                            { icon: BarChart3, title: 'Order History & Tracking', desc: 'View all your past orders, track active deliveries, and reorder your favorites anytime.' },
                         ].map(({ icon: Icon, title, desc }, i) => (
                             <Card key={i} className="transition-all hover:-translate-y-1 hover:shadow-card-hover">
                                 <CardContent className="p-7">
@@ -245,7 +245,7 @@ export default function Landing() {
                             HRMS
                         </span>
                     </div>
-                    <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Hardware Retail Management System. All rights reserved.</p>
+                    <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} HRMS Hardware Store. All rights reserved.</p>
                 </div>
             </footer>
 

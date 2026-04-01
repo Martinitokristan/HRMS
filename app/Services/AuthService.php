@@ -13,9 +13,9 @@ class AuthService
      * @param array $credentials
      * @return User|null
      */
-    public function attemptLogin(array $credentials): ?User
+    public function attemptLogin(array $credentials, bool $remember = false): ?User
     {
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user();
 
             // Block suspended accounts

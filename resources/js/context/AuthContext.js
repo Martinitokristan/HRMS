@@ -55,8 +55,8 @@ export function AuthProvider({ children }) {
         verifySession();
     }, []);
 
-    const login = async (email, password) => {
-        const userData = await auth.login(email, password);
+    const login = async (email, password, remember = false) => {
+        const userData = await auth.login(email, password, remember);
         setUser(userData);
         verifySession();
         return userData;
