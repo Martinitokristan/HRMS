@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,12 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Plus, Trash2 } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierUnitSettings() {
     const { showToast } = useToast();
-    const { refreshTrigger } = useSilentRefresh('supplier_unit_types');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_SETTINGS);
     const [unitTypes, setUnitTypes] = useState([]);
     const [loading, setLoading] = useState(unitTypes.length === 0);
     const [saving, setSaving] = useState(false);
@@ -38,8 +38,8 @@ export default function SupplierUnitSettings() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get('/supplier/unit-types');
-            setUnitTypes(res.data.data || []);
+            const res = await api.get('/supplier/unit-types');
+            setUnitTypes(res.data.data !== undefined ? res.data.data : res.data || []);
         } catch (err) {
             // Silence background error
         } finally {
@@ -58,9 +58,9 @@ export default function SupplierUnitSettings() {
         }
         setSaving(true);
         try {
-            await axios.post('/supplier/unit-types', newUnit);
+            await api.post('/supplier/unit-types', newUnit);
             showToast('Unit type added successfully');
-            markStale('supplier_unit_types');
+            markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             setNewUnit({ purchase_unit: '', sell_unit: '', multiplier: 1 });
             fetchData(true);
         } catch (e) {
@@ -73,9 +73,9 @@ export default function SupplierUnitSettings() {
     const performDeleteUnit = async (id) => {
         closeConfirm();
         try {
-            await axios.delete(`/supplier/unit-types/${id}`);
+            await api.delete(`/supplier/unit-types/${id}`);
             showToast('Unit type deleted');
-            markStale('supplier_unit_types');
+            markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             fetchData(true);
         } catch (e) {
             showToast('Error deleting unit type', 'error');

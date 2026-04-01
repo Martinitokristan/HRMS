@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\Delivery;
 use App\Models\RiderProfile;
 use App\Models\CustomerNotification;
@@ -90,6 +91,12 @@ class DeliveryController extends Controller
         // Notify Rider
         $delivery->rider->notify(new NewOrderAssigned($delivery));
 
+        $riderId  = $request->rider_id;
+        $customerId = $delivery->sale->customer_id ?? null;
+        broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard'], 'delivery.rider_assigned'));
+        broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard', 'rider_notifications'], 'delivery.rider_assigned'));
+        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.rider_assigned'));
+
         return response()->json([
             'data'    => $delivery->fresh()->load(['sale', 'rider']),
             'message' => 'Rider assigned successfully',
@@ -138,6 +145,11 @@ class DeliveryController extends Controller
             'type' => 'rider_assigned'
         ]);
 
+        $customerId = $delivery->sale->customer_id ?? null;
+        broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.self_assigned'));
+        broadcast(new DataMutated("private-rider.{$rider->id}", ['rider_dashboard'], 'delivery.self_assigned'));
+        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.self_assigned'));
+
         return response()->json([
             'data'    => $delivery->fresh()->load(['sale', 'rider']),
             'message' => 'Order assigned successfully! Please accept to start delivery.',
@@ -185,6 +197,11 @@ class DeliveryController extends Controller
             'message' => "The assigned rider declined your order #{$delivery->tracking_number}. Reason: {$request->note}",
             'type' => 'rider_declined'
         ]);
+
+        $customerId = $delivery->sale->customer_id ?? null;
+        broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard'], 'delivery.declined'));
+        broadcast(new DataMutated("private-rider.{$rider->id}", ['rider_dashboard'], 'delivery.declined'));
+        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.declined'));
 
         return response()->json([
             'message' => 'Order declined successfully',
@@ -252,6 +269,12 @@ class DeliveryController extends Controller
         }
 
         $delivery->update($updates);
+
+        $riderId    = $request->user()->id;
+        $customerId = $delivery->sale->customer_id ?? null;
+        broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.status_updated'));
+        broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard'], 'delivery.status_updated'));
+        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.status_updated'));
 
         return response()->json([
             'data'    => $delivery->fresh()->load(['sale', 'rider']),
@@ -446,6 +469,12 @@ class DeliveryController extends Controller
             $delivery->rider->notify(new NewFeedbackReceived($delivery));
         }
 
+        $customerId = $delivery->sale->customer_id ?? null;
+        $riderId    = $delivery->rider_id;
+        broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_riders'], 'delivery.rated'));
+        if ($riderId)    broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard', 'rider_notifications'], 'delivery.rated'));
+        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders'], 'delivery.rated'));
+
         return response()->json([
             'data' => $delivery,
             'status' => 'success',
@@ -513,6 +542,12 @@ class DeliveryController extends Controller
                 'is_read' => false,
             ]);
         }
+
+        $riderId    = $request->user()->id;
+        $customerId = $delivery->sale->customer_id ?? null;
+        broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.proof_uploaded'));
+        broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard'], 'delivery.proof_uploaded'));
+        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.proof_uploaded'));
 
         return response()->json([
             'data' => [

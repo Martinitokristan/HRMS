@@ -20,10 +20,10 @@ class AuthController extends Controller
         $role = $request->get('role', 'customer');
 
         $rules = [
-            'name'         => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
-            'email'        => 'required|email|unique:users,email',
-            'phone'        => ['required', 'string', 'regex:/^63\d{10}$/'],
-            'password'     => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
+            'name' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
+            'email' => 'required|email|unique:users,email',
+            'phone' => ['required', 'string', 'regex:/^63\d{10}$/'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
         ];
 
         $customMessages = [
@@ -34,24 +34,24 @@ class AuthController extends Controller
 
         if ($role === 'rider') {
             $rules = array_merge($rules, [
-                'vehicle_type'      => 'required|string',
-                'vehicle_model'     => 'required|string',
-                'plate_number'      => 'required|string',
-                'license_number'    => 'required|string',
-                'address'           => 'required|string',
-                'valid_id_type'     => 'required|string',
-                'valid_id_file'     => 'required|file|image|mimes:jpeg,png,jpg|max:5000',
-                'id_number'         => 'required|string',
+                'vehicle_type' => 'required|string',
+                'vehicle_model' => 'required|string',
+                'plate_number' => 'required|string',
+                'license_number' => 'required|string',
+                'address' => 'required|string',
+                'valid_id_type' => 'required|string',
+                'valid_id_file' => 'required|file|image|mimes:jpeg,png,jpg|max:5000',
+                'id_number' => 'required|string',
                 'emergency_contact' => 'required|string',
             ]);
             $customMessages['valid_id_file.image'] = 'The valid ID must be an image file (jpeg, png, jpg).';
             $customMessages['valid_id_file.mimes'] = 'The valid ID must be an image file (jpeg, png, jpg).';
         } else {
             $rules = array_merge($rules, [
-                'province'     => 'required|string|max:100',
+                'province' => 'required|string|max:100',
                 'municipality' => 'required|string|max:100',
-                'zip_code'     => 'nullable|string|max:10',
-                'address'      => 'required|string|max:255',
+                'zip_code' => 'nullable|string|max:10',
+                'address' => 'required|string|max:255',
             ]);
         }
 
@@ -61,11 +61,11 @@ class AuthController extends Controller
 
         $user = \DB::transaction(function () use ($request, $role, $verifyToken) {
             $user = User::create([
-                'name'     => $request->name,
-                'email'    => $request->email,
-                'phone'    => $request->phone,
-                'role'     => $role,
-                'status'   => 'pending',
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'role' => $role,
+                'status' => 'pending',
                 'password' => Hash::make($request->password),
                 'email_verification_token' => $verifyToken,
             ]);
@@ -77,31 +77,31 @@ class AuthController extends Controller
                 }
 
                 \App\Models\RiderProfile::create([
-                    'user_id'           => $user->id,
-                    'vehicle_type'      => $request->vehicle_type,
-                    'vehicle_model'     => $request->vehicle_model,
-                    'plate_number'      => $request->plate_number,
-                    'license_number'    => $request->license_number,
-                    'address'           => $request->address,
-                    'valid_id_type'     => $request->valid_id_type,
-                    'valid_id_path'     => $idPath,
-                    'id_number'         => $request->id_number,
-                    'id_file_path'      => $idPath,
+                    'user_id' => $user->id,
+                    'vehicle_type' => $request->vehicle_type,
+                    'vehicle_model' => $request->vehicle_model,
+                    'plate_number' => $request->plate_number,
+                    'license_number' => $request->license_number,
+                    'address' => $request->address,
+                    'valid_id_type' => $request->valid_id_type,
+                    'valid_id_path' => $idPath,
+                    'id_number' => $request->id_number,
+                    'id_file_path' => $idPath,
                     'emergency_contact' => $request->emergency_contact,
-                    'availability'      => 'off_duty',
+                    'availability' => 'off_duty',
                 ]);
             } else {
                 \App\Models\CustomerProfile::create([
-                    'user_id'      => $user->id,
-                    'age'          => $request->age,
-                    'sex'          => $request->sex,
-                    'province'     => $request->province,
+                    'user_id' => $user->id,
+                    'age' => $request->age,
+                    'sex' => $request->sex,
+                    'province' => $request->province,
                     'municipality' => $request->municipality,
-                    'zip_code'     => $request->zip_code,
-                    'address'      => $request->address,
-                    'landmark'     => $request->landmark,
-                    'latitude'     => $request->latitude,
-                    'longitude'    => $request->longitude,
+                    'zip_code' => $request->zip_code,
+                    'address' => $request->address,
+                    'landmark' => $request->landmark,
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
                 ]);
             }
 
@@ -117,7 +117,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Registration successful! Please check your email to verify your account.',
-            'status'  => 'success',
+            'status' => 'success',
         ], 201);
     }
 
@@ -143,27 +143,23 @@ class AuthController extends Controller
             'email_verification_token' => null,
             'status' => $status
         ]);
-
-        $authToken = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'message' => 'Email verified successfully!',
+            'message' => 'Email verified successfully! Please log in.',
             'status' => 'success',
-            'data' => $user,
-            'token' => $authToken
+            'data' => $user
         ]);
     }
 
     public function resendVerification(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-        
+
         $user = User::where('email', $request->email)->first();
-        
+
         if (!$user) {
             return response()->json(['message' => 'User not found.'], 404);
         }
-        
+
         if ($user->email_verified_at) {
             return response()->json(['message' => 'Email is already verified.'], 400);
         }
@@ -180,70 +176,5 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'Verification email resent successfully!']);
-    }
-
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
-        }
-
-        if (!$user->email_verified_at) {
-            return response()->json([
-                'message' => 'Please verify your email address before logging in.',
-                'status'  => 'error',
-            ], 403);
-        }
-
-        if ($user->status === 'suspended') {
-            return response()->json([
-                'message' => 'Your account has been suspended.',
-                'status'  => 'error',
-            ], 403);
-        }
-
-        if ($user->role === 'rider') {
-            \App\Models\RiderProfile::updateOrCreate(
-                ['user_id' => $user->id],
-                ['availability' => 'available']
-            );
-        }
-
-        $user->update(['last_login_at' => now()]);
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'data'    => $user->load('riderProfile'),
-            'token'   => $token,
-            'message' => 'Login successful',
-            'status'  => 'success',
-        ]);
-    }
-
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Logged out successfully',
-            'status'  => 'success',
-        ]);
-    }
-
-    public function me(Request $request)
-    {
-        return response()->json([
-            'data'   => $request->user()->load('riderProfile'),
-            'status' => 'success',
-        ]);
     }
 }

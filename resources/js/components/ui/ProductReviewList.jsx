@@ -7,14 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import RatingStars from '@/components/ui/RatingStars';
 import { ThumbsUp, MessageSquare, Filter, CheckCircle, Star } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
-import axios from 'axios';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
+import api, { silentApi } from '../../lib/api';
 
 const ProductReviewList = ({ productId, variantId, productVariants }) => {
-  const { refreshTrigger } = useSilentRefresh('product_reviews');
+  const { refreshTrigger } = useSilentRefresh(STALE_KEYS.PRODUCT_REVIEWS);
   const [reviews, setReviews] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(reviews.length === 0);
+  const [loading, setLoading] = useState(reviews?.length === 0);
   const [filterBy, setFilterBy] = useState('recent');
   const [helpfulVotes, setHelpfulVotes] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(variantId || 'all');
@@ -24,7 +24,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
   const perPage = 10;
 
   useEffect(() => {
-    fetchReviews(reviews.length > 0);
+    fetchReviews(reviews?.length > 0);
   }, [productId, selectedVariant, filterBy, refreshTrigger, currentPage]);
 
   const fetchReviews = async (silent = false) => {
@@ -33,13 +33,15 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
       let url = `/products/${productId}/reviews?filter=${filterBy}&page=${currentPage}&per_page=${perPage}`;
       if (selectedVariant && selectedVariant !== 'all') url += `&variant=${selectedVariant}`;
 
-      const response = await axios.get(url);
+      const response = await silentApi.get(url);
       const data = response.data;
 
-      if (data.status === 'success' || data.data) {
-        setReviews(data.data.reviews?.data || []);
-        setTotalCount(data.data.reviews?.total || 0);
-        setSummary(data.data.summary);
+      const responseData = data.data !== undefined ? data.data : data;
+
+      if (responseData) {
+        setReviews(responseData.reviews?.data || []);
+        setTotalCount(responseData.reviews?.total || 0);
+        setSummary(responseData.summary);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -50,18 +52,16 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
 
   const handleHelpful = async (reviewId, isHelpful) => {
     try {
-      const response = await axios.post(`/reviews/${reviewId}/helpful`, { is_helpful: isHelpful }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('hrms_token')}`,
-        }
-      });
+      // NOTE: hrms_token sessionStorage is removed as we use httpOnly cookies
+      const response = await api.post(`/reviews/${reviewId}/helpful`, { is_helpful: isHelpful });
 
-      if (response.data.status === 'success' || response.data.data) {
-        const data = response.data;
-        markStale('product_reviews');
+      const responseData = response.data.data !== undefined ? response.data.data : response.data;
+
+      if (responseData) {
+        markStale(STALE_KEYS.PRODUCT_REVIEWS);
         setHelpfulVotes(prev => ({
           ...prev,
-          [reviewId]: data.data.helpful_count
+          [reviewId]: responseData.helpful_count || 0
         }));
       }
     } catch (error) {
@@ -107,13 +107,13 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
             {/* Left Side: Average Rating */}
             <div className="lg:col-span-4 text-center lg:border-r border-gray-100 lg:pr-12">
               <div className="text-7xl font-black text-gray-900 mb-2 leading-none">
-                {Number(summary.average_rating).toFixed(1)}
+                {Number(summary.average_rating || 0).toFixed(1)}
               </div>
               <div className="flex justify-center mb-4">
                 <RatingStars rating={summary.average_rating} size="lg" />
               </div>
               <p className="text-sm font-black text-gray-400 uppercase tracking-widest">
-                Based on {summary.total_reviews} reviews
+                Based on {summary.total_reviews || 0} reviews
               </p>
             </div>
 
@@ -121,7 +121,8 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
             <div className="lg:col-span-8 flex flex-col gap-3">
               {[5, 4, 3, 2, 1].map((star) => {
                 const count = summary.rating_breakdown?.[star] || 0;
-                const percentage = summary.total_reviews > 0 ? (count / summary.total_reviews) * 100 : 0;
+                const totalRev = Number(summary.total_reviews) || 0;
+                const percentage = totalRev > 0 ? (count / totalRev) * 100 : 0;
                 return (
                   <div
                     key={star}
@@ -170,7 +171,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
               </SelectTrigger>
               <SelectContent className="z-[100000]">
                 <SelectItem value="all">All Reviews</SelectItem>
-                {productVariants.map(variant => (
+                {(productVariants || []).map(variant => (
                   <SelectItem key={variant.id} value={variant.id.toString()}>
                     {variant.size_value?.label || ''}
                     {variant.color_value?.label ? ` ${variant.color_value.label}` : ''}
@@ -276,7 +277,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
                 </p>
 
                 {/* Thumbnails */}
-                {review.images && review.images.length > 0 && (
+                {Array.isArray(review.images) && review.images.length > 0 && (
                   <div className="flex flex-wrap gap-4 mb-8">
                     {review.images.map((image, idx) => (
                       <div key={idx} className="group/img relative w-24 h-24 rounded-2xl overflow-hidden border border-gray-100 hover:border-orange-200 transition-colors cursor-zoom-in">
@@ -297,7 +298,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
                     className="flex items-center gap-2.5 bg-gray-50 border border-gray-100 hover:border-orange-100 hover:bg-orange-50 text-gray-600 hover:text-orange-600 py-2 px-4 rounded-xl transition-all font-black text-[11px] active:scale-95 group/btn"
                   >
                     <span className="group-hover/btn:scale-125 transition-transform">👍</span>
-                    {helpfulVotes[review.id] || review.helpful_count || 0}
+                    {helpfulVotes[review.id] !== undefined ? helpfulVotes[review.id] : (review.helpful_count || 0)}
                   </button>
                 </div>
 
@@ -328,7 +329,7 @@ const ProductReviewList = ({ productId, variantId, productVariants }) => {
           </button>
 
           <div className="flex items-center gap-2">
-            {[...Array(Math.ceil(totalCount / perPage))].map((_, i) => (
+            {[...Array(Math.ceil(totalCount / perPage) || 0)].map((_, i) => (
               <button
                 key={i + 1}
                 onClick={() => setCurrentPage(i + 1)}

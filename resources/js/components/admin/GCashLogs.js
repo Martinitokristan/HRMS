@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Smartphone, CheckCircle, XCircle, Search, RefreshCw, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function GCashLogs() {
+    const { refreshTrigger } = useSilentRefresh('admin_orders');
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -40,9 +42,10 @@ export default function GCashLogs() {
             if (filter === 'matched') queryPath += '&matched=true';
             if (filter === 'unmatched') queryPath += '&matched=false';
 
-            const res = await axios.get(queryPath);
-            setLogs(res.data.data);
-            setTotalPages(res.data.last_page);
+            const res = await api.get(queryPath);
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            setLogs(Array.isArray(data) ? data : []);
+            setTotalPages(res.data?.last_page || 1);
         } catch (err) {
             console.error('Failed to fetch GCash logs', err);
         } finally {
@@ -52,7 +55,7 @@ export default function GCashLogs() {
 
     useEffect(() => {
         fetchLogs();
-    }, [page, filter]);
+    }, [page, filter, refreshTrigger]);
 
     return (
         <div className="space-y-6">
@@ -118,8 +121,8 @@ export default function GCashLogs() {
                                 </th>
                             </tr>
                         </thead>
-                                <tbody className="bg-white divide-y divide-slate-200">
-                            {loading && logs.length === 0 ? (
+                        <tbody className="bg-white divide-y divide-slate-200">
+                            {loading && (!Array.isArray(logs) || logs.length === 0) ? (
                                 <tr>
                                     <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
                                         <div className="flex justify-center mb-2">
@@ -128,7 +131,7 @@ export default function GCashLogs() {
                                         Loading logs...
                                     </td>
                                 </tr>
-                            ) : logs.length === 0 ? (
+                            ) : (!Array.isArray(logs) || logs.length === 0) ? (
                                 <tr>
                                     <td colSpan="5" className="px-6 py-12 text-center text-slate-500 bg-slate-50/50">
                                         <div className="flex flex-col items-center">

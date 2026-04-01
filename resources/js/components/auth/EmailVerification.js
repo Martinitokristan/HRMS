@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
-import { useSupplierAuth } from '../../context/SupplierAuthContext';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -10,12 +9,10 @@ import { Button } from '@/components/ui/button';
 export default function EmailVerification() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const { loginWithToken } = useAuth();
-    const { loginWithToken: loginAsSupplier } = useSupplierAuth();
-    
+
     const token = searchParams.get('token');
     const type = searchParams.get('type');
-    
+
     const [status, setStatus] = useState('verifying'); // verifying, success, error, pending
     const [message, setMessage] = useState('Verifying your email address...');
 
@@ -29,42 +26,24 @@ export default function EmailVerification() {
         const verifyEmail = async () => {
             try {
                 // Determine endpoint based on type
-                const endpoint = type === 'supplier' 
+                const endpoint = type === 'supplier'
                     ? `/supplier/auth/verify-email?token=${token}`
                     : `/auth/verify-email?token=${token}`;
 
-                const response = await axios.get(endpoint);
-                const { data, token: authToken, message } = response.data;
-
-                if (type === 'rider') {
-                    // Rider is pending approval
-                    setStatus('pending');
-                    setMessage('Email verified! Your application is now pending admin review and interview.');
-                } else if (type === 'supplier') {
-                    // Log in supplier and redirect to supplier dashboard
-                    if (authToken) {
-                        loginAsSupplier(authToken, data);
-                    }
+                const response = await api.get(endpoint);
+                
+                if (response.data.status === 'success') {
                     setStatus('success');
-                    setMessage('Email verified successfully! Redirecting to your dashboard...');
-                    setTimeout(() => navigate('/supplier/dashboard'), 2000);
+                    setMessage('Email verified successfully! Please head to the login page to continue.');
                 } else {
-                    // Log in customer and redirect to shop
-                    if (authToken) {
-                        loginWithToken(authToken, data);
-                    }
-                    setStatus('success');
-                    setMessage('Email verified successfully! Redirecting to the shop...');
-                    setTimeout(() => navigate('/shop'), 2000);
+                    setStatus('error');
+                    setMessage('Verification failed. Please try again or request a new link.');
                 }
             } catch (error) {
                 const status = error.response?.status;
                 const msg = error.response?.data?.message || '';
 
-                // 404 = token already used (already verified) OR invalid
-                // "Email already verified" = second click on the link
                 if (status === 404 || msg.toLowerCase().includes('already verified') || msg.toLowerCase().includes('invalid or expired')) {
-                    // Treat as already verified — just redirect appropriately
                     setStatus('success');
                     setMessage('Your email is already verified! Redirecting...');
                     setTimeout(() => {
@@ -80,7 +59,7 @@ export default function EmailVerification() {
         };
 
         verifyEmail();
-    }, [token, type, navigate, loginWithToken]);
+    }, [token, type, navigate]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 flex-col p-4">

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import RatingStars from '@/components/ui/RatingStars';
 import { Star, MessageSquare, Upload } from 'lucide-react';
+import api from '../../lib/api';
 
 const ProductReviewForm = ({ productId, productVariantId, onReviewSubmitted, onCancel }) => {
   const [rating, setRating] = useState(0);
@@ -24,10 +25,6 @@ const ProductReviewForm = ({ productId, productVariantId, onReviewSubmitted, onC
 
     setSubmitting(true);
 
-    // Get CSRF token
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    const token = localStorage.getItem('hrms_token');
-
     const payload = {
       product_id: productId,
       product_variant_id: productVariantId || null,
@@ -36,37 +33,19 @@ const ProductReviewForm = ({ productId, productVariantId, onReviewSubmitted, onC
       title: title,
     };
 
-    console.log('🔍 [ProductReviewForm] Submitting review with payload:', payload);
-    console.log('🔍 [ProductReviewForm] Title:', title);
-    console.log('🔍 [ProductReviewForm] Review text:', reviewText);
-
     try {
-      const response = await fetch(`/api/products/${productId}/reviews`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'X-CSRF-TOKEN': csrfToken,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
+      const response = await api.post(`/products/${productId}/reviews`, payload);
+      const data = response.data;
       
-      if (response.ok) {
-        onReviewSubmitted(data.data);
-        // Reset form
-        setRating(0);
-        setTitle('');
-        setReviewText('');
-        setImages([]);
-      } else {
-        alert(data.message || 'Failed to submit review');
-      }
+      onReviewSubmitted(data.data !== undefined ? data.data : data);
+      // Reset form
+      setRating(0);
+      setTitle('');
+      setReviewText('');
+      setImages([]);
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('Failed to submit review');
+      alert(error.response?.data?.message || 'Failed to submit review');
     } finally {
       setSubmitting(false);
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 import {
     RotateCcw, Search, Eye, CheckCircle2, XCircle, Clock,
     Package, ImageIcon, ChevronLeft, AlertTriangle, DollarSign,
@@ -43,11 +45,14 @@ export default function Returns() {
     const [refundMethod, setRefundMethod] = useState('original_payment');
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState({});
+    
+    // Background Sync
+    const returnsRefresh = useSilentRefresh(STALE_KEYS.ADMIN_RETURNS);
 
     const fetchReturns = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get('/returns', {
+            const res = await api.get('/returns', {
                 params: {
                     search: search || undefined,
                     status: statusFilter !== 'all' ? statusFilter : undefined,
@@ -55,8 +60,8 @@ export default function Returns() {
                     per_page: 15,
                 },
             });
-            setReturns(res.data.data?.data || []);
-            setPagination(res.data.data || {});
+            setReturns(res.data.data?.data || res.data.data || []);
+            setPagination(res.data.data !== undefined ? res.data.data : res.data);
             setStats(res.data.stats || {});
         } catch (err) {
             showToast('Failed to load returns', 'error');
@@ -65,19 +70,21 @@ export default function Returns() {
         }
     }, [search, statusFilter, page]);
 
-    useEffect(() => { fetchReturns(); }, [fetchReturns]);
+    useEffect(() => { fetchReturns(); }, [fetchReturns, returnsRefresh.refreshTrigger]);
 
     const handleApprove = async (id) => {
         if (!refundMethod) { showToast('Please select a refund method', 'error'); return; }
         setActionLoading(true);
         try {
-            const res = await axios.post(`/returns/${id}/approve`, {
+            const res = await api.post(`/returns/${id}/approve`, {
                 refund_method: refundMethod,
                 admin_notes: adminNotes || null,
             });
             showToast(res.data.message || 'Return approved');
             setSelectedReturn(res.data.data);
-            fetchReturns();
+            
+            // Notify Admin, Customer History, and Inventory (since stock moved)
+            markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS, STALE_KEYS.ADMIN_INVENTORY);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to approve', 'error');
         } finally { setActionLoading(false); }
@@ -87,10 +94,10 @@ export default function Returns() {
         if (!adminNotes.trim()) { showToast('Please provide a reason for rejection', 'error'); return; }
         setActionLoading(true);
         try {
-            const res = await axios.post(`/returns/${id}/reject`, { admin_notes: adminNotes });
+            const res = await api.post(`/returns/${id}/reject`, { admin_notes: adminNotes });
             showToast(res.data.message || 'Return rejected');
             setSelectedReturn(res.data.data);
-            fetchReturns();
+            markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to reject', 'error');
         } finally { setActionLoading(false); }
@@ -99,10 +106,10 @@ export default function Returns() {
     const handleComplete = async (id) => {
         setActionLoading(true);
         try {
-            const res = await axios.post(`/returns/${id}/complete`);
+            const res = await api.post(`/returns/${id}/complete`);
             showToast(res.data.message || 'Refund processed');
             setSelectedReturn(res.data.data);
-            fetchReturns();
+            markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS, STALE_KEYS.ADMIN_DASHBOARD);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to complete', 'error');
         } finally { setActionLoading(false); }
@@ -110,7 +117,7 @@ export default function Returns() {
 
     const openDetail = async (id) => {
         try {
-            const res = await axios.get(`/returns/${id}`);
+            const res = await api.get(`/returns/${id}`);
             setSelectedReturn(res.data.data);
             setAdminNotes(res.data.data.admin_notes || '');
             setRefundMethod(res.data.data.refund_method || 'original_payment');

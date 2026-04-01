@@ -8,6 +8,7 @@ import { getProductSaleInfo, getVariantSaleInfo } from '../../utils/priceCalcula
 import { useAuth } from '../../context/AuthContext';
 import RatingStars from '../ui/RatingStars';
 import ProductReviewList from '../ui/ProductReviewList';
+import api, { silentApi } from '../../lib/api';
 
 export default function ProductDetailModal({ isOpen, onClose, product, onAddToCart }) {
     const [qty, setQty] = useState(1);
@@ -69,28 +70,24 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
         }
 
         const hasInitialData = product.average_rating !== undefined && product.total_reviews !== undefined;
-        setLoadingRating(!hasInitialData && !productRating); // Only show loading if we don't have data yet
-        try {
-            // Fetch both rating and sold count in parallel for faster loading
-            const [ratingResponse, soldResponse] = await Promise.all([
-                fetch(`/api/products/${product.id}/reviews`),
-                fetch(`/api/products/${product.id}/sold-count`)
-            ]);
+            setLoadingRating(!hasInitialData && !productRating); // Only show loading if we don't have data yet
+            try {
+                // Fetch both rating and sold count in parallel for faster loading
+                const [ratingRes, soldRes] = await Promise.all([
+                    silentApi.get(`/products/${product.id}/reviews`),
+                    silentApi.get(`/products/${product.id}/sold-count`)
+                ]);
 
             // Set rating data
-            if (ratingResponse.ok) {
-                const ratingData = await ratingResponse.json();
-                if (ratingData.data?.summary) {
-                    setProductRating(ratingData.data.summary);
-                }
+            const ratingData = ratingRes.data;
+            if (ratingData.data?.summary) {
+                setProductRating(ratingData.data.summary);
             }
 
             // Set sold count data
-            if (soldResponse.ok) {
-                const soldData = await soldResponse.json();
-                if (soldData.status === 'success') {
-                    setSoldCount(soldData.sold_count || 0);
-                }
+            const soldData = soldRes.data;
+            if (soldData.status === 'success') {
+                setSoldCount(soldData.sold_count || 0);
             }
         } catch (error) {
             console.error('Error fetching product data:', error);
@@ -102,20 +99,12 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
     const checkReviewEligibility = async () => {
         if (!user || !product.id) return;
 
-        const token = localStorage.getItem('hrms_token');
-
         setCheckingEligibility(true);
         try {
-            const response = await fetch(`/api/customers/${user.id}/can-review/${product.id}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
-            const data = await response.json();
-            if (data.status === 'success') {
-                setCanReview(data.can_review);
+            const response = await silentApi.get(`/customers/${user.id}/can-review/${product.id}`);
+            // Check both data.can_review and data.status for flexibility
+            if (response.data.status === 'success' || response.data.can_review !== undefined) {
+                setCanReview(response.data.can_review);
             }
         } catch (error) {
             console.error('Error checking review eligibility:', error);

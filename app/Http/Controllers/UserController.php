@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -55,6 +56,8 @@ class UserController extends Controller
             $user->riderProfile()->create(['availability' => 'available']);
         }
 
+        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'user.created'));
+
         return response()->json([
             'data'    => $user->load('riderProfile'),
             'message' => 'User created successfully',
@@ -79,6 +82,8 @@ class UserController extends Controller
 
         $user->update($data);
 
+        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'user.updated'));
+
         return response()->json([
             'data'    => $user->fresh(),
             'message' => 'User updated',
@@ -93,6 +98,8 @@ class UserController extends Controller
         // Revoke all tokens
         $user->tokens()->delete();
 
+        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'user.suspended'));
+
         return response()->json(['message' => 'User suspended', 'status' => 'success']);
     }
 
@@ -101,6 +108,8 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $user->update(['status' => 'active']);
 
+        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'user.restored'));
+
         return response()->json(['message' => 'User restored', 'status' => 'success']);
     }
 
@@ -108,6 +117,8 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete();
+
+        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'user.deleted'));
 
         return response()->json(['message' => 'User deleted', 'status' => 'success']);
     }

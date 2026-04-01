@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../shared/Modal';
 import { StatusBadge } from '../shared/Badge';
@@ -14,7 +14,7 @@ export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
         
         let isMounted = true;
         setLoading(true);
-        axios.get(`/deliveries/${deliveryId}`)
+        api.get(`/deliveries/${deliveryId}`)
             .then(res => {
                 if (isMounted) {
                     setDelivery(res.data.data);

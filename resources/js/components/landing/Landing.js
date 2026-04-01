@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api, { silentApi } from "../../lib/api";
 import { Package, ShieldCheck, Truck, BarChart3, Wrench, ShoppingCart, ArrowRight, X, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export default function Landing() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const r = await axios.get('/products', { params: { per_page: 8 } });
+            const r = await silentApi.get('/products', { params: { per_page: 8 } });
             const d = r.data.data;
             setProducts(d.data ? d.data : d);
         } catch (err) {

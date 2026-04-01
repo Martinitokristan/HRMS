@@ -36,4 +36,12 @@ return [
         'from_name' => env('BREVO_FROM_NAME', 'Hardware Retail Management System'),
     ],
 
+    'removebg' => [
+        'key' => env('REMOVEBG_API_KEY'),
+    ],
+
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
 ];

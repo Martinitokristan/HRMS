@@ -7,6 +7,7 @@ use App\Models\Variant;
 use App\Models\VariantValue;
 use App\Models\Setting;
 use App\Models\UnitConversion;
+use App\Events\DataMutated;
 use App\Models\UnitType;
 use Illuminate\Http\Request;
 
@@ -101,6 +102,9 @@ class SettingsController extends Controller
     public function deleteVariantValue($id)
     {
         VariantValue::destroy($id);
+
+        broadcast(new DataMutated('private-admin', ['admin_settings'], 'variant_value.deleted'));
+
         return response()->json(['status' => 'success']);
     }
 
@@ -146,6 +150,9 @@ class SettingsController extends Controller
     public function deleteUnitType($id)
     {
         UnitType::destroy($id);
+
+        broadcast(new DataMutated('private-admin', ['admin_settings'], 'unit_type.deleted'));
+
         return response()->json(['status' => 'success']);
     }
 
@@ -170,35 +177,44 @@ class SettingsController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    public function getNotifications(Request $request)
+    private function resolveNotifiable(Request $request)
     {
         $user = $request->user();
-        $notifications = $user->notifications()->orderBy('created_at', 'desc')->take(30)->get();
+        if ($user->role === 'supplier') {
+            return \App\Models\Supplier::where('email', $user->email)->first() ?? $user;
+        }
+        return $user;
+    }
+
+    public function getNotifications(Request $request)
+    {
+        $notifiable = $this->resolveNotifiable($request);
+        $notifications = $notifiable->notifications()->orderBy('created_at', 'desc')->take(30)->get();
         return response()->json(['data' => $notifications]);
     }
 
     public function markAllNotificationsRead(Request $request)
     {
-        $request->user()->unreadNotifications->markAsRead();
+        $this->resolveNotifiable($request)->unreadNotifications->markAsRead();
         return response()->json(['status' => 'success']);
     }
 
     public function deleteNotification(Request $request, $id)
     {
-        $request->user()->notifications()->where('id', $id)->delete();
+        $this->resolveNotifiable($request)->notifications()->where('id', $id)->delete();
         return response()->json(['status' => 'success']);
     }
 
     public function deleteBatchNotifications(Request $request)
     {
         $request->validate(['ids' => 'required|array']);
-        $request->user()->notifications()->whereIn('id', $request->ids)->delete();
+        $this->resolveNotifiable($request)->notifications()->whereIn('id', $request->ids)->delete();
         return response()->json(['status' => 'success']);
     }
 
     public function deleteAllNotifications(Request $request)
     {
-        $request->user()->notifications()->delete();
+        $this->resolveNotifiable($request)->notifications()->delete();
         return response()->json(['status' => 'success']);
     }
 
@@ -221,6 +237,8 @@ class SettingsController extends Controller
 
         $value = VariantValue::create($request->only(['variant_id', 'label', 'hex_code', 'description', 'category']));
 
+        broadcast(new DataMutated('private-admin', ['admin_settings'], 'variant_value.created'));
+
         return response()->json(['data' => $value, 'status' => 'success']);
     }
 
@@ -242,6 +260,8 @@ class SettingsController extends Controller
         ]);
 
         $unit = UnitType::create($request->only(['purchase_unit', 'sell_unit', 'multiplier']));
+
+        broadcast(new DataMutated('private-admin', ['admin_settings'], 'unit_type.created'));
 
         return response()->json(['data' => $unit, 'status' => 'success']);
     }

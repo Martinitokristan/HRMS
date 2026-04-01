@@ -16,9 +16,11 @@ import {
     Calendar,
     Download
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../../lib/api';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 
 export default function AnalyticsDashboard() {
+    const { refreshTrigger } = useSilentRefresh('admin_dashboard');
     const [period, setPeriod] = useState('month');
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({
@@ -31,17 +33,17 @@ export default function AnalyticsDashboard() {
 
     useEffect(() => {
         fetchAnalytics();
-    }, [period]);
+    }, [period, refreshTrigger]);
 
     const fetchAnalytics = async () => {
         setLoading(true);
         try {
             const [salesRes, topProductsRes, customerBehaviorRes, inventoryRes, profitRes] = await Promise.all([
-                axios.get(`/reports/sales?period=${period}`),
-                axios.get(`/reports/top-products?period=${period}`),
-                axios.get('/analytics/customer-behavior'),
-                axios.get('/analytics/inventory-forecast'),
-                axios.get('/analytics/profit-margins')
+                api.get(`/reports/sales?period=${period}`),
+                api.get(`/reports/top-products?period=${period}`),
+                api.get('/analytics/customer-behavior'),
+                api.get('/analytics/inventory-forecast'),
+                api.get('/analytics/profit-margins')
             ]);
 
             setData({
@@ -60,7 +62,7 @@ export default function AnalyticsDashboard() {
 
     const exportReport = async (type) => {
         try {
-            const response = await axios.get(`/reports/export?type=${type}&period=${period}`, {
+            const response = await api.get(`/reports/export?type=${type}&period=${period}`, {
                 responseType: 'blob'
             });
             

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../shared/Modal';
 import { StatusBadge } from '../shared/Badge';
@@ -15,10 +15,10 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
         
         let isMounted = true;
         setLoading(true);
-        axios.get(`/suppliers/${supplierId}`)
+        api.get(`/suppliers/${supplierId}`)
             .then(res => {
                 if (isMounted) {
-                    setSupplier(res.data.data);
+                    setSupplier(res.data.data !== undefined ? res.data.data : res.data);
                     setLoading(false);
                 }
             })

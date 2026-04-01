@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -97,7 +97,7 @@ export default function SupplierRegister() {
                 ...formData,
                 phone: `63${formData.phone}`
             };
-            const response = await axios.post('/supplier/auth/register', dataToSubmit);
+            const response = await api.post('/supplier/auth/register', dataToSubmit);
             setSuccessMsg('Supplier account created successfully! Please check your email to verify your account.');
             showToast('Registration successful!', 'success');
         } catch (error) {
@@ -123,7 +123,7 @@ export default function SupplierRegister() {
         setResendMsg('');
         setResendError('');
         try {
-            const response = await axios.post('/supplier/auth/resend-verification', { email: formData.email });
+            const response = await api.post('/supplier/auth/resend-verification', { email: formData.email });
             setResendMsg(response.data.message);
         } catch (err) {
             setResendError(err.response?.data?.message || 'Failed to resend email.');

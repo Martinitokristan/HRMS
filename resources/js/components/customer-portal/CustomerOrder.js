@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
@@ -14,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle, Navigation, Loader2, Download, Smartphone } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
+import { STALE_KEYS, markStale } from "../../store/dataStore";
 
 import "leaflet/dist/leaflet.css";
 
@@ -74,7 +76,8 @@ function CheckoutMapController({ position, onMapClick }) {
 export default function CustomerOrder() {
     const navigate = useNavigate();
     const { showToast } = useToast();
-    const { user } = useAuth();
+    const { user, settings } = useAuth();
+    const gcashEnabled = !!(settings?.settings?.payments?.gcash_payload || settings?.payments?.gcash_payload);
 
     const [cart, setCart] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -147,7 +150,7 @@ export default function CustomerOrder() {
             ? `${product.id}-${variantString}`
             : product.id;
 
-        const newCart = cart.map((item) => {
+        const newCart = Array.isArray(cart) ? cart.map((item) => {
             if (item.cartId === product.cartId) {
                 return {
                     ...item,
@@ -160,7 +163,7 @@ export default function CustomerOrder() {
                 };
             }
             return item;
-        });
+        }) : [];
 
         setCart(newCart);
         localStorage.setItem("hrms_cart", JSON.stringify(newCart));
@@ -169,25 +172,30 @@ export default function CustomerOrder() {
     useEffect(() => {
         const saved = localStorage.getItem("hrms_cart");
         if (saved) {
-            const cartData = JSON.parse(saved);
-            // ONLY show items selected in the cart page
-            const selectedOnly = cartData.filter(item => item.selectedForCheckout);
-            if (selectedOnly.length === 0) {
-                navigate("/shop/cart");
-                return;
+            try {
+                const cartData = JSON.parse(saved);
+                // ONLY show items selected in the cart page
+                const selectedOnly = Array.isArray(cartData) ? cartData.filter(item => item.selectedForCheckout) : [];
+                if (selectedOnly.length === 0) {
+                    navigate("/shop/cart");
+                    return;
+                }
+                setCart(selectedOnly);
+            } catch (e) {
+                console.error("Cart parse error:", e);
+                navigate("/shop");
             }
-            setCart(selectedOnly);
         } else {
             navigate("/shop");
         }
 
         // Fetch customer profile for location
-        axios
+        api
             .get("/customer/profile")
             .then((res) => {
-                setCustomerProfile(res.data.data);
-                if (res.data.data?.address) {
-                    const profile = res.data.data;
+                const profile = res.data;
+                setCustomerProfile(profile);
+                if (profile?.address) {
                     setAddress(`${profile.address}, ${profile.municipality}, ${profile.province}`);
                     if (profile.latitude && profile.longitude) {
                         setCheckoutPosition([parseFloat(profile.latitude), parseFloat(profile.longitude)]);
@@ -198,21 +206,25 @@ export default function CustomerOrder() {
     }, [navigate]);
 
     const removeFromCart = (cartId) => {
-        const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
-        const newSaved = saved.filter(item => item.cartId !== cartId);
-        localStorage.setItem("hrms_cart", JSON.stringify(newSaved));
+        try {
+            const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
+            const newSaved = Array.isArray(saved) ? saved.filter(item => item.cartId !== cartId) : [];
+            localStorage.setItem("hrms_cart", JSON.stringify(newSaved));
 
-        const newCart = cart.filter(item => item.cartId !== cartId);
-        setCart(newCart);
-        if (newCart.length === 0) {
-            navigate("/shop");
+            const newCart = Array.isArray(cart) ? cart.filter(item => item.cartId !== cartId) : [];
+            setCart(newCart);
+            if (newCart.length === 0) {
+                navigate("/shop");
+            }
+        } catch (e) {
+            console.error("Remove from cart error:", e);
         }
     };
 
-    const total = cart.reduce(
+    const total = Array.isArray(cart) ? cart.reduce(
         (sum, item) => sum + item.sell_price * item.qty,
         0,
-    );
+    ) : 0;
 
     const handleCheckout = async (e) => {
         e.preventDefault();
@@ -224,43 +236,15 @@ export default function CustomerOrder() {
         }
 
         // Validate cart has items
-        if (cart.length === 0) {
+        if (!cart || cart.length === 0) {
             showToast("Your cart is empty.", "error");
             return;
         }
 
         setLoading(true);
 
-        // Debug: Check if user is logged in
-        console.log('User:', user);
-        console.log('Token:', localStorage.getItem('hrms_token'));
-        console.log('Order data:', {
-            address: address.trim(),
-            payment_method: payment,
-            customer_id: user?.id,
-            items: cart.map((i) => ({
-                product_id: i.id,
-                product_variant_id: i.variant_id || null,
-                quantity: i.qty,
-                price: i.sell_price,
-                variants: i.selectedVariants || {},
-            })),
-        });
-
-        // Test API call first
         try {
-            const testResponse = await axios.get('/auth/me');
-            console.log('Auth test successful:', testResponse.data);
-        } catch (testErr) {
-            console.error('Auth test failed:', testErr);
-            showToast('Authentication error. Please log in again.', 'error');
-            setLoading(false);
-            return;
-        }
-
-        try {
-            console.log('Sending order request...');
-            const orderResponse = await axios.post("/sales", {
+            const orderResponse = await api.post("/sales", {
                 address: address.trim(),
                 latitude: checkoutPosition[0],
                 longitude: checkoutPosition[1],
@@ -277,10 +261,11 @@ export default function CustomerOrder() {
             });
 
             if (payment === "gcash") {
-                setGcashAmount(orderResponse.data.data.total_amount);
+                const totalAmt = orderResponse.data.data?.total_amount || orderResponse.data.total_amount;
+                setGcashAmount(totalAmt);
                 setGcashBasePayload(orderResponse.data.gcash_payload);
                 setGcashModal(true);
-                return; // Wait for user to pay before completing
+                return; 
             }
 
             // Normal COD completion
@@ -294,31 +279,39 @@ export default function CustomerOrder() {
     };
 
     const completeOrderSuccess = () => {
-        // Dispatch event to refresh product list on home page
-        window.dispatchEvent(new CustomEvent('orderPlaced', { detail: { items: cart } }));
-        // Remove placed items from localStorage cart
-        const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
-        const cartIdsToRemove = cart.map(i => i.cartId);
-        const remainingCart = saved.filter(item => !cartIdsToRemove.includes(item.cartId));
+        // Broadly synchronize state across all relevant roles
+        markStale(
+            STALE_KEYS.CUSTOMER_ORDERS,
+            STALE_KEYS.CUSTOMER_CART,
+            STALE_KEYS.ADMIN_ORDERS,
+            STALE_KEYS.ADMIN_DASHBOARD,
+            STALE_KEYS.CUSTOMER_SHOP
+        );
 
-        if (remainingCart.length > 0) {
-            localStorage.setItem("hrms_cart", JSON.stringify(remainingCart));
-        } else {
+        // Remove placed items from localStorage cart
+        try {
+            const saved = JSON.parse(localStorage.getItem("hrms_cart") || "[]");
+            const cartIdsToRemove = cart.map(i => i.cartId);
+            const remainingCart = Array.isArray(saved) ? saved.filter(item => !cartIdsToRemove.includes(item.cartId)) : [];
+
+            if (remainingCart.length > 0) {
+                localStorage.setItem("hrms_cart", JSON.stringify(remainingCart));
+            } else {
+                localStorage.removeItem("hrms_cart");
+            }
+        } catch (e) {
             localStorage.removeItem("hrms_cart");
         }
         setOrderSuccess(true);
         setGcashModal(false);
     };
 
-    if (cart.length === 0) return null;
+    if (!cart || cart.length === 0) return null;
 
     // Invoice/Confirmation Step
     if (step === 2) {
         const hasLocation =
             customerProfile?.latitude && customerProfile?.longitude;
-        const position = hasLocation
-            ? [customerProfile.latitude, customerProfile.longitude]
-            : [7.0707, 125.608];
 
         return (
             <div className="min-h-screen bg-secondary/30 py-8 px-4">
@@ -373,7 +366,7 @@ export default function CustomerOrder() {
 
                                 <div className="border-t border-border pt-4">
                                     <h4 className="font-bold text-foreground mb-3">Order Items</h4>
-                                    {cart.map((item) => (
+                                    {Array.isArray(cart) && cart.map((item) => (
                                         <div key={item.cartId} className="flex gap-3 py-3 border-b border-border/50 items-start">
                                             <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center text-xl shrink-0 overflow-hidden">
                                                 {item.image_path ? (
@@ -420,43 +413,41 @@ export default function CustomerOrder() {
                                     The pin below is your default home. If you want this delivered elsewhere today (like work), click "Use Current GPS" or drag the pin.
                                 </p>
 
-                                {hasLocation ? (
-                                    <>
-                                        <div className="h-[240px] rounded-xl overflow-hidden border-2 border-primary/20 cursor-crosshair relative shadow-inner">
-                                            <MapContainer center={checkoutPosition} zoom={16} maxZoom={20} style={{ height: "100%", width: "100%" }}>
-                                                <CheckoutMapController position={checkoutPosition} onMapClick={handleMapClick} />
-                                                <TileLayer
-                                                    url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
-                                                    attribution="&copy; Google Maps"
-                                                    maxZoom={20}
-                                                />
-                                                <Marker
-                                                    position={checkoutPosition}
-                                                    draggable={true}
-                                                    eventHandlers={{ dragend: handleMarkerDragEnd }}
-                                                />
-                                            </MapContainer>
-                                        </div>
-
-                                        <Card className="bg-amber-50 border-amber-200 p-3">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <MapPin className="h-4 w-4 text-amber-600" />
-                                                <span className="font-semibold text-sm text-amber-800">Your Checkout Location</span>
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {checkoutPosition[0].toFixed(6)}, {checkoutPosition[1].toFixed(6)}
-                                            </div>
-                                        </Card>
-
-                                        <Card className="bg-blue-50 border-blue-200 p-3">
-                                            <p className="text-sm text-blue-800 flex items-start gap-2"><MapPin className="h-4 w-4 shrink-0 mt-0.5 text-blue-600" /><span><strong>Delivery Confirmation:</strong><br />Your order will be delivered to the location shown above. Please ensure this is correct before placing your order.</span></p>
-                                        </Card>
-                                    </>
-                                ) : (
+                                {!hasLocation && (
                                     <Card className="bg-amber-50 border-amber-200 p-3">
-                                        <p className="text-sm text-amber-800 flex items-start gap-2"><AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" /><span><strong>No Location Data:</strong><br />Your account doesn't have GPS coordinates. The rider may need to contact you for directions.</span></p>
+                                        <p className="text-sm text-amber-800 flex items-start gap-2"><AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" /><span><strong>No saved location:</strong> Pin is set to a default position. Use "Use Current GPS" or drag the pin to set your delivery location.</span></p>
                                     </Card>
                                 )}
+
+                                <div className="h-[240px] rounded-xl overflow-hidden border-2 border-primary/20 cursor-crosshair relative shadow-inner">
+                                    <MapContainer center={checkoutPosition} zoom={16} maxZoom={20} style={{ height: "100%", width: "100%" }}>
+                                        <CheckoutMapController position={checkoutPosition} onMapClick={handleMapClick} />
+                                        <TileLayer
+                                            url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+                                            attribution="&copy; Google Maps"
+                                            maxZoom={20}
+                                        />
+                                        <Marker
+                                            position={checkoutPosition}
+                                            draggable={true}
+                                            eventHandlers={{ dragend: handleMarkerDragEnd }}
+                                        />
+                                    </MapContainer>
+                                </div>
+
+                                <Card className="bg-amber-50 border-amber-200 p-3">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <MapPin className="h-4 w-4 text-amber-600" />
+                                        <span className="font-semibold text-sm text-amber-800">Your Checkout Location</span>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {checkoutPosition[0].toFixed(6)}, {checkoutPosition[1].toFixed(6)}
+                                    </div>
+                                </Card>
+
+                                <Card className="bg-blue-50 border-blue-200 p-3">
+                                    <p className="text-sm text-blue-800 flex items-start gap-2"><MapPin className="h-4 w-4 shrink-0 mt-0.5 text-blue-600" /><span><strong>Delivery Confirmation:</strong><br />Your order will be delivered to the location shown above. Please ensure this is correct before placing your order.</span></p>
+                                </Card>
 
                                 {/* PAYMENT METHOD */}
                                 <div className="space-y-3 mb-6">
@@ -475,6 +466,7 @@ export default function CustomerOrder() {
                                             <div className="text-xs text-muted-foreground mt-1 ml-6">Pay when your order arrives</div>
                                         </div>
 
+                                        {gcashEnabled ? (
                                         <div
                                             className={`border rounded-lg p-3 cursor-pointer transition-all ${payment === "gcash" ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 ring-offset-1" : "border-border hover:bg-secondary/50"}`}
                                             onClick={() => setPayment("gcash")}
@@ -487,6 +479,14 @@ export default function CustomerOrder() {
                                             </div>
                                             <div className="text-xs text-muted-foreground mt-1 ml-6">Pay via QR code with reference verification</div>
                                         </div>
+                                        ) : (
+                                        <div className="border rounded-lg p-3 opacity-40 cursor-not-allowed border-border bg-secondary/30">
+                                            <div className="flex items-center gap-2 font-semibold text-muted-foreground">
+                                                📱 GCash
+                                            </div>
+                                            <div className="text-xs text-muted-foreground mt-1">GCash not available at the moment</div>
+                                        </div>
+                                        )}
                                     </div>
 
                                     {payment === "gcash" && (
@@ -678,7 +678,7 @@ export default function CustomerOrder() {
                         </div>
 
                         <div className="space-y-0 mb-4">
-                            {cart.map((item) => (
+                            {Array.isArray(cart) && cart.map((item) => (
                                 <div key={item.cartId || item.id} className="flex gap-3 py-3 border-b border-border/50 items-center">
                                     <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center text-2xl shrink-0 overflow-hidden">
                                         {item.image_path ? (
@@ -688,7 +688,7 @@ export default function CustomerOrder() {
                                     <div className="flex-1 min-w-0">
                                         <div className="font-semibold text-foreground text-sm truncate">{item.name}</div>
                                         {item.variantString && <div className="text-xs text-muted-foreground">{item.variantString}</div>}
-                                        <div className="text-xs text-muted-foreground">Qty: {item.qty} × ₱{item.sell_price.toLocaleString()}</div>
+                                        <div className="text-xs text-muted-foreground">Qty: {item.qty} × ₱{(item.sell_price || 0).toLocaleString()}</div>
                                         <div className="flex gap-3 mt-1">
                                             {item.product_variants?.length > 0 && (
                                                 <button type="button" className="text-[11px] text-primary font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline" onClick={() => setSelectedProduct(item)}>Edit</button>
@@ -697,7 +697,7 @@ export default function CustomerOrder() {
                                         </div>
                                     </div>
                                     <div className="font-bold text-foreground text-sm whitespace-nowrap">
-                                        ₱{(item.sell_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ₱{((item.sell_price || 0) * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </div>
                                 </div>
                             ))}

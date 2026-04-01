@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import Modal from '../shared/Modal';
@@ -12,13 +13,15 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableFoo
 import { AlertCircle, CheckCircle2, XCircle, Loader2, Package } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
+import PoReceiptModal from '../shared/PoReceiptModal';
 
 export default function PurchaseTab({ mode = 'completed' }) {
     const { showToast } = useToast();
+    const { settings } = useAuth();
     const isRequestMode = mode === 'requests';
-    const { refreshTrigger } = useSilentRefresh('admin_purchases');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_PURCHASES);
     
     const [pos, setPos] = useState({ data: [], total: 0 });
     const [loading, setLoading] = useState(pos.data.length === 0);
@@ -27,6 +30,7 @@ export default function PurchaseTab({ mode = 'completed' }) {
     const [statusFilter, setStatusFilter] = useState('');
 
     const [viewPo, setViewPo] = useState(null);
+    const [receiptPo, setReceiptPo] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
 
     const [confirmModal, setConfirmModal] = useState({
@@ -43,7 +47,7 @@ export default function PurchaseTab({ mode = 'completed' }) {
     const fetchPos = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get('/purchase-orders', { 
+            const res = await api.get('/purchase-orders', { 
                 params: { 
                     page, 
                     search, 
@@ -79,11 +83,16 @@ export default function PurchaseTab({ mode = 'completed' }) {
     const handleAction = async (poId, action) => {
         setActionLoading(true);
         try {
-            await axios.post(`/purchase-orders/${poId}/${action}`);
+            await api.post(`/purchase-orders/${poId}/${action}`);
             showToast(`PO ${action}d successfully`);
             
             // Re-fetch quietly
-            markStale('admin_purchases', 'admin_stock', 'admin_dashboard', 'supplier_orders');
+            markStale(
+                STALE_KEYS.ADMIN_PURCHASES, 
+                STALE_KEYS.ADMIN_INVENTORY, 
+                STALE_KEYS.ADMIN_DASHBOARD, 
+                STALE_KEYS.SUPPLIER_ORDERS
+            );
             fetchPos(true);
             
             setViewPo(null);
@@ -163,7 +172,13 @@ export default function PurchaseTab({ mode = 'completed' }) {
                                 <TableCell className="px-4 py-3 text-center text-muted-foreground">{po.items?.length || 0} items</TableCell>
                                 <TableCell className="px-4 py-3 text-center"><StatusBadge status={po.status} /></TableCell>
                                 <TableCell className="px-4 py-3 text-center">
-                                    <Button size="sm" onClick={() => setViewPo(po)}>Review</Button>
+                                    {po.status === 'received' ? (
+                                        <Button size="sm" className="bg-primary hover:bg-primary/90 text-white" onClick={() => setReceiptPo(po)}>
+                                            View Receipt
+                                        </Button>
+                                    ) : (
+                                        <Button size="sm" variant="outline" onClick={() => setViewPo(po)}>Review</Button>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -243,13 +258,14 @@ export default function PurchaseTab({ mode = 'completed' }) {
                                                     <TableCell className="px-4 py-3">
                                                         <div className="font-bold text-foreground mb-0.5">{productName}</div>
                                                         <Badge variant="outline" className="font-mono text-[11px]">Barcode: {barcode}</Badge>
-                                                        {i.product_variant && (
-                                                            <div className="text-[11px] text-primary font-bold mt-1">
-                                                                ({[i.product_variant.size_value?.label, i.product_variant.color_value?.label].filter(Boolean).join(' ')})
-                                                            </div>
-                                                        )}
+                                                        {i.product_variant
+                                                            ? <div className="text-[11px] text-primary font-bold mt-1">
+                                                                {[i.product_variant.size_value?.label, i.product_variant.color_value?.label, i.product_variant.weight_value?.label].filter(Boolean).join(' / ')}
+                                                              </div>
+                                                            : <div className="text-[11px] text-muted-foreground mt-1">Base product</div>
+                                                        }
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3 text-center font-bold text-lg text-foreground">{i.quantity}</TableCell>
+                                                    <TableCell className="px-4 py-3 text-center font-bold text-lg text-foreground">{parseInt(i.quantity)}</TableCell>
                                                     <TableCell className="px-4 py-3 text-right text-muted-foreground font-semibold">
                                                         ₱{Number(i.unit_cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                     </TableCell>
@@ -344,6 +360,14 @@ export default function PurchaseTab({ mode = 'completed' }) {
             </Modal>
 
             <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
+
+            {receiptPo && (
+                <PoReceiptModal
+                    po={receiptPo}
+                    settings={settings}
+                    onClose={() => setReceiptPo(null)}
+                />
+            )}
         </div>
     );
 }

@@ -2,6 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
@@ -22,16 +25,16 @@ use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\CartReservationController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\GCashController;
+use App\Http\Controllers\RecommendationController;
 
 // Auth (public)
 Route::post('/auth/register', [AuthController::class , 'register']);
-Route::post('/auth/login', [AuthController::class , 'login']);
+Route::post('/login', LoginController::class);
 Route::get('/auth/verify-email', [AuthController::class , 'verifyEmail']);
 Route::post('/auth/resend-verification', [AuthController::class , 'resendVerification']);
 
 // Supplier Auth (public)
 Route::post('/supplier/auth/register', [SupplierAuthController::class , 'register']);
-Route::post('/supplier/auth/login', [SupplierAuthController::class , 'login']);
 Route::get('/supplier/auth/verify-email', [SupplierAuthController::class , 'verifyEmail']);
 Route::post('/supplier/auth/resend-verification', [SupplierAuthController::class , 'resendVerification']);
 
@@ -59,8 +62,8 @@ Route::get('/test', function () {
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
-    Route::post('/auth/logout', [AuthController::class , 'logout']);
-    Route::get('/auth/me', [AuthController::class , 'me']);
+    Route::post('/logout', LogoutController::class);
+    Route::get('/me', MeController::class);
 
     // Products (Protected CUD) & Inventory
     Route::post('/products', [ProductController::class , 'store']);
@@ -151,11 +154,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/orders', [CustomerController::class , 'myOrders']);
     Route::get('/customer/profile', [CustomerController::class , 'myProfile']);
     Route::put('/customer/profile', [CustomerController::class , 'updateProfile']);
+    Route::put('/customer/change-password', [CustomerController::class , 'changePassword']);
+    Route::post('/customer/photo', [CustomerController::class , 'uploadPhoto']);
     Route::post('/customer/orders/{id}/cancel', [SaleController::class , 'cancelOrder']);
     Route::post('/customer/orders/{id}/upload-proof', [SaleController::class , 'uploadGCashProof']);
     Route::get('/customer/orders/{id}/cancellation-policy', [SaleController::class , 'cancellationPolicy']);
     Route::post('/customer/returns', [ReturnController::class , 'store']);
     Route::get('/customer/returns', [ReturnController::class , 'customerReturns']);
+
+    // Recommendations & Activity Tracking
+    Route::get('/recommendations', [RecommendationController::class , 'index']);
+    Route::post('/activity', [RecommendationController::class , 'logActivity']);
+    Route::post('/search-log', [RecommendationController::class , 'logSearch']);
 
     // Cart Reservations
     Route::post('/cart/reserve', [CartReservationController::class , 'reserve']);
@@ -239,8 +249,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Supplier Protected Routes (outside auth:sanctum - uses supplier token auth)
-Route::middleware('supplier.auth')->group(function () {
-    Route::post('/supplier/auth/logout', [SupplierAuthController::class , 'logout']);
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/supplier/auth/profile', [SupplierAuthController::class , 'profile']);
     Route::put('/supplier/auth/profile', [SupplierAuthController::class , 'updateProfile']);
     Route::get('/supplier/purchase-orders', [PurchaseOrderController::class , 'supplierIndex']);

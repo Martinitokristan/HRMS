@@ -8,7 +8,7 @@ class Product extends Model
 {
     protected $fillable = [
         'barcode', 'name', 'description', 'category_id', 'unit_type_id', 'supplier_id',
-        'purchase_price', 'sell_price', 'sale_percentage', 'image_path', 'is_active',
+        'purchase_price', 'sell_price', 'sale_percentage', 'image_path', 'image_banner_path', 'banner_bg_path', 'is_active',
     ];
 
     protected $casts = ['is_active' => 'boolean'];

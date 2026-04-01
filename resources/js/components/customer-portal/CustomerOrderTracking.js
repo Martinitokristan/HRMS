@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
+import api, { silentApi } from '../../lib/api';
 import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useAuth } from '../../context/AuthContext';
@@ -99,10 +99,9 @@ const CustomerOrderTracking = ({ delivery }) => {
     const routeCacheRef = useRef(new Map());
     const pollingIntervalRef = useRef(null);
 
-    // Initial rider location fetch
     const fetchRiderLocation = useCallback(async () => {
         try {
-            const response = await axios.get(`/customer/delivery/${delivery.id}/rider-location`);
+            const response = await silentApi.get(`/customer/delivery/${delivery.id}/rider-location`);
             if (response.data.data) {
                 setRiderLocation(response.data.data);
             }
@@ -144,7 +143,7 @@ const CustomerOrderTracking = ({ delivery }) => {
         }
         
         try {
-            const response = await axios.post('/route', {
+            const response = await silentApi.post('/route', {
                 start_lat: startLatNum,
                 start_lon: startLonNum,
                 end_lat: endLatNum,

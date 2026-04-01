@@ -5,9 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MapPin, Clock, CheckCircle, Package, Truck, Phone, Star } from 'lucide-react';
-import axios from 'axios';
+import api from '../../lib/api';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 
 export default function DeliveryTracking({ deliveryId }) {
+    const { refreshTrigger } = useSilentRefresh('admin_deliveries');
     const [delivery, setDelivery] = useState(null);
     const [loading, setLoading] = useState(true);
     const [location, setLocation] = useState(null);
@@ -23,11 +25,11 @@ export default function DeliveryTracking({ deliveryId }) {
         }, 30000);
         
         return () => clearInterval(interval);
-    }, [deliveryId]);
+    }, [deliveryId, refreshTrigger]);
 
     const fetchDelivery = async () => {
         try {
-            const response = await axios.get(`/api/deliveries/${deliveryId}`);
+            const response = await api.get(`/deliveries/${deliveryId}`);
             setDelivery(response.data.data);
             if (response.data.data.rider_latitude && response.data.data.rider_longitude) {
                 setLocation({

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 
 export default function RatingModal({ isOpen, onClose, delivery, onSuccess }) {
@@ -20,7 +20,7 @@ export default function RatingModal({ isOpen, onClose, delivery, onSuccess }) {
 
         setSubmitting(true);
         try {
-            await axios.post(`/deliveries/${delivery.id}/rate`, {
+            await api.post(`/deliveries/${delivery.id}/rate`, {
                 rating,
                 comment: comment.trim()
             });

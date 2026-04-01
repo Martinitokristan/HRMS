@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import Modal from '../shared/Modal';
@@ -16,6 +17,7 @@ import VariantSelector from '../shared/VariantSelector';
 
 export default function SupplierCatalog() {
     const { showToast } = useToast();
+    const { refreshTrigger } = useSilentRefresh('supplier_products');
     const [products, setProducts] = useState({ data: [], total: 0 });
     const [categories, setCategories] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
@@ -32,12 +34,16 @@ export default function SupplierCatalog() {
     const [selectedOptions, setSelectedOptions] = useState({ size: '', color: '', weight: '' });
     const [activeGalleryImage, setActiveGalleryImage] = useState(null);
 
-    useEffect(() => { fetchProducts(); }, [page, search, categoryFilter, supplierFilter, promotedOnly]);
+    useEffect(() => { fetchProducts(); }, [page, search, categoryFilter, supplierFilter, promotedOnly, refreshTrigger]);
     useEffect(() => {
-        axios.get('/categories').then(r => setCategories(r.data.data || [])).catch(() => { });
-        axios.get('/suppliers').then(r => {
-            const d = r.data.data;
-            setSuppliers(Array.isArray(d) ? d : d?.data || []);
+        api.get('/categories').then(r => {
+            const data = r.data?.data !== undefined ? r.data.data : r.data;
+            setCategories(Array.isArray(data) ? data : []);
+        }).catch(() => { });
+        
+        api.get('/suppliers').then(r => {
+            const data = r.data?.data !== undefined ? r.data.data : r.data;
+            setSuppliers(Array.isArray(data) ? data : (data?.data || []));
         }).catch(() => { });
     }, []);
 
@@ -49,41 +55,52 @@ export default function SupplierCatalog() {
             if (categoryFilter) params.category_id = categoryFilter;
             if (supplierFilter) params.supplier_id = supplierFilter;
             if (promotedOnly) params.promoted = 1;
-            const res = await axios.get('/supplier-catalog', { params });
-            setProducts(res.data.data);
+            const res = await api.get('/supplier-catalog', { params });
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+                setProducts({
+                    data: Array.isArray(data.data) ? data.data : [],
+                    total: data.total || 0
+                });
+            } else if (Array.isArray(data)) {
+                setProducts({
+                    data: data,
+                    total: data.length
+                });
+            } else {
+                setProducts({ data: [], total: 0 });
+            }
         } catch (e) {
+            console.error('Failed to fetch catalog:', e);
             showToast('Failed to load supplier available products', 'error');
+            setProducts({ data: [], total: 0 });
         } finally {
             setLoading(false);
         }
     };
 
     const handleOrder = async () => {
-        const variants = (viewProduct?.variants || []);
-        const hasVariants = variants.length > 0;
-
         if (!viewProduct || orderQty < (viewProduct.min_order_qty || 1)) {
             showToast('Please enter a valid quantity.', 'error');
             return;
         }
 
-        // Check stock for whichever option is selected
-        const availableStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
-        if (availableStock <= 0) {
+        const currentStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
+        if (currentStock <= 0) {
             showToast('This option is out of stock.', 'error');
             return;
         }
-        if (orderQty > availableStock) {
-            showToast(`Only ${availableStock} units available for this option.`, 'error');
+        if (orderQty > currentStock) {
+            showToast(`Only ${currentStock} units available for this option.`, 'error');
             return;
         }
 
-        // Determine the price to use: variant price override > base product price
         const unitCost = selectedVariant?.price_override ?? viewProduct.price;
 
         setActionLoading(true);
         try {
-            await axios.post('/purchase-orders', {
+            await api.post('/purchase-orders', {
                 supplier_id: viewProduct.supplier_id,
                 items: [{
                     supplier_product_id: viewProduct.id,
@@ -97,7 +114,6 @@ export default function SupplierCatalog() {
             setSelectedVariant(null);
             setSelectedOptions({ size: '', color: '', weight: '' });
             setOrderQty(1);
-            // Refresh list so new stock counts are visible immediately
             fetchProducts();
         } catch (e) {
             showToast(e.response?.data?.message || 'Failed to place order.', 'error');
@@ -128,7 +144,7 @@ export default function SupplierCatalog() {
                             onChange: v => { setCategoryFilter(v); setPage(1); },
                             options: [
                                 { value: '', label: 'All Categories' },
-                                ...categories.map(c => ({ value: c.id, label: c.name }))
+                                ...(Array.isArray(categories) ? categories.map(c => ({ value: c.id, label: c.name })) : [])
                             ]
                         },
                         {
@@ -136,7 +152,7 @@ export default function SupplierCatalog() {
                             onChange: v => { setSupplierFilter(v); setPage(1); },
                             options: [
                                 { value: '', label: 'All Suppliers' },
-                                ...suppliers.map(s => ({ value: s.id, label: s.name }))
+                                ...(Array.isArray(suppliers) ? suppliers.map(s => ({ value: s.id, label: s.name })) : [])
                             ]
                         },
                     ]}
@@ -154,7 +170,7 @@ export default function SupplierCatalog() {
 
             {loading ? (
                 <div className="text-center py-12"><div className="spinner mx-auto" /></div>
-            ) : products.data?.length === 0 ? (
+            ) : (!products.data || products.data.length === 0) ? (
                 <Card className="text-center py-16 px-8">
                     <Store className="h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground" />
                     <h3 className="text-base font-bold text-foreground mb-1">No Supplier Products Found</h3>
@@ -184,24 +200,23 @@ export default function SupplierCatalog() {
                                 <div className="font-bold text-foreground mb-1">{p.name}</div>
                                 <div className="text-[12px] text-muted-foreground mb-1">{p.supplier?.name || 'Unknown Supplier'}</div>
                                 <div className="text-[12px] text-muted-foreground mb-2">
-                                    {p.category?.name || 'Uncategorized'} &bull; {p.variants?.length || 0} variant{p.variants?.length !== 1 ? 's' : ''}
+                                    {p.category?.name || 'Uncategorized'} &bull; {p.product_variants?.length || p.variants?.length || 0} variant{(p.product_variants?.length || p.variants?.length) !== 1 ? 's' : ''}
                                 </div>
 
-                                {/* Stock Availability Badge */}
                                 <div className="mb-3">
                                     <Badge
-                                        variant={p.total_stock > 0 ? "default" : "destructive"}
+                                        variant={(p.total_stock > 0 || p.inventory?.current_stock > 0) ? "default" : "destructive"}
                                         className="text-[10px] font-bold"
                                     >
-                                        {p.total_stock > 0 ? `✓ ${p.total_stock} Available` : '✗ Out of Stock'}
+                                        {(p.total_stock > 0 || p.inventory?.current_stock > 0) ? `✓ ${p.total_stock || p.inventory?.current_stock} Available` : '✗ Out of Stock'}
                                     </Badge>
                                 </div>
 
                                 <div className="flex items-center justify-between">
                                     <span className="font-bold text-lg text-primary">
-                                        ₱{Number(p.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        ₱{Number(p.price || p.purchase_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </span>
-                                    {p.min_order_qty > 1 && (
+                                    {(p.min_order_qty || 1) > 1 && (
                                         <span className="text-[11px] text-muted-foreground font-medium">Min: {p.min_order_qty} units</span>
                                     )}
                                 </div>
@@ -211,16 +226,16 @@ export default function SupplierCatalog() {
                 </div>
             )}
 
-            <Pagination page={page} total={products.total} perPage={20} onChange={setPage} />
+            <Pagination page={page} total={products.total || 0} perPage={20} onChange={setPage} />
 
-            {/* Product Detail Modal - Modern Design */}
             <Modal isOpen={!!viewProduct} onClose={() => { setViewProduct(null); setSelectedVariant(null); setSelectedOptions({ size: '', color: '', weight: '' }); setOrderQty(1); setActiveGalleryImage(null); }} title="" size="lg" hideFooter hideTitle>
                 {viewProduct && (() => {
-                    const variants = (viewProduct.variants || []).map(v => ({
+                    const variantsSource = viewProduct.product_variants || viewProduct.variants || [];
+                    const variants = (Array.isArray(variantsSource) ? variantsSource : []).map(v => ({
                         id: v.id,
-                        size: v.size || '',
-                        color: v.color || '',
-                        weight: v.weight || '',
+                        size: v.size_value?.label || v.size || '',
+                        color: v.color_value?.label || v.color || '',
+                        weight: v.weight_value?.label || v.weight || '',
                         stock: v.stock || 0,
                         price_override: v.price_override || null,
                         color_hex: v.color_hex || null,
@@ -229,13 +244,11 @@ export default function SupplierCatalog() {
                     }));
                     const hasVariants = variants.length > 0;
 
-                    // selectedVariant === null means base/Regular is selected
-                    const currentPrice = selectedVariant ? (selectedVariant.price_override || viewProduct.price) : viewProduct.price;
-                    const currentStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
+                    const currentPrice = selectedVariant ? (selectedVariant.price_override || viewProduct.price || viewProduct.purchase_price) : (viewProduct.price || viewProduct.purchase_price);
+                    const currentStock = selectedVariant ? selectedVariant.stock : (viewProduct.total_stock || viewProduct.inventory?.current_stock || 0);
                     const isOutOfStock = currentStock <= 0;
                     const subtotal = currentPrice * orderQty;
 
-                    // Helper to get variant label
                     const getVariantLabel = (v) => {
                         const parts = [];
                         if (v.size) parts.push(v.size);
@@ -244,7 +257,6 @@ export default function SupplierCatalog() {
                         return parts.join(' / ') || 'Variant';
                     };
 
-                    // Image Gallery Logic
                     const mainImage = selectedVariant ? (selectedVariant.image_path || viewProduct.image_path) : viewProduct.image_path;
                     const additionalImages = selectedVariant ? (selectedVariant.additional_images || []) : (viewProduct.additional_images || []);
                     const allImages = [mainImage, ...additionalImages].filter(Boolean);
@@ -252,15 +264,8 @@ export default function SupplierCatalog() {
 
                     return (
                         <div className="flex flex-col md:flex-row overflow-hidden bg-white text-gray-900 border-none shadow-none">
-                            {/* Left Side - Image & Gallery */}
                             <div className="md:w-[50%] p-8 flex flex-col items-center justify-center bg-gray-50/20">
-                                {/* Main Image Box */}
                                 <div className="w-full aspect-square relative rounded-2xl bg-white shadow-lg shadow-gray-200/50 border border-gray-100 flex items-center justify-center overflow-hidden mb-4">
-                                    {/* Sale Badge Mock if needed - Or conditional if you have sale_price */}
-                                    {/* <div className="absolute top-4 right-4 z-10">
-                                        <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">SALE -50% OFF</span>
-                                    </div> */}
-                                    
                                     {displayImage ? (
                                         <img
                                             src={`/storage/${displayImage}`}
@@ -272,7 +277,6 @@ export default function SupplierCatalog() {
                                     )}
                                 </div>
 
-                                {/* Thumbnails Row */}
                                 {allImages.length > 1 && (
                                     <div className="flex flex-wrap justify-center gap-3">
                                         {allImages.map((img, i) => (
@@ -291,9 +295,7 @@ export default function SupplierCatalog() {
                                 )}
                             </div>
 
-                            {/* Right Side - Details */}
                             <div className="md:w-[50%] p-8 flex flex-col overflow-y-auto max-h-[85vh]">
-                                {/* Top Nav-like spacing / Category */}
                                 <div className="mb-3">
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-[#FF5A1F] mb-0.5">
                                         {viewProduct.category?.name || 'SUPPLIES'}
@@ -302,7 +304,6 @@ export default function SupplierCatalog() {
                                         {viewProduct.name}
                                     </h2>
                                     
-                                    {/* Description */}
                                     {viewProduct.description && (
                                         <p className="text-xs text-gray-500 leading-relaxed mb-2">
                                             {viewProduct.description}
@@ -310,7 +311,6 @@ export default function SupplierCatalog() {
                                     )}
                                 </div>
 
-                                {/* Stock Badge */}
                                 <div className="mb-4">
                                     <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold ${
                                         isOutOfStock 
@@ -328,19 +328,14 @@ export default function SupplierCatalog() {
                                     </div>
                                 </div>
 
-                                {/* Price Area */}
                                 <div className="mb-4 bg-[#FFF9F6] border border-[#FFE7DB] rounded-xl p-4 relative overflow-hidden">
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-3xl font-black text-[#FF5A1F]">
-                                            ₱{Number(currentPrice).toFixed(2)}
+                                            ₱{Number(currentPrice || 0).toFixed(2)}
                                         </span>
-                                        {/* Original price placeholder if needed */}
-                                        {/* <span className="text-sm text-gray-300 line-through">₱{(currentPrice * 1.5).toFixed(2)}</span>
-                                        <span className="text-[10px] text-green-600 font-bold ml-1">You save ₱{(currentPrice * 0.5).toFixed(2)}</span> */}
                                     </div>
                                 </div>
 
-                                {/* Labels / Meta Data Section */}
                                 <div className="grid grid-cols-1 gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
                                     {viewProduct.barcode && (
                                         <div className="flex justify-between items-center text-xs">
@@ -358,12 +353,10 @@ export default function SupplierCatalog() {
                                     </div>
                                 </div>
 
-                                {/* Variants Section */}
                                 {hasVariants && (
                                     <div className="mb-4">
                                         <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">SELECT OPTION</div>
                                         <div className="flex flex-wrap gap-2">
-                                            {/* Regular Option */}
                                             <button
                                                 type="button"
                                                 onClick={() => { setSelectedVariant(null); setOrderQty(viewProduct.min_order_qty || 1); setActiveGalleryImage(null); }}
@@ -375,8 +368,7 @@ export default function SupplierCatalog() {
                                                 Regular
                                             </button>
 
-                                            {/* Map over variants */}
-                                            {variants.map(v => {
+                                            {(Array.isArray(variants) ? variants : []).map(v => {
                                                 const isSelected = selectedVariant?.id === v.id;
                                                 const isOOS = v.stock <= 0;
                                                 return (
@@ -398,7 +390,6 @@ export default function SupplierCatalog() {
                                     </div>
                                 )}
 
-                                {/* Quantity Selector */}
                                 <div className="mb-6">
                                     <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">QUANTITY</div>
                                     <div className="flex items-center gap-3">
@@ -423,7 +414,6 @@ export default function SupplierCatalog() {
                                     </div>
                                 </div>
 
-                                {/* CTA Action Button */}
                                 <div className="mt-auto">
                                     <Button
                                         className="w-full h-12 rounded-xl text-base font-black bg-[#FF5A1F] hover:bg-[#e44e18] text-white shadow-lg shadow-orange-100 transition-all flex items-center justify-center gap-3 active:scale-95"
@@ -442,3 +432,4 @@ export default function SupplierCatalog() {
         </div>
     );
 }
+

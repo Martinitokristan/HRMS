@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
+import api, { silentApi } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import RiderSettings from './RiderSettings';
 import RatingStatsCard from './RatingStatsCard';
@@ -19,7 +19,7 @@ import {
     X
 } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import NotificationPanel from '../shared/NotificationPanel';
 
@@ -80,8 +80,8 @@ const customerIcon = L.divIcon({
 
 export default function RiderDashboardV3() {
     const { user, logout } = useAuth();
-    const { refreshTrigger: dashTrigger } = useSilentRefresh('rider_dashboard');
-    const { refreshTrigger: notifTrigger } = useSilentRefresh('rider_notifications');
+    const { refreshTrigger: dashTrigger } = useSilentRefresh(STALE_KEYS.RIDER_DASHBOARD);
+    const { refreshTrigger: notifTrigger } = useSilentRefresh(STALE_KEYS.RIDER_NOTIFICATIONS);
     const [view, setView] = useState('dashboard');
     const [showMap, setShowMap] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -208,7 +208,7 @@ export default function RiderDashboardV3() {
         }
 
         try {
-            const response = await axios.post('/route', {
+            const response = await api.post('/route', {
                 start_lat: startLatNum,
                 start_lon: startLonNum,
                 end_lat: endLatNum,
@@ -249,7 +249,7 @@ export default function RiderDashboardV3() {
                 params.heading = currentPos.heading || 0;
             }
 
-            const response = await axios.get('/riders/me/dashboard', { params });
+            const response = await silentApi.get('/riders/me/dashboard', { params });
             const { stats: dashStats, my_jobs, nearby } = response.data.data;
 
             if (isMountedRef.current) {
@@ -271,10 +271,9 @@ export default function RiderDashboardV3() {
         }
     }, []);
 
-    // Fetch notifications
     const fetchNotifications = useCallback(async () => {
         try {
-            const response = await axios.get('/riders/me/notifications');
+            const response = await silentApi.get('/riders/me/notifications');
             if (isMountedRef.current) {
                 setNotifications(response.data.data || []);
                 setUnreadCount(response.data.data?.filter(n => !n.read_at).length || 0);
@@ -293,10 +292,7 @@ export default function RiderDashboardV3() {
         fetchNotifications(notifications.length > 0);
     }, [fetchNotifications, notifTrigger]);
 
-    useEffect(() => {
-        const interval = setInterval(() => fetchData(true), 5000); // refresh every 5s for smoother tracking
-        return () => clearInterval(interval);
-    }, [fetchData]);
+    // Real-time synchronization is now handled by the refreshTrigger logic in the effects above
 
     // Get rider location
     useEffect(() => {
@@ -374,7 +370,8 @@ export default function RiderDashboardV3() {
     // Handle mark notifications read
     const handleMarkNotificationsRead = useCallback(() => {
         if (unreadCount > 0) {
-            axios.post('/riders/me/notifications/read').then(() => {
+            api.post('/riders/me/notifications/read').then(() => {
+                markStale(STALE_KEYS.RIDER_NOTIFICATIONS);
                 if (isMountedRef.current) {
                     setUnreadCount(0);
                     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
@@ -387,18 +384,16 @@ export default function RiderDashboardV3() {
     const handleSelfAssign = useCallback(async (deliveryId) => {
         setAssigningOrder(deliveryId);
         try {
-            await axios.post(`/deliveries/${deliveryId}/self-assign`);
-            markStale('rider_dashboard', 'admin_dashboard', 'customer_dashboard');
-            await fetchData(true);
-            alert('Order assigned successfully!');
+            await api.post(`/deliveries/${deliveryId}/self-assign`);
+            markStale(STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS);
+            window.location.reload();
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to assign order');
-        } finally {
             if (isMountedRef.current) {
                 setAssigningOrder(null);
             }
         }
-    }, [fetchData]);
+    }, []);
 
     // Handle decline
     const handleDecline = useCallback((deliveryId) => {
@@ -412,8 +407,8 @@ export default function RiderDashboardV3() {
             return;
         }
         try {
-            await axios.post(`/deliveries/${decliningOrder}/decline`, { note: declineNote });
-            markStale('rider_dashboard', 'admin_dashboard', 'customer_dashboard');
+            await api.post(`/deliveries/${decliningOrder}/decline`, { note: declineNote });
+            markStale(STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS);
             await fetchData(true);
             setShowDeclineModal(false);
             setDeclineNote('');
@@ -427,8 +422,8 @@ export default function RiderDashboardV3() {
     // Handle status change
     const handleStatusChange = useCallback(async (deliveryId, newStatus) => {
         try {
-            await axios.put(`/deliveries/${deliveryId}/status`, { status: newStatus });
-            markStale('rider_dashboard', 'admin_dashboard', 'customer_dashboard');
+            await api.put(`/deliveries/${deliveryId}/status`, { status: newStatus });
+            markStale(STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS);
             if (isMountedRef.current) {
                 const updated = deliveries.map(d =>
                     d.id === deliveryId ? { ...d, status: newStatus } : d
@@ -453,11 +448,11 @@ export default function RiderDashboardV3() {
         const formData = new FormData();
         formData.append('photo', file);
         try {
-            await axios.post(`/deliveries/${deliveryId}/upload-proof`, formData, {
+            await api.post(`/deliveries/${deliveryId}/upload-proof`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             if (isMountedRef.current) {
-                markStale('rider_dashboard', 'admin_dashboard', 'customer_dashboard');
+                markStale(STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS);
                 const updated = deliveries.filter(d => d.id !== deliveryId);
                 setDeliveries(updated);
                 setStats(prev => ({

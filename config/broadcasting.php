@@ -32,13 +32,16 @@ return [
 
         'pusher' => [
             'driver' => 'pusher',
-            'key' => env('PUSHER_APP_KEY'),
+            'key'    => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
-            'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => true,
-            ],
+            'options' => array_filter([
+                'cluster'  => env('PUSHER_APP_CLUSTER', 'mt1'),
+                'host'     => env('PUSHER_HOST') ?: null,
+                'port'     => env('PUSHER_HOST') ? (int) env('PUSHER_PORT', 6001) : null,
+                'scheme'   => env('PUSHER_HOST') ? env('PUSHER_SCHEME', 'http') : null,
+                'useTLS'   => env('PUSHER_SCHEME', 'https') === 'https',
+            ]),
         ],
 
         'ably' => [

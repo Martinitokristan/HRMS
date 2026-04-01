@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Settings2, Plus, Pencil, Trash2, Feather, Package, Weight, Truck, Mail, Smartphone } from 'lucide-react';
+import { Settings2, Plus, Pencil, Trash2, Feather, Package, Weight, Truck, Mail, Smartphone, QrCode } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const TABS = [
     { id: 'general', label: 'General', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
@@ -20,6 +21,7 @@ const TABS = [
     { id: 'master_variants', label: 'Variant Types', icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4' },
     { id: 'units', label: 'Unit Conversions', icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
     { id: 'notifications', label: 'Notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', count: 3 },
+    { id: 'payments', label: 'Payments', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
     { id: 'security', label: 'Security', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002-2zm10-10V7a4 4 0 00-8 0v4h8z' }
 ];
 
@@ -46,9 +48,10 @@ export default function Settings() {
         let isMounted = true;
         const fetchData = async () => {
             try {
-                const res = await axios.get('/settings');
+                const res = await api.get('/settings');
                 if (!isMounted) return;
-                const { settings, variants, unitTypes, categories } = res.data.data;
+                const data = res.data?.data !== undefined ? res.data.data : res.data;
+                const { settings, variants, unitTypes, categories } = data || {};
                 setSettings(settings || {});
                 setVariants(variants || []);
                 setCategories(categories || []);
@@ -76,7 +79,7 @@ export default function Settings() {
     const handleSaveSettings = async () => {
         setSaving(true);
         try {
-            await axios.put('/settings', {
+            await api.put('/settings', {
                 group: activeTab,
                 settings: settings[activeTab] || {}
             });
@@ -91,7 +94,7 @@ export default function Settings() {
 
     const handleSaveVal = async (variantId) => {
         try {
-            await axios.post('/settings/variant-values', { ...newVal, variant_id: variantId });
+            await api.post('/settings/variant-values', { ...newVal, variant_id: variantId });
             showToast('Value added');
             setNewVal({ variant_id: '', label: '', hex_code: '', description: '', category: '' });
             triggerRefresh();
@@ -103,7 +106,7 @@ export default function Settings() {
     const handleDeleteVal = async (id) => {
         if (!confirm('Are you sure?')) return;
         try {
-            await axios.delete(`/settings/variant-values/${id}`);
+            await api.delete(`/settings/variant-values/${id}`);
             triggerRefresh();
         } catch (e) {
             showToast('Error deleting value', 'error');
@@ -112,7 +115,7 @@ export default function Settings() {
 
     const handleSaveType = async () => {
         try {
-            await axios.post('/settings/variant-types', newVariant);
+            await api.post('/settings/variant-types', newVariant);
             showToast('Variant type saved');
             setModal({ open: false });
             triggerRefresh();
@@ -123,7 +126,7 @@ export default function Settings() {
 
     const handleSaveConv = async () => {
         try {
-            await axios.post('/settings/unit-conversions', newConv);
+            await api.post('/settings/unit-conversions', newConv);
             showToast('Rule added');
             setNewConv({ category_id: '', purchase_unit: '', sell_unit: '', conversion_factor: 1 });
             triggerRefresh();
@@ -134,7 +137,7 @@ export default function Settings() {
 
     const handleSaveUnit = async () => {
         try {
-            await axios.post('/settings/unit-types', newUnitType);
+            await api.post('/settings/unit-types', newUnitType);
             showToast('Unit type saved');
             setModal({ open: false });
             triggerRefresh();
@@ -146,7 +149,7 @@ export default function Settings() {
     const handleDeleteUnit = async (id) => {
         if (!confirm('Are you sure?')) return;
         try {
-            await axios.delete(`/settings/unit-types/${id}`);
+            await api.delete(`/settings/unit-types/${id}`);
             triggerRefresh();
         } catch (e) {
             showToast('Error deleting unit type', 'error');
@@ -155,7 +158,7 @@ export default function Settings() {
 
     const handleSaveCat = async () => {
         try {
-            await axios.post('/settings/categories', newCat);
+            await api.post('/settings/categories', newCat);
             showToast('Category saved');
             setModal({ open: false });
             triggerRefresh();
@@ -167,7 +170,7 @@ export default function Settings() {
     const handleDeleteCat = async (id) => {
         if (!confirm('Are you sure you want to delete this category? This might affect products linked to it.')) return;
         try {
-            await axios.delete(`/settings/categories/${id}`);
+            await api.delete(`/settings/categories/${id}`);
             showToast('Category deleted');
             triggerRefresh();
         } catch (e) {
@@ -566,6 +569,73 @@ export default function Settings() {
                         </div>
                         <div className="flex justify-end pt-4 border-t border-border mt-6">
                             <Button onClick={handleSaveSettings} disabled={saving}>Save Preferences</Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── PAYMENTS ── */}
+                {activeTab === 'payments' && (
+                    <div>
+                        <div className="mb-6">
+                            <h2 className="text-lg font-bold text-foreground">Payment Settings</h2>
+                            <p className="text-sm text-muted-foreground">Configure GCash QR code for customer checkout payments</p>
+                        </div>
+
+                        <Card className="p-5 mb-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <QrCode className="h-5 w-5 text-primary" />
+                                <h4 className="font-semibold text-foreground">GCash QR Base Payload</h4>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Paste your GCash static QR payload string here. The system will dynamically inject the transaction amount at checkout to generate a unique QR code per order.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                                <div className="space-y-3">
+                                    <Label>GCash Base Payload String</Label>
+                                    <Textarea
+                                        rows={6}
+                                        placeholder="Paste your GCash QR payload string here (e.g. 000201010211...)"
+                                        value={settings.payments?.gcash_payload || ''}
+                                        onChange={e => handleChange('gcash_payload', e.target.value)}
+                                        className="font-mono text-xs"
+                                    />
+                                    <p className="text-[11px] text-muted-foreground">
+                                        To get this string: open GCash → Show QR → scan with a QR reader app to copy the raw payload text.
+                                    </p>
+                                </div>
+                                <div className="flex flex-col items-center gap-3">
+                                    <Label className="self-start">Live QR Preview</Label>
+                                    <div className="border-2 border-dashed border-border rounded-xl p-4 flex items-center justify-center min-h-[200px] w-full bg-secondary/30">
+                                        {settings.payments?.gcash_payload ? (
+                                            <div className="flex flex-col items-center gap-2">
+                                                <QRCodeCanvas
+                                                    value={settings.payments.gcash_payload}
+                                                    size={160}
+                                                    level="M"
+                                                    includeMargin={true}
+                                                />
+                                                <span className="text-[11px] text-muted-foreground font-medium">Static QR preview</span>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center text-muted-foreground">
+                                                <QrCode className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                                                <p className="text-sm">QR preview will appear here</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card className="p-4 bg-amber-50/50 border-amber-200/60 mb-6">
+                            <p className="text-[12px] text-amber-700 font-medium flex items-start gap-2">
+                                <span className="mt-0.5">⚠️</span>
+                                <span>If no payload is saved here, the system falls back to the <code className="bg-amber-100 px-1 rounded">GCASH_BASE_PAYLOAD</code> value in your <code className="bg-amber-100 px-1 rounded">.env</code> file. Saving a value here overrides the .env setting.</span>
+                            </p>
+                        </Card>
+
+                        <div className="flex justify-end pt-4 border-t border-border">
+                            <Button onClick={handleSaveSettings} disabled={saving}>Save Payment Settings</Button>
                         </div>
                     </div>
                 )}

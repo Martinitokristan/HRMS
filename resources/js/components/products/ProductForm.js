@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Percent, Tag, Barcode, Plus, Trash2, Upload } from 'lucide-react';
+import { Package, Percent, Tag, Barcode, Plus, Trash2, Upload, Image, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function ProductForm({ product, categories, suppliers, unitTypes, variants, onSuccess, onCancel }) {
     const { showToast } = useToast();
@@ -27,15 +27,16 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
     // Fetch variant values for fallback when relationships fail
     const fetchVariantValues = async () => {
         try {
-            const res = await axios.get('/supplier/variant-values');
-            const variantData = res.data.data || [];
+            const res = await api.get('/supplier/variant-values');
+            const variantData = res.data?.data !== undefined ? res.data.data : (res.data || []);
             
-            // Organize by variant type: 1=Size, 2=Color, 3=Weight
-            const sizes = variantData.filter(v => v.variant_id === 1);
-            const colors = variantData.filter(v => v.variant_id === 2);
-            const weights = variantData.filter(v => v.variant_id === 3);
-            
-            setVariantValues({ sizes, colors, weights });
+            if (Array.isArray(variantData)) {
+                // Organize by variant type: 1=Size, 2=Color, 3=Weight
+                const sizes = variantData.filter(v => v.variant_id === 1);
+                const colors = variantData.filter(v => v.variant_id === 2);
+                const weights = variantData.filter(v => v.variant_id === 3);
+                setVariantValues({ sizes, colors, weights });
+            }
         } catch (e) { 
             // Silently fail - variant values are optional
         }
@@ -46,11 +47,11 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
         if (!id) return 'No ' + type;
         
         let variantList = [];
-        if (type === 'size') variantList = variantValues.sizes;
-        if (type === 'color') variantList = variantValues.colors;
-        if (type === 'weight') variantList = variantValues.weights;
+        if (type === 'size') variantList = variantValues.sizes || [];
+        if (type === 'color') variantList = variantValues.colors || [];
+        if (type === 'weight') variantList = variantValues.weights || [];
         
-        const variant = variantList.find(v => v.id === parseInt(id));
+        const variant = Array.isArray(variantList) ? variantList.find(v => v.id === parseInt(id)) : null;
         return variant ? variant.label : `${type.charAt(0).toUpperCase() + type.slice(1)} ID: ${id}`;
     };
 
@@ -75,9 +76,9 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
         variantSales: {}
     });
 
-    const sizeVariant = variants?.find(v => v.name.toLowerCase() === 'size');
-    const colorVariant = variants?.find(v => v.name.toLowerCase() === 'color');
-    const weightVariant = variants?.find(v => v.id === 3 || v.name.toLowerCase().includes('weight') || v.name.toLowerCase().includes('gram'));
+    const sizeVariant = Array.isArray(variants) ? variants.find(v => v.name?.toLowerCase() === 'size') : null;
+    const colorVariant = Array.isArray(variants) ? variants.find(v => v.name?.toLowerCase() === 'color') : null;
+    const weightVariant = Array.isArray(variants) ? variants.find(v => v.id === 3 || v.name?.toLowerCase().includes('weight') || v.name?.toLowerCase().includes('gram')) : null;
 
     useEffect(() => {
         setErrors({});
@@ -95,7 +96,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                 description: product.description || '',
             });
 
-            const pvs = product.product_variants || [];
+            const pvs = Array.isArray(product.product_variants) ? product.product_variants : [];
             if (pvs.length > 0) {
                 setVariantEnabled(true);
                 setVariantRows(pvs.map(pv => {
@@ -111,7 +112,6 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                         imageFile: null,
                         imagePreview: pv.image_path ? `/storage/${pv.image_path}` : null,
                         existing_image_path: pv.image_path || null,
-                        // Store original data for debugging
                         _original: pv
                     };
                 }));
@@ -170,9 +170,8 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
     const handleRemoveRow = (id) => setVariantRows(prev => prev.filter(r => r.id !== id));
     
     const handleRowChange = (id, field, value) => {
-        // Only allow sale percentage to be changed
         if (field === 'sale_percentage') {
-            setVariantRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+            setVariantRows(prev => (Array.isArray(prev) ? prev : []).map(r => r.id === id ? { ...r, [field]: value } : r));
             
             setSaleSettings(prev => ({
                 ...prev,
@@ -182,12 +181,6 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                 }
             }));
         }
-    };
-
-    const handleRowImage = (id, file) => {
-        if (!file) return;
-        const preview = URL.createObjectURL(file);
-        setVariantRows(prev => prev.map(r => r.id === id ? { ...r, imageFile: file, imagePreview: preview } : r));
     };
 
     const handleInputChange = (e) => {
@@ -209,7 +202,6 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
 
         const fd = new FormData();
         Object.keys(form).forEach(k => {
-            // Always include sale_percentage, even if it's 0 or empty
             if (k === 'sale_percentage') {
                 fd.append(k, form[k] || 0);
             } else if (form[k] !== '' && form[k] !== null) {
@@ -217,10 +209,9 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
             }
         });
 
-        // Add sale settings
         fd.append('sale_settings', JSON.stringify(saleSettings));
 
-        const variantList = variantEnabled
+        const variantList = variantEnabled && Array.isArray(variantRows)
             ? variantRows.map((row, index) => {
                 if (row.imageFile) {
                     fd.append(`variant_image_${index}`, row.imageFile);
@@ -243,10 +234,10 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
         try {
             if (product) {
                 fd.append('_method', 'PUT');
-                await axios.post(`/products/${product.id}`, fd);
+                await api.post(`/products/${product.id}`, fd);
                 showToast('Product updated successfully');
             } else {
-                await axios.post('/products', fd);
+                await api.post('/products', fd);
                 showToast('Product created successfully');
             }
             onSuccess();
@@ -294,7 +285,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                         onChange={handleInputChange}
                                         placeholder="e.g. Premium Polo Shirt"
                                         className={errors.name ? 'border-red-500' : ''}
-                                        disabled={product} // Read-only for existing products
+                                        disabled={!!product} 
                                     />
                                     {errors.name && <p className="text-sm text-red-500">{errors.name[0]}</p>}
                                 </div>
@@ -310,7 +301,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                             onChange={handleInputChange}
                                             placeholder="e.g. 1234567890123"
                                             className={errors.barcode ? 'border-red-500' : ''}
-                                            disabled={product} // Read-only for existing products
+                                            disabled={!!product} 
                                         />
                                     </div>
                                     {errors.barcode && <p className="text-sm text-red-500">{errors.barcode[0]}</p>}
@@ -321,13 +312,13 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                     <Select 
                                         value={form.category_id?.toString() || ''} 
                                         onValueChange={(value) => setForm(prev => ({ ...prev, category_id: value }))}
-                                        disabled={product} // Read-only for existing products
+                                        disabled={!!product} 
                                     >
                                         <SelectTrigger className={errors.category_id ? 'border-red-500' : ''}>
                                             <SelectValue placeholder="Select Category" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {(categories || []).map(c => (
+                                            {(Array.isArray(categories) ? categories : []).map(c => (
                                                 <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
                                             ))}
                                         </SelectContent>
@@ -340,13 +331,13 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                     <Select 
                                         value={form.supplier_id?.toString() || ''} 
                                         onValueChange={(value) => setForm(prev => ({ ...prev, supplier_id: value }))}
-                                        disabled={product} // Read-only for existing products
+                                        disabled={!!product} 
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select Supplier" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {(suppliers || []).map(s => (
+                                            {(Array.isArray(suppliers) ? suppliers : []).map(s => (
                                                 <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
                                             ))}
                                         </SelectContent>
@@ -358,13 +349,13 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                     <Select 
                                         value={form.unit_type_id?.toString() || ''} 
                                         onValueChange={(value) => setForm(prev => ({ ...prev, unit_type_id: value }))}
-                                        disabled={product} // Read-only for existing products
+                                        disabled={!!product} 
                                     >
                                         <SelectTrigger className={errors.unit_type_id ? 'border-red-500' : ''}>
                                             <SelectValue placeholder="Select Unit Type" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {(unitTypes || []).map(u => (
+                                            {(Array.isArray(unitTypes) ? unitTypes : []).map(u => (
                                                 <SelectItem key={u.id} value={u.id.toString()}>
                                                     {u.purchase_unit} / {u.sell_unit}
                                                 </SelectItem>
@@ -384,13 +375,41 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                     value={form.description}
                                     onChange={handleInputChange}
                                     placeholder="Optional product notes..."
-                                    disabled={product} // Read-only for existing products
+                                    disabled={!!product} 
                                 />
                             </div>
 
+                            {product && product.image_path && (
+                                <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg border bg-muted/30">
+                                    <Image className="w-4 h-4 text-muted-foreground" />
+                                    <span className="text-sm font-medium text-muted-foreground">Carousel:</span>
+                                    {product.image_banner_path ? (
+                                        <Badge variant="outline" className="gap-1 text-emerald-600 border-emerald-200 bg-emerald-50">
+                                            <CheckCircle className="w-3 h-3" />
+                                            Product cutout ready
+                                        </Badge>
+                                    ) : (
+                                        <Badge variant="outline" className="gap-1 text-amber-600 border-amber-200 bg-amber-50">
+                                            <AlertTriangle className="w-3 h-3" />
+                                            Cutout processing
+                                        </Badge>
+                                    )}
+                                    {product.banner_bg_path ? (
+                                        <Badge variant="outline" className="gap-1 text-emerald-600 border-emerald-200 bg-emerald-50">
+                                            <CheckCircle className="w-3 h-3" />
+                                            AI background ready
+                                        </Badge>
+                                    ) : (
+                                        <Badge variant="outline" className="gap-1 text-amber-600 border-amber-200 bg-amber-50">
+                                            <AlertTriangle className="w-3 h-3" />
+                                            Background processing
+                                        </Badge>
+                                    )}
+                                </div>
+                            )}
+
                             <Separator />
 
-                            {/* Pricing Section */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">Pricing & Sale Information</h3>
                                 
@@ -409,7 +428,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                                 onChange={handleInputChange}
                                                 placeholder="0.00"
                                                 className="pl-8"
-                                                disabled={product} // Read-only for existing products
+                                                disabled={!!product} 
                                             />
                                         </div>
                                         {errors.purchase_price && <p className="text-sm text-red-500">{errors.purchase_price[0]}</p>}
@@ -481,11 +500,6 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                                             className="pl-8 bg-green-50 border-green-200 text-green-700 font-bold"
                                                         />
                                                     </div>
-                                                    {form.sale_percentage && form.sell_price && (
-                                                        <p className="text-sm text-green-600">
-                                                            Customer saves: ₱{(parseFloat(form.sell_price) - parseFloat(calculateSalePrice(form.sell_price, form.sale_percentage))).toFixed(2)}
-                                                        </p>
-                                                    )}
                                                 </div>
                                             </div>
 
@@ -518,68 +532,48 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                 </div>
                             </div>
 
-                            {variantEnabled && variantRows.length > 0 && (
+                            {variantEnabled && Array.isArray(variantRows) && variantRows.length > 0 ? (
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <Badge variant="secondary">Variants Available</Badge>
                                     </div>
 
-                                    <div className="border rounded-lg overflow-hidden">
+                                    <div className="border rounded-lg overflow-hidden overflow-x-auto">
                                         <table className="w-full">
-                                            <thead className="bg-gray-50">
+                                            <thead className="bg-gray-50 text-left">
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Image</th>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Size</th>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Color</th>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Weight</th>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Stock</th>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Regular Price</th>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Barcode</th>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Sale %</th>
-                                                    <th className="px-4 py-2 text-left text-sm font-medium">Sale Price</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Image</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Size</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Color</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Weight</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Stock</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Regular Price</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Barcode</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Sale %</th>
+                                                    <th className="px-4 py-2 text-sm font-medium">Sale Price</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {(variantRows || []).map((row, index) => (
-                                                    <tr key={row.id} className="border-t">
+                                                {variantRows.map((row) => (
+                                                    <tr key={row.id} className="border-t hover:bg-secondary/20">
                                                         <td className="px-4 py-2">
                                                             <div className="flex items-center justify-center">
                                                                 {row.imagePreview ? (
-                                                                    <img src={row.imagePreview} alt="variant" className="w-8 h-8 object-cover rounded" />
+                                                                    <img src={row.imagePreview} alt="variant" className="w-8 h-8 object-cover rounded shadow-sm" />
                                                                 ) : (
-                                                                    <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
-                                                                        <Package className="w-4 h-4 text-gray-400" />
+                                                                    <div className="w-8 h-8 bg-secondary rounded flex items-center justify-center">
+                                                                        <Package className="w-4 h-4 text-muted-foreground opacity-40" />
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td className="px-4 py-2">
-                                                            <div className="text-sm font-medium">
-                                                                {row.size_value || 'No Size'}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 py-2">
-                                                            <div className="text-sm font-medium">
-                                                                {row.color_value || 'No Color'}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 py-2">
-                                                            <div className="text-sm font-medium">
-                                                                {row.weight_value || 'No Weight'}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 py-2">
-                                                            <div className="text-sm font-medium">{row.stock || 0}</div>
-                                                        </td>
-                                                        <td className="px-4 py-2">
-                                                            <div className="text-sm font-medium">
-                                                                ₱{row.price_override || form.sell_price || '0.00'}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 py-2">
-                                                            <div className="text-sm font-medium">
-                                                                {row.barcode || row._original?.barcode || row._original?.barcode_suffix || 'N/A'}
-                                                            </div>
+                                                        <td className="px-4 py-2 text-sm">{row.size_value || 'No Size'}</td>
+                                                        <td className="px-4 py-2 text-sm">{row.color_value || 'No Color'}</td>
+                                                        <td className="px-4 py-2 text-sm">{row.weight_value || 'No Weight'}</td>
+                                                        <td className="px-4 py-2 text-sm font-semibold">{row.stock || 0}</td>
+                                                        <td className="px-4 py-2 text-sm">₱{Number(row.price_override || form.sell_price || 0).toLocaleString()}</td>
+                                                        <td className="px-4 py-2 text-xs font-mono text-muted-foreground">
+                                                            {row.barcode || row._original?.barcode || row._original?.barcode_suffix || 'N/A'}
                                                         </td>
                                                         <td className="px-4 py-2">
                                                             <div className="relative">
@@ -591,9 +585,9 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                                                     value={row.sale_percentage}
                                                                     onChange={e => handleRowChange(row.id, 'sale_percentage', e.target.value)}
                                                                     placeholder="0"
-                                                                    className="w-20 pr-8"
+                                                                    className="w-20 pr-8 h-8 text-xs"
                                                                 />
-                                                                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">%</span>
+                                                                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-[10px]">%</span>
                                                             </div>
                                                         </td>
                                                         <td className="px-4 py-2">
@@ -607,13 +601,11 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                         </table>
                                     </div>
                                 </div>
-                            )}
-
-                            {(!variantEnabled || variantRows.length === 0) && (
-                                <div className="text-center py-8 text-gray-500">
-                                    <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                                    <p className="text-sm">No variants available for this product</p>
-                                    <p className="text-xs text-gray-400 mt-1">This product has no size, color, or weight variations</p>
+                            ) : (
+                                <div className="text-center py-12 text-muted-foreground bg-secondary/20 rounded-xl border border-dashed">
+                                    <Package className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                    <p className="text-sm font-medium">No variants found</p>
+                                    <p className="text-xs opacity-60 mt-1">This product is managed as a single item.</p>
                                 </div>
                             )}
                         </TabsContent>
@@ -621,19 +613,20 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                 </CardContent>
             </Card>
 
-            <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">
-                    {product ? `Editing: ${product.name}` : 'New Product'}
+            <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-border shadow-sm">
+                <p className="text-sm text-muted-foreground">
+                    {product ? `Editing Product: ${product.name}` : 'Creating New Product Master'}
                 </p>
-                <div className="flex items-center gap-3">
-                    <Button variant="outline" onClick={onCancel} type="button">
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" onClick={onCancel} type="button" disabled={loading}>
                         Cancel
                     </Button>
-                    <Button onClick={handleSubmit} disabled={loading} type="button">
-                        {loading ? 'Saving...' : product ? 'Update Product' : 'Save Product'}
+                    <Button onClick={handleSubmit} disabled={loading} type="button" className="px-8">
+                        {loading ? 'Processing...' : product ? 'Update Product' : 'Create Product'}
                     </Button>
                 </div>
             </div>
         </div>
     );
 }
+

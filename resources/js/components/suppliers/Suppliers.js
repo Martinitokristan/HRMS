@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Building2, Eye, Trash2, Plus, Package, ShoppingCart, Handshake, CheckCircle, Star } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 
 const SupplierStatusBadge = ({ status }) => {
     const config = {
@@ -33,8 +35,7 @@ export default function Suppliers() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_SUPPLIERS);
 
     // Modals
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -66,11 +67,27 @@ export default function Suppliers() {
     const fetchSuppliers = async () => {
         setLoading(true);
         try {
-            const res = await axios.get('/suppliers', { params: { search, page, status: statusFilter !== 'all' ? statusFilter : undefined } });
-            setSuppliers(res.data.data?.data || res.data.data || []);
-            setTotal(res.data.data?.total || res.data.data?.length || 0);
+            const res = await api.get('/suppliers', { params: { search, page, status: statusFilter !== 'all' ? statusFilter : undefined } });
+            
+            const responseData = res.data?.data !== undefined ? res.data.data : res.data;
+            
+            if (responseData && typeof responseData === 'object' && !Array.isArray(responseData)) {
+                // Paginated response
+                setSuppliers(Array.isArray(responseData.data) ? responseData.data : []);
+                setTotal(responseData.total || 0);
+            } else if (Array.isArray(responseData)) {
+                // Direct array
+                setSuppliers(responseData);
+                setTotal(responseData.length);
+            } else {
+                setSuppliers([]);
+                setTotal(0);
+            }
         } catch (error) {
+            console.error('Error fetching suppliers:', error);
             showToast('Error fetching suppliers', 'error');
+            setSuppliers([]);
+            setTotal(0);
         } finally {
             setLoading(false);
         }
@@ -90,10 +107,12 @@ export default function Suppliers() {
     const performDelete = async (id) => {
         closeConfirm();
         try {
-            const res = await axios.delete(`/suppliers/${id}`);
-            if (res.data.status === 'success') {
+            const res = await api.delete(`/suppliers/${id}`);
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            
+            if (data && (res.data.status === 'success' || !res.data.status)) {
                 showToast('Supplier deleted successfully');
-                triggerRefresh();
+                markStale(STALE_KEYS.ADMIN_SUPPLIERS);
             } else {
                 showToast(res.data.message || 'Error deleting supplier', 'error');
             }
@@ -128,7 +147,7 @@ export default function Suppliers() {
     };
 
     const handleSaveSuccess = () => {
-        triggerRefresh();
+        markStale(STALE_KEYS.ADMIN_SUPPLIERS);
         setIsModalOpen(false);
         setSelectedSupplier(null);
     };
@@ -136,9 +155,9 @@ export default function Suppliers() {
     // Stats calculation
     const stats = useMemo(() => ({
         total: total,
-        active: suppliers.filter(s => (s.status || 'active') === 'active').length,
-        preferred: suppliers.filter(s => s.status === 'preferred').length,
-        withProducts: suppliers.filter(s => (s.products_count || 0) > 0).length
+        active: (Array.isArray(suppliers) ? suppliers : []).filter(s => (s.status || 'active') === 'active').length,
+        preferred: (Array.isArray(suppliers) ? suppliers : []).filter(s => s.status === 'preferred').length,
+        withProducts: (Array.isArray(suppliers) ? suppliers : []).filter(s => (s.products_count || 0) > 0).length
     }), [suppliers, total]);
 
     return (
@@ -194,7 +213,7 @@ export default function Suppliers() {
 
             {/* Results Count */}
             <div className="flex items-center justify-between mb-2 px-1">
-                <span className="text-sm text-muted-foreground">Showing {suppliers.length} of {total} suppliers</span>
+                <span className="text-sm text-muted-foreground">Showing {suppliers?.length || 0} of {total} suppliers</span>
                 {loading && <span className="text-sm text-primary">Loading...</span>}
             </div>
 
@@ -214,7 +233,7 @@ export default function Suppliers() {
                     <TableBody>
                         {loading ? (
                             <TableRow><TableCell colSpan={6} className="text-center py-10"><div className="spinner mx-auto" /></TableCell></TableRow>
-                        ) : suppliers.length === 0 ? (
+                        ) : (!suppliers || suppliers.length === 0) ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-16">
                                     <Building2 className="h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground" />
@@ -274,7 +293,7 @@ export default function Suppliers() {
             </Card>
 
             {/* Pagination */}
-            {!loading && suppliers.length > 0 && (
+            {!loading && suppliers?.length > 0 && (
                 <Pagination page={page} total={total} perPage={15} onChange={setPage} />
             )}
 
@@ -306,3 +325,4 @@ export default function Suppliers() {
         </div>
     );
 }
+

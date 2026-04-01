@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../shared/Modal';
 
@@ -118,10 +118,10 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
         try {
             if (product) {
                 fd.append('_method', 'PUT');
-                await axios.post(`/products/${product.id}`, fd);
+                await api.post(`/products/${product.id}`, fd);
                 showToast('Product updated');
             } else {
-                await axios.post('/products', fd);
+                await api.post('/products', fd);
                 showToast('Product created');
             }
             onSuccess();

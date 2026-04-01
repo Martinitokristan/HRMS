@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -14,12 +14,12 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Plus, X, Upload, ClipboardList, Package, CheckCircle2 } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierProducts() {
     const { showToast } = useToast();
-    const { refreshTrigger } = useSilentRefresh('supplier_products');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_PRODUCTS);
     const [products, setProducts] = useState({ data: [], total: 0 });
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(products.data.length === 0);
@@ -94,20 +94,21 @@ export default function SupplierProducts() {
 
     const fetchCategories = async () => {
         try {
-            const res = await axios.get('/supplier/categories');
-            setCategories(res.data.data || []);
+            const res = await api.get('/supplier/categories');
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            setCategories(Array.isArray(data) ? data : []);
         } catch (e) { console.error(e); }
     };
 
     const fetchVariantValues = async () => {
         try {
-            const res = await axios.get('/supplier/variant-values');
-            const variantData = res.data.data || [];
+            const res = await api.get('/supplier/variant-values');
+            const variantData = res.data?.data !== undefined ? res.data.data : (res.data || []);
             
             // Organize by variant type: 1=Size, 2=Color, 3=Weight
-            const sizes = variantData.find(v => v.id === 1)?.values || [];
-            const colors = variantData.find(v => v.id === 2)?.values || [];
-            const weights = variantData.find(v => v.id === 3)?.values || [];
+            const sizes = Array.isArray(variantData) ? variantData.find(v => v.id === 1)?.values || [] : [];
+            const colors = Array.isArray(variantData) ? variantData.find(v => v.id === 2)?.values || [] : [];
+            const weights = Array.isArray(variantData) ? variantData.find(v => v.id === 3)?.values || [] : [];
             
             setVariantValues({ sizes, colors, weights });
         } catch (e) { 
@@ -121,10 +122,28 @@ export default function SupplierProducts() {
             const params = { page, per_page: 15 };
             if (search) params.search = search;
             if (categoryFilter) params.category_id = categoryFilter;
-            const res = await axios.get('/supplier/products', { params });
-            setProducts(res.data.data);
+            const res = await api.get('/supplier/products', { params });
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+                setProducts({
+                    data: Array.isArray(data.data) ? data.data : [],
+                    total: data.total || 0
+                });
+            } else if (Array.isArray(data)) {
+                setProducts({
+                    data: data,
+                    total: data.length
+                });
+            } else {
+                setProducts({ data: [], total: 0 });
+            }
         } catch (e) {
             // Silently fail on background refresh
+            if (!silent) {
+                console.error('Failed to fetch supplier products:', e);
+                setProducts({ data: [], total: 0 });
+            }
         } finally {
             if (!silent) setLoading(false);
         }
@@ -368,13 +387,13 @@ export default function SupplierProducts() {
 
             if (editing) {
                 fd.append('_method', 'PUT');
-                await axios.post(`/supplier/products/${editing.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                await api.post(`/supplier/products/${editing.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                 showToast('Product updated!', 'success');
             } else {
-                await axios.post('/supplier/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+                await api.post('/supplier/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                 showToast('Product created!', 'success');
             }
-            markStale('supplier_products', 'admin_products', 'customer_shop');
+            markStale(STALE_KEYS.SUPPLIER_PRODUCTS, STALE_KEYS.ADMIN_INVENTORY, STALE_KEYS.CUSTOMER_SHOP);
             setFormOpen(false);
             fetchProducts(true);
         } catch (err) {
@@ -387,9 +406,9 @@ export default function SupplierProducts() {
     const performDelete = async (id) => {
         closeConfirm();
         try {
-            await axios.delete(`/supplier/products/${id}`);
+            await api.delete(`/supplier/products/${id}`);
             showToast('Product deleted', 'success');
-            markStale('supplier_products', 'admin_products', 'customer_shop');
+            markStale(STALE_KEYS.SUPPLIER_PRODUCTS, STALE_KEYS.ADMIN_INVENTORY, STALE_KEYS.CUSTOMER_SHOP);
             fetchProducts(true);
         } catch (err) {
             showToast('Failed to delete product', 'error');

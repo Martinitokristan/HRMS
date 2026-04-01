@@ -6,14 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Star, ThumbsUp, MessageSquare, User, CheckCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function ProductReviews({ productId }) {
     const { user } = useAuth();
-    const { refreshTrigger } = useSilentRefresh('admin_reviews');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_REVIEWS);
     const [reviews, setReviews] = useState([]);
     const [rating, setRating] = useState(0);
     const [review, setReview] = useState('');
@@ -40,7 +40,7 @@ export default function ProductReviews({ productId }) {
     const fetchReviews = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const response = await axios.get(`/products/${productId}/reviews`);
+            const response = await api.get(`/products/${productId}/reviews`);
             
             // Handle different response structures safely
             const reviewsData = response.data?.data?.reviews || response.data?.reviews || response.data?.data || [];
@@ -65,8 +65,8 @@ export default function ProductReviews({ productId }) {
 
     const checkEligibility = async () => {
         try {
-            const response = await axios.get(`/customers/${user.id}/can-review/${productId}`);
-            setCanReview(response.data.data.can_review);
+            const response = await api.get(`/customers/${user.id}/can-review/${productId}`);
+            setCanReview(response.data.can_review);
         } catch (error) {
             console.error('Failed to check eligibility:', error);
         }
@@ -80,7 +80,7 @@ export default function ProductReviews({ productId }) {
 
         setSubmitting(true);
         try {
-            await axios.post(`/products/${productId}/reviews`, {
+            await api.post(`/products/${productId}/reviews`, {
                 rating,
                 review: review.trim()
             });
@@ -89,7 +89,7 @@ export default function ProductReviews({ productId }) {
             setRating(0);
             setReview('');
             setCanReview(false);
-            markStale('admin_reviews', 'admin_dashboard');
+            markStale(STALE_KEYS.ADMIN_REVIEWS, STALE_KEYS.ADMIN_DASHBOARD);
             fetchReviews(true);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to submit review');
@@ -100,8 +100,8 @@ export default function ProductReviews({ productId }) {
 
     const markHelpful = async (reviewId) => {
         try {
-            await axios.post(`/api/reviews/${reviewId}/helpful`, { is_helpful: true });
-            markStale('admin_reviews');
+            await api.post(`/reviews/${reviewId}/helpful`, { is_helpful: true });
+            markStale(STALE_KEYS.ADMIN_REVIEWS);
             fetchReviews(true);
             toast.success('Thank you for your feedback!');
         } catch (error) {

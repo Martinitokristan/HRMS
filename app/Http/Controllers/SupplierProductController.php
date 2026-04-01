@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\SupplierProduct;
 use App\Models\SupplierProductVariant;
 use Illuminate\Http\Request;
@@ -9,21 +10,36 @@ use Illuminate\Support\Facades\DB;
 
 class SupplierProductController extends Controller
 {
+    /**
+     * Resolve the suppliers.id for the currently authenticated user.
+     * Supplier users log in via the shared /api/login endpoint (users table),
+     * but supplier_products.supplier_id references suppliers.id.
+     * The two tables are linked by email.
+     */
+    private function resolveSupplierID(Request $request): int
+    {
+        $user = $request->user();
+        if ($user instanceof \App\Models\Supplier) {
+            return $user->id;
+        }
+        $supplier = \App\Models\Supplier::where('email', $user->email)->first();
+        if (!$supplier) {
+            abort(403, 'No supplier account linked to this user.');
+        }
+        return $supplier->id;
+    }
+
     // Supplier-facing: list their own products
     public function index(Request $request)
     {
-        $supplier = $request->user();
-        
-        // Additional safety check to prevent 500 errors
-        if (!$supplier) {
-            return response()->json([
-                'message' => 'Unauthorized. No authenticated user found.',
-                'status' => 'error'
-            ], 401);
+        if (!$request->user()) {
+            return response()->json(['message' => 'Unauthorized. No authenticated user found.', 'status' => 'error'], 401);
         }
 
+        $supplierId = $this->resolveSupplierID($request);
+
         $query = SupplierProduct::with(['category', 'variants'])
-            ->where('supplier_id', $supplier->id)
+            ->where('supplier_id', $supplierId)
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
                   ->orWhere('barcode', 'like', "%{$request->search}%");
@@ -44,15 +60,12 @@ class SupplierProductController extends Controller
     // Supplier-facing: create a product
     public function store(Request $request)
     {
-        $supplier = $request->user();
-        
-        // Additional safety check to prevent 500 errors
-        if (!$supplier) {
-            return response()->json([
-                'message' => 'Unauthorized. No authenticated user found.',
-                'status' => 'error'
-            ], 401);
+        if (!$request->user()) {
+            return response()->json(['message' => 'Unauthorized. No authenticated user found.', 'status' => 'error'], 401);
         }
+
+        $supplierId = $this->resolveSupplierID($request);
+        $supplier = $request->user();
 
         $data = $request->validate([
             'name'           => 'required|string|max:150',
@@ -67,7 +80,7 @@ class SupplierProductController extends Controller
             'variants'       => 'nullable|string',
         ]);
 
-        $product = DB::transaction(function () use ($data, $request, $supplier) {
+        $product = DB::transaction(function () use ($data, $request, $supplierId) {
             $imagePath = null;
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('supplier-products', 'public');
@@ -81,7 +94,7 @@ class SupplierProductController extends Controller
             }
 
             $product = SupplierProduct::create([
-                'supplier_id'       => $supplier->id,
+                'supplier_id'       => $supplierId,
                 'name'              => $data['name'],
                 'barcode'           => $data['barcode'],
                 'description'       => $data['description'] ?? null,
@@ -131,6 +144,10 @@ class SupplierProductController extends Controller
             return $product;
         });
 
+        $supplierId = $product->supplier_id;
+        broadcast(new DataMutated('private-admin', ['admin_inventory', 'admin_purchases'], 'supplier_product.created'));
+        broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.created'));
+
         return response()->json([
             'data'    => $product->load(['category', 'variants']),
             'message' => 'Product created successfully',
@@ -141,17 +158,12 @@ class SupplierProductController extends Controller
     // Supplier-facing: update a product
     public function update(Request $request, $id)
     {
-        $supplier = $request->user();
-        
-        // Additional safety check to prevent 500 errors
-        if (!$supplier) {
-            return response()->json([
-                'message' => 'Unauthorized. No authenticated user found.',
-                'status' => 'error'
-            ], 401);
+        if (!$request->user()) {
+            return response()->json(['message' => 'Unauthorized. No authenticated user found.', 'status' => 'error'], 401);
         }
-        
-        $product = SupplierProduct::where('supplier_id', $supplier->id)->findOrFail($id);
+
+        $supplierId = $this->resolveSupplierID($request);
+        $product = SupplierProduct::where('supplier_id', $supplierId)->findOrFail($id);
 
         $data = $request->validate([
             'name'           => 'required|string|max:150',
@@ -224,6 +236,10 @@ class SupplierProductController extends Controller
             }
         });
 
+        $supplierId = $product->supplier_id;
+        broadcast(new DataMutated('private-admin', ['admin_inventory', 'admin_purchases'], 'supplier_product.updated'));
+        broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.updated'));
+
         return response()->json([
             'data'    => $product->load(['category', 'variants']),
             'message' => 'Product updated successfully',
@@ -234,9 +250,12 @@ class SupplierProductController extends Controller
     // Supplier-facing: delete a product
     public function destroy(Request $request, $id)
     {
-        $supplier = $request->user();
-        $product = SupplierProduct::where('supplier_id', $supplier->id)->findOrFail($id);
+        $supplierId = $this->resolveSupplierID($request);
+        $product = SupplierProduct::where('supplier_id', $supplierId)->findOrFail($id);
         $product->delete();
+
+        broadcast(new DataMutated('private-admin', ['admin_inventory', 'admin_purchases'], 'supplier_product.deleted'));
+        broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.deleted'));
 
         return response()->json([
             'message' => 'Product deleted',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -51,7 +51,7 @@ export default function PaginatedTable({
         ...(search && { search: search }),
       });
 
-      const response = await axios.get(apiEndpoint, { params });
+      const response = await api.get(apiEndpoint, { params });
       const result = response.data;
       
       setData(result.data || []);

@@ -30,7 +30,7 @@ class PurchaseOrderAccepted extends Notification
             'po_number' => $this->po->po_number,
             'supplier_name' => $this->po->supplier->name ?? 'Supplier',
             'title' => 'Purchase Order Accepted',
-            'message' => "Your stock request (PO #{$this->po->po_number}) has been accepted and is being prepared for delivery.",
+            'message' => "Your stock request ({$this->po->po_number}) has been accepted and is being prepared for delivery.",
         ];
     }
 }

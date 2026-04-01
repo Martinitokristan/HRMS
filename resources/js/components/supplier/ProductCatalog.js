@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSupplierAuth } from '../../context/SupplierAuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,10 +18,10 @@ import {
     Eye,
     Star
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../../lib/api';
 
 export default function ProductCatalog() {
-    const { supplier } = useSupplierAuth();
+    const { user } = useAuth();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -46,8 +46,8 @@ export default function ProductCatalog() {
             if (categoryFilter) params.append('category_id', categoryFilter);
             if (statusFilter !== 'all') params.append('status', statusFilter);
 
-            const response = await axios.get(`/supplier/products?${params}`);
-            setProducts(response.data.data || []);
+            const response = await api.get(`/supplier/products?${params}`);
+            setProducts(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
             toast.error('Failed to fetch products');
         } finally {
@@ -57,8 +57,8 @@ export default function ProductCatalog() {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('/supplier/categories');
-            setCategories(response.data.data || []);
+            const response = await api.get('/supplier/categories');
+            setCategories(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
             console.error('Failed to fetch categories:', error);
         }
@@ -66,8 +66,8 @@ export default function ProductCatalog() {
 
     const fetchStats = async () => {
         try {
-            const response = await axios.get('/supplier/stats');
-            setStats(response.data.data);
+            const response = await api.get('/supplier/stats');
+            setStats(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
             console.error('Failed to fetch stats:', error);
         }
@@ -77,7 +77,7 @@ export default function ProductCatalog() {
         if (!confirm('Are you sure you want to delete this product?')) return;
         
         try {
-            await axios.delete(`/supplier/products/${productId}`);
+            await api.delete(`/supplier/products/${productId}`);
             toast.success('Product deleted successfully');
             fetchProducts();
             fetchStats();
@@ -90,7 +90,7 @@ export default function ProductCatalog() {
         const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
         
         try {
-            await axios.put(`/supplier/products/${productId}`, { is_active: newStatus === 'active' });
+            await api.put(`/supplier/products/${productId}`, { is_active: newStatus === 'active' });
             toast.success(`Product ${newStatus === 'active' ? 'activated' : 'deactivated'}`);
             fetchProducts();
             fetchStats();

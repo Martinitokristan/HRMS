@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\ProductReview;
 use App\Models\ReviewHelpfulness;
 use App\Models\Sale;
@@ -111,6 +112,9 @@ class ProductReviewController extends Controller
 
         \Log::info('ProductReview Store - Created review:', $review->toArray());
 
+        broadcast(new DataMutated('private-admin', ['admin_reviews', 'admin_dashboard'], 'review.created'));
+        broadcast(new DataMutated('shop', ['customer_shop'], 'review.created'));
+
         return response()->json([
             'data' => $review->load(['customer', 'product', 'productVariant']),
             'message' => 'Review submitted successfully and is now visible!',
@@ -145,6 +149,9 @@ class ProductReviewController extends Controller
 
         $review->update($data);
 
+        broadcast(new DataMutated('private-admin', ['admin_reviews'], 'review.updated'));
+        broadcast(new DataMutated('shop', ['customer_shop'], 'review.updated'));
+
         return response()->json([
             'data' => $review->load(['customer', 'product']),
             'message' => 'Review updated successfully',
@@ -156,6 +163,9 @@ class ProductReviewController extends Controller
     {
         $review = ProductReview::findOrFail($id);
         $review->delete();
+
+        broadcast(new DataMutated('private-admin', ['admin_reviews'], 'review.deleted'));
+        broadcast(new DataMutated('shop', ['customer_shop'], 'review.deleted'));
 
         return response()->json([
             'message' => 'Review deleted successfully',

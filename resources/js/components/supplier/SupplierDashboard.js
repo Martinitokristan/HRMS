@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { useSupplierAuth } from '../../context/SupplierAuthContext';
+import api from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,11 +11,12 @@ import {
     ChevronRight, FileText
 } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierDashboard() {
-    const { supplier } = useSupplierAuth();
-    const { refreshTrigger } = useSilentRefresh('supplier_dashboard');
+    const { user } = useAuth();
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_DASHBOARD);
     const [stats, setStats] = useState({ pending: 0, approved: 0, delivered: 0, total: 0, totalRevenue: 0, productCount: 0 });
     const [recentPos, setRecentPos] = useState([]);
     const [loading, setLoading] = useState(recentPos.length === 0);
@@ -38,8 +39,8 @@ export default function SupplierDashboard() {
         if (!silent) setLoading(true);
         try {
             const [posRes, prodsRes] = await Promise.all([
-                axios.get('/supplier/purchase-orders?per_page=5'),
-                axios.get('/supplier/products?per_page=1').catch(() => ({ data: { data: { total: 0 } } })),
+                api.get('/supplier/purchase-orders?per_page=5'),
+                api.get('/supplier/products?per_page=1').catch(() => ({ data: { data: { total: 0 } } })),
             ]);
             const pos = posRes.data.data.data || [];
             setRecentPos(pos);
@@ -93,7 +94,7 @@ export default function SupplierDashboard() {
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
                 <div className="relative z-10">
                     <div className="text-sm text-white/60 mb-2 font-medium tracking-wide">Welcome back,</div>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 tracking-tight">{supplier?.name || 'Supplier'}</h2>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 tracking-tight">{user?.name || 'Supplier'}</h2>
                     <p className="text-sm text-white/80 max-w-xl leading-relaxed mb-6">Manage your products, track purchase orders, and grow your business with HRMS.</p>
                     <div className="flex flex-wrap gap-3">
                         <Button size="sm" className="bg-white text-slate-800 hover:bg-white/90 font-semibold shadow-lg" asChild>

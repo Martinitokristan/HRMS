@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -12,14 +12,14 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Package } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
 
 export default function Products() {
     const { categories, unitTypes, settings, refreshCategories, refreshSettings, refreshUnitTypes } = useAuth();
-    const { refreshTrigger } = useSilentRefresh('admin_products');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_PRODUCTS);
     const [products, setProducts] = useState({ data: [], total: 0, current_page: 1 });
     const [suppliers, setSuppliers] = useState([]);
-    const [loading, setLoading] = useState(products.data.length === 0);
+    const [loading, setLoading] = useState(products.data?.length === 0);
     
     // Filters & Pagination
     const [page, setPage] = useState(1);
@@ -54,25 +54,27 @@ export default function Products() {
         refreshUnitTypes();
         
         let isMounted = true;
-        axios.get('/suppliers', { params: { no_pagination: 1 } })
+        api.get('/suppliers', { params: { no_pagination: 1 } })
             .then(res => {
-                if (isMounted) setSuppliers(res.data.data);
-            });
+                const data = res.data?.data || res.data || [];
+                if (isMounted) setSuppliers(Array.isArray(data) ? data : []);
+            })
+            .catch(err => console.error("Failed to fetch suppliers:", err));
         return () => { isMounted = false; };
     }, []);
 
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get('/products', { params: { page, search, category_id: categoryFilter } });
+            const res = await api.get('/products', { params: { page, search, category_id: categoryFilter } });
             // Handle different possible response structures
-            const responseData = res.data?.data || res.data;
+            const responseData = res.data?.data !== undefined ? res.data.data : res.data;
             
-            if (responseData && typeof responseData === 'object' && 'data' in responseData) {
+            if (responseData && typeof responseData === 'object' && !Array.isArray(responseData)) {
                 // Standard Laravel Paginator (if not further wrapped)
                 setProducts({
-                    data: responseData.data || [],
-                    total: responseData.total || 0,
+                    data: Array.isArray(responseData.data) ? responseData.data : [],
+                    total: responseData.total !== undefined ? responseData.total : 0,
                     current_page: responseData.current_page || 1
                 });
             } else if (Array.isArray(responseData)) {
@@ -82,10 +84,13 @@ export default function Products() {
                     total: responseData.length,
                     current_page: 1
                 });
+            } else {
+                setProducts({ data: [], total: 0, current_page: 1 });
             }
         } catch (err) {
             console.error('Failed to fetch products:', err);
             showToast('Failed to load products list', 'error');
+            setProducts({ data: [], total: 0, current_page: 1 });
         } finally {
             if (!silent) setLoading(false);
         }
@@ -95,7 +100,7 @@ export default function Products() {
         let isMounted = true;
         const debounce = setTimeout(() => {
             if (!isMounted) return;
-            fetchData(products.data.length > 0);
+            fetchData(products.data?.length > 0);
         }, 400);
         return () => {
             clearTimeout(debounce);
@@ -108,9 +113,9 @@ export default function Products() {
     const performDelete = async (id) => {
         closeConfirm();
         try {
-            await axios.delete(`/products/${id}`);
+            await api.delete(`/products/${id}`);
             showToast('Product deleted successfully');
-            markStale('admin_products', 'customer_shop', 'supplier_catalog');
+            markStale(STALE_KEYS.ADMIN_PRODUCTS, STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.SUPPLIER_PRODUCTS);
             fetchData(true);
         } catch (err) {
             showToast('Failed to delete product', 'error');
@@ -137,7 +142,7 @@ export default function Products() {
                 variants={settings?.variants || []}
                 onSuccess={() => { 
                     closeForm(); 
-                    markStale('admin_products', 'customer_shop', 'supplier_catalog');
+                    markStale(STALE_KEYS.ADMIN_PRODUCTS, STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.SUPPLIER_PRODUCTS);
                     fetchData(true); 
                 }}
                 onCancel={closeForm}
@@ -157,7 +162,7 @@ export default function Products() {
                         onChange: (v) => { setCategoryFilter(v); setPage(1); },
                         options: [
                             { value: '', label: 'All Categories' },
-                            ...categories.map(c => ({ value: c.id, label: c.name }))
+                            ...(Array.isArray(categories) ? categories.map(c => ({ value: c.id, label: c.name })) : [])
                         ]
                     }
                 ]}
@@ -180,9 +185,9 @@ export default function Products() {
                     <TableBody>
                         {loading ? (
                             <TableRow><TableCell colSpan={8} className="text-center py-10"><div className="spinner mx-auto" /></TableCell></TableRow>
-                        ) : products.data.length === 0 ? (
+                        ) : (products.data?.length === 0) ? (
                             <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">No products found.</TableCell></TableRow>
-                        ) : products.data.map(p => {
+                        ) : products.data?.map(p => {
                             const margin = p.sell_price > 0 ? ((p.sell_price - p.purchase_price) / p.sell_price * 100).toFixed(1) : 0;
                             const firstImg = p.image_path || p.product_variants?.find(v => v.image_path)?.image_path;
                             const imgSrc = firstImg ? `/storage/${firstImg}` : null;
@@ -218,10 +223,10 @@ export default function Products() {
                                         <Badge variant="secondary" className="font-semibold">{p.category?.name || 'Uncategorized'}</Badge>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-right">
-                                        <div className="text-sm text-muted-foreground font-medium">₱{Number(p.purchase_price).toFixed(2)}</div>
+                                        <div className="text-sm text-muted-foreground font-medium">₱{Number(p.purchase_price || 0).toFixed(2)}</div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-right">
-                                        <div className="text-base font-black text-foreground">₱{Number(p.sell_price).toFixed(2)}</div>
+                                        <div className="text-base font-black text-foreground">₱{Number(p.sell_price || 0).toFixed(2)}</div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
                                         <Badge variant="outline" className={`font-bold ${margin > 20 ? 'border-success/30 bg-success-light text-success-foreground' : 'border-warning/30 bg-warning-light text-warning-foreground'}`}>
@@ -232,7 +237,7 @@ export default function Products() {
                                         <div className="font-bold text-foreground">
                                             {p.product_variants?.length > 0 ? (
                                                 <>
-                                                    {p.product_variants.reduce((sum, v) => sum + (v.stock || 0), 0)} pcs 
+                                                    {p.product_variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)} pcs 
                                                     <div className="text-[10px] text-muted-foreground font-semibold">({p.product_variants.length} variants)</div>
                                                 </>
                                             ) : (
@@ -259,3 +264,4 @@ export default function Products() {
         </div>
     );
 }
+

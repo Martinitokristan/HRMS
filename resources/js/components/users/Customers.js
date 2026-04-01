@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import { StatusBadge } from '../shared/Badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Users, Eye } from 'lucide-react';
+import { Users as UsersIcon, Eye } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
@@ -14,7 +14,7 @@ import ConfirmModal from '../shared/ConfirmModal';
 export default function Customers() {
     const { refreshTrigger } = useSilentRefresh('admin_customers');
     const [customers, setCustomers] = useState({ data: [], total: 0 });
-    const [loading, setLoading] = useState(customers.data.length === 0);
+    const [loading, setLoading] = useState(customers.data?.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
 
@@ -35,12 +35,15 @@ export default function Customers() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get('/customers', { params: { page, search } });
-            const paginatedData = res.data.data;
+            const res = await api.get('/customers', { params: { page, search } });
+            const paginatedData = res.data.data !== undefined ? res.data.data : res.data;
             setCustomers({
-                data: paginatedData.data ? paginatedData.data : paginatedData,
-                total: paginatedData.total || paginatedData.length || 0
+                data: Array.isArray(paginatedData.data) ? paginatedData.data : (Array.isArray(paginatedData) ? paginatedData : []),
+                total: paginatedData.total !== undefined ? paginatedData.total : (paginatedData.length || 0)
             });
+        } catch (err) {
+            console.error("Failed to fetch customers:", err);
+            setCustomers({ data: [], total: 0 });
         } finally {
             if (!silent) setLoading(false);
         }
@@ -50,7 +53,7 @@ export default function Customers() {
         let isMounted = true;
         const debounce = setTimeout(() => {
             if (!isMounted) return;
-            fetchData(customers.data.length > 0);
+            fetchData(customers.data?.length > 0);
         }, 400);
         return () => {
             clearTimeout(debounce);
@@ -63,7 +66,7 @@ export default function Customers() {
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div>
                     <h2 className="text-xl font-bold text-foreground tracking-tight flex items-center gap-2">
-                        <Users className="h-6 w-6 text-primary" /> Customer Database
+                        <UsersIcon className="h-6 w-6 text-primary" /> Customer Database
                     </h2>
                     <p className="text-sm text-muted-foreground mt-0.5">View registered customers and their purchasing statistics</p>
                 </div>
@@ -88,13 +91,13 @@ export default function Customers() {
                     <TableBody>
                         {loading ? (
                             <TableRow><TableCell colSpan={6} className="text-center py-10"><div className="spinner mx-auto" /></TableCell></TableRow>
-                        ) : customers.data.length === 0 ? (
+                        ) : customers.data?.length === 0 ? (
                             <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">No customers found</TableCell></TableRow>
-                        ) : customers.data.map(u => (
+                        ) : customers.data?.map(u => (
                             <TableRow key={u.id} className={u.status === 'suspended' ? 'opacity-60' : ''}>
                                 <TableCell className="px-4 py-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white text-xs font-bold shrink-0">{u.name.charAt(0)}</div>
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white text-xs font-bold shrink-0">{u.name?.charAt(0)}</div>
                                         <div>
                                             <div className="font-semibold text-foreground">{u.name}</div>
                                             <div className="text-[12px] text-muted-foreground">{u.email}</div>
@@ -102,7 +105,7 @@ export default function Customers() {
                                         </div>
                                     </div>
                                 </TableCell>
-                                <TableCell className="px-4 py-3 font-semibold text-foreground">{u.sales_count}</TableCell>
+                                <TableCell className="px-4 py-3 font-semibold text-foreground">{u.sales_count || 0}</TableCell>
                                 <TableCell className="px-4 py-3 font-bold text-primary">₱{Number(u.total_spent || 0).toFixed(2)}</TableCell>
                                 <TableCell className="px-4 py-3 text-muted-foreground">{u.last_order_date ? new Date(u.last_order_date).toLocaleDateString() : 'Never'}</TableCell>
                                 <TableCell className="px-4 py-3"><StatusBadge status={u.status} /></TableCell>
@@ -123,3 +126,4 @@ export default function Customers() {
         </div>
     );
 }
+

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import StatCard from '../shared/StatCard';
 import { StatusBadge } from '../shared/Badge';
 import LineChart from '../shared/LineChart';
@@ -97,6 +98,7 @@ const MetricCard = ({ title, value, total, color, icon }) => {
 };
 
 export default function Reports() {
+    const { refreshTrigger } = useSilentRefresh('admin_dashboard');
     const [period, setPeriod] = useState('month');
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -117,8 +119,8 @@ export default function Reports() {
         const fetchReport = async () => {
             setLoading(true);
             try {
-                const res = await axios.get('/reports/sales', { params: { period } });
-                if (isMounted) setReport(res.data.data);
+                const res = await api.get('/reports/sales', { params: { period } });
+                if (isMounted) setReport(res.data.data !== undefined ? res.data.data : res.data);
             } catch (err) {
                 console.error('Failed to fetch report');
             } finally {
@@ -128,8 +130,9 @@ export default function Reports() {
 
         const fetchTopProducts = async () => {
             try {
-                const res = await axios.get('/reports/top-products', { params: { period } });
-                if (isMounted) setTopProducts(res.data.data || []);
+                const res = await api.get('/reports/top-products', { params: { period } });
+                const data = res.data?.data !== undefined ? res.data.data : res.data;
+                if (isMounted) setTopProducts(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error('Failed to fetch top products');
             }
@@ -138,7 +141,7 @@ export default function Reports() {
         fetchReport();
         fetchTopProducts();
         return () => { isMounted = false; };
-    }, [period]);
+    }, [period, refreshTrigger]);
 
     const formatCurr = (val) => {
         return new Intl.NumberFormat('en-PH', { 
@@ -154,7 +157,7 @@ export default function Reports() {
     const downloadPDF = async () => {
         setExporting(true);
         try {
-            const res = await axios.get('/reports/export', { 
+            const res = await api.get('/reports/export', { 
                 params: { period, type: 'pdf' },
                 responseType: 'blob' 
             });

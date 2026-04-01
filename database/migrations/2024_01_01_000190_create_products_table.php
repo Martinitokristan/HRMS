@@ -20,6 +20,8 @@ class CreateProductsTable extends Migration
             $table->decimal('sell_price', 10, 2);
             $table->decimal('sale_percentage', 5, 2)->default(0); // Added sale percentage field
             $table->string('image_path', 255)->nullable();
+            $table->string('image_banner_path')->nullable()->after('image_path');
+            $table->text('banner_bg_path')->nullable()->after('image_banner_path');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

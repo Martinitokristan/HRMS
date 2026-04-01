@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
@@ -74,7 +75,11 @@ class CustomerController extends Controller
 
     public function updateProfile(Request $request)
     {
-        $data = $request->validate([
+        $user = $request->user();
+
+        $request->validate([
+            'name'         => 'sometimes|string|max:255',
+            'phone'        => 'sometimes|nullable|string|max:20',
             'address'      => 'nullable|string|max:500',
             'landmark'     => 'nullable|string|max:255',
             'province'     => 'nullable|string|max:100',
@@ -86,15 +91,65 @@ class CustomerController extends Controller
             'sex'          => 'nullable|string|in:male,female,other',
         ]);
 
+        // Update user-level fields
+        $userFields = array_filter($request->only(['name', 'phone']), function($v) { return $v !== null; });
+        if (!empty($userFields)) {
+            $user->update($userFields);
+        }
+
+        // Update profile-level fields
+        $profileData = $request->only(['address', 'landmark', 'province', 'municipality', 'zip_code', 'latitude', 'longitude', 'age', 'sex']);
         $profile = \App\Models\CustomerProfile::updateOrCreate(
-            ['user_id' => $request->user()->id],
-            $data
+            ['user_id' => $user->id],
+            array_filter($profileData, function($v) { return $v !== null; })
         );
 
         return response()->json([
-            'data' => $profile,
+            'data'    => array_merge($profile->toArray(), ['name' => $user->fresh()->name, 'phone' => $user->fresh()->phone, 'email' => $user->email]),
             'message' => 'Profile updated successfully',
-            'status' => 'success',
+            'status'  => 'success',
+        ]);
+    }
+
+    public function uploadPhoto(Request $request)
+    {
+        $request->validate([
+            'photo' => 'required|image|max:2048',
+        ]);
+
+        $user = $request->user();
+        $path = $request->file('photo')->store('profile-photos', 'public');
+        $user->update(['photo' => $path]);
+
+        return response()->json([
+            'status'    => 'success',
+            'message'   => 'Photo updated successfully',
+            'photo_url' => asset('storage/' . $path),
+        ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'current_password' => 'required|string',
+            'password'         => 'required|string|min:8|confirmed',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Current password is incorrect.',
+                'errors'  => ['current_password' => ['Current password is incorrect.']],
+                'status'  => 'error',
+            ], 422);
+        }
+
+        $user->update(['password' => Hash::make($request->password)]);
+
+        return response()->json([
+            'message' => 'Password changed successfully.',
+            'status'  => 'success',
         ]);
     }
 }

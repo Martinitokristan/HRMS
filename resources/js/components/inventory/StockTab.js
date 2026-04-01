@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Eye, Layers, Info } from 'lucide-react';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 
 export default function StockTab() {
     const { showToast } = useToast();
@@ -21,8 +23,9 @@ export default function StockTab() {
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
     const [categories, setCategories] = useState([]);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+    
+    // Background Sync
+    const inventoryRefresh = useSilentRefresh(STALE_KEYS.ADMIN_INVENTORY);
 
     // Variant filters
     const [sizeFilter, setSizeFilter] = useState('');
@@ -157,17 +160,13 @@ export default function StockTab() {
 
     useEffect(() => {
         console.log('🔍 [StockTab] Loading initial settings and suppliers...');
-        axios.get('/settings').then(res => {
-            console.log('✅ [StockTab] Settings response:', res);
-            console.log('✅ [StockTab] Settings data structure:', res.data);
-            setCategories(res.data?.data?.categories || []);
-            setUnitTypes(res.data?.data?.unitTypes || []);
+        api.get('/settings').then(res => {
+            setCategories(res.data?.data?.categories || res.data?.categories || []);
+            setUnitTypes(res.data?.data?.unitTypes || res.data?.unitTypes || []);
         }).catch(err => {
             console.error('❌ [StockTab] Settings error:', err);
         });
-        axios.get('/suppliers').then(res => {
-            console.log('✅ [StockTab] Suppliers response:', res);
-            console.log('✅ [StockTab] Suppliers data structure:', res.data);
+        api.get('/suppliers').then(res => {
             // Handle different response structures safely
             const suppliersData = res.data?.data?.data || res.data?.data || res.data || [];
             setSuppliers(Array.isArray(suppliersData) ? suppliersData : []);
@@ -190,11 +189,9 @@ export default function StockTab() {
             if (weightFilter) params.weight = weightFilter;
             // Add cache-busting timestamp to force fresh data
             params._t = Date.now();
-            axios.get('/inventory', { params })
+            api.get('/inventory', { params })
                 .then(res => {
-                    console.log('✅ [StockTab] Inventory response:', res);
-                    console.log('✅ [StockTab] Inventory data structure:', res.data);
-                    const paginated = res.data?.data || {};
+                    const paginated = res.data?.data !== undefined ? res.data.data : (res.data || {});
                     if (isMounted) {
                         // Store raw data - grouping is handled by useMemo
                         setInventory({
@@ -219,7 +216,7 @@ export default function StockTab() {
             clearTimeout(debounce);
             isMounted = false;
         };
-    }, [page, search, categoryFilter, sizeFilter, colorFilter, weightFilter, refreshTrigger]);
+    }, [page, search, categoryFilter, sizeFilter, colorFilter, weightFilter, inventoryRefresh.refreshTrigger]);
 
     const handleTransfer = async () => {
         const qty = parseFloat(transferModal.qty);
@@ -243,7 +240,7 @@ export default function StockTab() {
         setTransferLoading(true);
         try {
             // Always send product_data so admin edits (name, price, unit, category) are applied
-            await axios.post('/inventory/transfer', {
+            await api.post('/inventory/transfer', {
                 inventory_id: transferModal.item.raw_id,
                 quantity: qty,
                 product_data: {
@@ -262,7 +259,10 @@ export default function StockTab() {
             }
             setTransferModal({ show: false, item: null, qty: '1', allVariants: [] });
             setSelectedVariantId('');
-            triggerRefresh(); // Refresh and clear expanded set to ensure data is updated accurately
+            
+            // Trigger sync for Admin and Customer roles
+            markStale(STALE_KEYS.ADMIN_INVENTORY, STALE_KEYS.CUSTOMER_SHOP);
+            
             setExpandedProducts(new Set());
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to transfer stock', 'error');
@@ -276,8 +276,8 @@ export default function StockTab() {
         if (categories.length === 0 || unitTypes.length === 0) {
             try {
                 const [categoriesRes, unitTypesRes] = await Promise.all([
-                    axios.get('/categories'),
-                    axios.get('/settings/unit-types')
+                    api.get('/categories'),
+                    api.get('/settings/unit-types')
                 ]);
                 
                 const fetchedCategories = categoriesRes.data?.data || [];
@@ -302,8 +302,7 @@ export default function StockTab() {
         if (item.is_variant && item.product_id && (!category_id || !unit_type_id)) {
             try {
                 // Use relative path for internal API call
-                const productRes = await axios.get(`/products/${item.product_id}`);
-                console.log('✅ [StockTab] Transfer - product API response:', productRes);
+                const productRes = await api.get(`/products/${item.product_id}`);
                 const product = productRes.data?.data || productRes.data || {};
                 
                 if (!category_id) category_id = product.category_id || '';
@@ -329,10 +328,8 @@ export default function StockTab() {
         if (item.product_id && !item.is_variant) {
             // Case 1: Already-tracked product with local product_id — fetch storefront variants
             try {
-                const res = await axios.get(`/inventory?product_id=${item.product_id}`);
-                console.log('✅ [StockTab] Transfer - inventory fetch response:', res);
-                console.log('✅ [StockTab] Transfer - inventory data structure:', res.data);
-                const inventoryData = res.data?.data?.data || res.data?.data || [];
+                const res = await api.get(`/inventory?product_id=${item.product_id}`);
+                const inventoryData = res.data?.data?.data || res.data?.data || res.data || [];
                 allVariants = inventoryData.filter(inv => 
                     inv.product_id === item.product_id && 
                     inv.is_variant && 
@@ -351,8 +348,8 @@ export default function StockTab() {
                 if (categories.length === 0) {
                     // Fetch categories from /categories API
                     const [categoriesRes, unitTypesRes] = await Promise.all([
-                        axios.get('/categories'),
-                        axios.get('/settings/unit-types')
+                        api.get('/categories'),
+                        api.get('/settings/unit-types')
                     ]);
                     
                     fetchedCategories = categoriesRes.data?.data || [];
@@ -362,9 +359,7 @@ export default function StockTab() {
                     setUnitTypes(fetchedUnitTypes);
                 }
                 
-                const res = await axios.get(`/supplier-catalog/${item.supplier_product_id}`);
-                console.log('✅ [StockTab] Transfer - supplier catalog response:', res);
-                console.log('✅ [StockTab] Transfer - supplier catalog data structure:', res.data);
+                const res = await api.get(`/supplier-catalog/${item.supplier_product_id}`);
                 const supplierProduct = res.data?.data || res.data || {};
                 const spVariants = supplierProduct?.variants || [];
                 
@@ -453,8 +448,8 @@ export default function StockTab() {
                             const totalSold = Number(item.total_sold || 0);
                             const totalImported = Number(item.total_imported || 0);
 
-                            // For the warehouse column: show ONLY base own stock (variants shown separately)
-                            const displayWarehouse = baseWarehouse;
+                            // For the warehouse column: show TOTAL (base + all variants)
+                            const displayWarehouse = baseWarehouse + variantWarehouse;
                             // For storefront: show ONLY base stock (variants shown separately)
                             const displayStorefront = baseStorefront;
 
@@ -486,9 +481,6 @@ export default function StockTab() {
                                         </TableCell>
                                         <TableCell className="px-4 py-3 text-center font-bold text-primary">
                                             {formatNum(displayWarehouse)}
-                                            {hasVariants && baseWarehouse > 0 && (
-                                                <div className="text-[10px] text-muted-foreground font-normal">base: {formatNum(baseWarehouse)}</div>
-                                            )}
                                         </TableCell>
                                         <TableCell className="px-4 py-3 text-center font-bold text-[15px] text-foreground">{formatNum(displayStorefront)}</TableCell>
                                         <TableCell className="px-4 py-3 text-center">
@@ -591,34 +583,7 @@ export default function StockTab() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {/* Include Base Product Row only on the first page */}
-                                        {variantPage === 1 && (
-                                            <TableRow className="border-b border-border bg-blue-50/30">
-                                                <TableCell className="px-4 py-4 font-bold text-foreground flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-primary" />
-                                                    Base Product (Regular)
-                                                </TableCell>
-                                                <TableCell className="px-4 py-4 text-center font-mono text-xs">{viewVariantItem.barcode}</TableCell>
-                                                <TableCell className="px-4 py-4 text-center font-black text-primary">{formatNum(viewVariantItem.warehouse_stock)}</TableCell>
-                                                <TableCell className="px-4 py-4 text-center font-bold text-foreground text-lg">{formatNum(viewVariantItem.current_stock)}</TableCell>
-                                                <TableCell className="px-4 py-4 text-center font-semibold text-success-foreground">{formatNum(viewVariantItem.total_sold)}</TableCell>
-                                                <TableCell className="px-4 py-4 text-center font-semibold text-info">{formatNum(viewVariantItem.total_imported)}</TableCell>
-                                                <TableCell className="px-4 py-4 text-center">
-                                                    {Number(viewVariantItem.current_stock) <= Number(viewVariantItem.reorder_threshold)
-                                                        ? <Badge variant="outline" className="border-destructive/30 bg-danger-light text-destructive">Low Stock</Badge>
-                                                        : <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground">Optimal</Badge>}
-                                                </TableCell>
-                                                <TableCell className="px-4 py-4 text-center">
-                                                    {viewVariantItem.warehouse_stock > 0 && (
-                                                        <Button size="sm" onClick={() => openTransferModal(viewVariantItem)}>
-                                                            Display
-                                                        </Button>
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-
-                                        {/* Then paginated Variants */}
+                                        {/* Paginated Variants only — base product info is in the modal header */}
                                         {paginatedVariants.map((variant) => {
                                             const variantParts = [];
                                             if (variant.size && variant.size !== '-') variantParts.push(variant.size);

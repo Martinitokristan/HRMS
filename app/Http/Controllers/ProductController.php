@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
+use App\Jobs\ProcessProductBannerImage;
 use App\Models\Inventory;
 use App\Models\InventoryAdjustment;
 use App\Models\Product;
@@ -128,6 +130,13 @@ class ProductController extends Controller
             return $product;
         });
 
+        broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.created'));
+        broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.created'));
+
+        if (!empty($product->image_path)) {
+            ProcessProductBannerImage::dispatch($product->id, $product->image_path);
+        }
+
         return response()->json([
             'data'    => $product->load(['category', 'unitType', 'supplier', 'inventory']),
             'message' => 'Product created successfully',
@@ -165,7 +174,13 @@ class ProductController extends Controller
         // Ensure sale_percentage is properly set
         $data['sale_percentage'] = $request->input('sale_percentage', 0);
 
+        $oldImagePath = $product->image_path;
         $product->update($data);
+
+        if ($product->image_path && $product->image_path !== $oldImagePath) {
+            $product->update(['image_banner_path' => null, 'banner_bg_path' => null]);
+            ProcessProductBannerImage::dispatch($product->id, $product->image_path);
+        }
 
         if ($request->has('reorder_threshold')) {
             $product->inventory()->update(['reorder_threshold' => $request->reorder_threshold]);
@@ -200,6 +215,9 @@ class ProductController extends Controller
             }
         }
 
+        broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.updated'));
+        broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.updated'));
+
         return response()->json([
             'data'    => $product->load(['category', 'unitType', 'supplier', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue']),
             'message' => 'Product updated successfully',
@@ -211,6 +229,9 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $product->delete();
+
+        broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.deleted'));
+        broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.deleted'));
 
         return response()->json(['message' => 'Product deleted', 'status' => 'success']);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\PurchaseOrder;
 use App\Models\POItem;
 use App\Models\Inventory;
@@ -115,6 +116,9 @@ class PurchaseOrderController extends Controller
 
         // Notification moved to approve() method
 
+        broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_dashboard', 'supplier_products'], 'purchase_order.created'));
+        broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_products'], 'purchase_order.created'));
+
         return response()->json([
             'data'    => $po->load(['supplier', 'items.product', 'items.supplierProduct']),
             'message' => 'Order request sent successfully',
@@ -150,6 +154,9 @@ class PurchaseOrderController extends Controller
         if ($po->supplier) {
             $po->supplier->notify(new \App\Notifications\PurchaseOrderRequest($po));
         }
+
+        broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_dashboard', 'supplier_products'], 'purchase_order.approved'));
+        broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_notifications', 'supplier_products'], 'purchase_order.approved'));
 
         return response()->json([
             'data'    => $po,
@@ -193,6 +200,9 @@ class PurchaseOrderController extends Controller
             $po->update(['status' => 'cancelled']);
         });
 
+        broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_dashboard', 'supplier_products'], 'purchase_order.declined'));
+        broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_products'], 'purchase_order.declined'));
+
         return response()->json([
             'data'    => $po,
             'message' => 'Purchase order has been declined. Stock has been restored.',
@@ -202,9 +212,9 @@ class PurchaseOrderController extends Controller
 
     public function accept($id)
     {
-        $supplier = request()->user();
+        $supplierId = $this->resolveSupplierID(request());
 
-        $po = PurchaseOrder::where('supplier_id', $supplier->id)
+        $po = PurchaseOrder::where('supplier_id', $supplierId)
             ->where('status', 'pending_supplier')
             ->findOrFail($id);
 
@@ -217,6 +227,9 @@ class PurchaseOrderController extends Controller
         $admins = User::where('role', 'admin')->get();
         Notification::send($admins, new PurchaseOrderAccepted($po));
 
+        broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_dashboard', 'supplier_products'], 'purchase_order.accepted'));
+        broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_products'], 'purchase_order.accepted'));
+
         return response()->json([
             'data'    => $po->fresh()->load(['supplier', 'items.product']),
             'message' => 'Purchase order accepted. Awaiting delivery confirmation.',
@@ -226,13 +239,13 @@ class PurchaseOrderController extends Controller
 
     public function reject($id)
     {
-        $supplier = request()->user();
+        $supplierId = $this->resolveSupplierID(request());
 
         $data = request()->validate([
             'rejection_reason' => 'required|string|min:10|max:1000',
         ]);
 
-        $po = PurchaseOrder::where('supplier_id', $supplier->id)
+        $po = PurchaseOrder::where('supplier_id', $supplierId)
             ->where('status', 'pending_supplier')
             ->findOrFail($id);
 
@@ -265,6 +278,9 @@ class PurchaseOrderController extends Controller
                 'rejection_reason' => $data['rejection_reason'],
             ]);
         });
+
+        broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_dashboard', 'supplier_products'], 'purchase_order.rejected'));
+        broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_products'], 'purchase_order.rejected'));
 
         return response()->json([
             'data'    => $po->fresh()->load(['supplier', 'items.product']),
@@ -619,6 +635,9 @@ class PurchaseOrderController extends Controller
             $po->update(['status' => 'received']);
         });
 
+        broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_inventory', 'admin_dashboard', 'supplier_products'], 'purchase_order.received'));
+        broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_products'], 'purchase_order.received'));
+
         return response()->json([
             'data'    => $po->fresh()->load(['supplier', 'items.product', 'items.productVariant']),
             'message' => 'Purchase order received. Stock added to Warehouse inventory.',
@@ -627,6 +646,28 @@ class PurchaseOrderController extends Controller
     }
 
     // Supplier-specific methods
+
+    /**
+     * Resolve the suppliers.id for the currently authenticated user.
+     * Supplier users log in via the shared /api/login endpoint (users table),
+     * but purchase_orders.supplier_id references suppliers.id.
+     * The two tables are linked by email.
+     */
+    private function resolveSupplierID(Request $request): int
+    {
+        $user = $request->user();
+        // If authenticated as Supplier model directly (token auth), use id as-is
+        if ($user instanceof \App\Models\Supplier) {
+            return $user->id;
+        }
+        // Otherwise authenticated as User model — find linked Supplier by email
+        $supplier = \App\Models\Supplier::where('email', $user->email)->first();
+        if (!$supplier) {
+            abort(403, 'No supplier account linked to this user.');
+        }
+        return $supplier->id;
+    }
+
     public function supplierIndex(Request $request)
     {
         try {
@@ -634,8 +675,10 @@ class PurchaseOrderController extends Controller
             
             \Log::info('SupplierIndex: Building query', ['supplier_id' => $supplier->id]);
 
+            $supplierId = $this->resolveSupplierID($request);
+
             $query = PurchaseOrder::with(['supplier', 'creator', 'items.product', 'items.supplierProduct'])
-                ->where('supplier_id', $supplier->id)
+                ->where('supplier_id', $supplierId)
                 ->when($request->tab, function($q) use ($request) {
                     if ($request->tab === 'requests') {
                         return $q->whereIn('status', ['pending_supplier', 'accepted']);
@@ -667,10 +710,10 @@ class PurchaseOrderController extends Controller
 
     public function supplierShow($id)
     {
-        $supplier = request()->user();
+        $supplierId = $this->resolveSupplierID(request());
 
         $po = PurchaseOrder::with(['supplier', 'creator', 'items.product'])
-            ->where('supplier_id', $supplier->id)
+            ->where('supplier_id', $supplierId)
             ->findOrFail($id);
 
         return response()->json(['data' => $po, 'status' => 'success']);
@@ -678,9 +721,9 @@ class PurchaseOrderController extends Controller
 
     public function deliver($id)
     {
-        $supplier = request()->user();
+        $supplierId = $this->resolveSupplierID(request());
 
-        $po = PurchaseOrder::where('supplier_id', $supplier->id)
+        $po = PurchaseOrder::where('supplier_id', $supplierId)
             ->where('status', 'accepted')
             ->findOrFail($id);
 
@@ -691,13 +734,16 @@ class PurchaseOrderController extends Controller
         $po->update([
             'status' => 'supplier_delivered',
             'delivered_at' => now(),
-            'delivered_by' => $supplier->id,
+            'delivered_by' => $supplierId,
             'delivery_notes' => $data['delivery_notes'] ?? null,
         ]);
 
         // Notify Admin(s)
         $admins = \App\Models\User::where('role', 'admin')->get();
         \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\PurchaseOrderDelivered($po));
+
+        broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_dashboard', 'admin_notifications'], 'purchase_order.delivered'));
+        broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_orders', 'supplier_dashboard'], 'purchase_order.delivered'));
 
         return response()->json([
             'data'    => $po->fresh()->load(['supplier', 'items.product']),

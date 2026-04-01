@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus, MapPin, Shield, Navigation } from 'lucide-react';
@@ -195,7 +196,7 @@ export default function Register() {
         setResendMsg('');
         setResendError('');
         try {
-            const response = await axios.post('/auth/resend-verification', { email: formData.email });
+            const response = await api.post('/auth/resend-verification', { email: formData.email });
             setResendMsg(response.data.message);
         } catch (err) {
             setResendError(err.response?.data?.message || 'Failed to resend email.');

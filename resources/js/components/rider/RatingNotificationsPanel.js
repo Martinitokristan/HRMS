@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,10 +7,10 @@ import { Separator } from '@/components/ui/separator';
 import { Star, Bell, BellOff, RefreshCw, Filter } from 'lucide-react';
 import RatingNotification from './RatingNotification';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
 
 export default function RatingNotificationsPanel() {
-    const { refreshTrigger } = useSilentRefresh('rider_rating_notifications');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.RIDER_NOTIFICATIONS);
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(notifications.length === 0);
     const [filter, setFilter] = useState('all'); // all, unread, read
@@ -23,7 +23,7 @@ export default function RatingNotificationsPanel() {
     const fetchNotifications = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const response = await axios.get('/riders/me/notifications');
+            const response = await api.get('/riders/me/notifications');
             const allNotifications = response.data.data || [];
             
             // Filter only rating notifications
@@ -41,8 +41,8 @@ export default function RatingNotificationsPanel() {
 
     const handleMarkAsRead = async (notificationId) => {
         try {
-            await axios.post('/riders/me/notifications/read');
-            markStale('rider_rating_notifications');
+            await api.post('/riders/me/notifications/read');
+            markStale(STALE_KEYS.RIDER_NOTIFICATIONS);
             // Update local state for immediate feedback
             setNotifications(prev => 
                 prev.map(notif => 
@@ -58,8 +58,8 @@ export default function RatingNotificationsPanel() {
 
     const handleMarkAllAsRead = async () => {
         try {
-            await axios.post('/riders/me/notifications/read');
-            markStale('rider_rating_notifications');
+            await api.post('/riders/me/notifications/read');
+            markStale(STALE_KEYS.RIDER_NOTIFICATIONS);
             setNotifications(prev => 
                 prev.map(notif => ({ ...notif, read_at: new Date().toISOString() }))
             );

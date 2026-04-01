@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -19,7 +19,7 @@ export default function RatingStatsCard() {
     const fetchRatingStats = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const response = await axios.get('/riders/me/rating-stats');
+            const response = await api.get('/riders/me/rating-stats');
             setStats(response.data.data);
         } catch (error) {
             // Silence background check

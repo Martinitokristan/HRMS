@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 
 export default function SupplierModal({ isOpen, onClose, onSave, supplier = null }) {
@@ -39,10 +39,10 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier = null
 
         try {
             if (supplier?.id) {
-                await axios.put(`/suppliers/${supplier.id}`, form);
+                await api.put(`/suppliers/${supplier.id}`, form);
                 showToast('Supplier updated successfully');
             } else {
-                await axios.post('/suppliers', form);
+                await api.post('/suppliers', form);
                 showToast('Supplier added successfully');
             }
             onSave();

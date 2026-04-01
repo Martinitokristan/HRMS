@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 
@@ -51,6 +52,8 @@ class SupplierController extends Controller
 
         $supplier = Supplier::create($data);
 
+        broadcast(new DataMutated('private-admin', ['admin_suppliers'], 'supplier.created'));
+
         return response()->json(['data' => $supplier, 'status' => 'success'], 201);
     }
 
@@ -73,6 +76,8 @@ class SupplierController extends Controller
 
         $supplier->update($data);
 
+        broadcast(new DataMutated('private-admin', ['admin_suppliers'], 'supplier.updated'));
+
         return response()->json(['data' => $supplier, 'status' => 'success']);
     }
 
@@ -86,6 +91,9 @@ class SupplierController extends Controller
         }
 
         $supplier->delete();
+
+        broadcast(new DataMutated('private-admin', ['admin_suppliers'], 'supplier.deleted'));
+
         return response()->json(['status' => 'success']);
     }
 }

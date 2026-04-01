@@ -18,6 +18,8 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
+        "psr/log": "1.1",
+        "pusher/pusher-php-server": "~6.0",
         "sendinblue/api-v3-sdk": "^8.4"
     },
     "require-dev": {
@@ -65,7 +67,9 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "platform": {
-            "php": "8.2.0"
+        },
+        "audit": {
+            "block-insecure": false
         }
     },
     "minimum-stability": "dev",

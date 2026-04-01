@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\Delivery;
 use App\Models\Inventory;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +15,7 @@ class SaleController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Sale::with(['customer', 'items.product', 'delivery'])
+        $query = Sale::with(['customer', 'items.product', 'items.productVariant.sizeValue', 'items.productVariant.colorValue', 'items.productVariant.weightValue', 'delivery'])
             ->when($request->status, function($q) use ($request) {
                 return $q->where('status', $request->status);
             })
@@ -188,9 +190,13 @@ class SaleController extends Controller
             return $sale;
         });
 
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard', 'admin_deliveries'], 'sale.created'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_cart'], 'sale.created'));
+
         return response()->json([
             'data'          => $sale->load(['customer', 'items.product', 'delivery']),
-            'gcash_payload' => env('GCASH_BASE_PAYLOAD', ''),
+            'gcash_payload' => Setting::get('gcash_payload', env('GCASH_BASE_PAYLOAD', '')),
             'message'       => 'Order created successfully',
             'status'        => 'success',
         ], 201);
@@ -246,6 +252,10 @@ class SaleController extends Controller
             ]);
         }
 
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard', 'admin_deliveries'], 'sale.status_updated'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'sale.status_updated'));
+
         return response()->json([
             'data'    => $sale->fresh()->load(['customer', 'items.product', 'delivery']),
             'message' => 'Order status updated to ' . $newStatus,
@@ -273,6 +283,10 @@ class SaleController extends Controller
                 }
             }
         }
+
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_inventory', 'admin_dashboard'], 'sale.returned'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders'], 'sale.returned'));
 
         return response()->json([
             'data'    => $sale->fresh(),
@@ -353,6 +367,10 @@ class SaleController extends Controller
             ]);
         });
 
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_inventory', 'admin_dashboard'], 'sale.cancelled'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications', 'customer_shop'], 'sale.cancelled'));
+
         return response()->json([
             'data'    => $sale->fresh()->load(['items.product', 'delivery']),
             'message' => 'Order cancelled successfully. Stock has been restored.',
@@ -385,6 +403,10 @@ class SaleController extends Controller
             'payment_reference' => $request->payment_reference,
             'status' => 'verifying_payment'
         ]);
+
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'sale.payment_proof_uploaded'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders'], 'sale.payment_proof_uploaded'));
 
         return response()->json([
             'data' => $sale->fresh(),

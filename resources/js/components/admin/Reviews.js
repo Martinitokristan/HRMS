@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,6 +8,7 @@ import { useToast } from '../../context/ToastContext';
 import ConfirmModal from '../shared/ConfirmModal';
 import StatCard from '../shared/StatCard';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 
 export default function Reviews() {
     const [reviews, setReviews] = useState([]);
@@ -18,7 +19,7 @@ export default function Reviews() {
     const [ratingFilter, setRatingFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const { showToast } = useToast();
-    const { refreshTrigger } = useSilentRefresh('admin_reviews');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_REVIEWS);
 
     const [confirmModal, setConfirmModal] = useState({
         show: false,
@@ -49,7 +50,7 @@ export default function Reviews() {
 
     const fetchReviews = async (page = 1) => {
         setLoading(true);
-        const token = localStorage.getItem('hrms_token');
+
         
         try {
             const params = new URLSearchParams();
@@ -57,7 +58,7 @@ export default function Reviews() {
             if (searchTerm) params.append('search', searchTerm);
             params.append('page', page);
 
-            const response = await axios.get(`/reviews?${params.toString()}`);
+            const response = await api.get(`/reviews?${params.toString()}`);
             
             if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
                 showToast('Failed to load reviews: Server returned an invalid format', 'error');
@@ -104,9 +105,12 @@ export default function Reviews() {
             async () => {
                 closeConfirm();
                 try {
-                    await axios.delete(`/reviews/${reviewId}`);
+                    await api.delete(`/reviews/${reviewId}`);
                     showToast('Review deleted successfully');
-                    fetchReviews(pagination.current_page);
+                    
+                    // Trigger sync for Admin and Customer (storefront product ratings)
+                    markStale(STALE_KEYS.ADMIN_REVIEWS, STALE_KEYS.CUSTOMER_SHOP);
+                    
                     setSelectedReview(null);
                 } catch (error) {
                     console.error('Failed to delete review:', error);

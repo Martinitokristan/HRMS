@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 import { useNavigate, Link } from "react-router-dom";
 import { StatusBadge } from "../shared/Badge";
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { ArrowLeft, Package, Phone, Star, XCircle, Rocket, User, AlertTriangle, 
 import CustomerOrderTracking from './CustomerOrderTracking';
 import { useToast } from '../../context/ToastContext';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 const CANCEL_REASONS = [
@@ -59,7 +59,7 @@ export default function OrderHistory() {
     const [proofRef, setProofRef] = useState('');
     const [submittingProof, setSubmittingProof] = useState(false);
 
-    const { refreshTrigger } = useSilentRefresh('customer_orders');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.CUSTOMER_ORDERS);
 
     const [confirmModal, setConfirmModal] = useState({
         show: false, title: '', message: '',
@@ -92,8 +92,9 @@ export default function OrderHistory() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get("/customer/orders");
-            setOrders(res.data?.data || res.data || []);
+            const res = await api.get("/customer/orders");
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            setOrders(Array.isArray(data) ? data : []);
         } catch (err) {
             // never wipe existing data on background error
         } finally {
@@ -108,15 +109,8 @@ export default function OrderHistory() {
             fetchData(orders.length > 0);
         }, 400);
 
-        // Real-time polling for status updates
-        const interval = setInterval(() => {
-            if (!isMounted) return;
-            fetchData(true); // Fetch in background without showing spinner
-        }, 5000); // Poll every 5 seconds for snappier updates
-
         return () => {
             clearTimeout(debounce);
-            clearInterval(interval);
             isMounted = false;
         };
     }, [refreshTrigger]);
@@ -138,12 +132,12 @@ export default function OrderHistory() {
         const orderId = cancelModal.order.id;
         setCancellingId(orderId);
         try {
-            await axios.post(`/customer/orders/${orderId}/cancel`, {
+            await api.post(`/customer/orders/${orderId}/cancel`, {
                 reason: cancelReason,
                 notes: cancelNotes || null,
             });
             toast.success("Order cancelled successfully");
-            markStale('customer_shop', 'admin_sales', 'admin_dashboard', 'customer_orders', 'admin_stock');
+            markStale(STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_INVENTORY);
             fetchData(true);
             closeCancelModal();
         } catch (err) {
@@ -180,14 +174,14 @@ export default function OrderHistory() {
 
         setSubmittingReturn(true);
         try {
-            await axios.post('/customer/returns', {
+            await api.post('/customer/returns', {
                 sale_id: returnModal.order.id,
                 reason: returnReason,
                 reason_details: returnDetails || null,
                 items: selectedItems.map(i => ({ sale_item_id: i.sale_item_id, quantity: i.quantity })),
             });
             toast.success('Return request submitted successfully! You will be notified when it is reviewed.');
-            markStale('customer_orders', 'admin_dashboard', 'admin_sales');
+            markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.ADMIN_RETURNS);
             fetchData(true);
             closeReturnModal();
         } catch (err) {
@@ -217,11 +211,11 @@ export default function OrderHistory() {
         if (proofRef) formData.append('payment_reference', proofRef);
 
         try {
-            await axios.post(`/customer/orders/${proofModal.order.id}/upload-proof`, formData, {
+            await api.post(`/customer/orders/${proofModal.order.id}/upload-proof`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             toast.success("Payment proof uploaded! Please wait for verification.");
-            markStale('customer_orders', 'admin_sales');
+            markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_DASHBOARD);
             fetchData(true);
             closeProofModal();
         } catch (err) {
@@ -235,12 +229,12 @@ export default function OrderHistory() {
         if (!ratingOrder || ratingValue === 0) return;
         setSubmittingRating(true);
         try {
-            await axios.post(`/deliveries/${ratingOrder.delivery.id}/rate`, {
+            await api.post(`/deliveries/${ratingOrder.delivery.id}/rate`, {
                 rating: ratingValue,
                 comment: ratingComment,
             });
             toast.success("Rating submitted successfully");
-            markStale('customer_orders', 'rider_dashboard');
+            markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_REVIEWS);
             fetchData(true);
             setRatingOrder(null);
             setRatingValue(0);

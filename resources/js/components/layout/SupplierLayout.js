@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useSupplierAuth } from '../../context/SupplierAuthContext';
-import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import api, { silentApi } from '../../lib/api';
 import {
     LayoutDashboard, Package, ShoppingCart, FolderOpen,
     Settings, Bell, LogOut, Menu, ChevronDown, Plus, X, ClipboardList
@@ -11,7 +11,7 @@ import NotificationPanel from '../shared/NotificationPanel';
 
 export default function SupplierLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { supplier, logout, categories } = useSupplierAuth();
+    const { user, logout, categories } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [profileOpen, setProfileOpen] = useState(false);
@@ -24,10 +24,11 @@ export default function SupplierLayout() {
         
         // Fetch notifications
         const fetchNotis = () => {
-            axios.get('/notifications').then(res => {
-                const data = res.data.data || [];
-                setNotifications(data.slice(0, 10));
-                setUnreadNoti(data.filter(n => !n.read_at).length);
+            silentApi.get('/notifications').then(res => {
+                const data = res.data?.data !== undefined ? res.data.data : res.data;
+                const notis = Array.isArray(data) ? data : [];
+                setNotifications(notis.slice(0, 10));
+                setUnreadNoti(notis.filter(n => !n.read_at).length);
             }).catch(() => {});
         };
         fetchNotis();
@@ -123,7 +124,7 @@ export default function SupplierLayout() {
                         <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', catsOpen && 'rotate-180')} />
                     </button>
                     <div className={cn('overflow-hidden transition-all duration-250', catsOpen ? 'max-h-60' : 'max-h-0')}>
-                        {categories.map(cat => (
+                        {categories?.length > 0 && categories.map(cat => (
                             <div key={cat.id} className="flex items-center">
                                 <NavLink
                                     to={`/supplier/products?category_id=${cat.id}`}
@@ -159,11 +160,11 @@ export default function SupplierLayout() {
                 <div className="border-t border-white/[0.08] p-4">
                     <div className="flex items-center gap-3 px-1">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FF6B35]/20 text-[#FF6B35] text-sm font-bold">
-                            {supplier?.name?.charAt(0) || 'S'}
+                            {user?.name?.charAt(0) || 'S'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="truncate text-sm font-semibold text-white">{supplier?.name || 'Supplier'}</p>
-                            <p className="truncate text-[11px] text-white/40">{supplier?.email || ''}</p>
+                            <p className="truncate text-sm font-semibold text-white">{user?.name || 'Supplier'}</p>
+                            <p className="truncate text-[11px] text-white/40">{user?.email || ''}</p>
                         </div>
                     </div>
                 </div>
@@ -210,10 +211,11 @@ export default function SupplierLayout() {
                                 isRead={(n) => !!n.read_at}
                                 markReadUrl="/notifications/mark-all-read"
                                 onRefresh={() => {
-                                    axios.get('/notifications').then(res => {
-                                        const data = res.data.data || [];
-                                        setNotifications(data.slice(0, 10));
-                                        setUnreadNoti(data.filter(n => !n.read_at).length);
+                                    silentApi.get('/notifications').then(res => {
+                                        const data = res.data?.data !== undefined ? res.data.data : res.data;
+                                        const notis = Array.isArray(data) ? data : [];
+                                        setNotifications(notis.slice(0, 10));
+                                        setUnreadNoti(notis.filter(n => !n.read_at).length);
                                     }).catch(() => {});
                                 }}
                                 onNotificationClick={(n) => {
@@ -227,21 +229,21 @@ export default function SupplierLayout() {
 
                         {/* Profile */}
                         <div className="relative">
-                            <button
-                                onClick={() => { setProfileOpen(!profileOpen); setNotiOpen(false); }}
-                                className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#FFF1EB] text-[#FF6B35] font-bold text-sm transition-all hover:bg-[#FF6B35] hover:text-white"
-                            >
-                                {supplier?.name?.charAt(0)?.toUpperCase() || 'S'}
-                            </button>
-                            {profileOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-[299]" onClick={() => setProfileOpen(false)} />
-                                    <div className="absolute right-0 top-[calc(100%+8px)] z-[300] w-[220px] overflow-hidden rounded-2xl border border-border bg-white shadow-xl">
-                                        <div className="border-b border-border px-4 py-3.5">
-                                            <p className="font-semibold text-sm text-foreground">{supplier?.name}</p>
-                                            <p className="text-[12px] text-muted-foreground truncate">{supplier?.email}</p>
-                                            <span className="mt-1.5 inline-block rounded-full bg-[#FFF1EB] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FF6B35]">Supplier</span>
-                                        </div>
+                                <button
+                                    onClick={() => { setProfileOpen(!profileOpen); setNotiOpen(false); }}
+                                    className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#FFF1EB] text-[#FF6B35] font-bold text-sm transition-all hover:bg-[#FF6B35] hover:text-white"
+                                >
+                                    {user?.name?.charAt(0)?.toUpperCase() || 'S'}
+                                </button>
+                                {profileOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-[299]" onClick={() => setProfileOpen(false)} />
+                                        <div className="absolute right-0 top-[calc(100%+8px)] z-[300] w-[220px] overflow-hidden rounded-2xl border border-border bg-white shadow-xl">
+                                            <div className="border-b border-border px-4 py-3.5">
+                                                <p className="font-semibold text-sm text-foreground">{user?.name}</p>
+                                                <p className="text-[12px] text-muted-foreground truncate">{user?.email}</p>
+                                                <span className="mt-1.5 inline-block rounded-full bg-[#FFF1EB] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FF6B35]">Supplier</span>
+                                            </div>
                                         <button
                                             onClick={() => { setProfileOpen(false); navigate('/supplier/settings'); }}
                                             className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"

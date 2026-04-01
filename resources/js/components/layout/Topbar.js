@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api, { silentApi } from '../../lib/api';
 import { Bell, Settings, LogOut, Menu } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import NotificationPanel from '../shared/NotificationPanel';
@@ -35,10 +35,11 @@ export default function Topbar({ toggleSidebar }) {
 
     const fetchNotifications = async () => {
         try {
-            const res = await axios.get('/notifications');
-            const data = res.data.data || res.data || [];
-            setNotifications(Array.isArray(data) ? data.slice(0, 30) : []);
-            setUnreadCount(Array.isArray(data) ? data.filter(n => !n.read_at).length : 0);
+            const res = await silentApi.get('/notifications');
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            const notis = Array.isArray(data) ? data : [];
+            setNotifications(notis.slice(0, 30));
+            setUnreadCount(notis.filter(n => !n.read_at).length);
         } catch (e) { }
     };
 

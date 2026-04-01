@@ -137,6 +137,129 @@
 
 ---
 
+## **⚡ REAL-TIME SYNC RULES (Pusher + useSilentRefresh)**
+
+> Every page that **displays data fetched from the API** MUST use `useSilentRefresh` so all logged-in users across all devices see updates instantly without manually reloading.
+
+### **Frontend Rule — Every New Page Component**
+
+**Step 1: Import the hook**
+```js
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+```
+
+**Step 2: Call the hook inside your component with the correct stale key**
+```js
+const { refreshTrigger } = useSilentRefresh('admin_orders'); // pick key from table below
+```
+
+**Step 3: Add `refreshTrigger` to your data-fetching `useEffect` dependency array**
+```js
+useEffect(() => {
+    fetchData();
+}, [page, search, refreshTrigger]); // ← always include refreshTrigger
+```
+
+**That's it.** When any backend mutation broadcasts that stale key, your component auto-refetches silently.
+
+---
+
+### **📋 Stale Key Reference Table**
+
+Pick the key that matches the data your page displays:
+
+| Stale Key | Used by | Triggered when |
+|---|---|---|
+| `admin_dashboard` | Dashboard, Reports, Analytics | Orders/sales change |
+| `admin_orders` | Orders list, GCash Logs | Order created/updated |
+| `admin_purchases` | Purchase Orders (admin) | PO created/approved/received |
+| `admin_inventory` | Inventory (Stock/Purchase/Sales tabs) | Stock transferred, PO received |
+| `admin_returns` | Returns page | Return requested/updated |
+| `admin_reviews` | Reviews, Rating Analytics | Review submitted |
+| `admin_users` | Users page | User created/suspended/restored |
+| `admin_riders` | Riders page | Rider approved/scheduled |
+| `admin_deliveries` | Delivery page, DeliveryTracking | Delivery status updated |
+| `admin_products` | Products page | Product created/updated/deleted |
+| `admin_notifications` | Admin notifications | Any notification |
+| `supplier_dashboard` | Supplier Dashboard | PO status changes |
+| `supplier_orders` | Supplier Orders | PO created/approved/received |
+| `supplier_products` | Supplier Products, Supplier Catalog | Product/stock updated |
+| `supplier_notifications` | Supplier notifications | PO accepted/rejected |
+| `supplier_settings` | Supplier Settings | Settings saved |
+| `customer_shop` | Customer home/shop | Product stock changes |
+| `customer_orders` | Order history | Order placed/status changed |
+| `customer_cart` | Shopping cart | Cart updated |
+| `customer_returns` | Customer returns | Return status updated |
+| `customer_notifications` | Customer notifications | Notification received |
+| `rider_dashboard` | Rider dashboard | Delivery assigned |
+| `rider_notifications` | Rider notifications | Notification received |
+| `product_reviews` | Product reviews | Review submitted |
+
+---
+
+### **Backend Rule — Every New Controller Mutation**
+
+Every `store`, `update`, `destroy`, and status-change method in a controller **MUST** call `broadcast()` after the DB operation succeeds.
+
+**Step 1: Import the event at the top of your controller**
+```php
+use App\Events\DataMutated;
+```
+
+**Step 2: Add broadcast calls after the mutation**
+```php
+// Broadcast to admin channel
+broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'order.created'));
+
+// Broadcast to supplier channel (if supplier-specific)
+broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_orders', 'supplier_dashboard'], 'order.created'));
+
+// Broadcast to customer channel (if customer-specific)
+broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'order.created'));
+```
+
+**Channel naming rules:**
+- `private-admin` — for all admin users
+- `private-supplier.{supplier_id}` — for a specific supplier
+- `private-customer.{user_id}` — for a specific customer
+- `private-rider.{user_id}` — for a specific rider
+
+**Always include multiple stale keys** if the mutation affects multiple pages (e.g. creating a PO affects both `admin_purchases` AND `admin_dashboard`).
+
+---
+
+### **✅ New Page Checklist**
+
+When adding any new page that fetches data:
+
+- [ ] `useSilentRefresh` imported from `../../hooks/useSilentRefresh`
+- [ ] Correct stale key selected from the reference table above
+- [ ] `refreshTrigger` added to the `useEffect` dependency array
+- [ ] If the page doesn't exist in the stale key table, add a new key to `resources/js/store/dataStore.js` under `STALE_KEYS`
+
+### **✅ New Controller Method Checklist**
+
+When adding any new backend mutation (create/update/delete/status change):
+
+- [ ] `use App\Events\DataMutated;` imported
+- [ ] `broadcast(new DataMutated(...))` called after successful DB operation
+- [ ] Correct channel used (`private-admin`, `private-supplier.{id}`, etc.)
+- [ ] All affected stale keys included in the array
+- [ ] **No `str_starts_with` / `str_ends_with` / `str_contains`** — use `strpos()` instead (PHP 7.4 compatibility)
+
+### **⚠️ PHP 7.4 Compatibility**
+
+This project runs PHP 7.4. These PHP 8.0+ functions will cause silent broadcast failures:
+
+| ❌ PHP 8.0+ (breaks on 7.4) | ✅ Use instead |
+|---|---|
+| `str_starts_with($s, 'x')` | `strpos($s, 'x') === 0` |
+| `str_ends_with($s, 'x')` | `substr($s, -strlen('x')) === 'x'` |
+| `str_contains($s, 'x')` | `strpos($s, 'x') !== false` |
+| Arrow functions `fn() =>` | Regular `function() use (...)` |
+
+---
+
 ## **🚀 TASK EXECUTION TEMPLATE**
 
 ### **Before Starting ANY Task:**

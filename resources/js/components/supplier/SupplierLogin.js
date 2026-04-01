@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useSupplierAuth } from '../../context/SupplierAuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { Package } from 'lucide-react';
 export default function SupplierLogin() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [submitting, setSubmitting] = useState(false);
-    const { login } = useSupplierAuth();
+    const { login } = useAuth();
     const { showToast } = useToast();
     const navigate = useNavigate();
 

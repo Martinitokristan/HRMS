@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
-import { SupplierAuthProvider } from './context/SupplierAuthContext';
+import RealTimeSyncBridge from './components/shared/RealTimeSyncBridge';
 import '../css/globals.css';
 
 // Layout
@@ -38,6 +37,7 @@ import CustomerHome from './components/customer-portal/CustomerHome';
 import CustomerOrder from './components/customer-portal/CustomerOrder';
 import CartPage from './components/customer-portal/CartPage';
 import OrderHistory from './components/customer-portal/OrderHistory';
+import CustomerSettings from './components/customer-portal/CustomerSettings';
 import ProductReviewsPage from './components/customer-portal/ProductReviewsPage';
 
 // Rider App
@@ -69,32 +69,15 @@ function ProtectedRoute({ children, roles }) {
     const loginPath = '/login';
 
     if (!user) return <Navigate to={loginPath} replace />;
+    
     if (roles && !roles.includes(user.role)) {
         // Redirect based on their ACTUAL role if they hit the wrong area
         if (user.role === 'admin') return <Navigate to="/dashboard" replace />;
         if (user.role === 'rider') return <Navigate to="/rider" replace />;
         if (user.role === 'customer') return <Navigate to="/shop" replace />;
+        if (user.role === 'supplier') return <Navigate to="/supplier/dashboard" replace />;
         return <Navigate to="/" replace />;
     }
-    return children;
-}
-
-// Supplier Protected Route - simplified to just check token
-function SupplierProtectedRoute({ children }) {
-    const [loading, setLoading] = useState(true);
-    const [authenticated, setAuthenticated] = useState(false);
-
-    useEffect(() => {
-        const token = localStorage.getItem('supplier_token');
-        if (token) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            setAuthenticated(true);
-        }
-        setLoading(false);
-    }, []);
-
-    if (loading) return <div className="loading-page"><div className="spinner" /></div>;
-    if (!authenticated) return <Navigate to="/login?role=supplier" replace />;
     return children;
 }
 
@@ -144,6 +127,7 @@ export default function AppRouter() {
                 <Route path="/shop/cart" element={<CartPage />} />
                 <Route path="/shop/order" element={<CustomerOrder />} />
                 <Route path="/shop/history" element={<OrderHistory />} />
+                <Route path="/shop/settings" element={<CustomerSettings />} />
                 <Route path="/shop/products/:id/reviews" element={<ProductReviewsPage />} />
             </Route>
 
@@ -157,9 +141,9 @@ export default function AppRouter() {
             {/* Supplier Portal */}
             <Route path="/supplier/register" element={<SupplierRegister />} />
             <Route element={
-                <SupplierProtectedRoute>
+                <ProtectedRoute roles={['supplier']}>
                     <SupplierLayout />
-                </SupplierProtectedRoute>
+                </ProtectedRoute>
             }>
                 <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
                 <Route path="/supplier/products" element={<SupplierProducts />} />
@@ -182,11 +166,10 @@ if (document.getElementById('app')) {
     root.render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AuthProvider>
-                <SupplierAuthProvider>
-                    <ToastProvider>
-                        <AppRouter />
-                    </ToastProvider>
-                </SupplierAuthProvider>
+                <ToastProvider>
+                    <RealTimeSyncBridge />
+                    <AppRouter />
+                </ToastProvider>
             </AuthProvider>
         </BrowserRouter>
     );

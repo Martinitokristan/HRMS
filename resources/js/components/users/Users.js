@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -12,14 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Users as UsersIcon, Plus, Pencil, ShieldOff, ShieldCheck } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function Users() {
     const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh('admin_users');
     const [users, setUsers] = useState({ data: [], total: 0 });
-    const [loading, setLoading] = useState(users.data.length === 0);
+    const [loading, setLoading] = useState(users.data?.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
@@ -45,12 +45,17 @@ export default function Users() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get('/users', { params: { page, search, role: roleFilter } });
-            const paginatedData = res.data.data;
+            const res = await api.get('/users', { params: { page, search, role: roleFilter } });
+            // Standardize: handles both Resource wrapper and flat response
+            const paginatedData = res.data.data !== undefined ? res.data.data : res.data;
+            
             setUsers({
-                data: paginatedData.data ? paginatedData.data : paginatedData,
-                total: paginatedData.total || paginatedData.length || 0
+                data: Array.isArray(paginatedData.data) ? paginatedData.data : (Array.isArray(paginatedData) ? paginatedData : []),
+                total: paginatedData.total !== undefined ? paginatedData.total : (paginatedData.length || 0)
             });
+        } catch (err) {
+            console.error("Failed to fetch users:", err);
+            setUsers({ data: [], total: 0 });
         } finally {
             if (!silent) setLoading(false);
         }
@@ -60,7 +65,7 @@ export default function Users() {
         let isMounted = true;
         const debounce = setTimeout(() => {
             if (!isMounted) return;
-            fetchData(users.data.length > 0);
+            fetchData(users.data?.length > 0);
         }, 400);
         return () => {
             clearTimeout(debounce);
@@ -73,13 +78,13 @@ export default function Users() {
         setSaving(true);
         try {
             if (modal.user) {
-                await axios.put(`/users/${modal.user.id}`, formData);
+                await api.put(`/users/${modal.user.id}`, formData);
                 showToast('User updated successfully');
             } else {
-                await axios.post('/users', formData);
+                await api.post('/users', formData);
                 showToast('User created successfully');
             }
-            markStale('admin_users');
+            markStale(STALE_KEYS.ADMIN_USERS);
             fetchData(true);
             setModal({ open: false, user: null });
         } catch (err) {
@@ -92,9 +97,9 @@ export default function Users() {
     const performToggleStatus = async (userId, currentStatus) => {
         closeConfirm();
         try {
-            await axios.put(`/users/${userId}/status`, { status: currentStatus === 'active' ? 'suspended' : 'active' });
+            await api.put(`/users/${userId}/status`, { status: currentStatus === 'active' ? 'suspended' : 'active' });
             showToast('User status updated');
-            markStale('admin_users');
+            markStale(STALE_KEYS.ADMIN_USERS);
             fetchData(true);
         } catch (e) {
             showToast('Failed to update status', 'error');
@@ -159,13 +164,13 @@ export default function Users() {
                     <TableBody>
                         {loading ? (
                             <TableRow><TableCell colSpan={6} className="text-center py-10"><div className="spinner mx-auto" /></TableCell></TableRow>
-                        ) : users.data.length === 0 ? (
+                        ) : users.data?.length === 0 ? (
                             <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">No users found</TableCell></TableRow>
-                        ) : users.data.map(u => (
+                        ) : users.data?.map(u => (
                             <TableRow key={u.id} className={u.status === 'suspended' ? 'opacity-60' : ''}>
                                 <TableCell className="px-4 py-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white text-xs font-bold shrink-0">{u.name.charAt(0)}</div>
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-white text-xs font-bold shrink-0">{u.name?.charAt(0)}</div>
                                         <div>
                                             <div className="font-semibold text-foreground">{u.name}</div>
                                             <div className="text-[12px] text-muted-foreground">{u.email}</div>
@@ -175,7 +180,7 @@ export default function Users() {
                                 <TableCell className="px-4 py-3"><RoleBadge role={u.role} /></TableCell>
                                 <TableCell className="px-4 py-3 text-muted-foreground">{u.phone || '-'}</TableCell>
                                 <TableCell className="px-4 py-3"><StatusBadge status={u.status} /></TableCell>
-                                <TableCell className="px-4 py-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</TableCell>
+                                <TableCell className="px-4 py-3 text-muted-foreground">{u.created_at ? new Date(u.created_at).toLocaleDateString() : '-'}</TableCell>
                                 <TableCell className="px-4 py-3">
                                     <div className="flex items-center gap-1">
                                         <Button variant="ghost" size="sm" onClick={() => openEdit(u)} className="h-7 px-2 gap-1">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Plus, Pencil, Trash2, Ruler, Palette, Weight as WeightIcon } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 const TABS = [
@@ -20,7 +20,7 @@ const TABS = [
 
 export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
     const { showToast } = useToast();
-    const { refreshTrigger } = useSilentRefresh('supplier_variant_values');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_SETTINGS);
     const [activeTab, setActiveTab] = useState(initialTab);
     const [variants, setVariants] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -52,11 +52,11 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
         if (!silent) setLoading(true);
         try {
             const [variantsRes, categoriesRes] = await Promise.all([
-                axios.get('/supplier/variant-values'),
-                axios.get('/supplier/categories')
+                api.get('/supplier/variant-values'),
+                api.get('/supplier/categories')
             ]);
-            setVariants(variantsRes.data.data || []);
-            setCategories(categoriesRes.data.data || []);
+            setVariants(variantsRes.data.data !== undefined ? variantsRes.data.data : variantsRes.data || []);
+            setCategories(categoriesRes.data.data !== undefined ? categoriesRes.data.data : categoriesRes.data || []);
         } catch (err) {
             // Silence background error
         } finally {
@@ -75,9 +75,9 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
         }
         setSaving(true);
         try {
-            await axios.post('/supplier/variant-values', { ...newVal, variant_id: variantId });
+            await api.post('/supplier/variant-values', { ...newVal, variant_id: variantId });
             showToast('Value added successfully');
-            markStale('supplier_variant_values');
+            markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             setNewVal({ variant_id: '', label: '', hex_code: '', description: '', category: '' });
             fetchData(true);
         } catch (e) {
@@ -90,9 +90,9 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
     const performDeleteVal = async (id) => {
         closeConfirm();
         try {
-            await axios.delete(`/supplier/variant-values/${id}`);
+            await api.delete(`/supplier/variant-values/${id}`);
             showToast('Value deleted');
-            markStale('supplier_variant_values');
+            markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             fetchData(true);
         } catch (e) {
             showToast('Error deleting value', 'error');

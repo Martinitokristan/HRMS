@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\ReturnOrder;
 use App\Models\Sale;
 use App\Models\Inventory;
@@ -148,6 +149,10 @@ class ReturnController extends Controller
             'images'         => $images,
         ]);
 
+        $customerId = $return->sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_dashboard'], 'return.created'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_returns', 'customer_orders'], 'return.created'));
+
         return response()->json([
             'data'    => $return->load(['sale.customer', 'requestedBy']),
             'message' => 'Return request submitted successfully. Awaiting admin approval.',
@@ -218,6 +223,10 @@ class ReturnController extends Controller
             ]);
         });
 
+        $customerId = $return->sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_inventory', 'admin_dashboard'], 'return.approved'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_returns', 'customer_notifications'], 'return.approved'));
+
         return response()->json([
             'data'    => $return->fresh()->load(['sale.customer', 'requestedBy', 'approvedBy']),
             'message' => 'Return approved. Stock restored and customer notified.',
@@ -256,6 +265,10 @@ class ReturnController extends Controller
             'is_read'     => false,
         ]);
 
+        $customerId = $return->sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_returns'], 'return.rejected'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_returns', 'customer_notifications'], 'return.rejected'));
+
         return response()->json([
             'data'    => $return->fresh()->load(['sale.customer', 'requestedBy', 'approvedBy']),
             'message' => 'Return rejected. Customer notified.',
@@ -287,6 +300,10 @@ class ReturnController extends Controller
             'message'     => "Your refund of ₱" . number_format($return->refund_amount, 2) . " for return #{$return->return_number} has been processed.",
             'is_read'     => false,
         ]);
+
+        $customerId = $return->sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_dashboard'], 'return.completed'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_returns', 'customer_notifications'], 'return.completed'));
 
         return response()->json([
             'data'    => $return->fresh()->load(['sale.customer', 'requestedBy', 'approvedBy']),

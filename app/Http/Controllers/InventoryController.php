@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
+use App\Jobs\ProcessProductBannerImage;
 use App\Models\Inventory;
 use App\Models\InventoryAdjustment;
 use App\Models\Product;
@@ -374,6 +376,10 @@ class InventoryController extends Controller
                         'is_active'      => true, 
                     ]);
                     $productId = $product->id;
+
+                    if (!empty($product->image_path)) {
+                        ProcessProductBannerImage::dispatch($product->id, $product->image_path);
+                    }
                 }
 
                 // 2. Link Inventory to new Product and map Variants
@@ -560,6 +566,9 @@ class InventoryController extends Controller
             return $inv->load('product');
         });
 
+        broadcast(new DataMutated('private-admin', ['admin_inventory'], 'inventory.transferred'));
+        broadcast(new DataMutated('shop', ['customer_shop'], 'inventory.transferred'));
+
         return response()->json([
             'data'    => $result,
             'message' => 'Stock transferred to storefront successfully. ' . ($result->product ? 'Product is now in store module.' : ''),
@@ -648,6 +657,10 @@ class InventoryController extends Controller
                             ]);
                             
                             $productId = $product->id;
+
+                            if (!empty($product->image_path)) {
+                                ProcessProductBannerImage::dispatch($product->id, $product->image_path);
+                            }
                         }
                     }
                 }
@@ -732,6 +745,9 @@ class InventoryController extends Controller
                 'product_id' => $productId,
             ];
         });
+
+        broadcast(new DataMutated('private-admin', ['admin_inventory'], 'inventory.transferred_multiple'));
+        broadcast(new DataMutated('shop', ['customer_shop'], 'inventory.transferred_multiple'));
 
         return response()->json([
             'data'    => $results,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 
 export default function RatingAnalytics() {
+    const { refreshTrigger } = useSilentRefresh('admin_reviews');
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [period, setPeriod] = useState('month');
@@ -28,11 +30,11 @@ export default function RatingAnalytics() {
 
     useEffect(() => {
         fetchAnalytics();
-    }, [period]);
+    }, [period, refreshTrigger]);
 
     const fetchAnalytics = async () => {
         try {
-            const response = await axios.get(`/reports/rating-analytics?period=${period}`);
+            const response = await api.get(`/reports/rating-analytics?period=${period}`);
             setData(response.data.data);
         } catch (error) {
             console.error('Failed to fetch rating analytics:', error);

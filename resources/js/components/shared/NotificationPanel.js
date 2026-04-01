@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { Bell, Trash2, CheckCheck, X, AlertCircle } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -34,6 +34,7 @@ export default function NotificationPanel({
     onNotificationClick,
     onRefresh,
     markReadUrl,
+    renderExtra,
 }) {
     const [deleteMode, setDeleteMode] = useState(false);
     const [selected, setSelected] = useState(new Set());
@@ -71,7 +72,7 @@ export default function NotificationPanel({
     const markAllRead = async () => {
         try {
             const readUrl = markReadUrl || `${apiPrefix}/read`;
-            await axios.post(readUrl);
+            await api.post(readUrl);
             if (onRefresh) onRefresh();
             setUnreadCount(0);
         } catch (e) {
@@ -83,7 +84,7 @@ export default function NotificationPanel({
         if (selected.size === 0) return;
         setDeleting(true);
         try {
-            await axios.post(`${apiPrefix}/delete-batch`, { ids: Array.from(selected) });
+            await api.post(`${apiPrefix}/delete-batch`, { ids: Array.from(selected) });
             setNotifications(prev => prev.filter(n => !selected.has(n.id)));
             setSelected(new Set());
             setDeleteMode(false);
@@ -95,7 +96,7 @@ export default function NotificationPanel({
     const handleDeleteAll = async () => {
         setDeleting(true);
         try {
-            await axios.post(`${apiPrefix}/delete-all`);
+            await api.post(`${apiPrefix}/delete-all`);
             setNotifications([]);
             setSelected(new Set());
             setDeleteMode(false);
@@ -219,6 +220,7 @@ export default function NotificationPanel({
                                     <p className={cn('text-[13px] text-foreground leading-snug', !isRead(n) && 'font-semibold')}>
                                         {renderMessage(n)}
                                     </p>
+                                    {renderExtra?.(n)}
                                 </div>
                                 {/* Unread dot */}
                                 {!deleteMode && !isRead(n) && (

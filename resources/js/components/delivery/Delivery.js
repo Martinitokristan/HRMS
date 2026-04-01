@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import StatCard from '../shared/StatCard';
 import FilterBar from '../shared/FilterBar';
@@ -14,7 +14,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { RefreshCw, Truck, Eye, Rocket, CheckCircle2, XCircle, Trash2, Package, Clock, CheckCheck } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 
 const STATUS_CONFIG = {
     waiting: { label: 'Waiting for Confirmation', color: '#6B7280', bgColor: '#F3F4F6' },
@@ -27,7 +27,7 @@ const STATUS_CONFIG = {
 export default function Delivery() {
     const { showToast } = useToast();
     
-    const { refreshTrigger } = useSilentRefresh('admin_deliveries');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_DELIVERIES);
     const [pageData, setPageData] = useState({
         deliveries: [],
         riders: [],
@@ -64,10 +64,10 @@ export default function Delivery() {
         if (!silent) setLoading(true);
         try {
             const [deliveriesRes, ridersRes] = await Promise.all([
-                axios.get('/deliveries', { 
+                api.get('/deliveries', { 
                     params: { search, page, status: statusFilter !== 'all' ? statusFilter : undefined } 
                 }),
-                axios.get('/riders/available')
+                api.get('/riders/available')
             ]);
             const data = deliveriesRes.data;
             const dData = data.data?.data || data.data || [];
@@ -103,9 +103,9 @@ export default function Delivery() {
     const handleAssign = async (deliveryId, riderId) => {
         if (!riderId) return;
         try {
-            await axios.put(`/deliveries/${deliveryId}/assign`, { rider_id: riderId });
+            await api.put(`/deliveries/${deliveryId}/assign`, { rider_id: riderId });
             showToast('Rider assigned successfully');
-            markStale('admin_deliveries', 'rider_dashboard');
+            markStale(STALE_KEYS.ADMIN_DELIVERIES, STALE_KEYS.RIDER_DASHBOARD);
             fetchData(true);
         } catch (err) {
             showToast('Assignment failed', 'error');
@@ -114,10 +114,15 @@ export default function Delivery() {
 
     const handleStatus = async (deliveryId, status) => {
         try {
-            await axios.put(`/deliveries/${deliveryId}/status`, { status });
+            await api.put(`/deliveries/${deliveryId}/status`, { status });
             const statusLabel = STATUS_CONFIG[status]?.label || status;
             showToast(`Delivery marked as ${statusLabel}`);
-            markStale('admin_deliveries', 'admin_dashboard', 'rider_dashboard', 'customer_orders');
+            markStale(
+                STALE_KEYS.ADMIN_DELIVERIES,
+                STALE_KEYS.ADMIN_DASHBOARD,
+                STALE_KEYS.RIDER_DASHBOARD,
+                STALE_KEYS.CUSTOMER_ORDERS
+            );
             fetchData(true);
         } catch (err) {
             showToast('Status update failed', 'error');
@@ -126,9 +131,14 @@ export default function Delivery() {
 
     const handleDeleteDelivery = async (id) => {
         try {
-            await axios.delete(`/deliveries/${id}`);
+            await api.delete(`/deliveries/${id}`);
             showToast('Delivery deleted successfully');
-            markStale('admin_deliveries', 'admin_dashboard', 'rider_dashboard', 'customer_orders');
+            markStale(
+                STALE_KEYS.ADMIN_DELIVERIES,
+                STALE_KEYS.ADMIN_DASHBOARD,
+                STALE_KEYS.RIDER_DASHBOARD,
+                STALE_KEYS.CUSTOMER_ORDERS
+            );
             fetchData(true);
             closeConfirm();
         } catch (err) {
@@ -142,11 +152,11 @@ export default function Delivery() {
         try {
             await Promise.all(
                 selectedDeliveries.map(id => 
-                    axios.put(`/deliveries/${id}/assign`, { rider_id: bulkRiderId })
+                    api.put(`/deliveries/${id}/assign`, { rider_id: bulkRiderId })
                 )
             );
             showToast(`Assigned ${selectedDeliveries.length} deliveries to rider`);
-            markStale('admin_deliveries', 'rider_dashboard');
+            markStale(STALE_KEYS.ADMIN_DELIVERIES, STALE_KEYS.RIDER_DASHBOARD);
             fetchData(true);
             setSelectedDeliveries([]);
             setShowBulkAssign(false);

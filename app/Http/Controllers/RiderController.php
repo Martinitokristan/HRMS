@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DataMutated;
 use App\Models\Delivery;
 use App\Models\RiderProfile;
 use App\Models\User;
@@ -278,6 +279,9 @@ class RiderController extends Controller
 
         // TODO: Send email notification to the rider
 
+        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'rider.interview_scheduled'));
+        broadcast(new DataMutated("private-rider.{$user->id}", ['rider_dashboard', 'rider_notifications'], 'rider.interview_scheduled'));
+
         return response()->json(['status' => 'success', 'message' => 'Interview scheduled successfully.']);
     }
 
@@ -286,6 +290,9 @@ class RiderController extends Controller
         $user = User::findOrFail($id);
         $user->update(['status' => 'active']);
         
+        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'rider.approved'));
+        broadcast(new DataMutated("private-rider.{$user->id}", ['rider_dashboard', 'rider_notifications'], 'rider.approved'));
+
         return response()->json(['status' => 'success', 'message' => 'Rider hired and activated!']);
     }
     public function updateProfile(Request $request)

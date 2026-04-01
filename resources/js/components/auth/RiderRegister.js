@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -121,7 +121,7 @@ export default function RiderRegister() {
 
         setSubmitting(true);
         try {
-            await axios.post('/auth/register', formData, {
+            await api.post('/auth/register', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setSuccessMsg('Application submitted! Please check your email to verify your account.');
@@ -148,7 +148,7 @@ export default function RiderRegister() {
         setResendMsg('');
         setResendError('');
         try {
-            const response = await axios.post('/auth/resend-verification', { email: form.email });
+            const response = await api.post('/auth/resend-verification', { email: form.email });
             setResendMsg(response.data.message);
         } catch (err) {
             setResendError(err.response?.data?.message || 'Failed to resend email.');

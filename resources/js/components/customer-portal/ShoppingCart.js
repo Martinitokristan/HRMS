@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Minus, Plus, Trash2, ShoppingCart, Clock, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../../lib/api';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 
 export default function ShoppingCart() {
     const { user } = useAuth();
@@ -15,21 +17,16 @@ export default function ShoppingCart() {
     const [loading, setLoading] = useState(false);
     const [expiringSoon, setExpiringSoon] = useState([]);
 
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.CUSTOMER_CART);
+
     useEffect(() => {
         fetchCart();
         fetchReservations();
-        
-        // Check for expiring reservations every minute
-        const interval = setInterval(() => {
-            fetchReservations();
-        }, 60000);
-        
-        return () => clearInterval(interval);
-    }, []);
+    }, [refreshTrigger]);
 
     const fetchCart = async () => {
         try {
-            const response = await axios.get('/cart');
+            const response = await api.get('/cart');
             setCart(response.data.data || []);
         } catch (error) {
             console.error('Failed to fetch cart:', error);
@@ -38,7 +35,7 @@ export default function ShoppingCart() {
 
     const fetchReservations = async () => {
         try {
-            const response = await axios.get('/cart/reservations');
+            const response = await api.get('/cart/reservations');
             const reservations = response.data.data || [];
             setReservations(reservations);
             
@@ -58,7 +55,8 @@ export default function ShoppingCart() {
         
         setLoading(true);
         try {
-            await axios.put(`/cart/${itemId}`, { quantity });
+            await api.put(`/cart/${itemId}`, { quantity });
+            markStale(STALE_KEYS.CUSTOMER_CART);
             await fetchCart();
             await fetchReservations();
         } catch (error) {
@@ -71,7 +69,8 @@ export default function ShoppingCart() {
     const removeFromCart = async (itemId) => {
         setLoading(true);
         try {
-            await axios.delete(`/cart/${itemId}`);
+            await api.delete(`/cart/${itemId}`);
+            markStale(STALE_KEYS.CUSTOMER_CART);
             await fetchCart();
             await fetchReservations();
             toast.success('Item removed from cart');
@@ -85,11 +84,12 @@ export default function ShoppingCart() {
     const reserveItem = async (item) => {
         setLoading(true);
         try {
-            await axios.post('/cart/reserve', {
+            await api.post('/cart/reserve', {
                 product_id: item.product_id,
                 product_variant_id: item.product_variant_id,
                 quantity: item.quantity
             });
+            markStale(STALE_KEYS.CUSTOMER_CART);
             await fetchReservations();
             toast.success('Item reserved for 15 minutes');
         } catch (error) {
@@ -102,7 +102,8 @@ export default function ShoppingCart() {
     const releaseReservation = async (reservationId) => {
         setLoading(true);
         try {
-            await axios.post('/cart/release', { reservation_id: reservationId });
+            await api.post('/cart/release', { reservation_id: reservationId });
+            markStale(STALE_KEYS.CUSTOMER_CART);
             await fetchReservations();
             toast.success('Reservation released');
         } catch (error) {

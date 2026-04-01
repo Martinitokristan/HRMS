@@ -8,15 +8,15 @@ import { useAuth } from '../../context/AuthContext';
 import ProductReviewList from '@/components/ui/ProductReviewList';
 import ProductReviewForm from '@/components/ui/ProductReviewForm';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
-import axios from 'axios';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
+import api from '../../lib/api';
 
 export default function ProductReviewsPage() {
     const params = useParams();
     const productId = params.id;
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { refreshTrigger } = useSilentRefresh('product_reviews');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.PRODUCT_REVIEWS);
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(!product);
     const [showReviewForm, setShowReviewForm] = useState(false);
@@ -57,7 +57,7 @@ export default function ProductReviewsPage() {
         
         if (!silent) setLoading(true);
         try {
-            const response = await axios.get(`/products/${productId}`);
+            const response = await api.get(`/products/${productId}`);
             const data = response.data;
             if (data.status === 'success') {
                 setProduct(data.data);
@@ -84,27 +84,13 @@ export default function ProductReviewsPage() {
     const checkReviewEligibility = async () => {
         if (!user || !productId) return;
         
-        const token = localStorage.getItem('hrms_token');
-        
         try {
             const url = selectedVariant 
-                ? `/api/customers/${user.id}/can-review/${productId}?variant_id=${selectedVariant}`
-                : `/api/customers/${user.id}/can-review/${productId}`;
+                ? `/customers/${user.id}/can-review/${productId}?variant_id=${selectedVariant}`
+                : `/customers/${user.id}/can-review/${productId}`;
                 
-            const response = await fetch(url, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            setCanReview(data.can_review);
+            const response = await api.get(url);
+            setCanReview(response.data.can_review);
         } catch (error) {
             console.error('Error checking review eligibility:', error);
             setCanReview(false);
@@ -114,7 +100,7 @@ export default function ProductReviewsPage() {
     const handleReviewSubmitted = (newReview) => {
         setReviewSubmitted(true);
         setShowReviewForm(false);
-        markStale('product_reviews', 'admin_reviews');
+        markStale(STALE_KEYS.PRODUCT_REVIEWS, STALE_KEYS.ADMIN_REVIEWS);
         fetchProduct(true);
     };
 

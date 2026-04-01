@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -7,7 +7,7 @@ import L from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, RefreshCw, MapIcon, Smartphone, Phone, Navigation, CheckCircle2, XCircle, PhilippinePeso, Truck, Package, MapPin } from 'lucide-react';
+import { LogOut, RefreshCw, MapIcon, Smartphone, Phone, Navigation, CheckCircle2, XCircle, PhilippinePeso, Truck, Package, MapPin, Clock } from 'lucide-react';
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -90,17 +90,17 @@ export default function RiderApp() {
 
     const fetchData = async () => {
         try {
-            const res = await axios.get('/riders/me/dashboard', {
+            const res = await api.get('/riders/me/dashboard', {
                 params: hasGeo ? {
                     latitude: riderPos[0],
                     longitude: riderPos[1]
                 } : {}
             });
-            const d = res.data.data;
-            setStats(d.stats);
-            setNearby(d.nearby);
-            setMyJobs(d.my_jobs);
-            setCompleted(d.completed);
+            const d = res.data;
+            setStats(d.stats || { total: 0, done: 0, active: 0, failed: 0, quota: 10000, collected: 0 });
+            setNearby(d.nearby || []);
+            setMyJobs(d.my_jobs || []);
+            setCompleted(d.completed || []);
         } catch (e) {
             showToast('Failed to fetch dashboard data', 'error');
         } finally {
@@ -122,14 +122,14 @@ export default function RiderApp() {
 
         const sendProximity = () => {
             activeJobs.forEach(job => {
-                axios.post(`/deliveries/${job.id}/proximity`, {
+                api.post(`/deliveries/${job.id}/proximity`, {
                     latitude: riderPos[0],
                     longitude: riderPos[1],
                 }).then(res => {
                     if (res.data.notified) {
                         showToast(`Customer notified — you're ${Math.round(res.data.distance_km * 1000)}m away!`, 'success');
                     }
-                }).catch(() => {});
+                }).catch(() => { });
             });
         };
 
@@ -141,10 +141,10 @@ export default function RiderApp() {
     const handleAction = async (id, status, actionNote) => {
         try {
             if (status === 'assigned') {
-                await axios.put(`/deliveries/${id}/assign`, { rider_id: user.id });
+                await api.put(`/deliveries/${id}/assign`, { rider_id: user.id });
                 setActiveTab('my_jobs');
             } else {
-                await axios.put(`/deliveries/${id}/status`, { status });
+                await api.put(`/deliveries/${id}/status`, { status });
             }
             showToast(actionNote || 'Action successful');
             triggerRefresh();
@@ -155,26 +155,26 @@ export default function RiderApp() {
 
     if (loading) return <div className="flex items-center justify-center h-screen bg-secondary/30"><div className="spinner" /></div>;
 
-    if (user && user.status !== 'active') {
+    if (user && user.status === 'suspended') {
         return (
             <div className="min-h-screen flex items-center justify-center p-8 bg-secondary/30">
-                <Card className="max-w-md w-full p-8 text-center">
-                    <div className="text-lg font-black text-foreground mb-6">HRMS</div>
-                    <div className="mb-4">{user.status === 'pending' ? <Clock className="h-14 w-14 mx-auto text-amber-400" /> : <CheckCircle2 className="h-14 w-14 mx-auto text-green-400" />}</div>
-                    <h1 className="text-xl font-bold text-foreground capitalize mb-3">Account {user.status.replace('_', ' ')}</h1>
+                <Card className="max-w-md w-full p-8 text-center border-destructive/50 shadow-2xl">
+                    <div className="text-lg font-black text-foreground mb-6 tracking-tighter">BOSHET <span className="text-destructive font-light">| HRMS</span></div>
+                    <div className="mb-4"><XCircle className="h-16 w-16 mx-auto text-destructive" /></div>
+                    <h1 className="text-xl font-bold text-foreground mb-3">Account Suspended</h1>
                     <p className="text-muted-foreground leading-relaxed mb-6 max-w-sm mx-auto">
-                        {user.status === 'pending'
-                          ? "Thank you for applying! Our HR team is currently reviewing your documents and vehicle information. We'll contact you soon to schedule an in-person interview."
-                          : "Great news! Your interview has been scheduled. Please check your registered email for the specific date and location. See you there!"}
+                        Your rider account has been suspended by the management. Please contact support or visit the main office for clarification regarding your account status.
                     </p>
                     <div className="flex flex-col gap-2">
-                        <Button onClick={triggerRefresh}>Check Status Again</Button>
-                        <Button variant="outline" onClick={logout}><LogOut className="h-4 w-4 mr-1" /> Sign Out</Button>
+                        <Button variant="outline" onClick={logout} className="border-destructive/20 hover:bg-destructive/5">
+                            <LogOut className="h-4 w-4 mr-1" /> Sign Out
+                        </Button>
                     </div>
                 </Card>
             </div>
         );
     }
+
     return (
         <div className={`rider-dashboard-v2 ${hideMap ? 'hide-map' : ''}`}>
             {/* Sidebar / List View */}
@@ -239,115 +239,115 @@ export default function RiderApp() {
                             </div>
                         </Card>
 
-                {/* Main Tabs */}
-                <div className="flex border-b border-border mx-3">
-                    <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'nearby' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('nearby')}>
-                        <MapPin className="inline h-3.5 w-3.5 mr-1" /> Nearby
-                    </button>
-                    <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'my_jobs' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('my_jobs')}>
-                        <Truck className="inline h-3.5 w-3.5 mr-1" /> My Jobs
-                    </button>
-                    <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'completed' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('completed')}>
-                        <CheckCircle2 className="inline h-3.5 w-3.5 mr-1" /> Done
-                    </button>
-                </div>
+                        {/* Main Tabs */}
+                        <div className="flex border-b border-border mx-3">
+                            <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'nearby' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('nearby')}>
+                                <MapPin className="inline h-3.5 w-3.5 mr-1" /> Nearby
+                            </button>
+                            <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'my_jobs' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('my_jobs')}>
+                                <Truck className="inline h-3.5 w-3.5 mr-1" /> My Jobs
+                            </button>
+                            <button className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 ${activeTab === 'completed' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('completed')}>
+                                <CheckCircle2 className="inline h-3.5 w-3.5 mr-1" /> Done
+                            </button>
+                        </div>
 
-                {/* Tab Content */}
-                <div className="tab-content-scroll">
-                    {activeTab === 'nearby' && (
-                        <div className="p-3 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1"><MapPin className="h-3 w-3" /> {nearby.length} orders near you</span>
-                                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={triggerRefresh}><RefreshCw className="h-3 w-3" /> Refresh</Button>
-                            </div>
-                            {nearby.length === 0 && (
-                                <Card className="text-center py-10 px-6">
-                                    <MapPin className="text-3xl mb-2" />
-                                    <h3 className="font-bold text-foreground mb-1">No Nearby Orders</h3>
-                                    <p className="text-sm text-muted-foreground">We'll notify you when new orders arrive in your current zone.</p>
-                                </Card>
-                            )}
-                            {nearby.map(order => (
-                                <Card key={order.id} className="p-4">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-bold text-foreground">#{order.sale?.order_number}</span>
-                                        <Badge variant="secondary" className="text-[10px] font-bold">{order.distance} AWAY</Badge>
-                                        <span className="text-sm font-black text-primary">₱{Number(order.sale?.total_amount).toLocaleString()}</span>
-                                    </div>
-                                    <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
-                                    <div className="text-xs text-muted-foreground mb-1">{order.address}</div>
-                                    <div className="text-[10px] text-muted-foreground mb-3 line-clamp-1">{order.sale?.items?.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}</div>
+                        {/* Tab Content */}
+                        <div className="tab-content-scroll">
+                            {activeTab === 'nearby' && (
+                                <div className="p-3 space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Truck className="h-3 w-3" /> {order.distance} — 4 min drive</span>
-                                        <Button size="sm" className="h-7 text-xs font-bold" onClick={() => handleAction(order.id, 'assigned', 'Order accepted!')}>ACCEPT →</Button>
+                                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1"><MapPin className="h-3 w-3" /> {nearby.length} orders near you</span>
+                                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={triggerRefresh}><RefreshCw className="h-3 w-3" /> Refresh</Button>
                                     </div>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
-
-                    {activeTab === 'my_jobs' && (
-                        <div className="p-3 space-y-3">
-                            {myJobs.length === 0 && (
-                                <Card className="text-center py-10 px-6">
-                                    <Truck className="h-10 w-10 mx-auto mb-2 text-muted-foreground opacity-30" />
-                                    <h3 className="font-bold text-foreground mb-1">No Active Jobs</h3>
-                                    <p className="text-sm text-muted-foreground">Ready for more? Check the "Nearby" tab to accept a new delivery.</p>
-                                </Card>
+                                    {nearby.length === 0 && (
+                                        <Card className="text-center py-10 px-6">
+                                            <MapPin className="text-3xl mb-2" />
+                                            <h3 className="font-bold text-foreground mb-1">No Nearby Orders</h3>
+                                            <p className="text-sm text-muted-foreground">We'll notify you when new orders arrive in your current zone.</p>
+                                        </Card>
+                                    )}
+                                    {nearby.map(order => (
+                                        <Card key={order.id} className="p-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-xs font-bold text-foreground">#{order.sale?.order_number}</span>
+                                                <Badge variant="secondary" className="text-[10px] font-bold">{order.distance} AWAY</Badge>
+                                                <span className="text-sm font-black text-primary">₱{Number(order.sale?.total_amount).toLocaleString()}</span>
+                                            </div>
+                                            <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
+                                            <div className="text-xs text-muted-foreground mb-1">{order.address}</div>
+                                            <div className="text-[10px] text-muted-foreground mb-3 line-clamp-1">{order.sale?.items?.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}</div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Truck className="h-3 w-3" /> {order.distance} — 4 min drive</span>
+                                                <Button size="sm" className="h-7 text-xs font-bold" onClick={() => handleAction(order.id, 'assigned', 'Order accepted!')}>ACCEPT →</Button>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
                             )}
-                            {myJobs.map(order => (
-                                <Card key={order.id} className={`p-4 ${order.status === 'in_progress' ? 'border-primary/50 bg-primary/5' : ''}`}>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-bold text-foreground">#{order.sale?.order_number}</span>
-                                        <Badge variant="outline" className="text-[10px] capitalize flex items-center gap-1"><Truck className="h-3 w-3" /> {order.status.replace('_', ' ')}</Badge>
-                                        <span className="text-sm font-black text-primary">₱{Number(order.sale?.total_amount).toLocaleString()}</span>
-                                    </div>
-                                    <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
-                                    <div className="text-xs text-muted-foreground mb-3 flex items-center gap-1"><MapPin className="h-3 w-3 shrink-0" /> {order.address}</div>
-                                    <div className="flex items-center gap-2">
-                                        {order.status === 'pending' ? (
-                                            <Button size="sm" className="flex-1 h-8 text-xs font-bold" onClick={() => handleAction(order.id, 'in_progress', 'Delivery started')}>START DELIVERY</Button>
-                                        ) : (
-                                            <>
-                                                <Button size="sm" className="flex-1 h-8 text-xs font-bold bg-green-600 hover:bg-green-700" onClick={() => handleAction(order.id, 'delivered', 'Marked as delivered')}><CheckCircle2 className="h-3 w-3 mr-1" /> COMPLETE</Button>
-                                                <Button size="sm" variant="destructive" className="h-8 text-xs font-bold" onClick={() => { if(confirm('Mark as failed?')) handleAction(order.id, 'failed', 'Marked as failed'); }}><XCircle className="h-3 w-3 mr-1" /> FAIL</Button>
-                                            </>
-                                        )}
-                                        <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => window.open(`tel:${order.sale?.customer?.phone || ''}`)}><Phone className="h-3.5 w-3.5" /></Button>
-                                    </div>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
 
-                    {activeTab === 'completed' && (
-                        <div className="p-3 space-y-2">
-                            {completed.length === 0 && (
-                                <Card className="text-center py-10 px-6">
-                                    <div className="text-3xl mb-2">📝</div>
-                                    <h3 className="font-bold text-foreground mb-1">No Recent Activity</h3>
-                                    <p className="text-sm text-muted-foreground">Your finished deliveries and failed attempts will show up here.</p>
-                                </Card>
+                            {activeTab === 'my_jobs' && (
+                                <div className="p-3 space-y-3">
+                                    {myJobs.length === 0 && (
+                                        <Card className="text-center py-10 px-6">
+                                            <Truck className="h-10 w-10 mx-auto mb-2 text-muted-foreground opacity-30" />
+                                            <h3 className="font-bold text-foreground mb-1">No Active Jobs</h3>
+                                            <p className="text-sm text-muted-foreground">Ready for more? Check the "Nearby" tab to accept a new delivery.</p>
+                                        </Card>
+                                    )}
+                                    {myJobs.map(order => (
+                                        <Card key={order.id} className={`p-4 ${order.status === 'in_progress' ? 'border-primary/50 bg-primary/5' : ''}`}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-xs font-bold text-foreground">#{order.sale?.order_number}</span>
+                                                <Badge variant="outline" className="text-[10px] capitalize flex items-center gap-1"><Truck className="h-3 w-3" /> {order.status.replace('_', ' ')}</Badge>
+                                                <span className="text-sm font-black text-primary">₱{Number(order.sale?.total_amount).toLocaleString()}</span>
+                                            </div>
+                                            <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
+                                            <div className="text-xs text-muted-foreground mb-3 flex items-center gap-1"><MapPin className="h-3 w-3 shrink-0" /> {order.address}</div>
+                                            <div className="flex items-center gap-2">
+                                                {order.status === 'pending' ? (
+                                                    <Button size="sm" className="flex-1 h-8 text-xs font-bold" onClick={() => handleAction(order.id, 'in_progress', 'Delivery started')}>START DELIVERY</Button>
+                                                ) : (
+                                                    <>
+                                                        <Button size="sm" className="flex-1 h-8 text-xs font-bold bg-green-600 hover:bg-green-700" onClick={() => handleAction(order.id, 'delivered', 'Marked as delivered')}><CheckCircle2 className="h-3 w-3 mr-1" /> COMPLETE</Button>
+                                                        <Button size="sm" variant="destructive" className="h-8 text-xs font-bold" onClick={() => { if (confirm('Mark as failed?')) handleAction(order.id, 'failed', 'Marked as failed'); }}><XCircle className="h-3 w-3 mr-1" /> FAIL</Button>
+                                                    </>
+                                                )}
+                                                <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => window.open(`tel:${order.sale?.customer?.phone || ''}`)}><Phone className="h-3.5 w-3.5" /></Button>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
                             )}
-                            {completed.map(order => (
-                                <Card key={order.id} className="p-3 flex items-center justify-between">
-                                    <div>
-                                        <div className="text-xs font-bold text-foreground">#{order.sale?.order_number}</div>
-                                        <div className="text-[10px] font-bold mt-0.5">
-                                            {order.status === 'delivered' ? <span className="text-green-600 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> DELIVERED</span> : <span className="text-destructive flex items-center gap-1"><XCircle className="h-3 w-3" /> FAILED</span>}
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-sm font-bold text-foreground">₱{Number(order.sale?.total_amount).toLocaleString()}</div>
-                                        <div className="text-[10px] text-muted-foreground">{new Date(order.updated_at).toLocaleDateString().toUpperCase()}</div>
-                                    </div>
-                                </Card>
-                            ))}
+
+                            {activeTab === 'completed' && (
+                                <div className="p-3 space-y-2">
+                                    {completed.length === 0 && (
+                                        <Card className="text-center py-10 px-6">
+                                            <div className="text-3xl mb-2">📝</div>
+                                            <h3 className="font-bold text-foreground mb-1">No Recent Activity</h3>
+                                            <p className="text-sm text-muted-foreground">Your finished deliveries and failed attempts will show up here.</p>
+                                        </Card>
+                                    )}
+                                    {completed.map(order => (
+                                        <Card key={order.id} className="p-3 flex items-center justify-between">
+                                            <div>
+                                                <div className="text-xs font-bold text-foreground">#{order.sale?.order_number}</div>
+                                                <div className="text-[10px] font-bold mt-0.5">
+                                                    {order.status === 'delivered' ? <span className="text-green-600 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> DELIVERED</span> : <span className="text-destructive flex items-center gap-1"><XCircle className="h-3 w-3" /> FAILED</span>}
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-bold text-foreground">₱{Number(order.sale?.total_amount).toLocaleString()}</div>
+                                                <div className="text-[10px] text-muted-foreground">{new Date(order.updated_at).toLocaleDateString().toUpperCase()}</div>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            </div> {/* END inner-container */}
-            </div> {/* END content-wrapper */}
+                    </div> {/* END inner-container */}
+                </div> {/* END content-wrapper */}
             </div>
 
             {/* Map Area */}
@@ -363,9 +363,9 @@ export default function RiderApp() {
                 </div>
 
                 <div className="map-placeholder">
-                    <MapContainer 
-                        center={riderPos} 
-                        zoom={16} 
+                    <MapContainer
+                        center={riderPos}
+                        zoom={16}
                         style={{ height: '100%', width: '100%' }}
                         zoomControl={false}
                     >
@@ -373,7 +373,7 @@ export default function RiderApp() {
                             url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
                             attribution="&copy; Google Maps"
                         />
-                        
+
                         {/* Rider Marker */}
                         <Marker position={riderPos} icon={riderIcon}>
                             <Popup>
@@ -384,9 +384,9 @@ export default function RiderApp() {
 
                         {/* Job Markers */}
                         {nearby.map(job => (
-                            <Marker 
-                                key={job.id} 
-                                position={[job.latitude || riderPos[0], job.longitude || riderPos[1]]} 
+                            <Marker
+                                key={job.id}
+                                position={[job.latitude || riderPos[0], job.longitude || riderPos[1]]}
                                 icon={jobIcon}
                                 eventHandlers={{
                                     click: () => setSelectedJob(job),

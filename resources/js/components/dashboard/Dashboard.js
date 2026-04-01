@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { Link } from 'react-router-dom';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import StatCard from '../shared/StatCard';
@@ -10,13 +10,13 @@ import { PhilippinePeso, ShoppingBag, AlertTriangle, Bike } from 'lucide-react';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export default function Dashboard() {
-    const { refreshTrigger } = useSilentRefresh('admin_dashboard');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_DASHBOARD);
 
     const [dashboardData, setDashboardData] = useState({
         stats: null,
@@ -43,6 +43,7 @@ export default function Dashboard() {
 
     // Load saved layout or use defaults
     const [layouts, setLayouts] = useState(() => {
+        const token = sessionStorage.getItem('hrms_token');
         const saved = localStorage.getItem('dashboard_layout');
         if (saved) {
             try { return JSON.parse(saved); } catch (e) { console.error('Error parsing layout', e); }
@@ -70,8 +71,8 @@ export default function Dashboard() {
         if (!silent) setLoading(true);
         try {
             const [summaryRes, chartRes] = await Promise.all([
-                axios.get('/sales/summary'),
-                axios.get('/reports/sales', { params: { period } })
+                api.get('/sales/summary'),
+                api.get('/reports/sales', { params: { period } })
             ]);
             setDashboardData({
                 stats: summaryRes.data.data,

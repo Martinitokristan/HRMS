@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -27,7 +27,7 @@ const RiderSettings = ({ onBack }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.put('/riders/me/profile', profileData);
+            const res = await api.put('/riders/me/profile', profileData);
             setMessage({ type: 'success', text: 'Profile updated successfully' });
             setUser(res.data.user);
             if (refreshSettings) refreshSettings();
@@ -47,7 +47,7 @@ const RiderSettings = ({ onBack }) => {
 
         setLoading(true);
         try {
-            const res = await axios.post('/riders/me/photo', formData, {
+            const res = await api.post('/riders/me/photo', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setMessage({ type: 'success', text: 'Photo updated successfully' });
@@ -68,7 +68,7 @@ const RiderSettings = ({ onBack }) => {
         }
         setLoading(true);
         try {
-            await axios.put('/riders/me/security', securityData);
+            await api.put('/riders/me/security', securityData);
             setMessage({ type: 'success', text: 'Password changed successfully' });
             setSecurityData({ current_password: '', password: '', password_confirmation: '' });
         } catch (err) {

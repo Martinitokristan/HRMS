@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useSupplierAuth } from '../../context/SupplierAuthContext';
 import { ShieldCheck, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,6 @@ import { Separator } from '@/components/ui/separator';
 
 export default function Login() {
     const { login: userLogin } = useAuth();
-    const { login: supplierLogin } = useSupplierAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
@@ -26,24 +24,12 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const user = await userLogin(email, password, null);
+            const user = await userLogin(email, password);
             if (user.role === 'rider')         navigate('/rider',     { replace: true });
             else if (user.role === 'customer') navigate('/shop',      { replace: true });
+            else if (user.role === 'supplier') navigate('/supplier/dashboard', { replace: true });
             else                               navigate('/dashboard', { replace: true });
-            return;
-        } catch (userErr) {
-            const status = userErr.response?.status;
-            if (!status || (status !== 401 && status !== 422 && status !== 403)) {
-                setError('Network error. Please try again.');
-                setLoading(false);
-                return;
-            }
-        }
-
-        try {
-            await supplierLogin(email, password);
-            navigate('/supplier/dashboard', { replace: true });
-        } catch (supplierErr) {
+        } catch (err) {
             setError('Invalid email or password. Please try again.');
             setLoading(false);
         }

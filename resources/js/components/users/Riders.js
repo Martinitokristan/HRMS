@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../lib/api';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import { StatusBadge } from '../shared/Badge';
@@ -11,13 +11,13 @@ import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Bike, Eye, CalendarCheck, UserCheck } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { markStale } from '../../store/dataStore';
+import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function Riders() {
-    const { refreshTrigger } = useSilentRefresh('admin_riders');
+    const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_RIDERS);
     const [riders, setRiders] = useState({ data: [], total: 0 });
-    const [loading, setLoading] = useState(riders.data.length === 0);
+    const [loading, setLoading] = useState(riders.data?.length === 0); 
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -42,12 +42,15 @@ export default function Riders() {
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const res = await axios.get('/riders', { params: { page, search, status: statusFilter === 'all' ? '' : statusFilter } });
-            const paginatedData = res.data.data;
+            const res = await api.get('/riders', { params: { page, search, status: statusFilter === 'all' ? '' : statusFilter } });
+            const paginatedData = res.data.data !== undefined ? res.data.data : res.data;
             setRiders({
-                data: paginatedData.data ? paginatedData.data : paginatedData,
-                total: paginatedData.total || paginatedData.length || 0
+                data: Array.isArray(paginatedData.data) ? paginatedData.data : (Array.isArray(paginatedData) ? paginatedData : []),
+                total: paginatedData.total !== undefined ? paginatedData.total : (paginatedData.length || 0)
             });
+        } catch (err) {
+            console.error("Failed to fetch riders:", err);
+            setRiders({ data: [], total: 0 });
         } finally {
             if (!silent) setLoading(false);
         }
@@ -57,7 +60,7 @@ export default function Riders() {
         let isMounted = true;
         const debounce = setTimeout(() => {
             if (!isMounted) return;
-            fetchData(riders.data.length > 0);
+            fetchData(riders.data?.length > 0);
         }, 400);
         return () => {
             clearTimeout(debounce);
@@ -69,9 +72,9 @@ export default function Riders() {
         const datetime = prompt("Enter interview date and time (YYYY-MM-DD HH:MM):", new Date().toISOString().slice(0, 16).replace('T', ' '));
         if (!datetime) return;
         try {
-            await axios.post(`/riders/${id}/interview`, { interview_at: datetime });
+            await api.post(`/riders/${id}/interview`, { interview_at: datetime });
             showToast('Interview scheduled!', 'success');
-            markStale('admin_riders');
+            markStale(STALE_KEYS.ADMIN_RIDERS);
             fetchData(true);
         } catch (err) {
             showToast('Failed to schedule interview', 'error');
@@ -81,9 +84,9 @@ export default function Riders() {
     const performHire = async (id) => {
         closeConfirm();
         try {
-            await axios.post(`/riders/${id}/approve`);
+            await api.post(`/riders/${id}/approve`);
             showToast('Rider hired and account activated!', 'success');
-            markStale('admin_riders');
+            markStale(STALE_KEYS.ADMIN_RIDERS);
             fetchData(true);
         } catch (err) {
             showToast('Failed to hire rider', 'error');
@@ -143,13 +146,13 @@ export default function Riders() {
                     <TableBody>
                         {loading ? (
                             <TableRow><TableCell colSpan={7} className="text-center py-10"><div className="spinner mx-auto" /></TableCell></TableRow>
-                        ) : riders.data.length === 0 ? (
+                        ) : riders.data?.length === 0 ? (
                             <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">No riders found</TableCell></TableRow>
-                        ) : riders.data.map(r => (
+                        ) : riders.data?.map(r => (
                             <TableRow key={r.id} className={r.status === 'suspended' ? 'opacity-60' : ''}>
                                 <TableCell className="px-4 py-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0">{r.name.charAt(0)}</div>
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0">{r.name?.charAt(0)}</div>
                                         <div>
                                             <div className="font-semibold text-foreground">{r.name}</div>
                                             <div className="text-[12px] font-semibold text-muted-foreground">{r.email}</div>

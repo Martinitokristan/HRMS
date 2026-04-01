@@ -18,10 +18,12 @@ import {
     TrendingUp,
     Users
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../../lib/api';
+import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 
 export default function RiderDashboard() {
     const { user } = useAuth();
+    const { refreshTrigger } = useSilentRefresh('rider_dashboard');
     const [dashboard, setDashboard] = useState(null);
     const [activeDelivery, setActiveDelivery] = useState(null);
     const [location, setLocation] = useState(null);
@@ -49,12 +51,12 @@ export default function RiderDashboard() {
             clearInterval(locationInterval);
             clearInterval(dashboardInterval);
         };
-    }, []);
+    }, [refreshTrigger]);
 
     const fetchDashboard = async () => {
         try {
-            const response = await axios.get('/riders/me/dashboard');
-            setDashboard(response.data.data);
+            const response = await api.get('/riders/me/dashboard');
+            setDashboard(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
             toast.error('Failed to fetch dashboard data');
         } finally {
@@ -64,8 +66,8 @@ export default function RiderDashboard() {
 
     const fetchActiveDelivery = async () => {
         try {
-            const response = await axios.get('/deliveries/active');
-            setActiveDelivery(response.data.data);
+            const response = await api.get('/deliveries/active');
+            setActiveDelivery(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
             // No active delivery is fine
             setActiveDelivery(null);
@@ -77,7 +79,7 @@ export default function RiderDashboard() {
         
         setLocationLoading(true);
         try {
-            await axios.post(`/deliveries/${activeDelivery.id}/location`, {
+            await api.post(`/deliveries/${activeDelivery.id}/location`, {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude
             });
@@ -94,12 +96,13 @@ export default function RiderDashboard() {
 
     const toggleStatus = async () => {
         try {
-            const response = await axios.post('/riders/me/toggle-status');
+            const response = await api.post('/riders/me/toggle-status');
             setDashboard(prev => ({
                 ...prev,
-                availability: response.data.data.availability
+                availability: response.data.data?.availability || response.data.availability
             }));
-            toast.success(`Status updated to ${response.data.data.availability}`);
+            const availability = response.data.data?.availability || response.data.availability;
+            toast.success(`You are now ${availability === 'online' ? 'Online' : 'Offline'}`);
         } catch (error) {
             toast.error('Failed to update status');
         }
@@ -107,7 +110,7 @@ export default function RiderDashboard() {
 
     const acceptDelivery = async (deliveryId) => {
         try {
-            await axios.post(`/deliveries/${deliveryId}/self-assign`);
+            await api.post(`/deliveries/${deliveryId}/self-assign`);
             toast.success('Delivery accepted successfully');
             fetchActiveDelivery();
             fetchDashboard();
@@ -120,7 +123,7 @@ export default function RiderDashboard() {
         if (!activeDelivery) return;
         
         try {
-            await axios.post(`/deliveries/${activeDelivery.id}/status`, { status });
+            await api.post(`/deliveries/${activeDelivery.id}/status`, { status });
             toast.success(`Delivery status updated to ${status}`);
             fetchActiveDelivery();
             fetchDashboard();
