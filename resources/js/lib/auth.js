@@ -22,7 +22,11 @@ export const auth = {
     },
 
     logout: async () => {
-        await api.post('/logout');
+        const isSupplier = !!sessionStorage.getItem('supplier_token');
+        sessionStorage.removeItem('supplier_token');
+        if (!isSupplier) {
+            await api.post('/logout');
+        }
     },
 
     getUser: async () => {

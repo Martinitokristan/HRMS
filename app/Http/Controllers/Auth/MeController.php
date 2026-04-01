@@ -19,6 +19,17 @@ class MeController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
+        if ($user instanceof \App\Models\Supplier) {
+            return response()->json([
+                'id'     => $user->id,
+                'name'   => $user->contact_name ?? $user->name,
+                'email'  => $user->email,
+                'role'   => 'supplier',
+                'status' => $user->status,
+                'photo'  => null,
+            ], 200);
+        }
+
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,

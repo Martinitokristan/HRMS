@@ -8,13 +8,23 @@ const api = axios.create({
     }
 });
 
+// Attach supplier Bearer token when present
+api.interceptors.request.use(config => {
+    const supplierToken = sessionStorage.getItem('supplier_token');
+    if (supplierToken) {
+        config.headers['Authorization'] = `Bearer ${supplierToken}`;
+    }
+    return config;
+});
+
 api.interceptors.response.use(
     response => response,
     error => {
         if (error.response && error.response.status === 401) {
-            // Trigger global login redirect without full page reload if possible
-            if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
-                window.location.href = '/login';
+            const isSupplierPage = window.location.pathname.startsWith('/supplier');
+            const loginPath = isSupplierPage ? '/supplier/login' : '/login';
+            if (window.location.pathname !== loginPath && window.location.pathname !== '/') {
+                window.location.href = loginPath;
             }
         }
         return Promise.reject(error);
@@ -28,6 +38,14 @@ export const silentApi = axios.create({
     headers: {
         'Accept': 'application/json',
     }
+});
+
+silentApi.interceptors.request.use(config => {
+    const supplierToken = sessionStorage.getItem('supplier_token');
+    if (supplierToken) {
+        config.headers['Authorization'] = `Bearer ${supplierToken}`;
+    }
+    return config;
 });
 
 export default api;

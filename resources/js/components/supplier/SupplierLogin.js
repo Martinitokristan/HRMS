@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import api from '../../lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,7 @@ import { Package } from 'lucide-react';
 export default function SupplierLogin() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [submitting, setSubmitting] = useState(false);
-    const { login } = useAuth();
+    const { setUser } = useAuth();
     const { showToast } = useToast();
     const navigate = useNavigate();
 
@@ -20,7 +21,10 @@ export default function SupplierLogin() {
         e.preventDefault();
         setSubmitting(true);
         try {
-            await login(form.email, form.password);
+            const res = await api.post('/supplier/auth/login', form);
+            const { token, supplier } = res.data.data;
+            sessionStorage.setItem('supplier_token', token);
+            setUser({ ...supplier, role: 'supplier' });
             showToast('Login successful!');
             navigate('/supplier/dashboard');
         } catch (err) {
