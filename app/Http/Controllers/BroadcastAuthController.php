@@ -17,7 +17,20 @@ class BroadcastAuthController extends Controller
      */
     public function authenticate(Request $request)
     {
-        $user = $request->user();
+        // Prefer Bearer token auth over session so a supplier can auth their
+        // private channel even when an admin session cookie is also present.
+        $user = null;
+
+        if ($bearerToken = $request->bearerToken()) {
+            $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($bearerToken);
+            if ($accessToken) {
+                $user = $accessToken->tokenable;
+            }
+        }
+
+        if (!$user) {
+            $user = $request->user();
+        }
 
         if (!$user) {
             return response()->json(['error' => 'Unauthenticated'], 403);

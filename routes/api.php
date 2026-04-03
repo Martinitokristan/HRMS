@@ -266,7 +266,7 @@ Route::middleware(['auth:sanctum', 'role:rider'])->group(function () {
 // =========================================================================
 // GROUP 7 — Supplier Only
 // =========================================================================
-Route::middleware(['auth:sanctum', 'role:supplier'])->group(function () {
+Route::middleware(['auth.supplier'])->group(function () {
     Route::get('/supplier/auth/profile', [SupplierAuthController::class , 'profile']);
     Route::put('/supplier/auth/profile', [SupplierAuthController::class , 'updateProfile']);
     Route::put('/supplier/auth/change-password', [SupplierAuthController::class , 'changePassword']);

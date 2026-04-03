@@ -23,25 +23,33 @@ const _port    = Number(process.env.MIX_PUSHER_PORT) || 6001;
 const _scheme  = process.env.MIX_PUSHER_SCHEME || 'https';
 const _cluster = process.env.MIX_PUSHER_APP_CLUSTER || 'mt1';
 
-const ECHO_CONFIG = Object.assign(
-    {
-        broadcaster:       'pusher',
-        key:               process.env.MIX_PUSHER_APP_KEY,
-        cluster:           _cluster,
-        forceTLS:          _scheme === 'https',
-        disableStats:      true,
-        enabledTransports: ['ws', 'wss'],
-        authEndpoint:      '/broadcasting/auth',
-        auth: {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept':           'application/json',
+function buildEchoConfig() {
+    const supplierToken = sessionStorage.getItem('supplier_token');
+    const authHeaders = {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept':           'application/json',
+    };
+    if (supplierToken) {
+        authHeaders['Authorization'] = `Bearer ${supplierToken}`;
+    }
+
+    return Object.assign(
+        {
+            broadcaster:       'pusher',
+            key:               process.env.MIX_PUSHER_APP_KEY,
+            cluster:           _cluster,
+            forceTLS:          _scheme === 'https',
+            disableStats:      true,
+            enabledTransports: ['ws', 'wss'],
+            authEndpoint:      '/broadcasting/auth',
+            auth: {
+                headers:         authHeaders,
+                withCredentials: true,
             },
-            withCredentials: true,
         },
-    },
-    _host ? { wsHost: _host, wsPort: _port, wssPort: _port } : {}
-);
+        _host ? { wsHost: _host, wsPort: _port, wssPort: _port } : {}
+    );
+}
 
 // Heartbeat interval (ms) — ping the socket to detect silent drops.
 const HEARTBEAT_INTERVAL_MS = 30_000;
@@ -52,7 +60,7 @@ let echoInstance = null;
 
 function buildEcho() {
     window.Pusher = Pusher;
-    echoInstance = new Echo(ECHO_CONFIG);
+    echoInstance = new Echo(buildEchoConfig());
     return echoInstance;
 }
 
@@ -94,8 +102,8 @@ export default function RealTimeSyncBridge() {
             if (user.role === 'admin')
                 listen('admin');
 
-            if (user.role === 'supplier' && user.supplier_id)
-                listen(`supplier.${user.supplier_id}`);
+            if (user.role === 'supplier' && user.id)
+                listen(`supplier.${user.id}`);
 
             if (user.role === 'customer')
                 listen(`customer.${user.id}`);
