@@ -10,38 +10,45 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\POItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        // Optimized: Load essential relationships for list view including variants and reviews
-        $query = Product::with(['category', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue', 'approvedReviews'])
-            ->where('is_active', true) // Only show active products in customer shop
-            ->when($request->search, function($q) use ($request) {
-                return $q->where('name', 'like', "%{$request->search}%")
-                         ->orWhere('barcode', 'like', "%{$request->search}%");
-            })
-            ->when($request->category_id, function($q) use ($request) {
-                return $q->where('category_id', $request->category_id);
-            })
-            ->when($request->status !== null, function($q) use ($request) {
-                return $q->where('is_active', $request->status === 'active');
+        $cacheKey = 'products:' . md5(json_encode($request->only(['search', 'category_id', 'status', 'page', 'per_page'])));
+
+        $result = Cache::tags(['products'])->remember($cacheKey, 900, function () use ($request) {
+            // Optimized: Load essential relationships for list view including variants and reviews
+            $query = Product::with(['category', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue', 'approvedReviews'])
+                ->where('is_active', true) // Only show active products in customer shop
+                ->when($request->search, function($q) use ($request) {
+                    return $q->where('name', 'like', "%{$request->search}%")
+                             ->orWhere('barcode', 'like', "%{$request->search}%");
+                })
+                ->when($request->category_id, function($q) use ($request) {
+                    return $q->where('category_id', $request->category_id);
+                })
+                ->when($request->status !== null, function($q) use ($request) {
+                    return $q->where('is_active', $request->status === 'active');
+                });
+
+            $perPage = $request->get('per_page', 15);
+            $products = $query->paginate($perPage);
+
+            // Append computed attributes
+            $products->getCollection()->transform(function ($product) {
+                $product->average_rating = $product->averageRating();
+                $product->total_reviews = $product->totalReviews();
+                return $product;
             });
 
-        $perPage = $request->get('per_page', 15);
-        $products = $query->paginate($perPage);
-
-        // Append computed attributes
-        $products->getCollection()->transform(function ($product) {
-            $product->average_rating = $product->averageRating();
-            $product->total_reviews = $product->totalReviews();
-            return $product;
+            return $products;
         });
 
         return response()->json([
-            'data'   => $products,
+            'data'   => $result,
             'status' => 'success',
         ]);
     }
@@ -130,6 +137,7 @@ class ProductController extends Controller
             return $product;
         });
 
+        Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.created'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.created'));
 
@@ -215,6 +223,7 @@ class ProductController extends Controller
             }
         }
 
+        Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.updated'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.updated'));
 
@@ -230,6 +239,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $product->delete();
 
+        Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.deleted'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.deleted'));
 

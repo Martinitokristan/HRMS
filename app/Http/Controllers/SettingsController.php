@@ -10,13 +10,14 @@ use App\Models\UnitConversion;
 use App\Events\DataMutated;
 use App\Models\UnitType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class SettingsController extends Controller
 {
     public function index(Request $request)
     {
         // Optimized: Cache static data and only return what's requested
-        $allSettings = Setting::all();
+        $allSettings = Cache::tags(['settings'])->remember('settings:all', 86400, fn() => Setting::all());
 
         $user = $request->user();
         $isAdmin = $user instanceof \App\Models\User && $user->role === 'admin';
@@ -65,6 +66,8 @@ class SettingsController extends Controller
                 Setting::set($key, $value, $request->group);
             }
         }
+
+        Cache::tags(['settings'])->flush();
 
         return response()->json([
             'message' => 'Settings saved successfully',
@@ -177,12 +180,15 @@ class SettingsController extends Controller
             $request->only(['name', 'description'])
         );
 
+        Cache::tags(['categories'])->flush();
+
         return response()->json(['data' => $category, 'status' => 'success']);
     }
 
     public function deleteCategory($id)
     {
         Category::destroy($id);
+        Cache::tags(['categories'])->flush();
         return response()->json(['status' => 'success']);
     }
 

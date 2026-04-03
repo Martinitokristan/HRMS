@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\DataMutated;
 use App\Jobs\ProcessProductBannerImage;
 use App\Models\Inventory;
+use Illuminate\Support\Facades\Cache;
 use App\Models\InventoryAdjustment;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
@@ -15,6 +16,17 @@ use Illuminate\Support\Facades\DB;
 class InventoryController extends Controller
 {
     public function index(Request $request)
+    {
+        $cacheKey = 'inventory:' . md5(json_encode($request->only(['search', 'category_id', 'supplier_id', 'page', 'per_page'])));
+
+        $cached = Cache::tags(['inventory'])->remember($cacheKey, 300, function () use ($request) {
+            return $this->buildInventoryResponse($request);
+        });
+
+        return response()->json($cached);
+    }
+
+    private function buildInventoryResponse(Request $request): array
     {
         // Optimized: Load essential relationships for list view including variants
         $pQuery = Product::with(['category', 'inventory', 'inventory.supplierProduct.variants', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue']);
@@ -162,12 +174,12 @@ class InventoryController extends Controller
         $responseData = $products->toArray();
         $responseData['data'] = $flattened;
 
-        return response()->json([
+        return [
             'data'           => $responseData,
             'variant_meta'   => $variantMeta,
             'low_stock_count' => Inventory::whereRaw('current_stock <= reorder_threshold')->count(),
             'status'         => 'success',
-        ]);
+        ];
     }
 
     public function adjust(Request $request)
@@ -215,6 +227,8 @@ class InventoryController extends Controller
                 'created_at' => now(),
             ]);
         });
+
+        Cache::tags(['inventory'])->flush();
 
         return response()->json([
             'message' => 'Stock adjusted successfully',
@@ -566,6 +580,7 @@ class InventoryController extends Controller
             return $inv->load('product');
         });
 
+        Cache::tags(['inventory', 'products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_inventory'], 'inventory.transferred'));
         broadcast(new DataMutated('shop', ['customer_shop'], 'inventory.transferred'));
 
@@ -746,6 +761,7 @@ class InventoryController extends Controller
             ];
         });
 
+        Cache::tags(['inventory', 'products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_inventory'], 'inventory.transferred_multiple'));
         broadcast(new DataMutated('shop', ['customer_shop'], 'inventory.transferred_multiple'));
 
