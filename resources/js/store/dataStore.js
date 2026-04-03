@@ -16,6 +16,7 @@ export const STALE_KEYS = {
     ADMIN_PRODUCTS: 'admin_products',
     ADMIN_RIDERS: 'admin_riders',
     ADMIN_SUPPLIERS: 'admin_suppliers',
+    ADMIN_SETTINGS: 'admin_settings',
     SUPPLIER_DASHBOARD: 'supplier_dashboard',
     SUPPLIER_ORDERS: 'supplier_orders',
     SUPPLIER_PRODUCTS: 'supplier_products',

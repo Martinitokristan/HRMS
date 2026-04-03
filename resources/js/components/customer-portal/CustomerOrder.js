@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle, Navigation, Loader2, Download, Smartphone } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
 import { STALE_KEYS, markStale } from "../../store/dataStore";
+import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 
 import "leaflet/dist/leaflet.css";
 
@@ -76,7 +77,8 @@ function CheckoutMapController({ position, onMapClick }) {
 export default function CustomerOrder() {
     const navigate = useNavigate();
     const { showToast } = useToast();
-    const { user, settings } = useAuth();
+    const { user, settings, refreshSettings } = useAuth();
+    const { refreshTrigger } = useSilentRefresh('admin_settings');
     const gcashEnabled = !!(settings?.settings?.payments?.gcash_payload || settings?.payments?.gcash_payload);
 
     const [cart, setCart] = useState([]);
@@ -104,6 +106,11 @@ export default function CustomerOrder() {
             setPaymentPhoneNumber(user.phone);
         }
     }, [user]);
+
+    // Refresh settings on mount and when refreshTrigger changes
+    useEffect(() => {
+        refreshSettings();
+    }, [refreshTrigger, refreshSettings]);
 
     // Get current GPS location
     const handleGetLocation = () => {

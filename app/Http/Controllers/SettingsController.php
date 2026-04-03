@@ -69,6 +69,11 @@ class SettingsController extends Controller
 
         Cache::tags(['settings'])->flush();
 
+        // Broadcast payment settings changes for real-time checkout updates
+        if ($request->group === 'payments') {
+            broadcast(new DataMutated('shop', ['customer_shop'], 'payment_settings.updated'));
+        }
+
         return response()->json([
             'message' => 'Settings saved successfully',
             'status'  => 'success',

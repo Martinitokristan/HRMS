@@ -31,6 +31,8 @@ class RemoveBgService
         }
 
         try {
+            Log::info('RemoveBgService: Processing image', ['path' => $imagePath, 'size' => filesize($fullPath)]);
+            
             $response = Http::withHeaders([
                 'X-Api-Key' => $apiKey,
             ])->attach(
@@ -41,11 +43,31 @@ class RemoveBgService
                 'size' => 'auto',
             ]);
 
+            Log::info('RemoveBgService: API response', [
+                'status' => $response->status(),
+                'headers' => $response->headers(),
+                'body_size' => strlen($response->body()),
+            ]);
+
             if (!$response->successful()) {
                 Log::error('RemoveBgService: API returned error.', [
                     'status' => $response->status(),
                     'body'   => substr($response->body(), 0, 500),
                 ]);
+                return null;
+            }
+            
+            // Validate response is actually an image
+            $body = $response->body();
+            if (empty($body) || strlen($body) < 100) {
+                Log::error('RemoveBgService: Response too small or empty', ['size' => strlen($body)]);
+                return null;
+            }
+            
+            // Check if response looks like an error message instead of image
+            $sample = substr($body, 0, 50);
+            if (strpos($sample, '{') === 0 || strpos($sample, '<') === 0) {
+                Log::error('RemoveBgService: Response looks like text/error instead of image', ['sample' => $sample]);
                 return null;
             }
 
@@ -57,7 +79,9 @@ class RemoveBgService
             $filename = pathinfo($imagePath, PATHINFO_FILENAME);
             $bannerRelPath = $bannerDir . '/banner_' . $filename . '.png';
 
-            Storage::disk('public')->put($bannerRelPath, $response->body());
+            Storage::disk('public')->put($bannerRelPath, $body);
+            
+            Log::info('RemoveBgService: Banner saved successfully', ['path' => $bannerRelPath, 'size' => strlen($body)]);
 
             return $bannerRelPath;
         } catch (\Exception $e) {
