@@ -641,7 +641,7 @@ class PurchaseOrderController extends Controller
             $po->update(['status' => 'received']);
         });
 
-        Cache::tags(['inventory', 'products'])->flush();
+        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) Cache::tags(['inventory', 'products'])->flush();
 
         broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_inventory', 'admin_dashboard', 'supplier_products'], 'purchase_order.received'));
         broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_products'], 'purchase_order.received'));

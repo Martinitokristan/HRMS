@@ -217,15 +217,19 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
                     var bannerSrc = hasBanner
                         ? '/storage/' + p.image_banner_path
                         : src;
-                    if (hasBanner) {
+                    if (hasBanner || hasBg) {
                         return (
                             <div
                                 className="relative z-10 hidden sm:flex items-center justify-center flex-shrink-0"
                                 style={{ width: '420px', height: '200px', marginRight: '20px', marginLeft: 'auto' }}
                             >
-                                <img src={bannerSrc} alt={p.name}
-                                    className="max-w-full max-h-full object-contain mix-blend-normal drop-shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
-                                />
+                                {bannerSrc ? (
+                                    <img src={bannerSrc} alt={p.name}
+                                        className="max-w-full max-h-full object-contain mix-blend-normal drop-shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
+                                    />
+                                ) : (
+                                    <ShoppingCart className="h-16 w-16" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                                )}
                             </div>
                         );
                     }

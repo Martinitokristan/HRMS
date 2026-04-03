@@ -17,7 +17,7 @@ import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierSettings() {
-    const { user, logout, refreshSettings } = useAuth();
+    const { user, logout, refreshSettings, refreshCategories } = useAuth();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_SETTINGS);
     const [activeTab, setActiveTab] = useState('profile');
     const [saving, setSaving] = useState(false);
@@ -138,6 +138,7 @@ export default function SupplierSettings() {
             markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             setNewCat('');
             if (refreshSettings) await refreshSettings();
+            if (refreshCategories) await refreshCategories();
             fetchCategories(true);
             showToast('Category added', 'success');
         } catch (err) {
@@ -153,6 +154,7 @@ export default function SupplierSettings() {
             await api.delete(`/supplier/categories/${id}`);
             markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             if (refreshSettings) await refreshSettings();
+            if (refreshCategories) await refreshCategories();
             fetchCategories(true);
             showToast('Category deleted', 'success');
         } catch (err) {

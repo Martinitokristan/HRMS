@@ -30,6 +30,7 @@ export default function SupplierOrders({ mode = 'completed' }) {
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_ORDERS);
     const [orders, setOrders] = useState({ data: [], total: 0 });
     const [loading, setLoading] = useState(true);
+    const [initialLoaded, setInitialLoaded] = useState(false);
     const [page, setPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState('');
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -57,7 +58,8 @@ export default function SupplierOrders({ mode = 'completed' }) {
     const [rejectError, setRejectError] = useState('');
 
     useEffect(() => {
-        fetchOrders(orders.data?.length > 0);
+        fetchOrders(initialLoaded);
+        if (!initialLoaded) setInitialLoaded(true);
     }, [page, statusFilter, refreshTrigger, mode]);
 
     useEffect(() => {

@@ -18527,7 +18527,7 @@ function ProductCarousel(_ref) {
         // Ensure product image sits above background layers
         var hasBanner = !!p.image_banner_path;
         var bannerSrc = hasBanner ? '/storage/' + p.image_banner_path : src;
-        if (hasBanner) {
+        if (hasBanner || hasBg) {
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("div", {
             className: "relative z-10 hidden sm:flex items-center justify-center flex-shrink-0",
             style: {
@@ -18536,10 +18536,15 @@ function ProductCarousel(_ref) {
               marginRight: '20px',
               marginLeft: 'auto'
             },
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("img", {
+            children: bannerSrc ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)("img", {
               src: bannerSrc,
               alt: p.name,
               className: "max-w-full max-h-full object-contain mix-blend-normal drop-shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
+            }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_9__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
+              className: "h-16 w-16",
+              style: {
+                color: 'rgba(255,255,255,0.3)'
+              }
             })
           });
         }
@@ -35293,40 +35298,44 @@ function SupplierOrders(_ref) {
     _useState4 = _slicedToArray(_useState3, 2),
     loading = _useState4[0],
     setLoading = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1),
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState6 = _slicedToArray(_useState5, 2),
-    page = _useState6[0],
-    setPage = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    initialLoaded = _useState6[0],
+    setInitialLoaded = _useState6[1];
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1),
     _useState8 = _slicedToArray(_useState7, 2),
-    statusFilter = _useState8[0],
-    setStatusFilter = _useState8[1];
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    page = _useState8[0],
+    setPage = _useState8[1];
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
     _useState0 = _slicedToArray(_useState9, 2),
-    selectedOrder = _useState0[0],
-    setSelectedOrder = _useState0[1];
+    statusFilter = _useState0[0],
+    setStatusFilter = _useState0[1];
   var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState10 = _slicedToArray(_useState1, 2),
-    receiptOrder = _useState10[0],
-    setReceiptOrder = _useState10[1];
-  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    selectedOrder = _useState10[0],
+    setSelectedOrder = _useState10[1];
+  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState12 = _slicedToArray(_useState11, 2),
-    deliveryNotes = _useState12[0],
-    setDeliveryNotes = _useState12[1];
-  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    receiptOrder = _useState12[0],
+    setReceiptOrder = _useState12[1];
+  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
     _useState14 = _slicedToArray(_useState13, 2),
-    submitting = _useState14[0],
-    setSubmitting = _useState14[1];
-  var _useState15 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+    deliveryNotes = _useState14[0],
+    setDeliveryNotes = _useState14[1];
+  var _useState15 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState16 = _slicedToArray(_useState15, 2),
+    submitting = _useState16[0],
+    setSubmitting = _useState16[1];
+  var _useState17 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       show: false,
       title: '',
       message: '',
       onConfirm: null,
       variant: 'default'
     }),
-    _useState16 = _slicedToArray(_useState15, 2),
-    confirmModal = _useState16[0],
-    setConfirmModal = _useState16[1];
+    _useState18 = _slicedToArray(_useState17, 2),
+    confirmModal = _useState18[0],
+    setConfirmModal = _useState18[1];
   var showConfirm = function showConfirm(title, message, onConfirm) {
     var variant = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'default';
     setConfirmModal({
@@ -35348,25 +35357,25 @@ function SupplierOrders(_ref) {
   };
 
   // Reject modal state
-  var _useState17 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState18 = _slicedToArray(_useState17, 2),
-    rejectModal = _useState18[0],
-    setRejectModal = _useState18[1]; // holds the order to reject
-  var _useState19 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+  var _useState19 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState20 = _slicedToArray(_useState19, 2),
-    rejectionReason = _useState20[0],
-    setRejectionReason = _useState20[1];
+    rejectModal = _useState20[0],
+    setRejectModal = _useState20[1]; // holds the order to reject
   var _useState21 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
     _useState22 = _slicedToArray(_useState21, 2),
-    rejectError = _useState22[0],
-    setRejectError = _useState22[1];
+    rejectionReason = _useState22[0],
+    setRejectionReason = _useState22[1];
+  var _useState23 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState24 = _slicedToArray(_useState23, 2),
+    rejectError = _useState24[0],
+    setRejectError = _useState24[1];
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var _orders$data;
-    fetchOrders(((_orders$data = orders.data) === null || _orders$data === void 0 ? void 0 : _orders$data.length) > 0);
+    fetchOrders(initialLoaded);
+    if (!initialLoaded) setInitialLoaded(true);
   }, [page, statusFilter, refreshTrigger, mode]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var _orders$data2;
-    if (highlightId && ((_orders$data2 = orders.data) === null || _orders$data2 === void 0 ? void 0 : _orders$data2.length) > 0 && !selectedOrder) {
+    var _orders$data;
+    if (highlightId && ((_orders$data = orders.data) === null || _orders$data === void 0 ? void 0 : _orders$data.length) > 0 && !selectedOrder) {
       var orderToOpen = orders.data.find(function (o) {
         return o.id == highlightId;
       });
@@ -38372,7 +38381,8 @@ function SupplierSettings() {
   var _useAuth = (0,_context_AuthContext__WEBPACK_IMPORTED_MODULE_1__.useAuth)(),
     user = _useAuth.user,
     logout = _useAuth.logout,
-    refreshSettings = _useAuth.refreshSettings;
+    refreshSettings = _useAuth.refreshSettings,
+    refreshCategories = _useAuth.refreshCategories;
   var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_22__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.SUPPLIER_SETTINGS),
     refreshTrigger = _useSilentRefresh.refreshTrigger;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('profile'),
@@ -38656,22 +38666,29 @@ function SupplierSettings() {
             _context4.n = 4;
             return refreshSettings();
           case 4:
+            if (!refreshCategories) {
+              _context4.n = 5;
+              break;
+            }
+            _context4.n = 5;
+            return refreshCategories();
+          case 5:
             fetchCategories(true);
             showToast('Category added', 'success');
-            _context4.n = 6;
+            _context4.n = 7;
             break;
-          case 5:
-            _context4.p = 5;
-            _t4 = _context4.v;
-            showToast(((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to add category', 'error');
           case 6:
             _context4.p = 6;
-            setSaving(false);
-            return _context4.f(6);
+            _t4 = _context4.v;
+            showToast(((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to add category', 'error');
           case 7:
+            _context4.p = 7;
+            setSaving(false);
+            return _context4.f(7);
+          case 8:
             return _context4.a(2);
         }
-      }, _callee4, null, [[2, 5, 6, 7]]);
+      }, _callee4, null, [[2, 6, 7, 8]]);
     }));
     return function handleAddCategory(_x3) {
       return _ref4.apply(this, arguments);
@@ -38696,18 +38713,25 @@ function SupplierSettings() {
             _context5.n = 3;
             return refreshSettings();
           case 3:
+            if (!refreshCategories) {
+              _context5.n = 4;
+              break;
+            }
+            _context5.n = 4;
+            return refreshCategories();
+          case 4:
             fetchCategories(true);
             showToast('Category deleted', 'success');
-            _context5.n = 5;
+            _context5.n = 6;
             break;
-          case 4:
-            _context5.p = 4;
+          case 5:
+            _context5.p = 5;
             _t5 = _context5.v;
             showToast('Failed to delete category', 'error');
-          case 5:
+          case 6:
             return _context5.a(2);
         }
-      }, _callee5, null, [[1, 4]]);
+      }, _callee5, null, [[1, 5]]);
     }));
     return function performDeleteCategory(_x4) {
       return _ref5.apply(this, arguments);
