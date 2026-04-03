@@ -15,31 +15,29 @@ export const auth = {
     login: async (email, password, remember = false) => {
         // CSRF handshake before attempting post
         await auth.csrf();
-
         const res = await api.post('/login', { email, password, remember });
-
-        // If response contains a supplier_token, store it for Bearer auth
-        if (res.data.supplier_token) {
-            sessionStorage.setItem('supplier_token', res.data.supplier_token);
-        }
-
         return res.data;
     },
 
-    logout: async () => {
-        const isSupplier = !!sessionStorage.getItem('supplier_token');
-        sessionStorage.removeItem('supplier_token');
-        if (!isSupplier) {
+    // role is passed from AuthContext so the correct logout endpoint is called
+    logout: async (role) => {
+        if (role === 'supplier') {
+            await api.post('/supplier/auth/logout');
+        } else {
             await api.post('/logout');
         }
     },
 
     getUser: async () => {
         try {
-            const res = await silentApi.get('/me');
-            return res.data; // MeController returns the User object directly
+            // Supplier pages must hit the supplier-guard endpoint so the session
+            // is resolved via the supplier guard, not the web (admin) guard.
+            const isSupplierPath = window.location.pathname.startsWith('/supplier');
+            const endpoint = isSupplierPath ? '/supplier/auth/me' : '/me';
+            const res = await silentApi.get(endpoint);
+            return res.data;
         } catch (error) {
-            if (error.response && error.response.status === 401) {
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
                 return null;
             }
             throw error;

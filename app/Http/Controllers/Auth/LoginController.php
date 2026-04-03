@@ -47,7 +47,7 @@ class LoginController extends Controller
             ], 200);
         }
 
-        // 2. Fallback: check suppliers table (token-based)
+        // 2. Fallback: check suppliers table (session-based via supplier guard)
         $supplier = Supplier::where('email', $credentials['email'])->first();
 
         if ($supplier && Hash::check($credentials['password'], $supplier->password)) {
@@ -63,15 +63,15 @@ class LoginController extends Controller
                 ], 403);
             }
 
-            $token = $supplier->createToken('supplier-token')->plainTextToken;
+            \Illuminate\Support\Facades\Auth::guard('supplier')->login($supplier, $remember);
+            $request->session()->regenerate();
 
             return response()->json([
-                'id'             => $supplier->id,
-                'name'           => $supplier->contact_name ?? $supplier->name,
-                'email'          => $supplier->email,
-                'role'           => 'supplier',
-                'status'         => $supplier->status,
-                'supplier_token' => $token,
+                'id'     => $supplier->id,
+                'name'   => $supplier->contact_name ?? $supplier->name,
+                'email'  => $supplier->email,
+                'role'   => 'supplier',
+                'status' => $supplier->status,
             ], 200);
         }
 

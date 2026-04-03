@@ -69,7 +69,7 @@ export function AuthProvider({ children }) {
 
     const logout = async () => {
         try {
-            await auth.logout();
+            await auth.logout(user?.role);
         } catch (e) { }
         setUser(null);
         window.location.href = '/login';

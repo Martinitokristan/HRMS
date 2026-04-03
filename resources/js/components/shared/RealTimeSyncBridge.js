@@ -24,15 +24,6 @@ const _scheme  = process.env.MIX_PUSHER_SCHEME || 'https';
 const _cluster = process.env.MIX_PUSHER_APP_CLUSTER || 'mt1';
 
 function buildEchoConfig() {
-    const supplierToken = sessionStorage.getItem('supplier_token');
-    const authHeaders = {
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept':           'application/json',
-    };
-    if (supplierToken) {
-        authHeaders['Authorization'] = `Bearer ${supplierToken}`;
-    }
-
     return Object.assign(
         {
             broadcaster:       'pusher',
@@ -43,7 +34,10 @@ function buildEchoConfig() {
             enabledTransports: ['ws', 'wss'],
             authEndpoint:      '/broadcasting/auth',
             auth: {
-                headers:         authHeaders,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept':           'application/json',
+                },
                 withCredentials: true,
             },
         },

@@ -122,15 +122,25 @@ class SupplierAuthController extends Controller
         ]);
     }
 
+    public function me(Request $request)
+    {
+        $supplier = $request->user();
+        return response()->json([
+            'id'     => $supplier->id,
+            'name'   => $supplier->contact_name ?? $supplier->name,
+            'email'  => $supplier->email,
+            'role'   => 'supplier',
+            'status' => $supplier->status,
+            'photo'  => null,
+        ]);
+    }
+
     public function logout(Request $request)
     {
-        // Revoke the token that made this request
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Logged out successfully',
-            'status' => 'success',
-        ]);
+        Auth::guard('supplier')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return response()->json(['status' => 'success']);
     }
 
     public function profile(Request $request)

@@ -8,15 +8,6 @@ const api = axios.create({
     }
 });
 
-// Attach supplier Bearer token when present
-api.interceptors.request.use(config => {
-    const supplierToken = sessionStorage.getItem('supplier_token');
-    if (supplierToken) {
-        config.headers['Authorization'] = `Bearer ${supplierToken}`;
-    }
-    return config;
-});
-
 api.interceptors.response.use(
     response => response,
     error => {
@@ -38,14 +29,6 @@ export const silentApi = axios.create({
     headers: {
         'Accept': 'application/json',
     }
-});
-
-silentApi.interceptors.request.use(config => {
-    const supplierToken = sessionStorage.getItem('supplier_token');
-    if (supplierToken) {
-        config.headers['Authorization'] = `Bearer ${supplierToken}`;
-    }
-    return config;
 });
 
 export default api;
