@@ -63,8 +63,19 @@ class LoginController extends Controller
                 ], 403);
             }
 
-            \Illuminate\Support\Facades\Auth::guard('supplier')->login($supplier, $remember);
-            $request->session()->regenerate();
+            $token = $supplier->createToken('supplier-token')->plainTextToken;
+
+            $cookie = cookie(
+                'supplier_token',
+                $token,
+                60 * 24 * 365,
+                '/',
+                null,
+                config('session.secure', false),
+                true,
+                false,
+                config('session.same_site', 'lax')
+            );
 
             return response()->json([
                 'id'     => $supplier->id,
@@ -72,7 +83,7 @@ class LoginController extends Controller
                 'email'  => $supplier->email,
                 'role'   => 'supplier',
                 'status' => $supplier->status,
-            ], 200);
+            ], 200)->withCookie($cookie);
         }
 
         return response()->json([

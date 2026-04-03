@@ -11,15 +11,17 @@ class AuthenticateSupplierToken
 {
     public function handle(Request $request, Closure $next)
     {
-        $bearerToken = $request->bearerToken();
+        $cookieToken = $request->cookie('supplier_token');
 
-        if ($bearerToken) {
-            $accessToken = PersonalAccessToken::findToken($bearerToken);
+        if ($cookieToken) {
+            $accessToken = PersonalAccessToken::findToken($cookieToken);
 
             if ($accessToken && $accessToken->tokenable instanceof Supplier) {
                 $supplier = $accessToken->tokenable;
                 auth()->setUser($supplier);
-                $request->setUserResolver(fn () => $supplier);
+                $request->setUserResolver(function () use ($supplier) {
+                    return $supplier;
+                });
                 return $next($request);
             }
         }

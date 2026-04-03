@@ -137,10 +137,16 @@ class SupplierAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::guard('supplier')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return response()->json(['status' => 'success']);
+        $cookieToken = $request->cookie('supplier_token');
+        if ($cookieToken) {
+            $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($cookieToken);
+            if ($accessToken) {
+                $accessToken->delete();
+            }
+        }
+
+        $cleared = cookie()->forget('supplier_token');
+        return response()->json(['status' => 'success'])->withCookie($cleared);
     }
 
     public function profile(Request $request)
