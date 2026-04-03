@@ -19,8 +19,8 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle generic login via SPA cookies.
-     * Falls back to supplier table for unified portal access.
+     * Handle unified login for all roles.
+     * Creates a Sanctum token delivered via auth_token HttpOnly cookie.
      */
     public function __invoke(Request $request): JsonResponse
     {
@@ -33,21 +33,23 @@ class LoginController extends Controller
         $remember = (bool) ($credentials['remember'] ?? false);
         unset($credentials['remember']);
 
-        // 1. Try regular user login (session-based)
+        // 1. Try regular user login (admin / customer / rider)
         $user = $this->authService->attemptLogin($credentials, $remember);
 
         if ($user) {
-            $request->session()->regenerate();
+            $token  = $user->createToken('auth-token')->plainTextToken;
+            $cookie = $this->buildAuthCookie($token);
+
             return response()->json([
                 'id'     => $user->id,
                 'name'   => $user->name,
                 'email'  => $user->email,
                 'role'   => $user->role,
                 'status' => $user->status,
-            ], 200);
+            ], 200)->withCookie($cookie);
         }
 
-        // 2. Fallback: check suppliers table (session-based via supplier guard)
+        // 2. Fallback: check suppliers table
         $supplier = Supplier::where('email', $credentials['email'])->first();
 
         if ($supplier && Hash::check($credentials['password'], $supplier->password)) {
@@ -63,19 +65,8 @@ class LoginController extends Controller
                 ], 403);
             }
 
-            $token = $supplier->createToken('supplier-token')->plainTextToken;
-
-            $cookie = cookie(
-                'supplier_token',
-                $token,
-                60 * 24 * 365,
-                '/',
-                null,
-                config('session.secure', false),
-                true,
-                false,
-                config('session.same_site', 'lax')
-            );
+            $token  = $supplier->createToken('auth-token')->plainTextToken;
+            $cookie = $this->buildAuthCookie($token);
 
             return response()->json([
                 'id'     => $supplier->id,
@@ -89,5 +80,20 @@ class LoginController extends Controller
         return response()->json([
             'message' => 'The provided credentials do not match our records.'
         ], 422);
+    }
+
+    private function buildAuthCookie(string $token)
+    {
+        return cookie(
+            'auth_token',
+            $token,
+            60 * 24 * 365,
+            '/',
+            null,
+            config('session.secure', false),
+            true,
+            false,
+            config('session.same_site', 'lax')
+        );
     }
 }

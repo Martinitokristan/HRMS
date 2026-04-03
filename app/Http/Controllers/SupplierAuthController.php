@@ -137,7 +137,7 @@ class SupplierAuthController extends Controller
 
     public function logout(Request $request)
     {
-        $cookieToken = $request->cookie('supplier_token');
+        $cookieToken = $request->cookie('auth_token');
         if ($cookieToken) {
             $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($cookieToken);
             if ($accessToken) {
@@ -145,7 +145,7 @@ class SupplierAuthController extends Controller
             }
         }
 
-        $cleared = cookie()->forget('supplier_token');
+        $cleared = cookie()->forget('auth_token');
         return response()->json(['status' => 'success'])->withCookie($cleared);
     }
 

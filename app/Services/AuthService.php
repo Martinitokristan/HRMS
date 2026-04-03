@@ -2,36 +2,28 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
 class AuthService
 {
     /**
-     * Attempt to authenticate a user with the given credentials.
+     * Validate user credentials without creating a session.
+     * Auth is handled via Sanctum token in HttpOnly cookie.
      *
      * @param array $credentials
      * @return User|null
      */
     public function attemptLogin(array $credentials, bool $remember = false): ?User
     {
-        if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user();
+        $user = User::where('email', $credentials['email'])->first();
 
+        if ($user && Hash::check($credentials['password'], $user->password)) {
             // Block suspended accounts
             if ($user->status === 'suspended') {
-                Auth::logout();
                 throw \Illuminate\Validation\ValidationException::withMessages([
                     'email' => ['Your account has been suspended. Please contact support.'],
                 ]);
-            }
-
-            // Optional: Block unverified users for specific roles
-            if (in_array($user->role, ['customer', 'supplier', 'admin']) && !$user->email_verified_at) {
-                // Auth::logout(); // Keep session or logout depends on UX, usually logout for SPA
-                // throw \Illuminate\Validation\ValidationException::withMessages([
-                //     'email' => ['Please verify your email address before logging in.'],
-                // ]);
             }
 
             return $user;

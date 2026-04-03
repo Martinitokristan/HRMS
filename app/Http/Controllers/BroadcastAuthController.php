@@ -17,9 +17,15 @@ class BroadcastAuthController extends Controller
      */
     public function authenticate(Request $request)
     {
-        // Resolve user: prefer supplier guard (session-based) then fall back to web guard.
-        $user = \Illuminate\Support\Facades\Auth::guard('supplier')->user()
-             ?? $request->user();
+        // Resolve user from auth_token HttpOnly cookie (unified for all roles).
+        $user = null;
+        $cookieToken = $request->cookie('auth_token');
+        if ($cookieToken) {
+            $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($cookieToken);
+            if ($accessToken) {
+                $user = $accessToken->tokenable;
+            }
+        }
 
         if (!$user) {
             return response()->json(['error' => 'Unauthenticated'], 403);

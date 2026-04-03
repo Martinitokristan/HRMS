@@ -34245,14 +34245,6 @@ var _port = Number("443") || 6001;
 var _scheme = "https" || 0;
 var _cluster = "ap1" || 0;
 function buildEchoConfig() {
-  var supplierToken = sessionStorage.getItem('supplier_token');
-  var authHeaders = {
-    'X-Requested-With': 'XMLHttpRequest',
-    'Accept': 'application/json'
-  };
-  if (supplierToken) {
-    authHeaders['Authorization'] = "Bearer ".concat(supplierToken);
-  }
   return Object.assign({
     broadcaster: 'pusher',
     key: "edc2bb3a8a3231bb7363",
@@ -34262,7 +34254,10 @@ function buildEchoConfig() {
     enabledTransports: ['ws', 'wss'],
     authEndpoint: '/broadcasting/auth',
     auth: {
-      headers: authHeaders,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      },
       withCredentials: true
     }
   }, _host ? {
@@ -46699,15 +46694,6 @@ var api = axios__WEBPACK_IMPORTED_MODULE_0___default().create({
     'Accept': 'application/json'
   }
 });
-
-// Attach supplier Bearer token when present
-api.interceptors.request.use(function (config) {
-  var supplierToken = sessionStorage.getItem('supplier_token');
-  if (supplierToken) {
-    config.headers['Authorization'] = "Bearer ".concat(supplierToken);
-  }
-  return config;
-});
 api.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
@@ -46728,13 +46714,6 @@ var silentApi = axios__WEBPACK_IMPORTED_MODULE_0___default().create({
   headers: {
     'Accept': 'application/json'
   }
-});
-silentApi.interceptors.request.use(function (config) {
-  var supplierToken = sessionStorage.getItem('supplier_token');
-  if (supplierToken) {
-    config.headers['Authorization'] = "Bearer ".concat(supplierToken);
-  }
-  return config;
 });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (api);
 
@@ -46804,10 +46783,6 @@ var auth = {
             });
           case 2:
             res = _context2.v;
-            // If response contains a supplier_token, store it for Bearer auth
-            if (res.data.supplier_token) {
-              sessionStorage.setItem('supplier_token', res.data.supplier_token);
-            }
             return _context2.a(2, res.data);
         }
       }, _callee2);
@@ -46819,16 +46794,9 @@ var auth = {
   }(),
   logout: function () {
     var _logout = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      var isSupplier;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.n) {
           case 0:
-            isSupplier = !!sessionStorage.getItem('supplier_token');
-            sessionStorage.removeItem('supplier_token');
-            if (isSupplier) {
-              _context3.n = 1;
-              break;
-            }
             _context3.n = 1;
             return _api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/logout');
           case 1:
@@ -46856,7 +46824,7 @@ var auth = {
           case 2:
             _context4.p = 2;
             _t = _context4.v;
-            if (!(_t.response && _t.response.status === 401)) {
+            if (!(_t.response && (_t.response.status === 401 || _t.response.status === 403))) {
               _context4.n = 3;
               break;
             }

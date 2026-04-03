@@ -74,7 +74,7 @@ Route::get('/test', function () {
 // =========================================================================
 // GROUP 1 — Shared All Roles (auth:sanctum, no role restriction)
 // =========================================================================
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth.token')->group(function () {
     Route::post('/logout', LogoutController::class);
     Route::get('/me', MeController::class);
     Route::get('/settings', [SettingsController::class , 'index']);
@@ -83,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // =========================================================================
 // GROUP 2 — Admin Only
 // =========================================================================
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth.token', 'role:admin'])->group(function () {
     // Products CUD
     Route::post('/products', [ProductController::class , 'store']);
     Route::put('/products/{id}', [ProductController::class , 'update']);
@@ -180,7 +180,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 // =========================================================================
 // GROUP 3 — Admin + Customer
 // =========================================================================
-Route::middleware(['auth:sanctum', 'role:admin,customer'])->group(function () {
+Route::middleware(['auth.token', 'role:admin,customer'])->group(function () {
     Route::get('/sales/{id}', [SaleController::class , 'show']);
     Route::post('/sales/{id}/cancel', [SaleController::class , 'cancelOrder']);
 });
@@ -188,7 +188,7 @@ Route::middleware(['auth:sanctum', 'role:admin,customer'])->group(function () {
 // =========================================================================
 // GROUP 4 — Admin + Rider
 // =========================================================================
-Route::middleware(['auth:sanctum', 'role:admin,rider'])->group(function () {
+Route::middleware(['auth.token', 'role:admin,rider'])->group(function () {
     Route::get('/deliveries', [DeliveryController::class , 'index']);
     Route::get('/deliveries/{id}', [DeliveryController::class , 'show']);
     Route::post('/deliveries/{id}/status', [DeliveryController::class , 'updateStatus']);
@@ -197,7 +197,7 @@ Route::middleware(['auth:sanctum', 'role:admin,rider'])->group(function () {
 // =========================================================================
 // GROUP 5 — Customer Only
 // =========================================================================
-Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
+Route::middleware(['auth.token', 'role:customer'])->group(function () {
     // Place orders
     Route::post('/sales', [SaleController::class , 'store']);
     Route::get('/gcash/status/{saleId}', [GCashController::class, 'checkStatus']);
@@ -240,7 +240,7 @@ Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
 // =========================================================================
 // GROUP 6 — Rider Only
 // =========================================================================
-Route::middleware(['auth:sanctum', 'role:rider'])->group(function () {
+Route::middleware(['auth.token', 'role:rider'])->group(function () {
     Route::get('/riders/me/dashboard', [RiderController::class , 'dashboard']);
     Route::get('/riders/me/deliveries', [RiderController::class , 'myDeliveries']);
     Route::post('/riders/me/toggle-status', [RiderController::class , 'toggleStatus']);
@@ -266,9 +266,7 @@ Route::middleware(['auth:sanctum', 'role:rider'])->group(function () {
 // =========================================================================
 // GROUP 7 — Supplier Only
 // =========================================================================
-Route::middleware(['auth.supplier'])->group(function () {
-    Route::get('/supplier/auth/me', [SupplierAuthController::class , 'me']);
-    Route::post('/supplier/auth/logout', [SupplierAuthController::class , 'logout']);
+Route::middleware(['auth.token', 'role:supplier'])->group(function () {
     Route::get('/supplier/auth/profile', [SupplierAuthController::class , 'profile']);
     Route::put('/supplier/auth/profile', [SupplierAuthController::class , 'updateProfile']);
     Route::put('/supplier/auth/change-password', [SupplierAuthController::class , 'changePassword']);
