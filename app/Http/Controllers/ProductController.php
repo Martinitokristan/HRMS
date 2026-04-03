@@ -10,7 +10,6 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\POItem;
 use Illuminate\Http\Request;
-use Illuminate\Cache\TaggableStore;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -20,8 +19,7 @@ class ProductController extends Controller
     {
         $cacheKey = 'products:' . md5(json_encode($request->only(['search', 'category_id', 'status', 'page', 'per_page'])));
 
-        $taggable = Cache::getStore() instanceof TaggableStore;
-        $result = ($taggable ? Cache::tags(['products']) : Cache::store())->remember($cacheKey, 900, function () use ($request) {
+        $result = Cache::tags(['products'])->remember($cacheKey, 900, function () use ($request) {
             // Optimized: Load essential relationships for list view including variants and reviews
             $query = Product::with(['category', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue', 'approvedReviews'])
                 ->where('is_active', true) // Only show active products in customer shop
@@ -139,7 +137,7 @@ class ProductController extends Controller
             return $product;
         });
 
-        if (Cache::getStore() instanceof TaggableStore) Cache::tags(['products'])->flush();
+        Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.created'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.created'));
 
@@ -225,7 +223,7 @@ class ProductController extends Controller
             }
         }
 
-        if (Cache::getStore() instanceof TaggableStore) Cache::tags(['products'])->flush();
+        Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.updated'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.updated'));
 
@@ -241,7 +239,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $product->delete();
 
-        if (Cache::getStore() instanceof TaggableStore) Cache::tags(['products'])->flush();
+        Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.deleted'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.deleted'));
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\DataMutated;
+use App\Jobs\ProcessProductBannerImage;
 use App\Models\PurchaseOrder;
 use App\Models\POItem;
 use App\Models\Inventory;
@@ -14,6 +15,7 @@ use App\Notifications\PurchaseOrderRequest;
 use App\Notifications\PurchaseOrderAccepted;
 use App\Notifications\PurchaseOrderDelivered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
@@ -526,6 +528,10 @@ class PurchaseOrderController extends Controller
                             $productId = $newProduct->id;
                             $productLocalCache[$supplierProductId] = $productId;
                             \Log::info('Created new product', ['product_id' => $productId, 'name' => $newProduct->name]);
+
+                            if (!empty($newProduct->image_path) && empty($newProduct->image_banner_path)) {
+                                ProcessProductBannerImage::dispatch($newProduct->id, $newProduct->image_path);
+                            }
                         }
                     }
                     
@@ -634,6 +640,8 @@ class PurchaseOrderController extends Controller
                 // This prevents incorrect stock merging in the inventory display
             $po->update(['status' => 'received']);
         });
+
+        Cache::tags(['inventory', 'products'])->flush();
 
         broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_inventory', 'admin_dashboard', 'supplier_products'], 'purchase_order.received'));
         broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_products'], 'purchase_order.received'));

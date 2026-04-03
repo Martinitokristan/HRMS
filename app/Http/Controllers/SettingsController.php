@@ -9,7 +9,6 @@ use App\Models\Setting;
 use App\Models\UnitConversion;
 use App\Events\DataMutated;
 use App\Models\UnitType;
-use Illuminate\Cache\TaggableStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -18,10 +17,7 @@ class SettingsController extends Controller
     public function index(Request $request)
     {
         // Optimized: Cache static data and only return what's requested
-        $taggable = Cache::getStore() instanceof TaggableStore;
-        $allSettings = $taggable
-            ? Cache::tags(['settings'])->remember('settings:all', 86400, fn() => Setting::all())
-            : Cache::remember('settings:all', 86400, fn() => Setting::all());
+        $allSettings = Cache::tags(['settings'])->remember('settings:all', 86400, fn() => Setting::all());
 
         $user = $request->user();
         $isAdmin = $user instanceof \App\Models\User && $user->role === 'admin';
@@ -71,9 +67,7 @@ class SettingsController extends Controller
             }
         }
 
-        if (Cache::getStore() instanceof TaggableStore) {
-            Cache::tags(['settings'])->flush();
-        }
+        Cache::tags(['settings'])->flush();
 
         return response()->json([
             'message' => 'Settings saved successfully',
@@ -186,9 +180,7 @@ class SettingsController extends Controller
             $request->only(['name', 'description'])
         );
 
-        if (Cache::getStore() instanceof TaggableStore) {
-            Cache::tags(['categories'])->flush();
-        }
+        Cache::tags(['categories'])->flush();
 
         return response()->json(['data' => $category, 'status' => 'success']);
     }
@@ -196,9 +188,7 @@ class SettingsController extends Controller
     public function deleteCategory($id)
     {
         Category::destroy($id);
-        if (Cache::getStore() instanceof TaggableStore) {
-            Cache::tags(['categories'])->flush();
-        }
+        Cache::tags(['categories'])->flush();
         return response()->json(['status' => 'success']);
     }
 
