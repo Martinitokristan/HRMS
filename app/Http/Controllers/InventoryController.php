@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\DataMutated;
 use App\Jobs\ProcessProductBannerImage;
 use App\Models\Inventory;
+use Illuminate\Cache\TaggableStore;
 use Illuminate\Support\Facades\Cache;
 use App\Models\InventoryAdjustment;
 use App\Models\Product;
@@ -19,7 +20,8 @@ class InventoryController extends Controller
     {
         $cacheKey = 'inventory:' . md5(json_encode($request->only(['search', 'category_id', 'supplier_id', 'page', 'per_page'])));
 
-        $cached = Cache::tags(['inventory'])->remember($cacheKey, 300, function () use ($request) {
+        $taggable = Cache::getStore() instanceof TaggableStore;
+        $cached = ($taggable ? Cache::tags(['inventory']) : Cache::store())->remember($cacheKey, 300, function () use ($request) {
             return $this->buildInventoryResponse($request);
         });
 
@@ -228,7 +230,7 @@ class InventoryController extends Controller
             ]);
         });
 
-        Cache::tags(['inventory'])->flush();
+        if (Cache::getStore() instanceof TaggableStore) Cache::tags(['inventory'])->flush();
 
         return response()->json([
             'message' => 'Stock adjusted successfully',
@@ -580,7 +582,7 @@ class InventoryController extends Controller
             return $inv->load('product');
         });
 
-        Cache::tags(['inventory', 'products'])->flush();
+        if (Cache::getStore() instanceof TaggableStore) Cache::tags(['inventory', 'products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_inventory'], 'inventory.transferred'));
         broadcast(new DataMutated('shop', ['customer_shop'], 'inventory.transferred'));
 
@@ -761,7 +763,7 @@ class InventoryController extends Controller
             ];
         });
 
-        Cache::tags(['inventory', 'products'])->flush();
+        if (Cache::getStore() instanceof TaggableStore) Cache::tags(['inventory', 'products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_inventory'], 'inventory.transferred_multiple'));
         broadcast(new DataMutated('shop', ['customer_shop'], 'inventory.transferred_multiple'));
 
