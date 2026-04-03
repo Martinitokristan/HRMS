@@ -25370,7 +25370,7 @@ function SupplierLayout() {
   react__WEBPACK_IMPORTED_MODULE_0___default().useEffect(function () {
     // Fetch notifications
     var fetchNotis = function fetchNotis() {
-      _lib_api__WEBPACK_IMPORTED_MODULE_4__.silentApi.get('/notifications').then(function (res) {
+      _lib_api__WEBPACK_IMPORTED_MODULE_4__.silentApi.get('/supplier/notifications').then(function (res) {
         var _res$data;
         var data = ((_res$data = res.data) === null || _res$data === void 0 ? void 0 : _res$data.data) !== undefined ? res.data.data : res.data;
         var notis = Array.isArray(data) ? data : [];
@@ -25563,7 +25563,7 @@ function SupplierLayout() {
               onClose: function onClose() {
                 return setNotiOpen(false);
               },
-              apiPrefix: "/notifications",
+              apiPrefix: "/supplier/notifications",
               renderMessage: function renderMessage(n) {
                 var _n$data;
                 return ((_n$data = n.data) === null || _n$data === void 0 ? void 0 : _n$data.message) || 'New notification';
@@ -25575,9 +25575,9 @@ function SupplierLayout() {
               isRead: function isRead(n) {
                 return !!n.read_at;
               },
-              markReadUrl: "/notifications/mark-all-read",
+              markReadUrl: "/supplier/notifications/mark-all-read",
               onRefresh: function onRefresh() {
-                _lib_api__WEBPACK_IMPORTED_MODULE_4__.silentApi.get('/notifications').then(function (res) {
+                _lib_api__WEBPACK_IMPORTED_MODULE_4__.silentApi.get('/supplier/notifications').then(function (res) {
                   var _res$data2;
                   var data = ((_res$data2 = res.data) === null || _res$data2 === void 0 ? void 0 : _res$data2.data) !== undefined ? res.data.data : res.data;
                   var notis = Array.isArray(data) ? data : [];
@@ -34244,26 +34244,33 @@ var _host = "";
 var _port = Number("443") || 6001;
 var _scheme = "https" || 0;
 var _cluster = "ap1" || 0;
-var ECHO_CONFIG = Object.assign({
-  broadcaster: 'pusher',
-  key: "edc2bb3a8a3231bb7363",
-  cluster: _cluster,
-  forceTLS: _scheme === 'https',
-  disableStats: true,
-  enabledTransports: ['ws', 'wss'],
-  authEndpoint: '/broadcasting/auth',
-  auth: {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'Accept': 'application/json'
-    },
-    withCredentials: true
+function buildEchoConfig() {
+  var supplierToken = sessionStorage.getItem('supplier_token');
+  var authHeaders = {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Accept': 'application/json'
+  };
+  if (supplierToken) {
+    authHeaders['Authorization'] = "Bearer ".concat(supplierToken);
   }
-}, _host ? {
-  wsHost: _host,
-  wsPort: _port,
-  wssPort: _port
-} : {});
+  return Object.assign({
+    broadcaster: 'pusher',
+    key: "edc2bb3a8a3231bb7363",
+    cluster: _cluster,
+    forceTLS: _scheme === 'https',
+    disableStats: true,
+    enabledTransports: ['ws', 'wss'],
+    authEndpoint: '/broadcasting/auth',
+    auth: {
+      headers: authHeaders,
+      withCredentials: true
+    }
+  }, _host ? {
+    wsHost: _host,
+    wsPort: _port,
+    wssPort: _port
+  } : {});
+}
 
 // Heartbeat interval (ms) — ping the socket to detect silent drops.
 var HEARTBEAT_INTERVAL_MS = 30000;
@@ -34272,7 +34279,7 @@ var RECONNECT_DELAY_MS = 5000;
 var echoInstance = null;
 function buildEcho() {
   window.Pusher = (pusher_js__WEBPACK_IMPORTED_MODULE_2___default());
-  echoInstance = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"](ECHO_CONFIG);
+  echoInstance = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"](buildEchoConfig());
   return echoInstance;
 }
 function destroyEcho() {
@@ -34305,7 +34312,7 @@ function RealTimeSyncBridge() {
         channelsJoined.push(channelName);
       }
       if (user.role === 'admin') listen('admin');
-      if (user.role === 'supplier' && user.supplier_id) listen("supplier.".concat(user.supplier_id));
+      if (user.role === 'supplier' && user.id) listen("supplier.".concat(user.id));
       if (user.role === 'customer') listen("customer.".concat(user.id));
       if (user.role === 'rider') listen("rider.".concat(user.id));
       listen('shop', false);
