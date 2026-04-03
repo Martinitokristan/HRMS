@@ -127,10 +127,12 @@ class PasswordResetController extends Controller
         $user = User::where('email', $email)->first();
         if ($user) {
             $user->update(['password' => Hash::make($request->password)]);
+            $user->tokens()->delete();
         } else {
             $supplier = Supplier::where('email', $email)->first();
             if ($supplier) {
                 $supplier->update(['password' => Hash::make($request->password)]);
+                $supplier->tokens()->delete();
             } else {
                 // Edge case: token exists but account was deleted
                 DB::table('password_resets')->where('email', $email)->delete();

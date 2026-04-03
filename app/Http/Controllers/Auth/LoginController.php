@@ -90,10 +90,10 @@ class LoginController extends Controller
             60 * 24 * 365,
             '/',
             null,
-            config('session.secure', false),
+            app()->environment('production'),
             true,
             false,
-            config('session.same_site', 'lax')
+            'lax'
         );
     }
 }
