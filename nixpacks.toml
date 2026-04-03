@@ -2,7 +2,7 @@
     # Remove hardcoded PORT to let Railway decide
 
 [phases.setup]
-nixPkgs = ["php82", "php82Packages.composer", "nodejs-18_x"]
+nixPkgs = ["php82", "php82Packages.composer", "php82Packages.gd", "nodejs-18_x"]
 
 [phases.install]
 cmds = ["composer update --no-dev --no-interaction --prefer-dist", "npm install"]
