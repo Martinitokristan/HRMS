@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('recommendations:compute')->everySixHours();
+        $schedule->command('gcash:check-expired')->everyFiveMinutes();
     }
 
     /**

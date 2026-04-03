@@ -122,6 +122,148 @@ class ReportController extends Controller
         }
     }
 
+    public function categorySales(Request $request)
+    {
+        try {
+            $period = $request->get('period', 'month');
+            $limit = min((int) $request->get('limit', 10), 50);
+
+            // Calculate current and previous period ranges
+            switch ($period) {
+                case 'week':
+                    $currentFrom = now()->subDays(7)->toDateString();
+                    $currentTo = now()->toDateString();
+                    $previousFrom = now()->subDays(14)->toDateString();
+                    $previousTo = now()->subDays(7)->toDateString();
+                    $periodLabel = 'This Week';
+                    $prevLabel = 'Last Week';
+                    break;
+                case 'year':
+                    $currentFrom = now()->subYear()->toDateString();
+                    $currentTo = now()->toDateString();
+                    $previousFrom = now()->subYears(2)->toDateString();
+                    $previousTo = now()->subYear()->toDateString();
+                    $periodLabel = 'This Year';
+                    $prevLabel = 'Last Year';
+                    break;
+                default: // month
+                    $currentFrom = now()->subDays(30)->toDateString();
+                    $currentTo = now()->toDateString();
+                    $previousFrom = now()->subDays(60)->toDateString();
+                    $previousTo = now()->subDays(30)->toDateString();
+                    $periodLabel = 'This Month';
+                    $prevLabel = 'Last Month';
+                    break;
+            }
+
+            // Get top N categories by current period revenue
+            $topCategoryIds = DB::table('sale_items')
+                ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                ->join('products', 'sale_items.product_id', '=', 'products.id')
+                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$currentFrom, $currentTo])
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery'])
+                ->whereNotNull('products.category_id')
+                ->groupBy('products.category_id')
+                ->orderByRaw('SUM(sale_items.quantity * sale_items.unit_price) DESC')
+                ->limit($limit)
+                ->pluck('products.category_id');
+
+            if ($topCategoryIds->isEmpty()) {
+                return response()->json([
+                    'data' => [
+                        'categories' => [],
+                        'period_label' => $periodLabel,
+                        'prev_label' => $prevLabel,
+                        'total_categories' => 0,
+                    ],
+                    'status' => 'success'
+                ]);
+            }
+
+            // Current period data
+            $currentData = DB::table('sale_items')
+                ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                ->join('products', 'sale_items.product_id', '=', 'products.id')
+                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$currentFrom, $currentTo])
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery'])
+                ->whereIn('products.category_id', $topCategoryIds)
+                ->groupBy('categories.id', 'categories.name')
+                ->select(
+                    'categories.id',
+                    'categories.name',
+                    DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
+                    DB::raw('SUM(sale_items.quantity) as units_sold')
+                )
+                ->get()
+                ->keyBy('id');
+
+            // Previous period data
+            $previousData = DB::table('sale_items')
+                ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                ->join('products', 'sale_items.product_id', '=', 'products.id')
+                ->whereIn('products.category_id', $topCategoryIds)
+                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$previousFrom, $previousTo])
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery'])
+                ->groupBy('products.category_id')
+                ->select(
+                    'products.category_id as id',
+                    DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
+                    DB::raw('SUM(sale_items.quantity) as units_sold')
+                )
+                ->get()
+                ->keyBy('id');
+
+            // Total category count
+            $totalCategories = DB::table('products')
+                ->whereNotNull('category_id')
+                ->distinct('category_id')
+                ->count('category_id');
+
+            // Merge into result
+            $categories = [];
+            foreach ($currentData as $id => $cat) {
+                $prev = $previousData->get($id);
+                $prevRevenue = $prev ? (float) $prev->revenue : 0;
+                $curRevenue = (float) $cat->revenue;
+                $growth = $prevRevenue > 0
+                    ? round((($curRevenue - $prevRevenue) / $prevRevenue) * 100, 1)
+                    : ($curRevenue > 0 ? 100 : 0);
+
+                $categories[] = [
+                    'id' => $id,
+                    'name' => $cat->name,
+                    'current_revenue' => round($curRevenue, 2),
+                    'previous_revenue' => round($prevRevenue, 2),
+                    'current_units' => (int) $cat->units_sold,
+                    'previous_units' => $prev ? (int) $prev->units_sold : 0,
+                    'growth' => $growth,
+                ];
+            }
+
+            // Sort by current revenue descending
+            usort($categories, function ($a, $b) {
+                return $b['current_revenue'] - $a['current_revenue'];
+            });
+
+            return response()->json([
+                'data' => [
+                    'categories' => $categories,
+                    'period_label' => $periodLabel,
+                    'prev_label' => $prevLabel,
+                    'total_categories' => $totalCategories,
+                ],
+                'status' => 'success'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Category Sales Error', ['message' => $e->getMessage()]);
+            return response()->json([
+                'error' => 'Failed to fetch category sales',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function inventory(Request $request)
     {
         $items = Inventory::with(['product.category'])

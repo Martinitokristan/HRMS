@@ -8,7 +8,10 @@ use App\Models\User;
 use App\Models\GCashTransaction;
 use App\Models\Delivery;
 use App\Models\CustomerNotification;
+use App\Events\DataMutated;
 use App\Notifications\GCashPaymentReceived;
+use App\Services\BrevoSmsService;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -170,6 +173,38 @@ class GCashController extends Controller
 
             DB::commit();
             Log::info("Successfully auto-confirmed order #{$sale->order_number} for ₱{$amount}");
+
+            // Broadcast real-time update so customer's order list and notifications refresh instantly
+            broadcast(new DataMutated(
+                "private-customer.{$sale->customer_id}",
+                ['customer_orders', 'customer_notifications'],
+                'payment.confirmed'
+            ));
+            broadcast(new DataMutated(
+                'private-admin',
+                ['admin_orders', 'admin_dashboard'],
+                'payment.confirmed'
+            ));
+
+            // Send SMS to customer if enabled in settings
+            try {
+                $smsEnabled = Setting::get('gcash_confirmed_sms', '0');
+                if ($smsEnabled === '1') {
+                    $customer = $sale->customer;
+                    $customerPhone = $sale->payment_phone_number ?? $customer->phone ?? null;
+                    if ($customerPhone) {
+                        $customerName = $customer->name ?? 'Valued Customer';
+                        $sale->loadMissing('items.product');
+                        $itemSummary = $sale->items->count() > 0
+                            ? $sale->items->map(fn($i) => $i->quantity . 'x ' . ($i->product->name ?? 'Item'))->join(', ')
+                            : "order #{$sale->order_number}";
+                        $message = BrevoSmsService::gcashConfirmedMessage($customerName, $amount, $itemSummary);
+                        BrevoSmsService::send($customerPhone, $message);
+                    }
+                }
+            } catch (\Exception $smsErr) {
+                Log::warning('GCash confirmed SMS failed: ' . $smsErr->getMessage());
+            }
             
             return response()->json(['status' => 'success', 'sale_id' => $sale->id]);
 
@@ -178,6 +213,70 @@ class GCashController extends Controller
             Log::error("Failed to confirm order #{$sale->id}: " . $e->getMessage());
             return response()->json(['error' => 'Server error'], 500);
         }
+    }
+
+    /**
+     * Public: Get order details by proof token (no auth required)
+     */
+    public function getProofOrder(Request $request, string $token)
+    {
+        $sale = Sale::where('payment_proof_token', $token)
+            ->whereIn('status', ['pending_payment', 'verifying_payment'])
+            ->with(['customer', 'items.product'])
+            ->first();
+
+        if (!$sale) {
+            return response()->json(['error' => 'Invalid or expired link.'], 404);
+        }
+
+        return response()->json([
+            'order_number'  => $sale->order_number,
+            'total_amount'  => $sale->total_amount,
+            'status'        => $sale->status,
+            'customer_name' => $sale->customer->name ?? 'Customer',
+            'items'         => $sale->items->map(fn($i) => [
+                'name'     => $i->product->name ?? 'Item',
+                'quantity' => $i->quantity,
+            ]),
+            'already_submitted' => !is_null($sale->payment_proof_path),
+        ]);
+    }
+
+    /**
+     * Public: Submit GCash payment proof via token link (no auth required)
+     */
+    public function submitProof(Request $request, string $token)
+    {
+        $sale = Sale::where('payment_proof_token', $token)
+            ->where('status', 'pending_payment')
+            ->first();
+
+        if (!$sale) {
+            return response()->json(['error' => 'Invalid link or proof already submitted.'], 404);
+        }
+
+        $request->validate([
+            'payment_reference' => 'required|string|max:50',
+            'payment_proof'     => 'required|image|max:5120',
+        ]);
+
+        $path = $request->file('payment_proof')->store('payment_proofs', 'public');
+
+        $sale->update([
+            'payment_reference' => $request->payment_reference,
+            'payment_proof_path'=> $path,
+            'status'            => 'verifying_payment',
+        ]);
+
+        // Notify admin in real-time
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'payment.proof_submitted'));
+
+        Log::info("Proof submitted for order #{$sale->order_number} via token link.");
+
+        return response()->json([
+            'message' => 'Proof submitted successfully. Our admin will verify your payment shortly.',
+            'status'  => 'success',
+        ]);
     }
 
     /**

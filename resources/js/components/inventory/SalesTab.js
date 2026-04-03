@@ -13,7 +13,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
-import { X } from 'lucide-react';
+import { X, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 export default function SalesTab() {
     const { showToast } = useToast();
@@ -258,6 +258,18 @@ export default function SalesTab() {
                             {viewOrder.payment_method === 'gcash' && viewOrder.payment_phone_number && (
                                 <Card className="bg-blue-50 border-blue-200 p-4 sm:col-span-2">
                                     <div className="text-[10px] font-bold uppercase tracking-wider text-blue-800 mb-2">GCash Payment Details</div>
+
+                                    {/* Expiry SMS warning */}
+                                    {viewOrder.payment_expiry_sms_sent_at && viewOrder.status === 'pending_payment' && (
+                                        <div className="flex gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                                            <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                                            <p className="text-xs text-amber-700">
+                                                <strong>Expiry SMS sent</strong> — The 15-minute window passed with no automatic match.
+                                                Customer was sent a proof submission link. Waiting for their upload.
+                                            </p>
+                                        </div>
+                                    )}
+
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <div className="text-xs text-muted-foreground">Paying Phone Number</div>
@@ -266,16 +278,24 @@ export default function SalesTab() {
                                         {viewOrder.payment_reference && (
                                             <div>
                                                 <div className="text-xs text-muted-foreground">Reference Number</div>
-                                                <div className="font-bold text-blue-900">{viewOrder.payment_reference}</div>
+                                                <div className="font-bold text-blue-900 font-mono">{viewOrder.payment_reference}</div>
                                             </div>
                                         )}
                                     </div>
+
                                     {viewOrder.payment_proof_path && (
-                                        <div className="mt-3 pt-3 border-t border-blue-200/50">
-                                            <div className="text-xs text-muted-foreground mb-2">Payment Screenshot Proof</div>
-                                            <a href={`/storage/${viewOrder.payment_proof_path}`} target="_blank" rel="noreferrer" className="block w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden border border-blue-200 hover:opacity-90 transition-opacity">
+                                        <div className="mt-3 pt-3 border-t border-blue-200/50 space-y-3">
+                                            <div className="text-xs text-muted-foreground">Payment Screenshot Proof</div>
+                                            <a href={`/storage/${viewOrder.payment_proof_path}`} target="_blank" rel="noreferrer" className="block w-32 h-32 rounded-lg overflow-hidden border border-blue-200 hover:opacity-90 transition-opacity">
                                                 <img src={`/storage/${viewOrder.payment_proof_path}`} alt="GCash Receipt" className="w-full h-full object-cover" />
                                             </a>
+                                            {/* Admin verification reminder */}
+                                            <div className="flex gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                                <ShieldAlert className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                                                <p className="text-xs text-red-700">
+                                                    <strong>Verify before confirming:</strong> Cross-check the reference number and amount against your GCash Transaction History. Reject if proof appears edited or AI-generated.
+                                                </p>
+                                            </div>
                                         </div>
                                     )}
                                 </Card>

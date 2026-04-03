@@ -84,6 +84,8 @@
 6. **NEVER skip adding testing checklists**
 7. **ALWAYS update file lists** and component usage
 8. **NEVER forget success criteria** verification
+9. **ALWAYS update `docs/HRMSBOSHET-System-Technical-Documentation.md`** whenever any code change is made — add new sections, update existing flowcharts, API references, database schemas, or security documentation to reflect the change
+10. **NEVER ship a code change without a corresponding documentation update** — the technical documentation must always mirror the current state of the codebase
 
 ### **🗂️ ROUTING RULES**
 1. **ALWAYS check existing routes** before adding new ones
@@ -279,9 +281,10 @@ This project runs PHP 7.4. These PHP 8.0+ functions will cause silent broadcast 
 ### **After Completion:**
 1. ✅ **Test thoroughly** (all scenarios)
 2. ✅ **Update documentation**
-3. ✅ **Verify success criteria**
-4. ✅ **Get user confirmation**
-5. ✅ **Clean up any temporary code**
+3. ✅ **Update `docs/HRMSBOSHET-System-Technical-Documentation.md`** — reflect new/changed APIs, database schemas, flowcharts, or security rules
+4. ✅ **Verify success criteria**
+5. ✅ **Get user confirmation**
+6. ✅ **Clean up any temporary code**
 
 ---
 
@@ -309,6 +312,7 @@ This project runs PHP 7.4. These PHP 8.0+ functions will cause silent broadcast 
 - [ ] Functionality tested?
 - [ ] Responsive design verified?
 - [ ] Documentation updated?
+- [ ] `docs/HRMSBOSHET-System-Technical-Documentation.md` updated to reflect changes?
 - [ ] Success criteria met?
 - [ ] User confirmed completion?
 

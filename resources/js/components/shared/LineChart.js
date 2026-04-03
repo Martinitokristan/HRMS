@@ -1,7 +1,8 @@
 import React from 'react';
 import { BarChart3 } from 'lucide-react';
 
-const LineChart = ({ data, maxValue, formatValue, title = "Trend", totalValueLabel = "Total", color = '#3b82f6', hideHeader = false }) => {
+const LineChart = ({ data, maxValue, formatValue, title = "Trend", totalValueLabel = "Total", color = '#3b82f6', hideHeader: hideHeaderProp = false }) => {
+    const hideHeader = hideHeaderProp || !title;
     if (!data || data.length === 0) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -80,7 +81,7 @@ const LineChart = ({ data, maxValue, formatValue, title = "Trend", totalValueLab
                 </div>
             )}
             <div className="chart-svg-container" style={{ flexGrow: 1, position: 'relative', width: '100%', minHeight: 0 }}>
-                <svg viewBox={`0 0 ${width} ${height}`} className="line-chart-svg" preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                <svg viewBox={`0 0 ${width} ${height}`} className="line-chart-svg" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
                     <defs>
                         <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" stopColor={color} stopOpacity="0.25" />

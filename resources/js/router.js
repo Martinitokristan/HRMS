@@ -14,6 +14,8 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import RiderRegister from './components/auth/RiderRegister';
 import EmailVerification from './components/auth/EmailVerification';
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
 
 // Landing
 import Landing from './components/landing/Landing';
@@ -61,6 +63,9 @@ import Returns from './components/admin/Returns';
 // Admin: GCash Logs
 import GCashLogs from './components/admin/GCashLogs';
 
+// Public: GCash Proof Submission
+import GCashProofSubmit from './components/gcash/GCashProofSubmit';
+
 function ProtectedRoute({ children, roles }) {
     const { user, loading } = useAuth();
     if (loading) return <div className="loading-page"><div className="spinner" /></div>;
@@ -90,6 +95,9 @@ export default function AppRouter() {
             <Route path="/register" element={<Register />} />
             <Route path="/rider/register" element={<RiderRegister />} />
             <Route path="/verify-email" element={<EmailVerification />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/submit-proof/:token" element={<GCashProofSubmit />} />
 
             {/* Admin — wrapped in AdminLayout */}
             <Route element={

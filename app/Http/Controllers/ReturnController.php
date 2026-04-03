@@ -7,6 +7,7 @@ use App\Models\ReturnOrder;
 use App\Models\Sale;
 use App\Models\Inventory;
 use App\Models\CustomerNotification;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -213,19 +214,24 @@ class ReturnController extends Controller
             // Update sale status
             $return->sale->update(['status' => 'returned']);
 
-            // Notify customer
-            CustomerNotification::create([
-                'customer_id' => $return->sale->customer_id,
-                'type'        => 'return_approved',
-                'title'       => 'Return Approved',
-                'message'     => "Your return request #{$return->return_number} has been approved. Refund: ₱" . number_format($return->refund_amount, 2),
-                'is_read'     => false,
-            ]);
+            // Notify customer in-app (gated by setting)
+            if (Setting::get('return_approved_notify', '0') === '1') {
+                CustomerNotification::create([
+                    'customer_id' => $return->sale->customer_id,
+                    'type'        => 'return_approved',
+                    'title'       => 'Return Approved',
+                    'message'     => "Your return request #{$return->return_number} has been approved. Refund: ₱" . number_format($return->refund_amount, 2),
+                    'is_read'     => false,
+                ]);
+            }
         });
 
         $customerId = $return->sale->customer_id;
+        $notifyKeys = Setting::get('return_approved_notify', '0') === '1'
+            ? ['customer_returns', 'customer_notifications']
+            : ['customer_returns'];
         broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_inventory', 'admin_dashboard'], 'return.approved'));
-        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_returns', 'customer_notifications'], 'return.approved'));
+        broadcast(new DataMutated("private-customer.{$customerId}", $notifyKeys, 'return.approved'));
 
         return response()->json([
             'data'    => $return->fresh()->load(['sale.customer', 'requestedBy', 'approvedBy']),

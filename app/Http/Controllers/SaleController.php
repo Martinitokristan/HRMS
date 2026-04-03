@@ -202,9 +202,20 @@ class SaleController extends Controller
         ], 201);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $sale = Sale::with(['customer', 'processedBy', 'items.product', 'delivery.rider'])->findOrFail($id);
+
+        $user = $request->user();
+        if ($user instanceof \App\Models\User && $user->role === 'customer') {
+            if ($sale->customer_id !== $user->id) {
+                return response()->json([
+                    'message' => 'Forbidden. You can only view your own orders.',
+                    'status' => 'error'
+                ], 403);
+            }
+        }
+
         return response()->json(['data' => $sale, 'status' => 'success']);
     }
 
@@ -240,16 +251,25 @@ class SaleController extends Controller
             }
         }
 
-        // Notify customer on confirmation
-        if ($newStatus === 'confirmed' && $sale->customer_id) {
-            \App\Models\CustomerNotification::create([
-                'customer_id' => $sale->customer_id,
-                'delivery_id' => $sale->delivery->id ?? null,
-                'type' => 'confirmed',
-                'title' => 'Order Confirmed',
-                'message' => "Your order #{$sale->order_number} has been confirmed and is being prepared!",
-                'is_read' => false,
-            ]);
+        // Notify customer in-app on every meaningful status change
+        if ($sale->customer_id) {
+            $notifications = [
+                'confirmed'        => ['Order Confirmed',        "Your order #{$sale->order_number} has been confirmed and is being prepared."],
+                'out_for_delivery' => ['Out for Delivery',       "Your order #{$sale->order_number} is now out for delivery. Expect it soon!"],
+                'delivered'        => ['Order Delivered',        "Your order #{$sale->order_number} has been delivered. Thank you for your purchase!"],
+                'cancelled'        => ['Order Cancelled',        "Your order #{$sale->order_number} has been cancelled."],
+            ];
+            if (isset($notifications[$newStatus])) {
+                [$title, $message] = $notifications[$newStatus];
+                \App\Models\CustomerNotification::create([
+                    'customer_id' => $sale->customer_id,
+                    'delivery_id' => $sale->delivery->id ?? null,
+                    'type'        => $newStatus,
+                    'title'       => $title,
+                    'message'     => $message,
+                    'is_read'     => false,
+                ]);
+            }
         }
 
         $customerId = $sale->customer_id;
@@ -415,9 +435,19 @@ class SaleController extends Controller
         ]);
     }
 
-    public function cancellationPolicy($id)
+    public function cancellationPolicy(Request $request, $id)
     {
         $sale = Sale::findOrFail($id);
+
+        $user = $request->user();
+        if ($user instanceof \App\Models\User && $user->role === 'customer') {
+            if ($sale->customer_id !== $user->id) {
+                return response()->json([
+                    'message' => 'Forbidden. You can only view your own orders.',
+                    'status' => 'error'
+                ], 403);
+            }
+        }
 
         $cancellable = in_array($sale->status, ['pending', 'confirmed']);
         $customerCanCancel = $sale->status === 'pending';

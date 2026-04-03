@@ -16,7 +16,16 @@ class SettingsController extends Controller
     public function index(Request $request)
     {
         // Optimized: Cache static data and only return what's requested
-        $settings = Setting::all()->groupBy('group')->map(function ($group) {
+        $allSettings = Setting::all();
+
+        $user = $request->user();
+        $isAdmin = $user instanceof \App\Models\User && $user->role === 'admin';
+
+        if (!$isAdmin) {
+            $allSettings = $allSettings->whereNotIn('group', ['security', 'notifications']);
+        }
+
+        $settings = $allSettings->groupBy('group')->map(function ($group) {
             return $group->pluck('value', 'key');
         });
 

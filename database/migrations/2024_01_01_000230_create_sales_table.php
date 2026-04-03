@@ -21,6 +21,8 @@ class CreateSalesTable extends Migration
             $table->string('payment_reference')->nullable();
             $table->string('payment_proof_path')->nullable();
             $table->timestamp('payment_confirmed_at')->nullable();
+            $table->timestamp('payment_expiry_sms_sent_at')->nullable();
+            $table->string('payment_proof_token', 64)->nullable()->unique();
             $table->text('notes')->nullable();
             $table->string('cancellation_reason')->nullable();
             $table->text('cancellation_notes')->nullable();

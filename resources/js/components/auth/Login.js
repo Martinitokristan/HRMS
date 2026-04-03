@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ShieldCheck, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,8 @@ import { Separator } from '@/components/ui/separator';
 export default function Login() {
     const { login: userLogin } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const successMessage = location.state?.message || '';
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -52,6 +54,13 @@ export default function Login() {
 
                     <h1 className="text-[26px] font-black text-foreground tracking-tight mb-2">Unified Access Portal</h1>
                     <p className="text-sm text-muted-foreground mb-8">Enter your credentials to manage your hardware operations.</p>
+
+                    {successMessage && (
+                        <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <AlertDescription className="text-green-700">{successMessage}</AlertDescription>
+                        </Alert>
+                    )}
 
                     {error && (
                         <Alert variant="destructive" className="mb-6">
@@ -94,7 +103,7 @@ export default function Login() {
                                 <Checkbox id="remember" checked={remember} onCheckedChange={setRemember} />
                                 <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground cursor-pointer">Remember me</Label>
                             </div>
-                            <a href="#" className="text-sm font-semibold text-primary hover:underline">Security Help?</a>
+                            <Link to="/forgot-password" className="text-sm font-semibold text-primary hover:underline">Forgot Password?</Link>
                         </div>
 
                         <Button type="submit" disabled={loading} className="w-full h-12 text-[15px] font-bold shadow-md shadow-primary/20">

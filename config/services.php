@@ -44,4 +44,9 @@ return [
         'key' => env('GEMINI_API_KEY'),
     ],
 
+    'iprogsms' => [
+        'api_token' => env('IPROG_API_TOKEN'),
+        'endpoint'  => env('IPROG_ENDPOINT', 'https://www.iprogsms.com/api/v1/sms_messages'),
+    ],
+
 ];
