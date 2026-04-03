@@ -288,4 +288,10 @@ Route::middleware(['auth:sanctum', 'role:supplier'])->group(function () {
     Route::get('/supplier/unit-types', [SettingsController::class , 'getUnitTypes']);
     Route::post('/supplier/unit-types', [SettingsController::class , 'storeUnitType']);
     Route::delete('/supplier/unit-types/{id}', [SettingsController::class , 'deleteUnitType']);
+    // Supplier Notifications
+    Route::get('/supplier/notifications', [SettingsController::class , 'getNotifications']);
+    Route::post('/supplier/notifications/mark-all-read', [SettingsController::class , 'markAllNotificationsRead']);
+    Route::delete('/supplier/notifications/{id}', [SettingsController::class , 'deleteNotification']);
+    Route::post('/supplier/notifications/delete-batch', [SettingsController::class , 'deleteBatchNotifications']);
+    Route::post('/supplier/notifications/delete-all', [SettingsController::class , 'deleteAllNotifications']);
 });

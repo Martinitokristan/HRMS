@@ -24,7 +24,7 @@ export default function SupplierLayout() {
         
         // Fetch notifications
         const fetchNotis = () => {
-            silentApi.get('/notifications').then(res => {
+            silentApi.get('/supplier/notifications').then(res => {
                 const data = res.data?.data !== undefined ? res.data.data : res.data;
                 const notis = Array.isArray(data) ? data : [];
                 setNotifications(notis.slice(0, 10));
@@ -205,13 +205,13 @@ export default function SupplierLayout() {
                                 setUnreadCount={setUnreadNoti}
                                 isOpen={notiOpen}
                                 onClose={() => setNotiOpen(false)}
-                                apiPrefix="/notifications"
+                                apiPrefix="/supplier/notifications"
                                 renderMessage={(n) => n.data?.message || 'New notification'}
                                 renderLabel={(n) => n.data?.title || 'HRMS'}
                                 isRead={(n) => !!n.read_at}
-                                markReadUrl="/notifications/mark-all-read"
+                                markReadUrl="/supplier/notifications/mark-all-read"
                                 onRefresh={() => {
-                                    silentApi.get('/notifications').then(res => {
+                                    silentApi.get('/supplier/notifications').then(res => {
                                         const data = res.data?.data !== undefined ? res.data.data : res.data;
                                         const notis = Array.isArray(data) ? data : [];
                                         setNotifications(notis.slice(0, 10));
