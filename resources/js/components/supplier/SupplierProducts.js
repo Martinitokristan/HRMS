@@ -62,6 +62,8 @@ export default function SupplierProducts() {
 
     // Variant values from settings (sizes, colors, weights)
     const [variantValues, setVariantValues] = useState({ sizes: [], colors: [], weights: [] });
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [creatingCategory, setCreatingCategory] = useState(false);
 
     const location = useLocation();
     
@@ -98,6 +100,23 @@ export default function SupplierProducts() {
             const data = res.data?.data !== undefined ? res.data.data : res.data;
             setCategories(Array.isArray(data) ? data : []);
         } catch (e) { console.error(e); }
+    };
+
+    const handleCreateCategory = async () => {
+        if (!newCategoryName.trim()) return;
+        setCreatingCategory(true);
+        try {
+            const res = await api.post('/supplier/categories', { name: newCategoryName.trim() });
+            const created = res.data?.data;
+            await fetchCategories();
+            if (created?.id) setForm(f => ({ ...f, category_id: String(created.id) }));
+            setNewCategoryName('');
+            showToast('Category created!', 'success');
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Failed to create category', 'error');
+        } finally {
+            setCreatingCategory(false);
+        }
     };
 
     const fetchVariantValues = async () => {
@@ -397,7 +416,13 @@ export default function SupplierProducts() {
             setFormOpen(false);
             fetchProducts(true);
         } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to save product', 'error');
+            const data = err.response?.data;
+            if (data?.errors) {
+                const firstError = Object.values(data.errors).flat()[0];
+                showToast(firstError || data.message || 'Validation failed', 'error');
+            } else {
+                showToast(data?.message || 'Failed to save product', 'error');
+            }
         } finally {
             setSubmitting(false);
         }

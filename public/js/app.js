@@ -36281,6 +36281,14 @@ function SupplierProducts() {
     _useState42 = _slicedToArray(_useState41, 2),
     variantValues = _useState42[0],
     setVariantValues = _useState42[1];
+  var _useState43 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState44 = _slicedToArray(_useState43, 2),
+    newCategoryName = _useState44[0],
+    setNewCategoryName = _useState44[1];
+  var _useState45 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState46 = _slicedToArray(_useState45, 2),
+    creatingCategory = _useState46[0],
+    setCreatingCategory = _useState46[1];
   var location = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_1__.useLocation)();
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     fetchProducts(products.data.length > 0);
@@ -36349,18 +36357,68 @@ function SupplierProducts() {
       return _ref.apply(this, arguments);
     };
   }();
-  var fetchVariantValues = /*#__PURE__*/function () {
+  var handleCreateCategory = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var _res$data2, _variantData$find, _variantData$find2, _variantData$find3, res, variantData, sizes, colors, weights, _t2;
+      var _res$data2, res, created, _err$response, _t2;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.p = _context2.n) {
           case 0:
-            _context2.p = 0;
-            _context2.n = 1;
+            if (newCategoryName.trim()) {
+              _context2.n = 1;
+              break;
+            }
+            return _context2.a(2);
+          case 1:
+            setCreatingCategory(true);
+            _context2.p = 2;
+            _context2.n = 3;
+            return _lib_api__WEBPACK_IMPORTED_MODULE_2__["default"].post('/supplier/categories', {
+              name: newCategoryName.trim()
+            });
+          case 3:
+            res = _context2.v;
+            created = (_res$data2 = res.data) === null || _res$data2 === void 0 ? void 0 : _res$data2.data;
+            _context2.n = 4;
+            return fetchCategories();
+          case 4:
+            if (created !== null && created !== void 0 && created.id) setForm(function (f) {
+              return _objectSpread(_objectSpread({}, f), {}, {
+                category_id: String(created.id)
+              });
+            });
+            setNewCategoryName('');
+            showToast('Category created!', 'success');
+            _context2.n = 6;
+            break;
+          case 5:
+            _context2.p = 5;
+            _t2 = _context2.v;
+            showToast(((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to create category', 'error');
+          case 6:
+            _context2.p = 6;
+            setCreatingCategory(false);
+            return _context2.f(6);
+          case 7:
+            return _context2.a(2);
+        }
+      }, _callee2, null, [[2, 5, 6, 7]]);
+    }));
+    return function handleCreateCategory() {
+      return _ref2.apply(this, arguments);
+    };
+  }();
+  var fetchVariantValues = /*#__PURE__*/function () {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+      var _res$data3, _variantData$find, _variantData$find2, _variantData$find3, res, variantData, sizes, colors, weights, _t3;
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.p = _context3.n) {
+          case 0:
+            _context3.p = 0;
+            _context3.n = 1;
             return _lib_api__WEBPACK_IMPORTED_MODULE_2__["default"].get('/supplier/variant-values');
           case 1:
-            res = _context2.v;
-            variantData = ((_res$data2 = res.data) === null || _res$data2 === void 0 ? void 0 : _res$data2.data) !== undefined ? res.data.data : res.data || []; // Organize by variant type: 1=Size, 2=Color, 3=Weight
+            res = _context3.v;
+            variantData = ((_res$data3 = res.data) === null || _res$data3 === void 0 ? void 0 : _res$data3.data) !== undefined ? res.data.data : res.data || []; // Organize by variant type: 1=Size, 2=Color, 3=Weight
             sizes = Array.isArray(variantData) ? ((_variantData$find = variantData.find(function (v) {
               return v.id === 1;
             })) === null || _variantData$find === void 0 ? void 0 : _variantData$find.values) || [] : [];
@@ -36375,49 +36433,49 @@ function SupplierProducts() {
               colors: colors,
               weights: weights
             });
-            _context2.n = 3;
+            _context3.n = 3;
             break;
           case 2:
-            _context2.p = 2;
-            _t2 = _context2.v;
-            console.error('Failed to load variant values:', _t2);
+            _context3.p = 2;
+            _t3 = _context3.v;
+            console.error('Failed to load variant values:', _t3);
           case 3:
-            return _context2.a(2);
+            return _context3.a(2);
         }
-      }, _callee2, null, [[0, 2]]);
+      }, _callee3, null, [[0, 2]]);
     }));
     return function fetchVariantValues() {
-      return _ref2.apply(this, arguments);
+      return _ref3.apply(this, arguments);
     };
   }();
   var fetchProducts = /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
       var silent,
-        _res$data3,
+        _res$data4,
         params,
         res,
         data,
-        _args3 = arguments,
-        _t3;
-      return _regenerator().w(function (_context3) {
-        while (1) switch (_context3.p = _context3.n) {
+        _args4 = arguments,
+        _t4;
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.p = _context4.n) {
           case 0:
-            silent = _args3.length > 0 && _args3[0] !== undefined ? _args3[0] : false;
+            silent = _args4.length > 0 && _args4[0] !== undefined ? _args4[0] : false;
             if (!silent) setLoading(true);
-            _context3.p = 1;
+            _context4.p = 1;
             params = {
               page: page,
               per_page: 15
             };
             if (search) params.search = search;
             if (categoryFilter) params.category_id = categoryFilter;
-            _context3.n = 2;
+            _context4.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_2__["default"].get('/supplier/products', {
               params: params
             });
           case 2:
-            res = _context3.v;
-            data = ((_res$data3 = res.data) === null || _res$data3 === void 0 ? void 0 : _res$data3.data) !== undefined ? res.data.data : res.data;
+            res = _context4.v;
+            data = ((_res$data4 = res.data) === null || _res$data4 === void 0 ? void 0 : _res$data4.data) !== undefined ? res.data.data : res.data;
             if (data && _typeof(data) === 'object' && !Array.isArray(data)) {
               setProducts({
                 data: Array.isArray(data.data) ? data.data : [],
@@ -36434,30 +36492,30 @@ function SupplierProducts() {
                 total: 0
               });
             }
-            _context3.n = 4;
+            _context4.n = 4;
             break;
           case 3:
-            _context3.p = 3;
-            _t3 = _context3.v;
+            _context4.p = 3;
+            _t4 = _context4.v;
             // Silently fail on background refresh
             if (!silent) {
-              console.error('Failed to fetch supplier products:', _t3);
+              console.error('Failed to fetch supplier products:', _t4);
               setProducts({
                 data: [],
                 total: 0
               });
             }
           case 4:
-            _context3.p = 4;
+            _context4.p = 4;
             if (!silent) setLoading(false);
-            return _context3.f(4);
+            return _context4.f(4);
           case 5:
-            return _context3.a(2);
+            return _context4.a(2);
         }
-      }, _callee3, null, [[1, 3, 4, 5]]);
+      }, _callee4, null, [[1, 3, 4, 5]]);
     }));
     return function fetchProducts() {
-      return _ref3.apply(this, arguments);
+      return _ref4.apply(this, arguments);
     };
   }();
   var openCreate = function openCreate() {
@@ -36718,10 +36776,10 @@ function SupplierProducts() {
     });
   };
   var handleSubmit = /*#__PURE__*/function () {
-    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(e) {
-      var validVariants, _form$additional_imag, fd, _err$response, _t4;
-      return _regenerator().w(function (_context4) {
-        while (1) switch (_context4.p = _context4.n) {
+    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(e) {
+      var validVariants, _form$additional_imag, fd, _err$response2, data, firstError, _t5;
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.p = _context5.n) {
           case 0:
             e.preventDefault();
 
@@ -36731,14 +36789,14 @@ function SupplierProducts() {
               return ((_v$size = v.size) === null || _v$size === void 0 ? void 0 : _v$size.trim()) || ((_v$color = v.color) === null || _v$color === void 0 ? void 0 : _v$color.trim()) || ((_v$weight = v.weight) === null || _v$weight === void 0 ? void 0 : _v$weight.trim()) || v.stock > 0;
             });
             if (!(variants.length > 0 && validVariants.length === 0)) {
-              _context4.n = 1;
+              _context5.n = 1;
               break;
             }
             showToast('Please fill in at least one field for each variant or remove empty variants', 'error');
-            return _context4.a(2);
+            return _context5.a(2);
           case 1:
             setSubmitting(true);
-            _context4.p = 2;
+            _context5.p = 2;
             fd = new FormData();
             fd.append('name', form.name);
             fd.append('barcode', form.barcode);
@@ -36777,11 +36835,11 @@ function SupplierProducts() {
               });
             }
             if (!editing) {
-              _context4.n = 4;
+              _context5.n = 4;
               break;
             }
             fd.append('_method', 'PUT');
-            _context4.n = 3;
+            _context5.n = 3;
             return _lib_api__WEBPACK_IMPORTED_MODULE_2__["default"].post("/supplier/products/".concat(editing.id), fd, {
               headers: {
                 'Content-Type': 'multipart/form-data'
@@ -36789,10 +36847,10 @@ function SupplierProducts() {
             });
           case 3:
             showToast('Product updated!', 'success');
-            _context4.n = 6;
+            _context5.n = 6;
             break;
           case 4:
-            _context4.n = 5;
+            _context5.n = 5;
             return _lib_api__WEBPACK_IMPORTED_MODULE_2__["default"].post('/supplier/products', fd, {
               headers: {
                 'Content-Type': 'multipart/form-data'
@@ -36804,52 +36862,58 @@ function SupplierProducts() {
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.SUPPLIER_PRODUCTS, _store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.ADMIN_INVENTORY, _store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.CUSTOMER_SHOP);
             setFormOpen(false);
             fetchProducts(true);
-            _context4.n = 8;
+            _context5.n = 8;
             break;
           case 7:
-            _context4.p = 7;
-            _t4 = _context4.v;
-            showToast(((_err$response = _t4.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to save product', 'error');
+            _context5.p = 7;
+            _t5 = _context5.v;
+            data = (_err$response2 = _t5.response) === null || _err$response2 === void 0 ? void 0 : _err$response2.data;
+            if (data !== null && data !== void 0 && data.errors) {
+              firstError = Object.values(data.errors).flat()[0];
+              showToast(firstError || data.message || 'Validation failed', 'error');
+            } else {
+              showToast((data === null || data === void 0 ? void 0 : data.message) || 'Failed to save product', 'error');
+            }
           case 8:
-            _context4.p = 8;
+            _context5.p = 8;
             setSubmitting(false);
-            return _context4.f(8);
+            return _context5.f(8);
           case 9:
-            return _context4.a(2);
+            return _context5.a(2);
         }
-      }, _callee4, null, [[2, 7, 8, 9]]);
+      }, _callee5, null, [[2, 7, 8, 9]]);
     }));
     return function handleSubmit(_x) {
-      return _ref4.apply(this, arguments);
+      return _ref5.apply(this, arguments);
     };
   }();
   var performDelete = /*#__PURE__*/function () {
-    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(id) {
-      var _t5;
-      return _regenerator().w(function (_context5) {
-        while (1) switch (_context5.p = _context5.n) {
+    var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(id) {
+      var _t6;
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.p = _context6.n) {
           case 0:
             closeConfirm();
-            _context5.p = 1;
-            _context5.n = 2;
+            _context6.p = 1;
+            _context6.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_2__["default"]["delete"]("/supplier/products/".concat(id));
           case 2:
             showToast('Product deleted', 'success');
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.SUPPLIER_PRODUCTS, _store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.ADMIN_INVENTORY, _store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.CUSTOMER_SHOP);
             fetchProducts(true);
-            _context5.n = 4;
+            _context6.n = 4;
             break;
           case 3:
-            _context5.p = 3;
-            _t5 = _context5.v;
+            _context6.p = 3;
+            _t6 = _context6.v;
             showToast('Failed to delete product', 'error');
           case 4:
-            return _context5.a(2);
+            return _context6.a(2);
         }
-      }, _callee5, null, [[1, 3]]);
+      }, _callee6, null, [[1, 3]]);
     }));
     return function performDelete(_x2) {
-      return _ref5.apply(this, arguments);
+      return _ref6.apply(this, arguments);
     };
   }();
   var handleDelete = function handleDelete(product) {
