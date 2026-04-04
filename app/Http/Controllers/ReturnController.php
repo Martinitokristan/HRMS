@@ -49,14 +49,24 @@ class ReturnController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'sale_id'        => 'required|exists:sales,id',
-            'reason'         => 'required|in:defective,wrong_item,damaged,not_as_described,missing_parts,other',
-            'reason_details' => 'nullable|string|max:1000',
-            'items'          => 'required|array|min:1',
-            'items.*.sale_item_id' => 'required|integer',
-            'items.*.quantity'     => 'required|integer|min:1',
-        ]);
+        \Log::info('Return request data', $request->all());
+        
+        try {
+            $data = $request->validate([
+                'sale_id'        => 'required|exists:sales,id',
+                'reason'         => 'required|in:defective,wrong_item,damaged,not_as_described,missing_parts,other',
+                'reason_details' => 'nullable|string|max:1000',
+                'items'          => 'required|array|min:1',
+                'items.*.sale_item_id' => 'required|integer',
+                'items.*.quantity'     => 'required|integer|min:1',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Return validation failed', [
+                'errors' => $e->errors(),
+                'data' => $request->all()
+            ]);
+            throw $e;
+        }
 
         $sale = Sale::with('items')->findOrFail($data['sale_id']);
         $user = $request->user();
