@@ -1105,8 +1105,8 @@ export default function RiderDashboardV3() {
                                                 <div>
                                                     <strong>Order #{d.tracking_number || d.order_id}</strong><br />
                                                     {d.customer_address}<br />
-                                                    <small>Distance: {d.distance ?? '—'}</small><br />
-                                                    <small>ETA: {d.eta ?? 'Unknown (no GPS)'}</small>
+                                                    <small>Distance: {riderPosition && d.customer_latitude && d.customer_longitude ? formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, d.customer_latitude, d.customer_longitude)) : (d.distance ?? '—')}</small><br />
+                                                    <small>ETA: {riderPosition && d.customer_latitude && d.customer_longitude ? formatEta(haversineKm(riderPosition.lat, riderPosition.lng, d.customer_latitude, d.customer_longitude)) : (d.eta ?? '—')}</small>
                                                 </div>
                                             </Popup>
                                         </Marker>

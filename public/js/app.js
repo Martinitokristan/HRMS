@@ -31437,9 +31437,9 @@ function RiderDashboardV3() {
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("strong", {
                     children: ["Order #", d.tracking_number || d.order_id]
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), d.customer_address, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("small", {
-                    children: ["Distance: ", (_d$distance = d.distance) !== null && _d$distance !== void 0 ? _d$distance : '—']
+                    children: ["Distance: ", riderPosition && d.customer_latitude && d.customer_longitude ? formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, d.customer_latitude, d.customer_longitude)) : (_d$distance = d.distance) !== null && _d$distance !== void 0 ? _d$distance : '—']
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("small", {
-                    children: ["ETA: ", (_d$eta = d.eta) !== null && _d$eta !== void 0 ? _d$eta : 'Unknown (no GPS)']
+                    children: ["ETA: ", riderPosition && d.customer_latitude && d.customer_longitude ? formatEta(haversineKm(riderPosition.lat, riderPosition.lng, d.customer_latitude, d.customer_longitude)) : (_d$eta = d.eta) !== null && _d$eta !== void 0 ? _d$eta : '—']
                   })]
                 })
               })
