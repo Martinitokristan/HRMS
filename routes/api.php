@@ -192,6 +192,7 @@ Route::middleware(['auth.token', 'role:admin,rider'])->group(function () {
     Route::get('/deliveries', [DeliveryController::class , 'index']);
     Route::get('/deliveries/{id}', [DeliveryController::class , 'show']);
     Route::match(['put', 'post'], '/deliveries/{id}/status', [DeliveryController::class , 'updateStatus']);
+    Route::post('/deliveries/{id}/upload-proof', [DeliveryController::class , 'uploadProof']);
 });
 
 // =========================================================================
