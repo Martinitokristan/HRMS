@@ -154,8 +154,8 @@ export default function OrderHistory() {
         setReturnItems((order.items || []).map(item => ({
             sale_item_id: item.id,
             product_name: item.product?.name || 'Product',
-            quantity: item.quantity,
-            max_quantity: item.quantity,
+            quantity: parseInt(item.quantity),
+            max_quantity: parseInt(item.quantity),
             selected: true,
         })));
     };
@@ -178,7 +178,7 @@ export default function OrderHistory() {
                 sale_id: returnModal.order.id,
                 reason: returnReason,
                 reason_details: returnDetails || null,
-                items: selectedItems.map(i => ({ sale_item_id: i.sale_item_id, quantity: i.quantity })),
+                items: selectedItems.map(i => ({ sale_item_id: i.sale_item_id, quantity: parseInt(i.quantity) })),
             });
             toast.success('Return request submitted successfully! You will be notified when it is reviewed.');
             markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.ADMIN_RETURNS);
@@ -726,7 +726,7 @@ export default function OrderHistory() {
                                                     value={item.quantity}
                                                     onChange={(e) => {
                                                         const updated = [...returnItems];
-                                                        updated[idx].quantity = parseInt(e.target.value);
+                                                        updated[idx].quantity = parseInt(e.target.value) || 1;
                                                         setReturnItems(updated);
                                                     }}
                                                     className="w-16 rounded border border-input bg-background px-2 py-1 text-xs"

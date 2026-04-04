@@ -17225,8 +17225,8 @@ function OrderHistory() {
       return {
         sale_item_id: item.id,
         product_name: ((_item$product = item.product) === null || _item$product === void 0 ? void 0 : _item$product.name) || 'Product',
-        quantity: item.quantity,
-        max_quantity: item.quantity,
+        quantity: parseInt(item.quantity),
+        max_quantity: parseInt(item.quantity),
         selected: true
       };
     }));
@@ -17272,7 +17272,7 @@ function OrderHistory() {
               items: selectedItems.map(function (i) {
                 return {
                   sale_item_id: i.sale_item_id,
-                  quantity: i.quantity
+                  quantity: parseInt(i.quantity)
                 };
               })
             });
@@ -18032,7 +18032,7 @@ function OrderHistory() {
                     value: item.quantity,
                     onChange: function onChange(e) {
                       var updated = _toConsumableArray(returnItems);
-                      updated[idx].quantity = parseInt(e.target.value);
+                      updated[idx].quantity = parseInt(e.target.value) || 1;
                       setReturnItems(updated);
                     },
                     className: "w-16 rounded border border-input bg-background px-2 py-1 text-xs",
