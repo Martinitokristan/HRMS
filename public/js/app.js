@@ -17242,7 +17242,7 @@ function OrderHistory() {
   };
   var handleSubmitReturn = /*#__PURE__*/function () {
     var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      var selectedItems, _err$response2, _t3;
+      var selectedItems, _err$response2, _err$response3, errorMsg, errors, errorDetails, _t3;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
@@ -17286,7 +17286,15 @@ function OrderHistory() {
           case 5:
             _context3.p = 5;
             _t3 = _context3.v;
-            toast.error(((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to submit return request');
+            errorMsg = ((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to submit return request';
+            errors = (_err$response3 = _t3.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.errors;
+            if (errors) {
+              errorDetails = Object.values(errors).flat().join(', ');
+              toast.error("".concat(errorMsg, ": ").concat(errorDetails));
+              console.error('Return validation errors:', errors);
+            } else {
+              toast.error(errorMsg);
+            }
           case 6:
             _context3.p = 6;
             setSubmittingReturn(false);
@@ -17318,7 +17326,7 @@ function OrderHistory() {
   };
   var handleSubmitProof = /*#__PURE__*/function () {
     var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
-      var formData, _err$response3, _t4;
+      var formData, _err$response4, _t4;
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.p = _context4.n) {
           case 0:
@@ -17349,7 +17357,7 @@ function OrderHistory() {
           case 4:
             _context4.p = 4;
             _t4 = _context4.v;
-            toast.error(((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || "Failed to upload proof");
+            toast.error(((_err$response4 = _t4.response) === null || _err$response4 === void 0 || (_err$response4 = _err$response4.data) === null || _err$response4 === void 0 ? void 0 : _err$response4.message) || "Failed to upload proof");
           case 5:
             _context4.p = 5;
             setSubmittingProof(false);
@@ -17365,7 +17373,7 @@ function OrderHistory() {
   }();
   var handleSubmitRating = /*#__PURE__*/function () {
     var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
-      var _err$response4, _t5;
+      var _err$response5, _t5;
       return _regenerator().w(function (_context5) {
         while (1) switch (_context5.p = _context5.n) {
           case 0:
@@ -17394,7 +17402,7 @@ function OrderHistory() {
           case 4:
             _context5.p = 4;
             _t5 = _context5.v;
-            toast.error(((_err$response4 = _t5.response) === null || _err$response4 === void 0 || (_err$response4 = _err$response4.data) === null || _err$response4 === void 0 ? void 0 : _err$response4.message) || "Failed to submit rating");
+            toast.error(((_err$response5 = _t5.response) === null || _err$response5 === void 0 || (_err$response5 = _err$response5.data) === null || _err$response5 === void 0 ? void 0 : _err$response5.message) || "Failed to submit rating");
           case 5:
             _context5.p = 5;
             setSubmittingRating(false);

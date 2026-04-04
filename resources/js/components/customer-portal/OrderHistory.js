@@ -185,7 +185,16 @@ export default function OrderHistory() {
             fetchData(true);
             closeReturnModal();
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to submit return request');
+            const errorMsg = err.response?.data?.message || 'Failed to submit return request';
+            const errors = err.response?.data?.errors;
+            
+            if (errors) {
+                const errorDetails = Object.values(errors).flat().join(', ');
+                toast.error(`${errorMsg}: ${errorDetails}`);
+                console.error('Return validation errors:', errors);
+            } else {
+                toast.error(errorMsg);
+            }
         } finally {
             setSubmittingReturn(false);
         }

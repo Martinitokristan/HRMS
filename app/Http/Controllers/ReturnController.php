@@ -65,7 +65,12 @@ class ReturnController extends Controller
                 'errors' => $e->errors(),
                 'data' => $request->all()
             ]);
-            throw $e;
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'data_sent' => $request->all(),
+                'status' => 'error'
+            ], 422);
         }
 
         $sale = Sale::with('items')->findOrFail($data['sale_id']);
