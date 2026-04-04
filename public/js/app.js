@@ -29834,8 +29834,29 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
-// Add custom CSS for markers
+// Haversine distance in km between two GPS points
 
+function haversineKm(lat1, lon1, lat2, lon2) {
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLon = (lon2 - lon1) * Math.PI / 180;
+  var a = Math.pow(Math.sin(dLat / 2), 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.pow(Math.sin(dLon / 2), 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+function formatDistance(km) {
+  if (km < 1) return Math.round(km * 1000) + ' m';
+  if (km < 10) return km.toFixed(1) + ' km';
+  return Math.round(km) + ' km';
+}
+function formatEta(km) {
+  var minutes = Math.round(km / 15 * 60);
+  if (minutes < 60) return minutes + ' min';
+  var h = Math.floor(minutes / 60);
+  var m = minutes % 60;
+  return m > 0 ? "".concat(h, " hr ").concat(m, " min") : "".concat(h, " hr");
+}
+
+// Add custom CSS for markers
 var markerStyles = "\n    .map-marker-container {\n        display: flex;\n        align-items: center;\n        justify-content: center;\n    }\n    .rider-map-blob {\n        width: 34px;\n        height: 34px;\n        background: #ef4444;\n        border: 4px solid white;\n        border-radius: 50%;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        font-size: 18px;\n        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);\n        transition: transform 0.3s ease-out;\n    }\n    .customer-map-blob {\n        width: 32px;\n        height: 32px;\n        background: #3b82f6;\n        border: 4px solid white;\n        border-radius: 50%;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        font-size: 16px;\n        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);\n    }\n";
 if (typeof document !== 'undefined') {
   var styleSheet = document.createElement('style');
@@ -30998,6 +31019,7 @@ function RiderDashboardV3() {
             gap: '1rem'
           },
           children: deliveries.map(function (delivery) {
+            var _delivery$distance, _delivery$eta;
             return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
               style: {
                 backgroundColor: '#fff',
@@ -31039,7 +31061,7 @@ function RiderDashboardV3() {
                         fontWeight: 600,
                         color: '#6b7280'
                       },
-                      children: delivery.distance
+                      children: riderPosition && delivery.customer_latitude && delivery.customer_longitude ? formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, delivery.customer_latitude, delivery.customer_longitude)) : (_delivery$distance = delivery.distance) !== null && _delivery$distance !== void 0 ? _delivery$distance : '—'
                     })]
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h3", {
                     style: {
@@ -31061,7 +31083,7 @@ function RiderDashboardV3() {
                       fontSize: '0.875rem',
                       fontWeight: 600
                     },
-                    children: ["ETA: ", delivery.eta]
+                    children: ["ETA: ", riderPosition && delivery.customer_latitude && delivery.customer_longitude ? formatEta(haversineKm(riderPosition.lat, riderPosition.lng, delivery.customer_latitude, delivery.customer_longitude)) : (_delivery$eta = delivery.eta) !== null && _delivery$eta !== void 0 ? _delivery$eta : '—']
                   })]
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
                   style: {
@@ -31141,7 +31163,7 @@ function RiderDashboardV3() {
             children: _toConsumableArray(nearbyOrders).sort(function (a, b) {
               return a.distance_value - b.distance_value;
             }).map(function (order) {
-              var _order$sale, _order$sale2;
+              var _order$distance, _order$sale, _order$sale2;
               return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
                 style: {
                   backgroundColor: '#fff',
@@ -31177,13 +31199,13 @@ function RiderDashboardV3() {
                           borderRadius: '20px'
                         },
                         children: ["#", order.tracking_number]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("span", {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
                         style: {
                           fontSize: '0.875rem',
                           fontWeight: 600,
                           color: '#6b7280'
                         },
-                        children: [order.distance, " \u2022 ~", order.eta]
+                        children: riderPosition && order.latitude && order.longitude ? "".concat(formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, order.latitude, order.longitude)), " \u2022 ~").concat(formatEta(haversineKm(riderPosition.lat, riderPosition.lng, order.latitude, order.longitude))) : (_order$distance = order.distance) !== null && _order$distance !== void 0 ? _order$distance : '—'
                       })]
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h3", {
                       style: {
@@ -31396,6 +31418,7 @@ function RiderDashboardV3() {
         }), [].concat(_toConsumableArray(deliveries), _toConsumableArray(nearbyOrders)).filter(function (d) {
           return focusedDeliveryId ? d.id === focusedDeliveryId : true;
         }).map(function (d) {
+          var _d$distance, _d$eta;
           var routeKey = "route-".concat(d.id);
           var roadRoute = roadRoutes[routeKey];
           if (!d.customer_latitude || !d.customer_longitude || !riderPosition) return null;
@@ -31414,9 +31437,9 @@ function RiderDashboardV3() {
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("strong", {
                     children: ["Order #", d.tracking_number || d.order_id]
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), d.customer_address, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("small", {
-                    children: ["Distance: ", d.distance]
+                    children: ["Distance: ", (_d$distance = d.distance) !== null && _d$distance !== void 0 ? _d$distance : '—']
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("small", {
-                    children: ["ETA: ", d.eta]
+                    children: ["ETA: ", (_d$eta = d.eta) !== null && _d$eta !== void 0 ? _d$eta : 'Unknown (no GPS)']
                   })]
                 })
               })
