@@ -23,6 +23,31 @@ import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import NotificationPanel from '../shared/NotificationPanel';
 
+// Haversine distance in km between two GPS points
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function formatDistance(km) {
+    if (km < 1) return Math.round(km * 1000) + ' m';
+    if (km < 10) return km.toFixed(1) + ' km';
+    return Math.round(km) + ' km';
+}
+
+function formatEta(km) {
+    const minutes = Math.round((km / 15) * 60);
+    if (minutes < 60) return minutes + ' min';
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h} hr ${m} min` : `${h} hr`;
+}
+
 // Add custom CSS for markers
 const markerStyles = `
     .map-marker-container {
@@ -791,7 +816,9 @@ export default function RiderDashboardV3() {
                                                         fontWeight: 600,
                                                         color: '#6b7280'
                                                     }}>
-                                                        {delivery.distance ?? '—'}
+                                                        {riderPosition && delivery.customer_latitude && delivery.customer_longitude
+                                                            ? formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, delivery.customer_latitude, delivery.customer_longitude))
+                                                            : (delivery.distance ?? '—')}
                                                     </span>
                                                 </div>
                                                 <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
@@ -801,7 +828,9 @@ export default function RiderDashboardV3() {
                                                     {delivery.customer_address}
                                                 </p>
                                                 <p style={{ color: '#059669', fontSize: '0.875rem', fontWeight: 600 }}>
-                                                    ETA: {delivery.eta ?? 'Unknown'}
+                                                    ETA: {riderPosition && delivery.customer_latitude && delivery.customer_longitude
+                                                        ? formatEta(haversineKm(riderPosition.lat, riderPosition.lng, delivery.customer_latitude, delivery.customer_longitude))
+                                                        : (delivery.eta ?? '—')}
                                                 </p>
                                             </div>
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -897,7 +926,9 @@ export default function RiderDashboardV3() {
                                                             fontWeight: 600,
                                                             color: '#6b7280'
                                                         }}>
-                                                            {order.distance ?? '—'}{order.eta ? ` • ~${order.eta}` : ''}
+                                                            {riderPosition && order.latitude && order.longitude
+                                                                ? `${formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, order.latitude, order.longitude))} • ~${formatEta(haversineKm(riderPosition.lat, riderPosition.lng, order.latitude, order.longitude))}`
+                                                                : (order.distance ?? '—')}
                                                         </span>
                                                     </div>
                                                     <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
