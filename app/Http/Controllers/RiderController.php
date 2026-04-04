@@ -187,9 +187,17 @@ class RiderController extends Controller
         ];
 
         // Get rider's current location for distance calculations
+        // If the request includes GPS coords (sent by frontend on every dashboard fetch), use and persist them
         $riderProfile = RiderProfile::where('user_id', $riderId)->first();
-        $riderLat = $riderProfile->current_latitude ?? 7.0707; // Default Davao coordinates
-        $riderLon = $riderProfile->current_longitude ?? 125.6080;
+        if ($request->filled('latitude') && $request->filled('longitude') && $riderProfile) {
+            $riderProfile->current_latitude  = (float) $request->latitude;
+            $riderProfile->current_longitude = (float) $request->longitude;
+            $riderProfile->current_heading   = (float) ($request->heading ?? 0);
+            $riderProfile->save();
+        }
+        $riderLat = $riderProfile->current_latitude ?? null;
+        $riderLon = $riderProfile->current_longitude ?? null;
+        $riderHasGps = $riderLat !== null && $riderLon !== null;
 
         $distanceCalculator = app(\App\Services\DistanceCalculator::class);
 
@@ -197,7 +205,7 @@ class RiderController extends Controller
             ->where('rider_id', $riderId)
             ->latest()
             ->get()
-            ->map(function($d) use ($riderLat, $riderLon, $distanceCalculator) {
+            ->map(function($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
                 // Retrieve customer profile
                 $profile = $d->sale->customer->customerProfile;
 
@@ -205,18 +213,22 @@ class RiderController extends Controller
                 $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
                 $d->customer_address = $d->address ?? 'No Address Provided';
 
-                // Set coordinates dynamically, defaulting to nearby location if none exists
-                $d->customer_latitude = $profile->latitude ?? 7.0707;
-                $d->customer_longitude = $profile->longitude ?? 125.6080;
+                $d->customer_latitude = $profile->latitude ?? null;
+                $d->customer_longitude = $profile->longitude ?? null;
 
-                // Calculate distance and ETA
-                $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $d->customer_latitude, $d->customer_longitude);
-                $d->distance = $distanceCalculator->formatDistance($distanceKm);
-                $d->distance_value = $distanceKm;
-                
-                $eta = $distanceCalculator->calculateETA($distanceKm);
-                $d->eta = $eta['text'];
-                
+                // Only calculate distance if both rider and customer have real GPS coordinates
+                if ($riderHasGps && $d->customer_latitude !== null && $d->customer_longitude !== null) {
+                    $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $d->customer_latitude, $d->customer_longitude);
+                    $d->distance = $distanceCalculator->formatDistance($distanceKm);
+                    $d->distance_value = $distanceKm;
+                    $eta = $distanceCalculator->calculateETA($distanceKm);
+                    $d->eta = $eta['text'];
+                } else {
+                    $d->distance = null;
+                    $d->distance_value = null;
+                    $d->eta = null;
+                }
+
                 return $d;
             });
 
@@ -225,38 +237,34 @@ class RiderController extends Controller
             ->where('status', 'pending')
             ->latest()
             ->get()
-            ->map(function($d) use ($riderLat, $riderLon, $distanceCalculator) {
-                // Use real coordinates from customer profile, or fallback to mock coordinates NEAR the rider's current real GPS location
+            ->map(function($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
                 $profile = $d->sale->customer->customerProfile;
 
-                // Bind customer name and address directly for easy frontend access
                 $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
                 $d->customer_address = $d->address ?? 'No Address Provided';
 
-                $customerLat = $profile->latitude ?? 7.0707;
-                $customerLon = $profile->longitude ?? 125.6080;
+                $customerLat = $profile->latitude ?? null;
+                $customerLon = $profile->longitude ?? null;
 
-                // Calculate real distance using Haversine formula
-                $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $customerLat, $customerLon);
-                
-                // Relax the radius limit for testing purposes (10km)  -Kristan
-                if ($distanceKm > 2000) {
-                    return null;
-                }
-                
                 $d->latitude = $customerLat;
                 $d->longitude = $customerLon;
-                $d->distance = $distanceCalculator->formatDistance($distanceKm);
-                $d->distance_value = $distanceKm; // For sorting
 
-                // Calculate ETA (assuming 15 km/h average speed)
-                $eta = $distanceCalculator->calculateETA($distanceKm);
-                $d->eta = $eta['text'];
+                // Only calculate distance if both rider and customer have real GPS coordinates
+                if ($riderHasGps && $customerLat !== null && $customerLon !== null) {
+                    $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $customerLat, $customerLon);
+                    $d->distance = $distanceCalculator->formatDistance($distanceKm);
+                    $d->distance_value = $distanceKm;
+                    $eta = $distanceCalculator->calculateETA($distanceKm);
+                    $d->eta = $eta['text'];
+                } else {
+                    $d->distance = null;
+                    $d->distance_value = null;
+                    $d->eta = null;
+                }
 
                 return $d;
             })
-            ->filter() // Remove null values (orders > 10km away)
-            ->sortBy('distance_value') // Sort by actual distance (closest first)
+            ->sortBy(fn($d) => $d->distance_value ?? PHP_INT_MAX)
             ->values();
 
         return response()->json([

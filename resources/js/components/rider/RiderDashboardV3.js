@@ -791,7 +791,7 @@ export default function RiderDashboardV3() {
                                                         fontWeight: 600,
                                                         color: '#6b7280'
                                                     }}>
-                                                        {delivery.distance}
+                                                        {delivery.distance ?? '—'}
                                                     </span>
                                                 </div>
                                                 <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
@@ -801,7 +801,7 @@ export default function RiderDashboardV3() {
                                                     {delivery.customer_address}
                                                 </p>
                                                 <p style={{ color: '#059669', fontSize: '0.875rem', fontWeight: 600 }}>
-                                                    ETA: {delivery.eta}
+                                                    ETA: {delivery.eta ?? 'Unknown'}
                                                 </p>
                                             </div>
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -897,7 +897,7 @@ export default function RiderDashboardV3() {
                                                             fontWeight: 600,
                                                             color: '#6b7280'
                                                         }}>
-                                                            {order.distance} • ~{order.eta}
+                                                            {order.distance ?? '—'}{order.eta ? ` • ~${order.eta}` : ''}
                                                         </span>
                                                     </div>
                                                     <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.25rem' }}>
@@ -1074,8 +1074,8 @@ export default function RiderDashboardV3() {
                                                 <div>
                                                     <strong>Order #{d.tracking_number || d.order_id}</strong><br />
                                                     {d.customer_address}<br />
-                                                    <small>Distance: {d.distance}</small><br />
-                                                    <small>ETA: {d.eta}</small>
+                                                    <small>Distance: {d.distance ?? '—'}</small><br />
+                                                    <small>ETA: {d.eta ?? 'Unknown (no GPS)'}</small>
                                                 </div>
                                             </Popup>
                                         </Marker>
