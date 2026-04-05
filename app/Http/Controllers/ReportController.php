@@ -95,7 +95,7 @@ class ReportController extends Controller
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
                 ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from->toDateString(), $to->toDateString()])
-                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending'])
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'returned'])
                 ->select(
                 'products.id',
                 'products.name',
@@ -161,7 +161,7 @@ class ReportController extends Controller
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
                 ->whereBetween(DB::raw('DATE(sales.created_at)'), [$currentFrom, $currentTo])
-                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery'])
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
                 ->whereNotNull('products.category_id')
                 ->groupBy('products.category_id')
                 ->orderByRaw('SUM(sale_items.quantity * sale_items.unit_price) DESC')
@@ -186,7 +186,7 @@ class ReportController extends Controller
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
                 ->join('categories', 'products.category_id', '=', 'categories.id')
                 ->whereBetween(DB::raw('DATE(sales.created_at)'), [$currentFrom, $currentTo])
-                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery'])
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
                 ->whereIn('products.category_id', $topCategoryIds)
                 ->groupBy('categories.id', 'categories.name')
                 ->select(
@@ -204,7 +204,7 @@ class ReportController extends Controller
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
                 ->whereIn('products.category_id', $topCategoryIds)
                 ->whereBetween(DB::raw('DATE(sales.created_at)'), [$previousFrom, $previousTo])
-                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery'])
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
                 ->groupBy('products.category_id')
                 ->select(
                     'products.category_id as id',
@@ -261,6 +261,93 @@ class ReportController extends Controller
                 'error' => 'Failed to fetch category sales',
                 'message' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function yearlyCategoryRevenue(Request $request)
+    {
+        try {
+            $year  = (int) $request->get('year', now()->year);
+            $limit = min((int) $request->get('limit', 10), 50);
+
+            $from = "{$year}-01-01";
+            $to   = "{$year}-12-31";
+
+            $categories = DB::table('sale_items')
+                ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                ->join('products', 'sale_items.product_id', '=', 'products.id')
+                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from, $to])
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
+                ->whereNotNull('products.category_id')
+                ->groupBy('categories.id', 'categories.name')
+                ->orderByRaw('SUM(sale_items.quantity * sale_items.unit_price) DESC')
+                ->limit($limit)
+                ->select(
+                    'categories.id',
+                    'categories.name',
+                    DB::raw('ROUND(SUM(sale_items.quantity * sale_items.unit_price), 2) as revenue'),
+                    DB::raw('SUM(sale_items.quantity) as units_sold')
+                )
+                ->get();
+
+            return response()->json([
+                'data'   => ['categories' => $categories, 'year' => $year],
+                'status' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch yearly category revenue', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function returnRateByCategory(Request $request)
+    {
+        try {
+            $limit = min((int) $request->get('limit', 10), 50);
+
+            $returnData = DB::table('return_order_items')
+                ->join('return_orders', 'return_order_items.return_order_id', '=', 'return_orders.id')
+                ->join('products', 'return_order_items.product_id', '=', 'products.id')
+                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->whereIn('return_orders.status', ['approved', 'completed'])
+                ->whereNotNull('products.category_id')
+                ->groupBy('categories.id', 'categories.name')
+                ->orderByRaw('SUM(return_order_items.quantity) DESC')
+                ->limit($limit)
+                ->select(
+                    'categories.id',
+                    'categories.name',
+                    DB::raw('SUM(return_order_items.quantity) as returned_units')
+                )
+                ->get();
+
+            $soldData = DB::table('sale_items')
+                ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                ->join('products', 'sale_items.product_id', '=', 'products.id')
+                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
+                ->whereNotNull('products.category_id')
+                ->groupBy('categories.id')
+                ->select('categories.id', DB::raw('SUM(sale_items.quantity) as sold_units'))
+                ->get()
+                ->keyBy('id');
+
+            $result = $returnData->map(function ($cat) use ($soldData) {
+                $sold    = $soldData->get($cat->id);
+                $soldQty = $sold ? (int) $sold->sold_units : 0;
+                $rate    = $soldQty > 0 ? round(($cat->returned_units / $soldQty) * 100, 1) : 0;
+                return [
+                    'id'             => $cat->id,
+                    'name'           => $cat->name,
+                    'returned_units' => (int) $cat->returned_units,
+                    'sold_units'     => $soldQty,
+                    'return_rate'    => $rate,
+                ];
+            })->sortByDesc('return_rate')->values();
+
+            return response()->json(['data' => $result, 'status' => 'success']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch return rate by category', 'message' => $e->getMessage()], 500);
         }
     }
 

@@ -49,29 +49,14 @@ class ReturnController extends Controller
 
     public function store(Request $request)
     {
-        \Log::info('Return request data', $request->all());
-        
-        try {
-            $data = $request->validate([
-                'sale_id'        => 'required|exists:sales,id',
-                'reason'         => 'required|in:defective,wrong_item,damaged,not_as_described,missing_parts,other',
-                'reason_details' => 'nullable|string|max:1000',
-                'items'          => 'required|array|min:1',
-                'items.*.sale_item_id' => 'required|integer',
-                'items.*.quantity'     => 'required|integer|min:1',
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Return validation failed', [
-                'errors' => $e->errors(),
-                'data' => $request->all()
-            ]);
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $e->errors(),
-                'data_sent' => $request->all(),
-                'status' => 'error'
-            ], 422);
-        }
+        $data = $request->validate([
+            'sale_id'        => 'required|exists:sales,id',
+            'reason'         => 'required|in:defective,wrong_item,damaged,not_as_described,missing_parts,other',
+            'reason_details' => 'nullable|string|max:1000',
+            'items'          => 'required|array|min:1',
+            'items.*.sale_item_id' => 'required|integer',
+            'items.*.quantity'     => 'required|integer|min:1',
+        ]);
 
         $sale = Sale::with('items')->findOrFail($data['sale_id']);
         $user = $request->user();
@@ -174,6 +159,7 @@ class ReturnController extends Controller
             'message' => 'Return request submitted successfully. Awaiting admin approval.',
             'status'  => 'success',
         ], 201);
+
     }
 
     public function show($id)
@@ -201,7 +187,7 @@ class ReturnController extends Controller
         ]);
 
         DB::transaction(function () use ($return, $request) {
-            // Restore stock for returned items
+            // Restore stock for returned items (sold count intentionally unchanged)
             foreach ($return->items as $item) {
                 if (!empty($item['product_variant_id'])) {
                     $variant = \App\Models\ProductVariant::find($item['product_variant_id']);

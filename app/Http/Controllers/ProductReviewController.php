@@ -70,7 +70,7 @@ class ProductReviewController extends Controller
 
         // Check eligibility
         $hasDeliveredOrder = Sale::where('customer_id', $customerId)
-            ->where('status', 'delivered')
+            ->whereIn('status', ['delivered', 'returned'])
             ->whereHas('items', function ($q) use ($data) {
                 $q->where('product_id', $data['product_id']);
             })
@@ -127,7 +127,7 @@ class ProductReviewController extends Controller
         // Calculate total sold quantity for this product
         $totalSold = \App\Models\SaleItem::where('product_id', $productId)
             ->whereHas('sale', function ($query) {
-                $query->whereIn('status', ['delivered', 'completed', 'processing']);
+                $query->whereIn('status', ['delivered', 'completed', 'processing', 'returned']);
             })
             ->sum('quantity');
 
@@ -280,7 +280,7 @@ class ProductReviewController extends Controller
 
         // Check if customer has a delivered order with this product
         $hasDeliveredOrder = Sale::where('customer_id', $customerId)
-            ->where('status', 'delivered')
+            ->whereIn('status', ['delivered', 'returned'])
             ->whereHas('items', function ($q) use ($productId, $variantId) {
                 $q->where('product_id', $productId);
                 if ($variantId) {
