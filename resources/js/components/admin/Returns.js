@@ -331,25 +331,25 @@ export default function Returns() {
                                                 </div>
                                             </div>
                                             {/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? (
-                                                <div className="space-y-2">
-                                                    <button
-                                                        onClick={() => {
-                                                            const phone = r.sale.payment_phone_number;
-                                                            try { navigator.clipboard.writeText(phone); } catch (e) {}
-                                                            if (/Android/i.test(navigator.userAgent)) {
-                                                                window.location.href = 'intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.globe.gcash.android;end';
-                                                            } else {
-                                                                window.location.href = 'gcash://';
-                                                            }
-                                                            showToast('GCash opening — tap Send Money and paste the number', 'success');
-                                                        }}
-                                                        className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors"
-                                                    >
-                                                        <ExternalLink className="h-4 w-4" />
-                                                        Open GCash App
-                                                    </button>
-                                                    <p className="text-xs text-green-700 text-center">Number auto-copied — tap Send Money in GCash and paste</p>
-                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        const phone = r.sale.payment_phone_number;
+                                                        const amount = Number(r.refund_amount).toFixed(2);
+                                                        try {
+                                                            navigator.clipboard.writeText(`${phone}\n${amount}`);
+                                                        } catch (e) {}
+                                                        if (/Android/i.test(navigator.userAgent)) {
+                                                            window.location.href = 'intent://#Intent;scheme=gcash;package=com.globe.gcash.android;end';
+                                                        } else {
+                                                            window.location.href = 'gcash://';
+                                                        }
+                                                        showToast('Number & amount copied to clipboard', 'success');
+                                                    }}
+                                                    className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors"
+                                                >
+                                                    <ExternalLink className="h-4 w-4" />
+                                                    Open GCash App
+                                                </button>
                                             ) : (
                                                 <p className="text-xs text-green-700 bg-green-100 rounded-lg p-2 text-center">
                                                     Open your GCash app → Send Money → type the number above
