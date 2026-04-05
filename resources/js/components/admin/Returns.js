@@ -331,13 +331,13 @@ export default function Returns() {
                                                 </div>
                                             </div>
                                             {/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? (
-                                                <a
-                                                    href={`gcash://send?phone=${r.sale.payment_phone_number}&amount=${Number(r.refund_amount).toFixed(2)}`}
+                                                <button
+                                                    onClick={() => { window.location.href = `gcash://send?phone=${r.sale.payment_phone_number}&amount=${Number(r.refund_amount).toFixed(2)}`; }}
                                                     className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors"
                                                 >
                                                     <ExternalLink className="h-4 w-4" />
                                                     Open GCash App
-                                                </a>
+                                                </button>
                                             ) : (
                                                 <p className="text-xs text-green-700 bg-green-100 rounded-lg p-2 text-center">
                                                     Open your GCash app → Send Money → type the number above

@@ -9441,8 +9441,10 @@ function Returns() {
                       })]
                     })]
                   })]
-                }), /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsxs)("a", {
-                  href: "gcash://send?phone=".concat(r.sale.payment_phone_number, "&amount=").concat(Number(r.refund_amount).toFixed(2)),
+                }), /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsxs)("button", {
+                  onClick: function onClick() {
+                    window.location.href = "gcash://send?phone=".concat(r.sale.payment_phone_number, "&amount=").concat(Number(r.refund_amount).toFixed(2));
+                  },
                   className: "flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors",
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"], {
                     className: "h-4 w-4"
