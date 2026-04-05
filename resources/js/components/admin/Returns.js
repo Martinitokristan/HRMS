@@ -332,7 +332,15 @@ export default function Returns() {
                                             </div>
                                             {/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? (
                                                 <button
-                                                    onClick={() => { window.location.href = `gcash://send?phone=${r.sale.payment_phone_number}&amount=${Number(r.refund_amount).toFixed(2)}`; }}
+                                                    onClick={() => {
+                                                        const phone = r.sale.payment_phone_number;
+                                                        const amount = Number(r.refund_amount).toFixed(2);
+                                                        if (/Android/i.test(navigator.userAgent)) {
+                                                            window.location.href = `intent://send?phone=${phone}&amount=${amount}#Intent;scheme=gcash;package=com.globe.gcash.android;end`;
+                                                        } else {
+                                                            window.location.href = `gcash://send?phone=${phone}&amount=${amount}`;
+                                                        }
+                                                    }}
                                                     className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors"
                                                 >
                                                     <ExternalLink className="h-4 w-4" />
