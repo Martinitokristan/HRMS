@@ -321,6 +321,7 @@ export default function Returns() {
                                                         <button
                                                             onClick={() => {
                                                                 navigator.clipboard.writeText(r.sale.payment_phone_number);
+                                                                showToast('Number copied to clipboard', 'success');
                                                             }}
                                                             className="text-green-600 hover:text-green-800 transition-colors p-1 rounded"
                                                             title="Copy number"
@@ -333,17 +334,11 @@ export default function Returns() {
                                             {/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? (
                                                 <button
                                                     onClick={() => {
-                                                        const phone = r.sale.payment_phone_number;
-                                                        const amount = Number(r.refund_amount).toFixed(2);
-                                                        try {
-                                                            navigator.clipboard.writeText(`${phone}\n${amount}`);
-                                                        } catch (e) {}
                                                         if (/Android/i.test(navigator.userAgent)) {
                                                             window.location.href = 'intent://#Intent;scheme=gcash;package=com.globe.gcash.android;end';
                                                         } else {
                                                             window.location.href = 'gcash://';
                                                         }
-                                                        showToast('Number & amount copied to clipboard', 'success');
                                                     }}
                                                     className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors"
                                                 >
