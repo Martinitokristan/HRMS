@@ -305,47 +305,84 @@ class ReportController extends Controller
         try {
             $limit = min((int) $request->get('limit', 10), 50);
 
-            $returnData = DB::table('return_order_items')
-                ->join('return_orders', 'return_order_items.return_order_id', '=', 'return_orders.id')
-                ->join('products', 'return_order_items.product_id', '=', 'products.id')
-                ->join('categories', 'products.category_id', '=', 'categories.id')
-                ->whereIn('return_orders.status', ['approved', 'completed'])
-                ->whereNotNull('products.category_id')
-                ->groupBy('categories.id', 'categories.name')
-                ->orderByRaw('SUM(return_order_items.quantity) DESC')
-                ->limit($limit)
-                ->select(
-                    'categories.id',
-                    'categories.name',
-                    DB::raw('SUM(return_order_items.quantity) as returned_units')
-                )
+            // items are stored as JSON in the 'returns' table (no separate items table)
+            $returns = DB::table('returns')
+                ->whereIn('status', ['approved', 'completed'])
+                ->whereNotNull('items')
+                ->select('items')
                 ->get();
 
+            // Aggregate returned units per product_id from JSON
+            $returnedByProduct = [];
+            foreach ($returns as $ret) {
+                $items = json_decode($ret->items, true) ?? [];
+                foreach ($items as $item) {
+                    $pid = $item['product_id'] ?? null;
+                    if ($pid) {
+                        $returnedByProduct[$pid] = ($returnedByProduct[$pid] ?? 0) + (int) ($item['quantity'] ?? 0);
+                    }
+                }
+            }
+
+            if (empty($returnedByProduct)) {
+                return response()->json(['data' => [], 'status' => 'success']);
+            }
+
+            // Map product_ids to categories
+            $productIds = array_keys($returnedByProduct);
+            $products   = DB::table('products')
+                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->whereIn('products.id', $productIds)
+                ->whereNotNull('products.category_id')
+                ->select('products.id as product_id', 'categories.id as category_id', 'categories.name as category_name')
+                ->get()
+                ->keyBy('product_id');
+
+            // Aggregate returned units by category
+            $returnedByCategory = [];
+            foreach ($returnedByProduct as $pid => $qty) {
+                $product = $products->get($pid);
+                if (!$product) continue;
+                $cid = $product->category_id;
+                if (!isset($returnedByCategory[$cid])) {
+                    $returnedByCategory[$cid] = ['id' => $cid, 'name' => $product->category_name, 'returned_units' => 0];
+                }
+                $returnedByCategory[$cid]['returned_units'] += $qty;
+            }
+
+            // Sort by returned_units desc and slice top N
+            usort($returnedByCategory, fn ($a, $b) => $b['returned_units'] - $a['returned_units']);
+            $topCategories   = array_slice($returnedByCategory, 0, $limit);
+            $topCategoryIds  = array_column($topCategories, 'id');
+
+            // Fetch sold units for these categories
             $soldData = DB::table('sale_items')
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
-                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->whereIn('products.category_id', $topCategoryIds)
                 ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
                 ->whereNotNull('products.category_id')
-                ->groupBy('categories.id')
-                ->select('categories.id', DB::raw('SUM(sale_items.quantity) as sold_units'))
+                ->groupBy('products.category_id')
+                ->select('products.category_id', DB::raw('SUM(sale_items.quantity) as sold_units'))
                 ->get()
-                ->keyBy('id');
+                ->keyBy('category_id');
 
-            $result = $returnData->map(function ($cat) use ($soldData) {
-                $sold    = $soldData->get($cat->id);
+            $result = array_map(function ($cat) use ($soldData) {
+                $sold    = $soldData->get($cat['id']);
                 $soldQty = $sold ? (int) $sold->sold_units : 0;
-                $rate    = $soldQty > 0 ? round(($cat->returned_units / $soldQty) * 100, 1) : 0;
+                $rate    = $soldQty > 0 ? round(($cat['returned_units'] / $soldQty) * 100, 1) : 0;
                 return [
-                    'id'             => $cat->id,
-                    'name'           => $cat->name,
-                    'returned_units' => (int) $cat->returned_units,
+                    'id'             => $cat['id'],
+                    'name'           => $cat['name'],
+                    'returned_units' => $cat['returned_units'],
                     'sold_units'     => $soldQty,
                     'return_rate'    => $rate,
                 ];
-            })->sortByDesc('return_rate')->values();
+            }, $topCategories);
 
-            return response()->json(['data' => $result, 'status' => 'success']);
+            usort($result, fn ($a, $b) => $b['return_rate'] <=> $a['return_rate']);
+
+            return response()->json(['data' => array_values($result), 'status' => 'success']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch return rate by category', 'message' => $e->getMessage()], 500);
         }
