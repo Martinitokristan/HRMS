@@ -19,5 +19,8 @@ Route::post('/broadcasting/auth', [BroadcastAuthController::class, 'authenticate
 */
 
 Route::get('/{any}', function () {
-    return view('app');
+    return response(view('app'))
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', '0');
 })->where('any', '.*');
