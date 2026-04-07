@@ -561,99 +561,96 @@ export default function CustomerOrder() {
                 </Modal>
 
                 {/* GCash Payment Modal */}
-                <Modal
-                    isOpen={gcashModal}
-                    onClose={() => { }} // Block normal close to enforce flow
-                    title="📱 GCash Automatic Payment"
-                    size="md"
-                    hideFooter
-                >
-                    <div className="pb-6 px-2 text-center">
-                        <div className="bg-blue-600 rounded-xl p-6 text-white text-center shadow-xl shadow-blue-500/20 mb-6">
-                            <h3 className="text-xl font-bold mb-2">Total Amount to Pay</h3>
-                            <div className="text-5xl font-black tracking-tighter mb-1">
-                                ₱{parseFloat(gcashAmount || 0).toFixed(2)}
+                {gcashModal && (
+                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+                        <div style={{ background: '#fff', borderRadius: 14, boxShadow: '0 8px 30px rgba(0,0,0,0.16)', width: '90vw', maxWidth: 420, fontFamily: 'Inter, system-ui, sans-serif', overflow: 'hidden' }}>
+
+                            {/* Blue header */}
+                            <div style={{ background: '#1A6FE8', padding: '12px 20px', textAlign: 'center' }}>
+                                <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
+                                    ₱{parseFloat(gcashAmount || 0).toFixed(2)}
+                                </div>
+                                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
+                                    Pay this exact amount via GCash
+                                </div>
                             </div>
-                            <p className="text-blue-100 text-sm italic mt-2">
-                                Pay this exact amount via GCash.
-                            </p>
-                        </div>
 
-                        <div className="bg-white p-4 rounded-xl border-2 border-dashed border-gray-300 w-fit mx-auto shadow-sm flex flex-col items-center">
-                            {gcashAmount && gcashBasePayload && (
-                                <QRCodeCanvas
-                                    id="dynamic-gcash-qr"
-                                    value={generateDynamicQRPayload(gcashBasePayload, gcashAmount)}
-                                    size={220}
-                                    level={"M"}
-                                    includeMargin={true}
-                                />
-                            )}
-                            <div className="mt-4 flex flex-col sm:flex-row gap-2 w-full">
-                                <Button
-                                    variant="outline"
-                                    className="w-full gap-2 border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800"
-                                    onClick={() => {
-                                        const canvas = document.getElementById('dynamic-gcash-qr');
-                                        if (canvas) {
-                                            const url = canvas.toDataURL('image/png');
-                                            const link = document.createElement('a');
-                                            link.download = `GCash-Payment-${parseFloat(gcashAmount).toFixed(2)}.png`;
-                                            link.href = url;
-                                            link.click();
-                                            showToast("QR code saved to your device!", "success");
-                                        }
-                                    }}
-                                >
-                                    <Download className="h-4 w-4" /> Save QR Image
-                                </Button>
-                                {/* Only show Open GCash on mobile view by using sm:hidden */}
-                                <Button
-                                    className="w-full gap-2 bg-blue-600 hover:bg-blue-700 sm:hidden"
-                                    onClick={() => {
-                                        window.location.href = "intent://#Intent;scheme=gcash;package=com.globe.gcash.android;end";
-                                        setTimeout(() => {
-                                            // Fallback to app store if GCash intent fails
-                                            window.open("https://play.google.com/store/apps/details?id=com.globe.gcash.android", "_blank");
-                                        }, 1000);
-                                    }}
-                                >
-                                    <Smartphone className="h-4 w-4" /> Open app
-                                </Button>
+                            {/* Body */}
+                            <div style={{ padding: '16px 20px 0' }}>
+
+                                {/* QR code */}
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#F4F6F9', borderRadius: 10, padding: '14px 14px 10px' }}>
+                                    {gcashAmount && gcashBasePayload && (
+                                        <QRCodeCanvas
+                                            id="dynamic-gcash-qr"
+                                            value={generateDynamicQRPayload(gcashBasePayload, gcashAmount)}
+                                            size={180}
+                                            level="M"
+                                            includeMargin={true}
+                                        />
+                                    )}
+                                    {/* Save QR button */}
+                                    <button
+                                        style={{ marginTop: 8, height: 32, padding: '0 14px', fontSize: 13, color: '#1A6FE8', background: '#fff', border: '1px solid #1A6FE8', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                                        onClick={() => {
+                                            const canvas = document.getElementById('dynamic-gcash-qr');
+                                            if (canvas) {
+                                                const url = canvas.toDataURL('image/png');
+                                                const link = document.createElement('a');
+                                                link.download = `GCash-Payment-${parseFloat(gcashAmount).toFixed(2)}.png`;
+                                                link.href = url;
+                                                link.click();
+                                                showToast("QR code saved to your device!", "success");
+                                            }
+                                        }}
+                                    >
+                                        <Download className="h-3.5 w-3.5" /> Save QR Image
+                                    </button>
+                                    {/* Open GCash app — mobile only */}
+                                    <button
+                                        className="sm:hidden"
+                                        style={{ marginTop: 6, height: 32, padding: '0 14px', fontSize: 13, color: '#fff', background: '#1A6FE8', border: 'none', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                                        onClick={() => {
+                                            window.location.href = "intent://#Intent;scheme=gcash;package=com.globe.gcash.android;end";
+                                            setTimeout(() => {
+                                                window.open("https://play.google.com/store/apps/details?id=com.globe.gcash.android", "_blank");
+                                            }, 1000);
+                                        }}
+                                    >
+                                        <Smartphone className="h-3.5 w-3.5" /> Open GCash App
+                                    </button>
+                                </div>
+
+                                {/* Instructions */}
+                                <div style={{ background: '#F4F6F9', borderRadius: 8, padding: '10px 12px', marginTop: 10 }}>
+                                    <div style={{ fontSize: 13, fontWeight: 600, color: '#1A1A2E', marginBottom: 6 }}>How to pay on mobile:</div>
+                                    <ol style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#6B7280', lineHeight: 1.6, listStyleType: 'decimal' }}>
+                                        <li>Tap <strong style={{ color: '#1A1A2E' }}>Save QR Image</strong> above.</li>
+                                        <li>Open GCash → tap <strong style={{ color: '#1A1A2E' }}>Scan</strong> or <strong style={{ color: '#1A1A2E' }}>Pay QR</strong>.</li>
+                                        <li>Select <strong style={{ color: '#1A1A2E' }}>Upload image</strong> and choose the saved QR.</li>
+                                        <li>Confirm number: <strong style={{ color: '#1A6FE8' }}>{paymentPhoneNumber}</strong></li>
+                                    </ol>
+                                </div>
+
+                                {/* CTA */}
+                                <div style={{ padding: '12px 0 16px' }}>
+                                    <button
+                                        style={{ width: '100%', height: 44, background: '#FF6B00', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                                        onClick={completeOrderSuccess}
+                                    >
+                                        <CheckCircle2 className="h-4 w-4" /> Done, I have Paid!
+                                    </button>
+                                    <button
+                                        style={{ width: '100%', marginTop: 8, height: 36, background: 'none', border: 'none', fontSize: 13, color: '#6B7280', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                                        onClick={() => { setGcashModal(false); navigate("/shop"); }}
+                                    >
+                                        <ArrowLeft className="h-3.5 w-3.5" /> Back to Shop
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="mt-8 text-left space-y-3 bg-secondary/50 p-4 rounded-xl text-sm mb-8 border border-border/50">
-                            <p className="font-bold flex items-center gap-2 text-foreground"><Smartphone className="h-4 w-4 text-primary" /> How to pay on mobile:</p>
-                            <ol className="list-decimal list-inside space-y-2 text-muted-foreground pl-1">
-                                <li>Tap <strong>Save QR Image</strong> above.</li>
-                                <li>Tap <strong>Open app</strong> (or manually open GCash).</li>
-                                <li>In GCash, tap <strong>Scan</strong> or <strong>Pay QR</strong>.</li>
-                                <li>Select the "Upload image" icon to choose your downloaded QR.</li>
-                                <li>Ensure the number matches: <span className="font-bold text-blue-600">{paymentPhoneNumber}</span></li>
-                            </ol>
-                        </div>
-
-                        <div className="flex flex-col gap-3">
-                            <Button
-                                className="w-full h-14 text-lg font-bold shadow-lg shadow-primary/20"
-                                onClick={completeOrderSuccess}
-                            >
-                                <CheckCircle2 className="h-5 w-5 mr-2" /> Done, I have Paid!
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className="w-full text-muted-foreground"
-                                onClick={() => {
-                                    setGcashModal(false);
-                                    navigate("/shop");
-                                }}
-                            >
-                                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Shop
-                            </Button>
                         </div>
                     </div>
-                </Modal>
+                )}
             </div>
         );
     }

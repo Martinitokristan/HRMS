@@ -15450,40 +15450,83 @@ function CustomerOrder() {
             })]
           })]
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_10__["default"], {
-        isOpen: gcashModal,
-        onClose: function onClose() {} // Block normal close to enforce flow
-        ,
-        title: "\uD83D\uDCF1 GCash Automatic Payment",
-        size: "md",
-        hideFooter: true,
+      }), gcashModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("div", {
+        style: {
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.55)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50,
+          padding: 16
+        },
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
-          className: "pb-6 px-2 text-center",
+          style: {
+            background: '#fff',
+            borderRadius: 14,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.16)',
+            width: '90vw',
+            maxWidth: 420,
+            fontFamily: 'Inter, system-ui, sans-serif',
+            overflow: 'hidden'
+          },
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
-            className: "bg-blue-600 rounded-xl p-6 text-white text-center shadow-xl shadow-blue-500/20 mb-6",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("h3", {
-              className: "text-xl font-bold mb-2",
-              children: "Total Amount to Pay"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
-              className: "text-5xl font-black tracking-tighter mb-1",
+            style: {
+              background: '#1A6FE8',
+              padding: '12px 20px',
+              textAlign: 'center'
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
+              style: {
+                fontSize: 22,
+                fontWeight: 700,
+                color: '#fff',
+                lineHeight: 1.2
+              },
               children: ["\u20B1", parseFloat(gcashAmount || 0).toFixed(2)]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("p", {
-              className: "text-blue-100 text-sm italic mt-2",
-              children: "Pay this exact amount via GCash."
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("div", {
+              style: {
+                fontSize: 12,
+                color: 'rgba(255,255,255,0.8)',
+                marginTop: 2
+              },
+              children: "Pay this exact amount via GCash"
             })]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
-            className: "bg-white p-4 rounded-xl border-2 border-dashed border-gray-300 w-fit mx-auto shadow-sm flex flex-col items-center",
-            children: [gcashAmount && gcashBasePayload && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(qrcode_react__WEBPACK_IMPORTED_MODULE_27__.QRCodeCanvas, {
-              id: "dynamic-gcash-qr",
-              value: generateDynamicQRPayload(gcashBasePayload, gcashAmount),
-              size: 220,
-              level: "M",
-              includeMargin: true
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
-              className: "mt-4 flex flex-col sm:flex-row gap-2 w-full",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_11__.Button, {
-                variant: "outline",
-                className: "w-full gap-2 border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800",
+            style: {
+              padding: '16px 20px 0'
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
+              style: {
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                background: '#F4F6F9',
+                borderRadius: 10,
+                padding: '14px 14px 10px'
+              },
+              children: [gcashAmount && gcashBasePayload && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(qrcode_react__WEBPACK_IMPORTED_MODULE_27__.QRCodeCanvas, {
+                id: "dynamic-gcash-qr",
+                value: generateDynamicQRPayload(gcashBasePayload, gcashAmount),
+                size: 180,
+                level: "M",
+                includeMargin: true
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("button", {
+                style: {
+                  marginTop: 8,
+                  height: 32,
+                  padding: '0 14px',
+                  fontSize: 13,
+                  color: '#1A6FE8',
+                  background: '#fff',
+                  border: '1px solid #1A6FE8',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                },
                 onClick: function onClick() {
                   var canvas = document.getElementById('dynamic-gcash-qr');
                   if (canvas) {
@@ -15496,72 +15539,140 @@ function CustomerOrder() {
                   }
                 },
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_22__["default"], {
-                  className: "h-4 w-4"
+                  className: "h-3.5 w-3.5"
                 }), " Save QR Image"]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_11__.Button, {
-                className: "w-full gap-2 bg-blue-600 hover:bg-blue-700 sm:hidden",
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("button", {
+                className: "sm:hidden",
+                style: {
+                  marginTop: 6,
+                  height: 32,
+                  padding: '0 14px',
+                  fontSize: 13,
+                  color: '#fff',
+                  background: '#1A6FE8',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                },
                 onClick: function onClick() {
                   window.location.href = "intent://#Intent;scheme=gcash;package=com.globe.gcash.android;end";
                   setTimeout(function () {
-                    // Fallback to app store if GCash intent fails
                     window.open("https://play.google.com/store/apps/details?id=com.globe.gcash.android", "_blank");
                   }, 1000);
                 },
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_26__["default"], {
-                  className: "h-4 w-4"
-                }), " Open app"]
+                  className: "h-3.5 w-3.5"
+                }), " Open GCash App"]
               })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
-            className: "mt-8 text-left space-y-3 bg-secondary/50 p-4 rounded-xl text-sm mb-8 border border-border/50",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("p", {
-              className: "font-bold flex items-center gap-2 text-foreground",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_26__["default"], {
-                className: "h-4 w-4 text-primary"
-              }), " How to pay on mobile:"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("ol", {
-              className: "list-decimal list-inside space-y-2 text-muted-foreground pl-1",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("li", {
-                children: ["Tap ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
-                  children: "Save QR Image"
-                }), " above."]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("li", {
-                children: ["Tap ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
-                  children: "Open app"
-                }), " (or manually open GCash)."]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("li", {
-                children: ["In GCash, tap ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
-                  children: "Scan"
-                }), " or ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
-                  children: "Pay QR"
-                }), "."]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("li", {
-                children: "Select the \"Upload image\" icon to choose your downloaded QR."
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("li", {
-                children: ["Ensure the number matches: ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("span", {
-                  className: "font-bold text-blue-600",
-                  children: paymentPhoneNumber
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
+              style: {
+                background: '#F4F6F9',
+                borderRadius: 8,
+                padding: '10px 12px',
+                marginTop: 10
+              },
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("div", {
+                style: {
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: '#1A1A2E',
+                  marginBottom: 6
+                },
+                children: "How to pay on mobile:"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("ol", {
+                style: {
+                  margin: 0,
+                  paddingLeft: 18,
+                  fontSize: 12,
+                  color: '#6B7280',
+                  lineHeight: 1.6,
+                  listStyleType: 'decimal'
+                },
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("li", {
+                  children: ["Tap ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
+                    style: {
+                      color: '#1A1A2E'
+                    },
+                    children: "Save QR Image"
+                  }), " above."]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("li", {
+                  children: ["Open GCash \u2192 tap ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
+                    style: {
+                      color: '#1A1A2E'
+                    },
+                    children: "Scan"
+                  }), " or ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
+                    style: {
+                      color: '#1A1A2E'
+                    },
+                    children: "Pay QR"
+                  }), "."]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("li", {
+                  children: ["Select ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
+                    style: {
+                      color: '#1A1A2E'
+                    },
+                    children: "Upload image"
+                  }), " and choose the saved QR."]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("li", {
+                  children: ["Confirm number: ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)("strong", {
+                    style: {
+                      color: '#1A6FE8'
+                    },
+                    children: paymentPhoneNumber
+                  })]
                 })]
               })]
-            })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
-            className: "flex flex-col gap-3",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_11__.Button, {
-              className: "w-full h-14 text-lg font-bold shadow-lg shadow-primary/20",
-              onClick: completeOrderSuccess,
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
-                className: "h-5 w-5 mr-2"
-              }), " Done, I have Paid!"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_11__.Button, {
-              variant: "ghost",
-              className: "w-full text-muted-foreground",
-              onClick: function onClick() {
-                setGcashModal(false);
-                navigate("/shop");
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("div", {
+              style: {
+                padding: '12px 0 16px'
               },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_20__["default"], {
-                className: "h-4 w-4 mr-2"
-              }), " Back to Shop"]
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("button", {
+                style: {
+                  width: '100%',
+                  height: 44,
+                  background: '#FF6B00',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8
+                },
+                onClick: completeOrderSuccess,
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
+                  className: "h-4 w-4"
+                }), " Done, I have Paid!"]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsxs)("button", {
+                style: {
+                  width: '100%',
+                  marginTop: 8,
+                  height: 36,
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 13,
+                  color: '#6B7280',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                },
+                onClick: function onClick() {
+                  setGcashModal(false);
+                  navigate("/shop");
+                },
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_31__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_20__["default"], {
+                  className: "h-3.5 w-3.5"
+                }), " Back to Shop"]
+              })]
             })]
           })]
         })
