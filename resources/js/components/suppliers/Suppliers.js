@@ -4,7 +4,6 @@ import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import StatCard from '../shared/StatCard';
-import Modal from '../shared/Modal';
 import ConfirmModal from '../shared/ConfirmModal';
 import SupplierForm from './SupplierForm';
 import SupplierViewModal from './SupplierViewModal';
@@ -298,18 +297,12 @@ export default function Suppliers() {
             )}
 
             {/* Modals */}
-            <Modal
+            <SupplierForm
                 isOpen={isModalOpen}
-                onClose={handleModalClose}
-                title={selectedSupplier ? 'Edit Supplier' : 'Add New Supplier'}
-                size="md"
-            >
-                <SupplierForm
-                    supplier={selectedSupplier}
-                    onSuccess={handleSaveSuccess}
-                    onCancel={handleModalClose}
-                />
-            </Modal>
+                supplier={selectedSupplier}
+                onSuccess={handleSaveSuccess}
+                onCancel={handleModalClose}
+            />
 
             <ConfirmModal
                 modal={confirmModal || { show: false }}

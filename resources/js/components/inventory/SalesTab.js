@@ -381,8 +381,6 @@ export default function SalesTab() {
 
 function SalesReceiptModal({ order, onClose, settings }) {
     const storeName = settings?.general?.store_name || 'Store';
-    const storeAddress = settings?.general?.store_address || '';
-    const storePhone = settings?.general?.contact_number || '';
     const storeEmail = settings?.general?.contact_email || '';
     const taxRate = parseFloat(settings?.general?.tax_rate || 0);
 
@@ -394,141 +392,151 @@ function SalesReceiptModal({ order, onClose, settings }) {
     const grandTotal = Number(order.total_amount || 0);
 
     const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
-    const fmtMoney = (n) => `\u20b1${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const fmtMoney = (n) => `₱${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const paymentLabel = (order.payment_method || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
     return (
-            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl relative">
+        <div
+            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+            onClick={onClose}
+        >
+            <div
+                className="relative w-full max-w-[600px] rounded-[10px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.15)] bg-white max-h-[92vh] flex flex-col"
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Close button overlays light header */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-[14px] right-[16px] text-[#6b7280] hover:text-[#111827] transition-colors z-10"
+                >
+                    <X className="h-[18px] w-[18px]" />
+                </button>
 
-                    {/* Close button — top-right */}
-                    <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground h-7 w-7 z-10">
-                        <X className="h-3.5 w-3.5" />
-                    </Button>
+                {/* Light Gray Header Banner */}
+                <div className="bg-[#f3f4f6] px-6 py-[18px] flex flex-col items-center text-center shrink-0 border-b border-[#e5e7eb]">
+                    <h1 className="text-[18px] font-bold text-[#111827] tracking-[0.02em]">{storeName}</h1>
+                    <span className="mt-1.5 bg-[#e5e7eb] text-[#6b7280] text-[10px] tracking-[0.08em] px-3 py-[3px] rounded-[20px]">
+                        OFFICIAL SALES RECEIPT
+                    </span>
+                </div>
 
-                    {/* Receipt body */}
-                    <div id="sales-receipt-area" className="px-8 pt-8 pb-8 space-y-5">
+                {/* Scrollable body */}
+                <div className="overflow-y-auto flex-1">
 
-                        {/* Store header — name only */}
-                        <div className="flex flex-col items-center text-center gap-1 pb-5 border-b border-gray-200">
-                            <h1 className="text-xl font-bold text-gray-900">{storeName}</h1>
-                            {storeAddress && <p className="text-xs text-gray-500">{storeAddress}</p>}
-                            {(storePhone || storeEmail) && (
-                                <p className="text-xs text-gray-500">{[storePhone, storeEmail].filter(Boolean).join(' · ')}</p>
-                            )}
-                            <span className="mt-1 text-[10px] font-bold uppercase tracking-widest text-gray-400 border border-gray-200 rounded-full px-3 py-0.5">Official Receipt</span>
+                    {/* Meta Info Row */}
+                    <div className="flex gap-4 px-6 py-[14px] bg-[#f9fafb] border-b border-[#e5e7eb]">
+                        <div className="flex-1">
+                            <p className="text-[10px] text-[#9ca3af] uppercase tracking-[0.06em] mb-0.5">OR Number</p>
+                            <p className="text-[15px] font-bold text-[#f97316]">{order.order_number}</p>
                         </div>
-
-                        {/* OR meta row */}
-                        <div className="grid grid-cols-3 gap-4 py-1">
-                            <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">OR Number</p>
-                                <p className="font-black text-base text-primary">{order.order_number}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Date Ordered</p>
-                                <p className="text-sm font-semibold text-gray-800">{fmtDate(order.created_at)}</p>
-                            </div>
-                            {order.delivery?.delivered_at && (
-                                <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Date Delivered</p>
-                                    <p className="text-sm font-semibold text-primary">{fmtDate(order.delivery.delivered_at)}</p>
-                                </div>
-                            )}
+                        <div className="flex-1">
+                            <p className="text-[10px] text-[#9ca3af] uppercase tracking-[0.06em] mb-0.5">Date Ordered</p>
+                            <p className="text-[14px] font-semibold text-[#111827]">{fmtDate(order.created_at)}</p>
                         </div>
-
-                        {/* Bill to / address / payment */}
-                        <div className="grid grid-cols-3 gap-4 border border-gray-100 rounded-lg p-4 bg-gray-50/50">
-                            <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Bill To</p>
-                                <p className="font-bold text-sm text-gray-900 leading-snug">{order.customer?.name}</p>
-                                {order.customer?.email && <p className="text-xs text-primary mt-0.5">{order.customer.email}</p>}
-                                {order.customer?.phone && <p className="text-xs text-gray-500 mt-0.5">{order.customer.phone}</p>}
-                            </div>
-                            {order.delivery?.address && (
-                                <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Delivery Address</p>
-                                    <p className="text-xs text-gray-700 leading-snug">{order.delivery.address}</p>
-                                </div>
-                            )}
-                            <div className="text-right">
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Payment</p>
-                                <Badge variant="outline" className="uppercase font-semibold text-xs">
-                                    {order.payment_method}
-                                </Badge>
-                                {order.payment_reference && (
-                                    <p className="text-[11px] text-gray-400 font-mono mt-1">Ref: {order.payment_reference}</p>
-                                )}
-                                {order.payment_phone_number && (
-                                    <p className="text-[11px] text-gray-400 mt-0.5">{order.payment_phone_number}</p>
-                                )}
-                            </div>
+                        <div className="flex-1">
+                            <p className="text-[10px] text-[#9ca3af] uppercase tracking-[0.06em] mb-0.5">Date Delivered</p>
+                            <p className="text-[14px] font-semibold text-[#f97316]">{fmtDate(order.delivery?.delivered_at)}</p>
                         </div>
+                    </div>
 
-                        {/* Items — plain rows with black header line */}
+                    {/* Bill To / Delivery Address / Payment */}
+                    <div className="grid grid-cols-3 gap-3 px-6 py-3 border-b border-[#e5e7eb]">
                         <div>
-                            {/* Column headers */}
-                            <div className="grid grid-cols-[1fr_60px_80px_80px] gap-2 pb-2 border-b border-black">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Item Description</p>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 text-center">QTY</p>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 text-right">Unit Price</p>
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 text-right">Amount</p>
-                            </div>
-                            {/* Item rows */}
-                            {order.items?.map((item, idx) => {
-                                const variantLabel = item.product_variant
-                                    ? [item.product_variant.size_value?.label, item.product_variant.color_value?.label, item.product_variant.weight_value?.label].filter(Boolean).join(' / ')
-                                    : null;
-                                return (
-                                    <div key={item.id || idx} className="grid grid-cols-[1fr_60px_80px_80px] gap-2 py-3 border-b border-gray-100 items-start">
-                                        <div>
-                                            <p className="font-semibold text-sm text-gray-900">{item.product?.name}</p>
-                                            {variantLabel
-                                                ? <p className="text-[11px] text-primary font-medium mt-0.5">{variantLabel}</p>
-                                                : <p className="text-[11px] text-gray-400 mt-0.5">Base · {item.product?.barcode}</p>
-                                            }
-                                        </div>
-                                        <p className="text-sm font-semibold text-gray-800 text-center pt-0.5">{parseInt(item.quantity)}</p>
-                                        <p className="text-sm text-gray-500 text-right pt-0.5">{fmtMoney(item.unit_price)}</p>
-                                        <p className="text-sm font-bold text-gray-900 text-right pt-0.5">{fmtMoney(item.subtotal)}</p>
-                                    </div>
-                                );
-                            })}
+                            <p className="text-[10px] text-[#9ca3af] uppercase tracking-[0.06em] mb-0.5">Bill To</p>
+                            <p className="text-[13px] font-semibold text-[#111827] leading-snug">{order.customer?.name || '—'}</p>
+                            {order.customer?.email && <p className="text-[11px] text-[#f97316] mt-0.5">{order.customer.email}</p>}
+                            {order.customer?.phone && <p className="text-[11px] text-[#9ca3af] mt-0.5">{order.customer.phone}</p>}
                         </div>
+                        <div>
+                            <p className="text-[10px] text-[#9ca3af] uppercase tracking-[0.06em] mb-0.5">Delivery Address</p>
+                            <p className="text-[13px] font-semibold text-[#111827] leading-snug">{order.delivery?.address || '—'}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] text-[#9ca3af] uppercase tracking-[0.06em] mb-0.5">Payment</p>
+                            <span className="inline-flex items-center rounded-[20px] px-[10px] py-[2px] text-[11px] font-medium bg-blue-50 text-blue-600">
+                                {paymentLabel || '—'}
+                            </span>
+                            {order.payment_reference && (
+                                <p className="text-[11px] text-[#9ca3af] font-mono mt-1">Ref: {order.payment_reference}</p>
+                            )}
+                            {order.payment_phone_number && (
+                                <p className="text-[11px] text-[#9ca3af] mt-0.5">{order.payment_phone_number}</p>
+                            )}
+                        </div>
+                    </div>
 
-                        {/* Totals */}
-                        <div className="flex justify-end">
-                            <div className="w-52 space-y-1.5">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-500">Subtotal</span>
-                                    <span className="font-semibold text-gray-800">{fmtMoney(itemsSubtotal)}</span>
+                    {/* Items Table */}
+                    <div className="px-6 mt-3">
+                        <table className="w-full text-[13px] border-collapse">
+                            <thead>
+                                <tr className="bg-[#f3f4f6]">
+                                    <th className="text-left px-[10px] py-[7px] text-[10px] font-medium text-[#6b7280] uppercase tracking-[0.05em]">Item Description</th>
+                                    <th className="text-center px-[10px] py-[7px] text-[10px] font-medium text-[#6b7280] uppercase tracking-[0.05em]">QTY</th>
+                                    <th className="text-center px-[10px] py-[7px] text-[10px] font-medium text-[#6b7280] uppercase tracking-[0.05em]">Unit Price</th>
+                                    <th className="text-center px-[10px] py-[7px] text-[10px] font-medium text-[#6b7280] uppercase tracking-[0.05em]">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {(order.items || []).map((item, idx) => {
+                                    const variantLabel = item.product_variant
+                                        ? [item.product_variant.size_value?.label, item.product_variant.color_value?.label, item.product_variant.weight_value?.label].filter(Boolean).join(' / ')
+                                        : null;
+                                    return (
+                                        <tr key={item.id || idx} className="border-b border-[#f3f4f6]">
+                                            <td className="px-[10px] py-[10px]">
+                                                <p className="font-medium text-[#111827]">{item.product?.name || '—'}</p>
+                                                {variantLabel
+                                                    ? <p className="text-[11px] text-[#f97316] mt-0.5">{variantLabel}</p>
+                                                    : item.product?.barcode && <p className="text-[11px] text-[#9ca3af] font-mono mt-0.5">{item.product.barcode}</p>
+                                                }
+                                            </td>
+                                            <td className="px-[10px] py-[10px] text-center font-semibold text-[#111827]">{parseInt(item.quantity)}</td>
+                                            <td className="px-[10px] py-[10px] text-center text-[#6b7280]">{fmtMoney(item.unit_price)}</td>
+                                            <td className="px-[10px] py-[10px] text-center font-bold text-[#111827]">{fmtMoney(item.subtotal)}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Totals */}
+                    <div className="flex justify-end px-6 pb-4 pt-2.5">
+                        <div className="w-52 space-y-1.5">
+                            <div className="flex justify-between text-[13px]">
+                                <span className="text-[#6b7280]">Subtotal</span>
+                                <span className="font-medium text-[#111827]">{fmtMoney(itemsSubtotal)}</span>
+                            </div>
+                            {discountPct > 0 && (
+                                <div className="flex justify-between text-[13px]">
+                                    <span className="text-[#6b7280]">Discount ({discountPct}%)</span>
+                                    <span className="font-medium text-red-500">− {fmtMoney(discountAmount)}</span>
                                 </div>
-                                {discountPct > 0 && (
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Discount ({discountPct}%)</span>
-                                        <span className="font-semibold text-red-500">− {fmtMoney(discountAmount)}</span>
-                                    </div>
-                                )}
-                                {taxRate > 0 && (
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Tax ({taxRate}%)</span>
-                                        <span className="font-semibold text-gray-800">{fmtMoney(vatAmount)}</span>
-                                    </div>
-                                )}
-                                <div className="flex justify-between items-start pt-3 mt-1 border-t-2 border-black gap-2">
-                                    <span className="font-black text-sm text-gray-900 uppercase leading-tight">Grand<br/>Total</span>
-                                    <span className="font-black text-2xl text-primary">{fmtMoney(grandTotal)}</span>
+                            )}
+                            {taxRate > 0 && (
+                                <div className="flex justify-between text-[13px]">
+                                    <span className="text-[#6b7280]">Tax ({taxRate}%)</span>
+                                    <span className="font-medium text-[#111827]">{fmtMoney(vatAmount)}</span>
                                 </div>
+                            )}
+                            <div className="border-t border-[#e5e7eb] pt-2 flex justify-between items-baseline gap-2">
+                                <span className="text-[12px] font-bold text-[#111827] uppercase">Grand Total</span>
+                                <span className="text-[18px] font-extrabold text-[#f97316]">{fmtMoney(grandTotal)}</span>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Footer */}
-                        <p className="text-center text-[11px] text-gray-400 pt-4 border-t border-gray-100 italic">
+                    {/* Footer */}
+                    <div className="px-6 py-[10px] bg-[#f9fafb] border-t border-[#e5e7eb]">
+                        <p className="text-[11px] text-[#9ca3af] italic text-center">
                             Thank you for your purchase! Please keep this receipt for your records.
                             {storeEmail ? ` For inquiries, contact ${storeEmail}.` : ''}
                         </p>
-
                     </div>
+
                 </div>
             </div>
+        </div>
     );
 }

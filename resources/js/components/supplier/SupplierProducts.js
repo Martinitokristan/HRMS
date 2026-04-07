@@ -770,127 +770,162 @@ export default function SupplierProducts() {
                 </form>
 
                 {/* Image Gallery Modal */}
-                <Modal
-                    isOpen={imageModalOpen}
-                    onClose={() => setImageModalOpen(false)}
-                    title={`Manage Gallery - ${imageModalTarget === 'base' ? 'Main Product' : `Variant #${Number(imageModalTarget) + 1}`}`}
-                    size="lg"
-                >
-                    <div className="space-y-8 py-2 pb-8 px-2">
-                        {/* Main Image Selection */}
-                        <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <Label className="text-sm font-bold flex items-center gap-2">
-                                    <Package className="h-4 w-4 text-orange-500" /> Main Showcased Photo
-                                </Label>
-                                {(imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]) && (
-                                    <Badge variant="outline" className="text-[10px] text-green-600 border-green-200 bg-green-50">Active</Badge>
-                                )}
+                {imageModalOpen && (
+                    <div
+                        className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+                        onClick={() => setImageModalOpen(false)}
+                    >
+                        <div
+                            className="relative w-full bg-white flex flex-col"
+                            style={{ maxWidth: 620, maxHeight: 530, borderRadius: 10, boxShadow: '0 8px 30px rgba(0,0,0,0.16)', overflow: 'hidden', width: '90vw' }}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* Header */}
+                            <div className="flex items-center justify-between shrink-0" style={{ padding: '12px 20px 10px', borderBottom: '1px solid #f0f0f0' }}>
+                                <span style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>
+                                    Manage Gallery — {imageModalTarget === 'base' ? 'Main Product' : `Variant #${Number(imageModalTarget) + 1}`}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setImageModalOpen(false)}
+                                    style={{ fontSize: 16, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: '2px 4px', borderRadius: 4 }}
+                                    onMouseEnter={e => e.currentTarget.style.color = '#111827'}
+                                    onMouseLeave={e => e.currentTarget.style.color = '#6b7280'}
+                                >
+                                    <X className="h-[16px] w-[16px]" />
+                                </button>
                             </div>
-                            <div className="relative aspect-video rounded-2xl bg-secondary/20 border-2 border-dashed border-border flex items-center justify-center overflow-hidden group hover:border-orange-200 transition-all">
-                                {(imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]) ? (
-                                    <>
-                                        <img 
-                                            src={imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]} 
-                                            className="w-full h-full object-contain p-4" 
-                                        />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                            <label className="bg-white text-foreground rounded-full px-4 py-2 text-xs font-bold cursor-pointer hover:bg-orange-50 transition-colors shadow-xl">
-                                                Change Photo
-                                                <input 
-                                                    type="file" 
-                                                    className="hidden" 
-                                                    accept="image/*" 
-                                                    onChange={e => imageModalTarget === 'base' ? handleImageChange(e) : handleVariantImageChange(imageModalTarget, e)} 
+
+                            {/* Body */}
+                            <div style={{ overflowY: 'auto', flex: 1, minHeight: 0 }}>
+
+                                {/* Section 1 — Main Showcased Photo */}
+                                <div style={{ padding: '10px 20px 8px' }}>
+                                    <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+                                        <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>🟠 Main Showcased Photo</span>
+                                        {(imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]) && (
+                                            <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: 10, padding: '2px 8px', borderRadius: 20 }}>Active</span>
+                                        )}
+                                    </div>
+
+                                    {/* Main image preview */}
+                                    <div className="relative" style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #e0e0e0', background: '#f0f0f0', height: 200, width: '100%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {(imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]) ? (
+                                            <>
+                                                <img
+                                                    src={imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]}
+                                                    alt="Main"
+                                                    style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }}
                                                 />
-                                            </label>
-                                            <button 
-                                                type="button"
-                                                onClick={() => imageModalTarget === 'base' ? (setForm({...form, image: null}), setImagePreview(null)) : removeVariantImage(imageModalTarget)}
-                                                className="bg-destructive text-white rounded-full p-2.5 shadow-xl hover:scale-110 transition-transform"
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-secondary/40 transition-colors group">
-                                        <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                            <Upload className="h-8 w-8 text-orange-500" />
-                                        </div>
-                                        <span className="text-sm font-bold text-foreground">Upload Main Product Photo</span>
-                                        <span className="text-[11px] text-muted-foreground mt-1">Recommended size: 800x800px</span>
-                                        <input 
-                                            type="file" 
-                                            className="hidden" 
-                                            accept="image/*" 
-                                            onChange={e => imageModalTarget === 'base' ? handleImageChange(e) : handleVariantImageChange(imageModalTarget, e)} 
-                                        />
-                                    </label>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Additional Photos Section */}
-                        <div>
-                            <div className="flex items-center justify-between mb-4">
-                                <Label className="text-sm font-bold flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-orange-500" /> Extra Gallery Photos
-                                </Label>
-                                <span className="text-[10px] font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">Max 3</span>
-                            </div>
-                            <div className="grid grid-cols-3 gap-6">
-                                {[0, 1, 2].map(i => {
-                                    let preview = null;
-                                    let isExisting = false;
-                                    
-                                    if (imageModalTarget === 'base') {
-                                        isExisting = i < (existingAdditionalImages || []).length;
-                                        preview = additionalImagePreviews[i];
-                                    } else {
-                                        const v = variants[imageModalTarget];
-                                        isExisting = v?.existing_extra_images && v.existing_extra_images[i];
-                                        preview = (variantExtraPreviews[imageModalTarget] || [])[i];
-                                    }
-
-                                    return (
-                                        <div key={i} className="group relative aspect-square rounded-2xl bg-secondary/10 border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-orange-200 transition-all">
-                                            {preview ? (
-                                                <>
-                                                    <img src={preview} className="w-full h-full object-cover" />
-                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                        <button 
-                                                            type="button" 
-                                                            onClick={() => imageModalTarget === 'base' ? removeAdditionalImage(i, isExisting) : removeVariantExtraImage(imageModalTarget, i, isExisting)}
-                                                            className="bg-destructive text-white rounded-full p-2.5 shadow-xl hover:scale-110 transition-transform"
-                                                        >
-                                                            <X className="h-4 w-4" />
-                                                        </button>
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-secondary/30 transition-colors">
-                                                    <Plus className="h-6 w-6 text-orange-300 group-hover:scale-110 transition-transform mb-1" />
-                                                    <span className="text-[10px] font-bold text-muted-foreground">Add Photo</span>
-                                                    <input 
-                                                        type="file" 
-                                                        className="hidden" 
-                                                        accept="image/*" 
-                                                        multiple 
-                                                        onChange={e => imageModalTarget === 'base' ? handleAdditionalImagesChange(e) : handleVariantExtraImagesChange(imageModalTarget, e)} 
+                                                {/* Change Photo overlay button */}
+                                                <label
+                                                    style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 12, color: '#555', background: 'white', border: '1px solid #ccc', borderRadius: 4, padding: '4px 10px', cursor: 'pointer' }}
+                                                >
+                                                    Change Photo
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        accept="image/*"
+                                                        onChange={e => imageModalTarget === 'base' ? handleImageChange(e) : handleVariantImageChange(imageModalTarget, e)}
                                                     />
                                                 </label>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                                {/* Remove button */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => imageModalTarget === 'base' ? (setForm({...form, image: null}), setImagePreview(null)) : removeVariantImage(imageModalTarget)}
+                                                    style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,0.55)', color: 'white', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
+                                                >
+                                                    <X className="h-[11px] w-[11px]" />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer" style={{ height: '100%' }}>
+                                                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                                                    <Upload className="h-5 w-5" style={{ color: '#f97316' }} />
+                                                </div>
+                                                <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>Upload Main Photo</span>
+                                                <span style={{ fontSize: 11, color: '#9ca3af', marginTop: 3 }}>Recommended: 800×800px</span>
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={e => imageModalTarget === 'base' ? handleImageChange(e) : handleVariantImageChange(imageModalTarget, e)}
+                                                />
+                                            </label>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Section 2 — Extra Gallery Photos */}
+                                <div style={{ padding: '0 20px 8px' }}>
+                                    <div className="flex items-center justify-between" style={{ marginTop: 12, marginBottom: 8 }}>
+                                        <span style={{ fontSize: 13, fontWeight: 600, color: '#f97316' }}>+ Extra Gallery Photos</span>
+                                        <span style={{ fontSize: 11, color: '#9ca3af' }}>Max: 3</span>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        {[0, 1, 2].map(i => {
+                                            let preview = null;
+                                            let isExisting = false;
+
+                                            if (imageModalTarget === 'base') {
+                                                isExisting = i < (existingAdditionalImages || []).length;
+                                                preview = additionalImagePreviews[i];
+                                            } else {
+                                                const v = variants[imageModalTarget];
+                                                isExisting = v?.existing_extra_images && v.existing_extra_images[i];
+                                                preview = (variantExtraPreviews[imageModalTarget] || [])[i];
+                                            }
+
+                                            return (
+                                                <div
+                                                    key={i}
+                                                    className="group relative"
+                                                    style={{ flex: 1, height: 90, border: '1.5px dashed #d0d0d0', borderRadius: 6, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', transition: 'border-color 0.15s, background 0.15s' }}
+                                                    onMouseEnter={e => { if (!preview) { e.currentTarget.style.borderColor = '#f97316'; e.currentTarget.style.background = '#fff8f5'; } }}
+                                                    onMouseLeave={e => { if (!preview) { e.currentTarget.style.borderColor = '#d0d0d0'; e.currentTarget.style.background = '#f0f0f0'; } }}
+                                                >
+                                                    {preview ? (
+                                                        <>
+                                                            <img src={preview} alt={`Gallery ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }} />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => imageModalTarget === 'base' ? removeAdditionalImage(i, isExisting) : removeVariantExtraImage(imageModalTarget, i, isExisting)}
+                                                                style={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', color: 'white', border: 'none', cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
+                                                            >
+                                                                <X className="h-[10px] w-[10px]" />
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                                                            <span style={{ fontSize: 20, color: '#c0c0c0', lineHeight: 1 }}>+</span>
+                                                            <span style={{ fontSize: 11, color: '#9e9e9e', marginTop: 3 }}>Add Photo</span>
+                                                            <input
+                                                                type="file"
+                                                                className="hidden"
+                                                                accept="image/*"
+                                                                multiple
+                                                                onChange={e => imageModalTarget === 'base' ? handleAdditionalImagesChange(e) : handleVariantExtraImagesChange(imageModalTarget, e)}
+                                                            />
+                                                        </label>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Footer Note */}
+                                <div style={{ padding: '4px 20px 12px' }}>
+                                    <p style={{ fontSize: 11, color: '#9e9e9e', textAlign: 'center', fontStyle: 'italic', margin: 0 }}>
+                                        These images appear as thumbnails below your main photo in the store catalog.
+                                    </p>
+                                </div>
+
                             </div>
-                            <p className="text-[11px] text-muted-foreground mt-4 text-center italic bg-orange-50/50 py-2 rounded-lg border border-orange-100">
-                                 These images appear as thumbnails below your main photo in the store catalog.
-                            </p>
                         </div>
                     </div>
-                </Modal>
+                )}
             </div>
         );
     }
