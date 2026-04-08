@@ -5,6 +5,7 @@ import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import StatCard from '../shared/StatCard';
 import ConfirmModal from '../shared/ConfirmModal';
+import SupplierForm from './SupplierForm';
 import SupplierViewModal from './SupplierViewModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,8 @@ export default function Suppliers() {
 
     // Modals
     const [viewSupplierId, setViewSupplierId] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedSupplier, setSelectedSupplier] = useState(null);
 
     const [confirmModal, setConfirmModal] = useState({
         show: false,
@@ -127,10 +130,20 @@ export default function Suppliers() {
     };
 
     const handleEdit = (supplier) => {
-        setViewSupplierId(null);
-        // Edit functionality removed - suppliers are managed via registration/approval only
+        setSelectedSupplier(supplier);
+        setIsModalOpen(true);
     };
 
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        setSelectedSupplier(null);
+    };
+
+    const handleSaveSuccess = () => {
+        markStale(STALE_KEYS.ADMIN_SUPPLIERS);
+        setIsModalOpen(false);
+        setSelectedSupplier(null);
+    };
 
 
     // Stats calculation
@@ -273,6 +286,12 @@ export default function Suppliers() {
             )}
 
             {/* Modals */}
+            <SupplierForm
+                isOpen={isModalOpen}
+                supplier={selectedSupplier}
+                onSuccess={handleSaveSuccess}
+                onCancel={handleModalClose}
+            />
 
             <ConfirmModal
                 modal={confirmModal || { show: false }}
@@ -282,7 +301,8 @@ export default function Suppliers() {
             <SupplierViewModal 
                 isOpen={!!viewSupplierId} 
                 onClose={() => setViewSupplierId(null)} 
-                supplierId={viewSupplierId} 
+                supplierId={viewSupplierId}
+                onEdit={(supplier) => { setViewSupplierId(null); handleEdit(supplier); }}
             />
         </div>
     );
