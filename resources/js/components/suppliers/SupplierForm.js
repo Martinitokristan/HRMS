@@ -144,8 +144,7 @@ export default function SupplierForm({ isOpen, supplier, onSuccess, onCancel }) 
                             >
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
-                                <option value="preferred">Preferred</option>
-                                <option value="blacklisted">Blacklisted</option>
+                                <option value="pending">Pending Approval</option>
                             </select>
                         </div>
                         {/* Office Address — full width, single-line */}

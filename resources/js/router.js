@@ -53,6 +53,7 @@ import SupplierOrders from './components/supplier/SupplierOrders';
 import SupplierProducts from './components/supplier/SupplierProducts';
 import SupplierSettings from './components/supplier/SupplierSettings';
 import SupplierLayout from './components/layout/SupplierLayout';
+import SupplierPendingApproval from './components/supplier/SupplierPendingApproval';
 
 // Admin: Supplier Available Products
 import SupplierCatalog from './components/suppliers/SupplierCatalog';
@@ -148,6 +149,7 @@ export default function AppRouter() {
 
             {/* Supplier Portal */}
             <Route path="/supplier/register" element={<SupplierRegister />} />
+            <Route path="/supplier/pending-approval" element={<SupplierPendingApproval />} />
             <Route element={
                 <ProtectedRoute roles={['supplier']}>
                     <SupplierLayout />

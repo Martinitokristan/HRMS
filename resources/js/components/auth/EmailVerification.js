@@ -33,6 +33,10 @@ export default function EmailVerification() {
                 const response = await api.get(endpoint);
                 
                 if (response.data.status === 'success') {
+                    if (type === 'supplier') {
+                        navigate('/supplier/pending-approval', { replace: true });
+                        return;
+                    }
                     setStatus('success');
                     setMessage('Email verified successfully! Please head to the login page to continue.');
                 } else {
@@ -40,10 +44,10 @@ export default function EmailVerification() {
                     setMessage('Verification failed. Please try again or request a new link.');
                 }
             } catch (error) {
-                const status = error.response?.status;
+                const httpStatus = error.response?.status;
                 const msg = error.response?.data?.message || '';
 
-                if (status === 404 || msg.toLowerCase().includes('already verified') || msg.toLowerCase().includes('invalid or expired')) {
+                if (msg.toLowerCase().includes('already verified')) {
                     setStatus('success');
                     setMessage('Your email is already verified! Redirecting...');
                     setTimeout(() => {
@@ -51,6 +55,9 @@ export default function EmailVerification() {
                         else if (type === 'rider') navigate('/');
                         else navigate('/shop');
                     }, 2000);
+                } else if (httpStatus === 404 || msg.toLowerCase().includes('invalid or expired')) {
+                    setStatus('expired');
+                    setMessage('This verification link has expired or has already been used. If your email is not yet verified, please request a new link.');
                 } else {
                     setStatus('error');
                     setMessage(msg || 'Verification failed. Please try again or request a new link.');
@@ -93,6 +100,17 @@ export default function EmailVerification() {
                     </div>
                 )}
 
+                {status === 'expired' && (
+                    <div className="flex flex-col items-center">
+                        <AlertCircle className="h-12 w-12 text-orange-500 mb-4" />
+                        <h2 className="text-xl font-bold mb-2 text-orange-600">Link Expired</h2>
+                        <Alert className="bg-orange-50 text-orange-800 border-orange-200 mb-6">
+                            <AlertDescription>{message}</AlertDescription>
+                        </Alert>
+                        <Button className="w-full mb-2" onClick={() => navigate(type === 'supplier' ? '/supplier/login' : '/login')}>Go to Login</Button>
+                    </div>
+                )}
+
                 {status === 'error' && (
                     <div className="flex flex-col items-center">
                         <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
@@ -100,7 +118,7 @@ export default function EmailVerification() {
                         <Alert variant="destructive" className="mb-6">
                             <AlertDescription>{message}</AlertDescription>
                         </Alert>
-                        <Button className="w-full" onClick={() => navigate('/login')}>Go to Login</Button>
+                        <Button className="w-full" onClick={() => navigate(type === 'supplier' ? '/supplier/login' : '/login')}>Go to Login</Button>
                     </div>
                 )}
             </div>

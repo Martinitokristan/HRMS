@@ -102,9 +102,17 @@ class SupplierAuthController extends Controller
             ], 403);
         }
 
-        if (!$supplier->isActive() && $supplier->status === 'inactive') {
+        if ($supplier->status === 'pending') {
             return response()->json([
-                'message' => 'Account is not active. Please contact administrator.',
+                'message' => 'Your account is pending admin approval. You will be notified once your account is activated.',
+                'code' => 'pending_approval',
+                'status' => 'error',
+            ], 403);
+        }
+
+        if ($supplier->status === 'inactive') {
+            return response()->json([
+                'message' => 'Account is inactive. Please contact administrator.',
                 'status' => 'error',
             ], 403);
         }
@@ -246,7 +254,6 @@ class SupplierAuthController extends Controller
         $supplier->update([
             'email_verified_at' => Carbon::now(),
             'email_verification_token' => null,
-            'status' => 'active',
         ]);
 
         $authToken = $supplier->createToken('supplier-token')->plainTextToken;

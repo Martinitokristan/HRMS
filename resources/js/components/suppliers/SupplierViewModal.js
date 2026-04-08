@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { X, Pencil } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const SUPPLIER_STATUS = {
     active:      { bg: 'bg-[#dcfce7]', text: 'text-[#16a34a]', label: 'Active' },
+    pending:     { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Pending Approval' },
     inactive:    { bg: 'bg-gray-100',  text: 'text-gray-500',  label: 'Inactive' },
-    preferred:   { bg: 'bg-blue-50',   text: 'text-blue-600',  label: 'Preferred' },
-    blacklisted: { bg: 'bg-red-50',    text: 'text-red-600',   label: 'Blacklisted' },
 };
 
 const PO_STATUS = {
@@ -43,6 +43,41 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
     const { showToast } = useToast();
     const [supplier, setSupplier] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
+
+    const isPendingSupplier = supplier?.status === 'pending';
+    const canManageSupplier = supplier && !isPendingSupplier;
+
+    const handleStatusAction = async (nextStatus, successMessage) => {
+        if (!supplier?.id || actionLoading) return;
+
+        setActionLoading(true);
+        try {
+            const payload = {
+                name: supplier.name,
+                contact_name: supplier.contact_name || '',
+                email: supplier.email || '',
+                phone: supplier.phone || '',
+                address: supplier.address || '',
+                status: nextStatus,
+            };
+
+            const res = await api.put(`/suppliers/${supplier.id}`, payload);
+            const updatedSupplier = res.data?.data !== undefined ? res.data.data : res.data;
+
+            setSupplier(prev => ({
+                ...(prev || {}),
+                ...updatedSupplier,
+                status: nextStatus,
+            }));
+
+            showToast(successMessage);
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to update supplier status', 'error');
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (!isOpen || !supplierId) return;
@@ -124,68 +159,79 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
                                 </div>
                             </div>
 
-                            {/* Stats Row */}
-                            <div className="flex gap-3">
-                                <div className="flex-1 flex flex-col bg-[#f9fafb] border border-[#e5e7eb] rounded-[8px] px-4 py-[10px]">
-                                    <span className="text-xs text-[#6b7280]">Products</span>
-                                    <span className="text-[20px] font-bold text-[#111827] leading-snug">
-                                        {supplier.products?.length ?? supplier.products_count ?? 0}
-                                    </span>
-                                </div>
-                                <div className="flex-1 flex flex-col bg-[#f9fafb] border border-[#e5e7eb] rounded-[8px] px-4 py-[10px]">
-                                    <span className="text-xs text-[#6b7280]">Orders</span>
-                                    <span className="text-[20px] font-bold text-[#111827] leading-snug">
-                                        {supplier.purchase_orders?.length ?? supplier.purchase_orders_count ?? 0}
-                                    </span>
-                                </div>
-                            </div>
+                            {canManageSupplier ? (
+                                <>
+                                    {/* Stats Row */}
+                                    <div className="flex gap-3">
+                                        <div className="flex-1 flex flex-col bg-[#f9fafb] border border-[#e5e7eb] rounded-[8px] px-4 py-[10px]">
+                                            <span className="text-xs text-[#6b7280]">Products</span>
+                                            <span className="text-[20px] font-bold text-[#111827] leading-snug">
+                                                {supplier.products?.length ?? supplier.products_count ?? 0}
+                                            </span>
+                                        </div>
+                                        <div className="flex-1 flex flex-col bg-[#f9fafb] border border-[#e5e7eb] rounded-[8px] px-4 py-[10px]">
+                                            <span className="text-xs text-[#6b7280]">Orders</span>
+                                            <span className="text-[20px] font-bold text-[#111827] leading-snug">
+                                                {supplier.purchase_orders?.length ?? supplier.purchase_orders_count ?? 0}
+                                            </span>
+                                        </div>
+                                    </div>
 
-                            {/* Purchase Orders Table */}
-                            <div>
-                                <p className="text-xs text-[#6b7280] uppercase tracking-[0.05em] mb-1.5">Purchase Orders</p>
-                                <div className="max-h-[140px] overflow-y-auto rounded-[6px] border border-[#e5e7eb]">
-                                    <table className="w-full text-[13px]">
-                                        <thead className="sticky top-0">
-                                            <tr className="bg-[#f9fafb]">
-                                                <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">PO Number</th>
-                                                <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">Products</th>
-                                                <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">Date</th>
-                                                <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">Amount</th>
-                                                <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {!supplier.purchase_orders || supplier.purchase_orders.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan={5} className="text-center py-4 text-[13px] text-[#6b7280]">
-                                                        No purchase orders found.
-                                                    </td>
-                                                </tr>
-                                            ) : supplier.purchase_orders.map((po, idx) => {
-                                                const productNames = po.items?.map(it => it.product?.name).filter(Boolean) || [];
-                                                const displayProducts = productNames.length > 2
-                                                    ? `${productNames.slice(0, 2).join(', ')} +${productNames.length - 2}`
-                                                    : productNames.join(', ') || '—';
-                                                return (
-                                                    <tr key={po.id} className={idx % 2 === 1 ? 'bg-[#fafafa]' : 'bg-white'}>
-                                                        <td className="px-[10px] py-2 font-semibold text-[#111827] whitespace-nowrap">{po.po_number}</td>
-                                                        <td className="px-[10px] py-2 text-[#374151] max-w-[90px] truncate">{displayProducts}</td>
-                                                        <td className="px-[10px] py-2 text-[#6b7280] whitespace-nowrap">
-                                                            {new Date(po.created_at).toLocaleDateString()}
-                                                        </td>
-                                                        <td className="px-[10px] py-2 font-semibold text-[#111827] whitespace-nowrap">
-                                                            ₱{Number(po.total_cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                        </td>
-                                                        <td className="px-[10px] py-2">
-                                                            <POBadge status={po.status} />
-                                                        </td>
+                                    {/* Purchase Orders Table */}
+                                    <div>
+                                        <p className="text-xs text-[#6b7280] uppercase tracking-[0.05em] mb-1.5">Purchase Orders</p>
+                                        <div className="max-h-[140px] overflow-y-auto rounded-[6px] border border-[#e5e7eb]">
+                                            <table className="w-full text-[13px]">
+                                                <thead className="sticky top-0">
+                                                    <tr className="bg-[#f9fafb]">
+                                                        <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">PO Number</th>
+                                                        <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">Products</th>
+                                                        <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">Date</th>
+                                                        <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">Amount</th>
+                                                        <th className="text-left px-[10px] py-2 text-[12px] font-medium text-[#6b7280]">Status</th>
                                                     </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
+                                                </thead>
+                                                <tbody>
+                                                    {!supplier.purchase_orders || supplier.purchase_orders.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan={5} className="text-center py-4 text-[13px] text-[#6b7280]">
+                                                                No purchase orders found.
+                                                            </td>
+                                                        </tr>
+                                                    ) : supplier.purchase_orders.map((po, idx) => {
+                                                        const productNames = po.items?.map(it => it.product?.name).filter(Boolean) || [];
+                                                        const displayProducts = productNames.length > 2
+                                                            ? `${productNames.slice(0, 2).join(', ')} +${productNames.length - 2}`
+                                                            : productNames.join(', ') || '—';
+                                                        return (
+                                                            <tr key={po.id} className={idx % 2 === 1 ? 'bg-[#fafafa]' : 'bg-white'}>
+                                                                <td className="px-[10px] py-2 font-semibold text-[#111827] whitespace-nowrap">{po.po_number}</td>
+                                                                <td className="px-[10px] py-2 text-[#374151] max-w-[90px] truncate">{displayProducts}</td>
+                                                                <td className="px-[10px] py-2 text-[#6b7280] whitespace-nowrap">
+                                                                    {new Date(po.created_at).toLocaleDateString()}
+                                                                </td>
+                                                                <td className="px-[10px] py-2 font-semibold text-[#111827] whitespace-nowrap">
+                                                                    ₱{Number(po.total_cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                </td>
+                                                                <td className="px-[10px] py-2">
+                                                                    <POBadge status={po.status} />
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="rounded-[8px] border border-[#e5e7eb] bg-[#f9fafb] px-4 py-3">
+                                    <p className="text-[13px] font-medium text-[#111827] mb-1">Approval Information</p>
+                                    <p className="text-[13px] text-[#6b7280]">
+                                        This supplier account is currently {supplier.status || 'inactive'}. Purchase order and product performance details will appear once the account is approved and active.
+                                    </p>
                                 </div>
-                            </div>
+                            )}
 
                         </div>
                     )}
@@ -193,19 +239,36 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
 
                 {/* Footer */}
                 <div className="border-t border-[#e5e7eb] px-6 pt-3 pb-5 flex items-center justify-end gap-2">
-                    <button
-                        onClick={onClose}
-                        className="h-[34px] px-4 text-[13px] rounded-[6px] border border-[#e5e7eb] text-[#374151] hover:bg-gray-50 transition-colors"
-                    >
-                        Close
-                    </button>
-                    {supplier && (
-                        <button
+                    {supplier && isPendingSupplier && (
+                        <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="h-[34px]"
+                                disabled={actionLoading}
+                                onClick={() => handleStatusAction('inactive', 'Supplier rejected successfully')}
+                            >
+                                Reject
+                            </Button>
+                            <Button
+                                type="button"
+                                className="h-[34px] bg-[#f97316] hover:bg-orange-600 text-white"
+                                disabled={actionLoading}
+                                onClick={() => handleStatusAction('active', 'Supplier approved successfully')}
+                            >
+                                Approve
+                            </Button>
+                        </>
+                    )}
+
+                    {canManageSupplier && (
+                        <Button
+                            type="button"
+                            className="h-[34px] bg-[#f97316] hover:bg-orange-600 text-white font-medium flex items-center gap-1.5"
                             onClick={() => onEdit(supplier)}
-                            className="h-[34px] px-4 text-[13px] rounded-[6px] bg-[#f97316] text-white hover:bg-orange-600 transition-colors font-medium flex items-center gap-1.5"
                         >
                             <Pencil className="h-3 w-3" /> Edit Supplier
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>

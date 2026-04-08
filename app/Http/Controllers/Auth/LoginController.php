@@ -59,6 +59,13 @@ class LoginController extends Controller
                 ], 403);
             }
 
+            if ($supplier->status === 'pending') {
+                return response()->json([
+                    'message' => 'Your account is pending admin approval. You will be notified once your account is activated.',
+                    'code' => 'pending_approval',
+                ], 403);
+            }
+
             if ($supplier->status === 'inactive') {
                 return response()->json([
                     'message' => 'Supplier account is inactive. Please contact administrator.',

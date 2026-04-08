@@ -5,22 +5,20 @@ import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import StatCard from '../shared/StatCard';
 import ConfirmModal from '../shared/ConfirmModal';
-import SupplierForm from './SupplierForm';
 import SupplierViewModal from './SupplierViewModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { Building2, Eye, Trash2, Plus, Package, ShoppingCart, Handshake, CheckCircle, Star } from 'lucide-react';
+import { Building2, Eye, Trash2, Package, ShoppingCart, Handshake, CheckCircle, Star } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 
 const SupplierStatusBadge = ({ status }) => {
     const config = {
         active: { className: 'border-success/30 bg-success-light text-success-foreground', label: 'Active' },
+        pending: { className: 'border-amber-200 bg-amber-50 text-amber-700', label: 'Pending Approval' },
         inactive: { className: 'border-border bg-secondary text-muted-foreground', label: 'Inactive' },
-        preferred: { className: 'border-info/30 bg-info/10 text-info', label: 'Preferred' },
-        blacklisted: { className: 'border-destructive/30 bg-destructive/5 text-destructive', label: 'Blacklisted' }
     };
     const c = config[status] || config.inactive;
     return <Badge variant="outline" className={c.className}>{c.label}</Badge>;
@@ -37,8 +35,6 @@ export default function Suppliers() {
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_SUPPLIERS);
 
     // Modals
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedSupplier, setSelectedSupplier] = useState(null);
     const [viewSupplierId, setViewSupplierId] = useState(null);
 
     const [confirmModal, setConfirmModal] = useState({
@@ -131,31 +127,17 @@ export default function Suppliers() {
     };
 
     const handleEdit = (supplier) => {
-        setSelectedSupplier(supplier);
-        setIsModalOpen(true);
+        setViewSupplierId(null);
+        // Edit functionality removed - suppliers are managed via registration/approval only
     };
 
-    const handleAdd = () => {
-        setSelectedSupplier(null);
-        setIsModalOpen(true);
-    };
 
-    const handleModalClose = () => {
-        setIsModalOpen(false);
-        setSelectedSupplier(null);
-    };
-
-    const handleSaveSuccess = () => {
-        markStale(STALE_KEYS.ADMIN_SUPPLIERS);
-        setIsModalOpen(false);
-        setSelectedSupplier(null);
-    };
 
     // Stats calculation
     const stats = useMemo(() => ({
         total: total,
         active: (Array.isArray(suppliers) ? suppliers : []).filter(s => (s.status || 'active') === 'active').length,
-        preferred: (Array.isArray(suppliers) ? suppliers : []).filter(s => s.status === 'preferred').length,
+        pending: (Array.isArray(suppliers) ? suppliers : []).filter(s => s.status === 'pending').length,
         withProducts: (Array.isArray(suppliers) ? suppliers : []).filter(s => (s.products_count || 0) > 0).length
     }), [suppliers, total]);
 
@@ -169,16 +151,13 @@ export default function Suppliers() {
                     </h2>
                     <p className="text-sm text-muted-foreground mt-0.5">Manage your vendor partnerships and track supplier performance</p>
                 </div>
-                <Button onClick={handleAdd} className="gap-2">
-                    <Plus className="h-4 w-4" /> Add New Supplier
-                </Button>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <StatCard label="Total Suppliers" value={stats.total} icon={Handshake} accentColor="accent" />
                 <StatCard label="Active Partners" value={stats.active} icon={CheckCircle} accentColor="green" />
-                <StatCard label="Preferred Suppliers" value={stats.preferred} icon={Star} accentColor="blue" />
+                <StatCard label="Pending Approval" value={stats.pending} icon={Star} accentColor="blue" />
                 <StatCard label="With Products" value={stats.withProducts} icon={Package} accentColor="purple" />
             </div>
 
@@ -193,8 +172,8 @@ export default function Suppliers() {
                     {[
                         { key: 'all', label: 'All', count: stats.total },
                         { key: 'active', label: 'Active', count: stats.active },
-                        { key: 'preferred', label: 'Preferred', count: stats.preferred },
-                        { key: 'inactive', label: 'Inactive', count: stats.total - stats.active - stats.preferred }
+                        { key: 'pending', label: 'Pending', count: stats.pending },
+                        { key: 'inactive', label: 'Inactive', count: stats.total - stats.active - stats.pending }
                     ].map(({ key, label, count }) => (
                         <Button
                             key={key}
@@ -237,10 +216,7 @@ export default function Suppliers() {
                                 <TableCell colSpan={6} className="text-center py-16">
                                     <Building2 className="h-10 w-10 mx-auto mb-2 opacity-30 text-muted-foreground" />
                                     <h3 className="text-base font-semibold text-foreground mb-1">No suppliers found</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">{search || statusFilter !== 'all' ? 'Try adjusting your filters or search terms' : 'Add your first supplier to get started with vendor management'}</p>
-                                    <Button onClick={handleAdd} className="gap-2">
-                                        <Plus className="h-4 w-4" /> Add Your First Supplier
-                                    </Button>
+                                    <p className="text-sm text-muted-foreground mb-4">{search || statusFilter !== 'all' ? 'Try adjusting your filters or search terms' : 'Suppliers will appear here once they register and are approved'}</p>
                                 </TableCell>
                             </TableRow>
                         ) : suppliers.map(supplier => {
@@ -297,12 +273,6 @@ export default function Suppliers() {
             )}
 
             {/* Modals */}
-            <SupplierForm
-                isOpen={isModalOpen}
-                supplier={selectedSupplier}
-                onSuccess={handleSaveSuccess}
-                onCancel={handleModalClose}
-            />
 
             <ConfirmModal
                 modal={confirmModal || { show: false }}
@@ -313,7 +283,6 @@ export default function Suppliers() {
                 isOpen={!!viewSupplierId} 
                 onClose={() => setViewSupplierId(null)} 
                 supplierId={viewSupplierId} 
-                onEdit={(supplier) => { setViewSupplierId(null); handleEdit(supplier); }}
             />
         </div>
     );

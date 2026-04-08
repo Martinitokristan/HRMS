@@ -72,6 +72,7 @@ class SupplierController extends Controller
             'email'        => 'nullable|email|max:150',
             'phone'        => 'nullable|string|max:20',
             'address'      => 'nullable|string',
+            'status'       => 'nullable|in:active,inactive,pending',
         ]);
 
         $supplier->update($data);

@@ -135,51 +135,55 @@ export default function SupplierRegister() {
     return (
         <div className="min-h-screen flex">
             {/* Success Modal */}
-            <Dialog open={!!successMsg} onOpenChange={(open) => { if (!open) navigate('/supplier/login') }}>
-                <DialogContent className="sm:max-w-md border-primary/20 shadow-2xl overflow-hidden p-0">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-orange-400" />
-                    <DialogHeader className="text-center pt-8 px-6">
-                        <div className="mx-auto w-16 h-16 bg-primary/10 text-primary flex items-center justify-center rounded-full mb-4">
-                            <Mail className="w-8 h-8" />
+            {!!successMsg && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+                    <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: '90vw', maxWidth: 400, padding: '32px 28px 24px', position: 'relative', borderTop: '3px solid #F97316', textAlign: 'center', fontFamily: 'Inter, system-ui, sans-serif' }}>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/supplier/login')}
+                            style={{ position: 'absolute', top: 12, right: 14, fontSize: 18, color: '#9CA3AF', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1 }}
+                        >×</button>
+                        <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#FFF4ED', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                            <Mail style={{ width: 22, height: 22, color: '#F97316' }} />
                         </div>
-                        <DialogTitle className="text-2xl font-black text-foreground">Verify Your Email</DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-[15px] leading-relaxed pt-2">
-                            We've sent a verification link to <br/>
-                            <span className="font-bold text-foreground">{formData.email}</span>. <br/>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: '#111827', marginBottom: 10 }}>Verify Your Email</div>
+                        <div style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, marginBottom: 20 }}>
+                            We've sent a verification link to <strong style={{ color: '#111827', fontWeight: 600 }}>{formData.email}</strong><br />
                             Check your inbox and click the link to activate your supplier account.
-                        </DialogDescription>
-                    </DialogHeader>
-                    
-                    <div className="p-6 space-y-4">
+                        </div>
                         {resendMsg && (
-                            <Alert className="bg-green-50 text-green-800 border-green-200">
-                                <CheckCircle className="h-4 w-4 text-green-500" />
+                            <Alert className="bg-green-50 text-green-800 border-green-200 mb-3 text-left">
                                 <AlertDescription>{resendMsg}</AlertDescription>
                             </Alert>
                         )}
                         {resendError && (
-                            <Alert variant="destructive">
-                                <AlertCircle className="h-4 w-4" />
+                            <Alert variant="destructive" className="mb-3 text-left">
                                 <AlertDescription>{resendError}</AlertDescription>
                             </Alert>
                         )}
-
-                        <div className="flex flex-col gap-3">
-                            <Button
-                                onClick={handleResend}
-                                disabled={resendLoading}
-                                className="w-full h-11 font-bold shadow-md"
-                            >
-                                {resendLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-                                Resend Verification Link
-                            </Button>
-                            <Button variant="ghost" className="w-full h-11" onClick={() => navigate('/supplier/login')}>
-                                Return to Supplier Login
-                            </Button>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={handleResend}
+                            disabled={resendLoading}
+                            style={{ width: '100%', height: 42, background: '#F97316', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: resendLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: resendLoading ? 0.75 : 1, transition: 'background 0.15s' }}
+                            onMouseEnter={e => { if (!resendLoading) e.currentTarget.style.background = '#EA6C0A'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#F97316'; }}
+                        >
+                            {resendLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw style={{ width: 14, height: 14 }} />}
+                            Resend Verification Link
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/supplier/login')}
+                            style={{ marginTop: 10, width: '100%', background: 'none', border: 'none', fontSize: 13, color: '#6B7280', cursor: 'pointer', padding: '6px 0' }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#111827'; e.currentTarget.style.textDecoration = 'underline'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = '#6B7280'; e.currentTarget.style.textDecoration = 'none'; }}
+                        >
+                            Return to Supplier Login
+                        </button>
                     </div>
-                </DialogContent>
-            </Dialog>
+                </div>
+            )}
 
             <div className="flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto">
                 <div className="w-full max-w-lg">
