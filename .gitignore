@@ -38,5 +38,5 @@ build_error.log
 # /documentation/
 
 # Certificates and Guides
-isrgrootx1.pem
+isgrootx1.pem
 caching_and_silent_reload_guide.md
