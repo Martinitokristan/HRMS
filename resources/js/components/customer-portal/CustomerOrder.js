@@ -13,10 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle, Navigation, Loader2, Download, Smartphone } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
 import { STALE_KEYS, markStale } from "../../store/dataStore";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
+import { usePhilippineAddress } from "../../hooks/usePhilippineAddress";
 
 import "leaflet/dist/leaflet.css";
 
@@ -86,7 +88,13 @@ export default function CustomerOrder() {
     const [step, setStep] = useState(1); // 1: Review, 2: Invoice & Location
     const [customerProfile, setCustomerProfile] = useState(null);
 
-    const [address, setAddress] = useState("");
+    const [deliveryStreet, setDeliveryStreet] = useState('');
+    const [deliveryBarangay, setDeliveryBarangay] = useState('');
+    const [deliveryMunicipality, setDeliveryMunicipality] = useState('');
+    const [deliveryProvince, setDeliveryProvince] = useState('');
+    const [deliveryProvinceCode, setDeliveryProvinceCode] = useState('');
+    const [deliveryCityCode, setDeliveryCityCode] = useState('');
+    const { provinces: dpProvinces, cities: dpCities, barangays: dpBarangays, loadingProvinces: dpLoadingProvinces, loadingCities: dpLoadingCities, loadingBarangays: dpLoadingBarangays } = usePhilippineAddress('', deliveryProvinceCode, deliveryCityCode);
     const [payment, setPayment] = useState("cod");
 
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -106,6 +114,20 @@ export default function CustomerOrder() {
             setPaymentPhoneNumber(user.phone);
         }
     }, [user]);
+
+    useEffect(() => {
+        if (deliveryProvince && dpProvinces.length > 0 && !deliveryProvinceCode) {
+            const found = dpProvinces.find(p => p.name === deliveryProvince);
+            if (found) setDeliveryProvinceCode(found.code);
+        }
+    }, [deliveryProvince, dpProvinces]);
+
+    useEffect(() => {
+        if (deliveryMunicipality && dpCities.length > 0 && !deliveryCityCode) {
+            const found = dpCities.find(c => c.name === deliveryMunicipality);
+            if (found) setDeliveryCityCode(found.code);
+        }
+    }, [deliveryMunicipality, dpCities]);
 
     // Refresh settings on mount and when refreshTrigger changes
     useEffect(() => {
@@ -203,7 +225,10 @@ export default function CustomerOrder() {
                 const profile = res.data;
                 setCustomerProfile(profile);
                 if (profile?.address) {
-                    setAddress(`${profile.address}, ${profile.municipality}, ${profile.province}`);
+                    setDeliveryStreet(profile.address || '');
+                    setDeliveryBarangay(profile.barangay || '');
+                    setDeliveryMunicipality(profile.municipality || '');
+                    setDeliveryProvince(profile.province || '');
                     if (profile.latitude && profile.longitude) {
                         setCheckoutPosition([parseFloat(profile.latitude), parseFloat(profile.longitude)]);
                     }
@@ -237,10 +262,11 @@ export default function CustomerOrder() {
         e.preventDefault();
 
         // Validate address
-        if (!address || address.trim().length < 5) {
-            showToast("Please enter a valid delivery address (at least 5 characters).", "error");
+        if (!deliveryStreet || !deliveryMunicipality || !deliveryProvince) {
+            showToast("Please complete your delivery address (province, municipality, and street are required).", "error");
             return;
         }
+        const address = [deliveryStreet.trim(), deliveryBarangay, deliveryMunicipality, deliveryProvince].filter(Boolean).join(', ');
 
         // Validate cart has items
         if (!cart || cart.length === 0) {
@@ -361,7 +387,7 @@ export default function CustomerOrder() {
 
                                 <div className="mb-4">
                                     <div className="text-sm text-muted-foreground mb-1">Delivery Address:</div>
-                                    <div className="text-sm">{address || "No address provided"}</div>
+                                    <div className="text-sm">{[deliveryStreet, deliveryBarangay, deliveryMunicipality, deliveryProvince].filter(Boolean).join(', ') || "No address provided"}</div>
                                 </div>
 
                                 <div className="mb-4">
@@ -514,9 +540,71 @@ export default function CustomerOrder() {
                                     )}
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                     <Label className="text-sm font-semibold">Confirm or Edit Delivery Address:</Label>
-                                    <Textarea rows={3} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter complete delivery address" />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs font-medium text-muted-foreground">Province *</Label>
+                                            <Select
+                                                value={deliveryProvinceCode}
+                                                onValueChange={code => {
+                                                    const found = dpProvinces.find(p => p.code === code);
+                                                    setDeliveryProvinceCode(code);
+                                                    setDeliveryProvince(found ? found.name : '');
+                                                    setDeliveryCityCode('');
+                                                    setDeliveryMunicipality('');
+                                                    setDeliveryBarangay('');
+                                                }}
+                                                disabled={dpLoadingProvinces}
+                                            >
+                                                <SelectTrigger className="h-10">
+                                                    <SelectValue placeholder={dpLoadingProvinces ? 'Loading…' : 'Select Province'} />
+                                                </SelectTrigger>
+                                                <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
+                                                    {dpProvinces.map(p => <SelectItem key={p.code} value={p.code}>{p.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs font-medium text-muted-foreground">Municipality / City *</Label>
+                                            <Select
+                                                value={deliveryCityCode}
+                                                onValueChange={code => {
+                                                    const found = dpCities.find(c => c.code === code);
+                                                    setDeliveryCityCode(code);
+                                                    setDeliveryMunicipality(found ? found.name : '');
+                                                    setDeliveryBarangay('');
+                                                }}
+                                                disabled={!deliveryProvinceCode || dpLoadingCities}
+                                            >
+                                                <SelectTrigger className="h-10">
+                                                    <SelectValue placeholder={!deliveryProvinceCode ? 'Select Province first' : dpLoadingCities ? 'Loading…' : 'Select Municipality / City'} />
+                                                </SelectTrigger>
+                                                <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
+                                                    {dpCities.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1.5 sm:col-span-2">
+                                            <Label className="text-xs font-medium text-muted-foreground">Barangay</Label>
+                                            <Select
+                                                value={deliveryBarangay}
+                                                onValueChange={setDeliveryBarangay}
+                                                disabled={!deliveryCityCode || dpLoadingBarangays}
+                                            >
+                                                <SelectTrigger className="h-10">
+                                                    <SelectValue placeholder={!deliveryCityCode ? 'Select Municipality first' : dpLoadingBarangays ? 'Loading…' : 'Select Barangay'} />
+                                                </SelectTrigger>
+                                                <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
+                                                    {dpBarangays.map(b => <SelectItem key={b.code} value={b.name}>{b.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-medium text-muted-foreground">House No. / Street / Purok *</Label>
+                                        <Input value={deliveryStreet} onChange={e => setDeliveryStreet(e.target.value)} placeholder="e.g. 123 Rizal St., Purok 4" required />
+                                    </div>
                                 </div>
 
                                 <div className="flex gap-3">

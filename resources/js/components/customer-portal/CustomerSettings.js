@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
+import { usePhilippineAddress } from '../../hooks/usePhilippineAddress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
     User, Lock, ArrowLeft, Save, Eye, EyeOff,
     CheckCircle2, AlertCircle, Loader2, MapPin, ShieldCheck, Camera
@@ -40,15 +42,19 @@ function TextInput({ value, onChange, placeholder, type = 'text', disabled }) {
 }
 
 function SelectInput({ value, onChange, options, disabled }) {
+    const placeholder = options.find(o => o.value === '')?.label ?? 'Select…';
+    const items = options.filter(o => o.value !== '');
     return (
-        <select
-            value={value ?? ''}
-            onChange={e => onChange(e.target.value)}
-            disabled={disabled}
-            className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 text-sm text-gray-900 focus:bg-white focus:border-[#FF5A1F] focus:ring-2 focus:ring-[#FF5A1F]/10 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-            {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
+        <Select value={value ?? ''} onValueChange={onChange} disabled={disabled}>
+            <SelectTrigger className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 focus:bg-white focus:border-[#FF5A1F] disabled:opacity-50 disabled:cursor-not-allowed">
+                <SelectValue placeholder={placeholder} />
+            </SelectTrigger>
+            <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
+                {items.map(o => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
     );
 }
 
@@ -86,10 +92,14 @@ export default function CustomerSettings() {
     const [photoError, setPhotoError] = useState(null);
     const [photoSuccess, setPhotoSuccess] = useState(false);
 
+    const [provinceCode, setProvinceCode] = useState('');
+    const [cityCode, setCityCode] = useState('');
+    const { provinces, cities, barangays, loadingProvinces, loadingCities, loadingBarangays } = usePhilippineAddress('', provinceCode, cityCode);
+
     // Profile state
     const [profile, setProfile] = useState({
         name: '', phone: '', age: '', sex: '',
-        address: '', landmark: '', province: '', municipality: '', zip_code: '',
+        address: '', landmark: '', province: '', municipality: '', barangay: '', zip_code: '',
     });
     const [profileLoading, setProfileLoading] = useState(true);
     const [profileSaving, setProfileSaving] = useState(false);
@@ -117,12 +127,27 @@ export default function CustomerSettings() {
                 landmark: p?.landmark || '',
                 province: p?.province || '',
                 municipality: p?.municipality || '',
+                barangay: p?.barangay || '',
                 zip_code: p?.zip_code || '',
             });
         }).catch(() => {
             setProfile(prev => ({ ...prev, name: user?.name || '', phone: user?.phone || '' }));
         }).finally(() => setProfileLoading(false));
     }, [user]);
+
+    useEffect(() => {
+        if (profile.province && provinces.length > 0 && !provinceCode) {
+            const found = provinces.find(p => p.name === profile.province);
+            if (found) setProvinceCode(found.code);
+        }
+    }, [profile.province, provinces]);
+
+    useEffect(() => {
+        if (profile.municipality && cities.length > 0 && !cityCode) {
+            const found = cities.find(c => c.name === profile.municipality);
+            if (found) setCityCode(found.code);
+        }
+    }, [profile.municipality, cities]);
 
     const handleProfileSave = async (e) => {
         e.preventDefault();
@@ -357,19 +382,53 @@ export default function CustomerSettings() {
                                     <h2 className="text-sm font-black text-gray-800 uppercase tracking-widest">Delivery Address</h2>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="sm:col-span-2">
-                                        <FieldGroup label="Street / Barangay" error={profileErrors.address?.[0]}>
-                                            <TextInput value={profile.address} onChange={set('address')} placeholder="House no., street, barangay" disabled={profileSaving} />
-                                        </FieldGroup>
-                                    </div>
                                     <FieldGroup label="Landmark" error={profileErrors.landmark?.[0]}>
                                         <TextInput value={profile.landmark} onChange={set('landmark')} placeholder="Nearby landmark" disabled={profileSaving} />
                                     </FieldGroup>
                                     <FieldGroup label="Municipality / City" error={profileErrors.municipality?.[0]}>
-                                        <TextInput value={profile.municipality} onChange={set('municipality')} placeholder="e.g. Davao City" disabled={profileSaving} />
+                                        <SelectInput
+                                            value={cityCode}
+                                            onChange={code => {
+                                                const found = cities.find(c => c.code === code);
+                                                setCityCode(code);
+                                                setProfile(prev => ({ ...prev, municipality: found ? found.name : '', barangay: '' }));
+                                            }}
+                                            disabled={profileSaving || !provinceCode || loadingCities}
+                                            options={[
+                                                { value: '', label: !provinceCode ? 'Select Province first' : loadingCities ? 'Loading…' : 'Select Municipality / City' },
+                                                ...cities.map(c => ({ value: c.code, label: c.name }))
+                                            ]}
+                                        />
                                     </FieldGroup>
                                     <FieldGroup label="Province" error={profileErrors.province?.[0]}>
-                                        <TextInput value={profile.province} onChange={set('province')} placeholder="e.g. Davao del Sur" disabled={profileSaving} />
+                                        <SelectInput
+                                            value={provinceCode}
+                                            onChange={code => {
+                                                const found = provinces.find(p => p.code === code);
+                                                setProvinceCode(code);
+                                                setCityCode('');
+                                                setProfile(prev => ({ ...prev, province: found ? found.name : '', municipality: '', barangay: '' }));
+                                            }}
+                                            disabled={profileSaving || loadingProvinces}
+                                            options={[
+                                                { value: '', label: loadingProvinces ? 'Loading provinces…' : 'Select Province' },
+                                                ...provinces.map(p => ({ value: p.code, label: p.name }))
+                                            ]}
+                                        />
+                                    </FieldGroup>
+                                    <FieldGroup label="Barangay" error={profileErrors.barangay?.[0]}>
+                                        <SelectInput
+                                            value={profile.barangay}
+                                            onChange={set('barangay')}
+                                            disabled={profileSaving || !cityCode || loadingBarangays}
+                                            options={[
+                                                { value: '', label: !cityCode ? 'Select Municipality first' : loadingBarangays ? 'Loading…' : 'Select Barangay' },
+                                                ...barangays.map(b => ({ value: b.name, label: b.name }))
+                                            ]}
+                                        />
+                                    </FieldGroup>
+                                    <FieldGroup label="House No. / Street / Purok" error={profileErrors.address?.[0]}>
+                                        <TextInput value={profile.address} onChange={set('address')} placeholder="e.g. 123 Rizal St., Purok 4" disabled={profileSaving} />
                                     </FieldGroup>
                                     <FieldGroup label="ZIP Code" error={profileErrors.zip_code?.[0]}>
                                         <TextInput value={profile.zip_code} onChange={set('zip_code')} placeholder="e.g. 8000" disabled={profileSaving} />

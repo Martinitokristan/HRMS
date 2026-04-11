@@ -245,4 +245,44 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Product deleted', 'status' => 'success']);
     }
+
+    public function bestSellers(Request $request)
+    {
+        $limit = (int) $request->get('limit', 4);
+
+        $topIds = DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->whereIn('sales.status', ['delivered', 'completed', 'processing', 'returned'])
+            ->select('sale_items.product_id', DB::raw('SUM(sale_items.quantity) as total_sold'))
+            ->groupBy('sale_items.product_id')
+            ->orderByDesc('total_sold')
+            ->limit($limit)
+            ->pluck('sale_items.product_id');
+
+        if ($topIds->isEmpty()) {
+            $products = Product::with(['category', 'inventory', 'approvedReviews'])
+                ->where('is_active', true)
+                ->latest()
+                ->limit($limit)
+                ->get();
+        } else {
+            $products = Product::with(['category', 'inventory', 'approvedReviews'])
+                ->where('is_active', true)
+                ->whereIn('id', $topIds)
+                ->get()
+                ->sortBy(fn($p) => array_search($p->id, $topIds->toArray()))
+                ->values();
+        }
+
+        $products->transform(function ($product) {
+            $product->average_rating = $product->averageRating();
+            $product->total_reviews  = $product->totalReviews();
+            return $product;
+        });
+
+        return response()->json([
+            'data'   => $products,
+            'status' => 'success',
+        ]);
+    }
 }

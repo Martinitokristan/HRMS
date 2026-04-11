@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { CheckCircle2, User, Building2, AlertCircle, CheckCircle, Mail, RefreshCw, Loader2 } from 'lucide-react';
+import { CheckCircle2, User, Building2, AlertCircle, CheckCircle, Mail, RefreshCw, Loader2, Eye, EyeOff, Package, Truck, Star } from 'lucide-react';
 import { useFormValidation } from '../../hooks/useFormValidation';
+import { PhAddressFields } from '../shared/PhAddressFields';
 
 export default function SupplierRegister() {
     const [formData, setFormData] = useState({
@@ -17,10 +18,21 @@ export default function SupplierRegister() {
         contact_name: '',
         email: '',
         phone: '',
+        province: '',
+        municipality: '',
+        barangay: '',
         address: '',
         password: '',
         password_confirmation: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    const features = [
+        { icon: Package, label: 'Wide Product Selection',  desc: 'Tools, supplies & equipment for every project' },
+        { icon: Truck,   label: 'Direct PO Integration',   desc: 'Automated purchase order management' },
+        { icon: Star,    label: 'Real-time Sync',          desc: 'Live inventory and payment tracking' },
+    ];
     const [loading, setLoading] = useState(false);
     const { showToast } = useToast();
     const navigate = useNavigate();
@@ -187,9 +199,17 @@ export default function SupplierRegister() {
 
             <div className="flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto">
                 <div className="w-full max-w-lg">
-                    <div className="text-xl font-black text-foreground mb-6 cursor-pointer" onClick={() => navigate('/')}>HRMS</div>
-                    <h1 className="text-2xl font-extrabold text-foreground mb-1">Supplier Partner Program</h1>
-                    <p className="text-muted-foreground mb-8">
+                    <div className="flex items-center gap-2.5 cursor-pointer mb-8" onClick={() => navigate('/')}>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F97316] shadow-lg shadow-orange-200">
+                            <span className="text-sm font-black text-white">H</span>
+                        </div>
+                        <div>
+                            <span className="text-xl font-black text-gray-900">HRMS</span>
+                            <span className="block text-[10px] text-gray-400 font-medium -mt-0.5 tracking-widest uppercase">Hardware Store</span>
+                        </div>
+                    </div>
+                    <h1 className="text-[26px] font-black text-gray-900 tracking-tight mb-1">Supplier Partner Program</h1>
+                    <p className="text-gray-500 mb-8">
                         Create your supplier account to start providing products to HRMS.
                     </p>
 
@@ -210,9 +230,19 @@ export default function SupplierRegister() {
                                     <Input name="name" type="text" value={formData.name} onChange={handleChange} required placeholder="Legal business name" className={errors.name ? 'border-red-500' : ''} />
                                     {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                                 </div>
-                                <div className="space-y-1.5">
-                                    <Label>Business Address</Label>
-                                    <Textarea name="address" value={formData.address} onChange={handleChange} placeholder="Warehouse or Office location" rows={3} />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <PhAddressFields
+                                        province={formData.province}
+                                        municipality={formData.municipality}
+                                        barangay={formData.barangay}
+                                        address={formData.address}
+                                        onProvinceChange={name => setFormData(prev => ({ ...prev, province: name, municipality: '', barangay: '' }))}
+                                        onMunicipalityChange={name => setFormData(prev => ({ ...prev, municipality: name, barangay: '' }))}
+                                        onBarangayChange={name => setFormData(prev => ({ ...prev, barangay: name }))}
+                                        onAddressChange={name => setFormData(prev => ({ ...prev, address: name }))}
+                                        errors={{ province: errors.province, municipality: errors.municipality, barangay: errors.barangay, address: errors.address }}
+                                        disabled={loading}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -244,21 +274,31 @@ export default function SupplierRegister() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <Label>Password *</Label>
-                                        <Input name="password" type="password" value={formData.password} onChange={handleChange} onKeyDown={handleKeyDown} required placeholder="Min 8 chars, 1 letter, 1 number" className={errors.password ? 'border-red-500' : ''} />
+                                        <div className="relative">
+                                            <Input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleChange} onKeyDown={handleKeyDown} required placeholder="Min 8 chars, 1 letter, 1 number" className={`pr-11 ${errors.password ? 'border-red-500' : ''}`} />
+                                            <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </button>
+                                        </div>
                                         {capsWarning && <p className="text-xs text-orange-500 my-1 font-semibold">Caps Lock is on!</p>}
                                         {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label>Confirm Password *</Label>
-                                        <Input name="password_confirmation" type="password" value={formData.password_confirmation} onChange={handleChange} required placeholder="Repeat password" className={errors.password_confirmation ? 'border-red-500' : ''} />
+                                        <div className="relative">
+                                            <Input name="password_confirmation" type={showConfirm ? 'text' : 'password'} value={formData.password_confirmation} onChange={handleChange} required placeholder="Repeat password" className={`pr-11 ${errors.password_confirmation ? 'border-red-500' : ''}`} />
+                                            <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </button>
+                                        </div>
                                         {errors.password_confirmation && <p className="text-sm text-red-500">{errors.password_confirmation}</p>}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <Button type="submit" className="w-full h-11" disabled={loading}>
-                            {loading ? 'Registering Company...' : 'Initialize Supplier Partnership'}
+                        <Button type="submit" disabled={loading} className="w-full h-12 text-[15px] font-bold bg-[#F97316] hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25">
+                            {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Registering…</> : 'Initialize Supplier Partnership'}
                         </Button>
 
                         <div className="text-center text-sm text-muted-foreground">
@@ -268,22 +308,28 @@ export default function SupplierRegister() {
                 </div>
             </div>
 
-            {/* Right - Branding */}
-            <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-12 text-white" style={{ backgroundImage: 'linear-gradient(rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.9)), url("/images/hero-banner.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                <div className="max-w-md text-center">
-                    <div className="text-6xl mb-6">🏭</div>
-                    <h2 className="text-2xl font-extrabold mb-3">Grow with HRMS</h2>
-                    <p className="text-white/70 mb-8">Join thousands of hardware suppliers streamlining their fulfillment through our automated retail engine.</p>
-                    <div className="space-y-3 text-left">
-                        {[
-                            'Direct Purchase Order Integration',
-                            'Real-time Inventory Syncing',
-                            'Automated Payment Reconciliation',
-                            'Advanced Analytics & Demand Forecasting',
-                        ].map((f, i) => (
-                            <div key={i} className="flex items-center gap-3">
-                                <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0" />
-                                <span className="text-sm text-white/80">{f}</span>
+            {/* Right — Hardware Image Panel */}
+            <div className="hidden lg:flex flex-col justify-end w-[480px] xl:w-[560px] relative overflow-hidden">
+                <img
+                    src="https://img.pikbest.com/wp/202343/hardware-tools-displayed-against-textured-metal-background_9965912.jpg!f305cw"
+                    alt="Hardware Tools"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/55 to-black/20" />
+                <div className="relative z-10 p-10 pb-12">
+                    <p className="text-[#F97316] text-[11px] font-black uppercase tracking-[0.2em] mb-2">Supplier Partner Program</p>
+                    <h2 className="text-3xl font-black text-white leading-tight mb-2">Grow Your<br/>Business with HRMS</h2>
+                    <p className="text-gray-400 text-sm mb-7 leading-relaxed">Streamline your fulfillment through our automated retail and logistics engine.</p>
+                    <div className="space-y-3">
+                        {features.map(({ icon: Icon, label, desc }) => (
+                            <div key={label} className="flex items-center gap-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 px-4 py-3">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F97316]/20 border border-[#F97316]/30">
+                                    <Icon className="h-4 w-4 text-[#F97316]" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-white">{label}</p>
+                                    <p className="text-[11px] text-gray-400">{desc}</p>
+                                </div>
                             </div>
                         ))}
                     </div>

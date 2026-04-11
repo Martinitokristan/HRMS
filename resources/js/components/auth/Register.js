@@ -4,7 +4,8 @@ import axios from 'axios';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus, MapPin, Shield, Navigation } from 'lucide-react';
+import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus, MapPin, Shield, Navigation, Eye, EyeOff, Package, Truck, Star } from 'lucide-react';
+import { PhAddressFields } from '../shared/PhAddressFields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,11 +45,19 @@ export default function Register() {
 
     const [formData, setFormData] = useState({
         name: '', email: '', phone: '', password: '', password_confirmation: '',
-        age: '', sex: '', province: '', municipality: '', zip_code: '',
+        age: '', sex: '', province: '', municipality: '', barangay: '', zip_code: '',
         address: '', landmark: '', latitude: '', longitude: ''
     });
 
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    const features = [
+        { icon: Package, label: 'Wide Product Selection',  desc: 'Tools, supplies & equipment for every project' },
+        { icon: Truck,   label: 'Fast & Tracked Delivery',  desc: 'Real-time delivery tracking to your location' },
+        { icon: Star,    label: 'Trusted by Contractors',   desc: 'Quality products from verified suppliers' },
+    ];
 
     const [successMsg, setSuccessMsg] = useState('');
     const [capsWarning, setCapsWarning] = useState(false);
@@ -305,17 +314,18 @@ export default function Register() {
             {/* Left - Form */}
             <div className="flex flex-1 items-center justify-center px-6 py-10 bg-card overflow-y-auto">
                 <div className="w-full max-w-[580px]">
-                    <div className="flex items-center gap-2 cursor-pointer mb-8" onClick={() => navigate('/')}>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                            <span className="text-sm font-black text-primary-foreground">H</span>
+                    <div className="flex items-center gap-2.5 cursor-pointer mb-8" onClick={() => navigate('/')}>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F97316] shadow-lg shadow-orange-200">
+                            <span className="text-sm font-black text-white">H</span>
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-foreground">
-                            HRMS
-                        </span>
+                        <div>
+                            <span className="text-xl font-black text-gray-900">HRMS</span>
+                            <span className="block text-[10px] text-gray-400 font-medium -mt-0.5 tracking-widest uppercase">Hardware Store</span>
+                        </div>
                     </div>
 
-                    <h1 className="text-[26px] font-black text-foreground tracking-tight mb-2">Create Customer Account</h1>
-                    <p className="text-sm text-muted-foreground mb-8">Enter your details to start ordering high-quality supplies.</p>
+                    <h1 className="text-[26px] font-black text-gray-900 tracking-tight mb-1">Create Customer Account</h1>
+                    <p className="text-sm text-gray-500 mb-8">Enter your details to start ordering high-quality supplies.</p>
 
                     {errors.form && (
                         <Alert variant="destructive" className="mb-6">
@@ -357,13 +367,23 @@ export default function Register() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="reg-password">Password</Label>
-                                        <Input id="reg-password" name="password" type="password" required value={formData.password} onChange={handleChange} onKeyDown={handleKeyDown} placeholder="Min 8 chars, 1 letter, 1 number" className={`h-11 ${errors.password ? 'border-red-500' : ''}`} />
+                                        <div className="relative">
+                                            <Input id="reg-password" name="password" type={showPassword ? 'text' : 'password'} required value={formData.password} onChange={handleChange} onKeyDown={handleKeyDown} placeholder="Min 8 chars, 1 letter, 1 number" className={`h-11 pr-11 ${errors.password ? 'border-red-500' : ''}`} />
+                                            <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </button>
+                                        </div>
                                         {capsWarning && <p className="text-xs text-orange-500 my-1 font-semibold">Caps Lock is on!</p>}
                                         {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="reg-confirm">Confirm Password</Label>
-                                        <Input id="reg-confirm" name="password_confirmation" type="password" value={formData.password_confirmation} required onChange={handleChange} placeholder="Repeat password" className={`h-11 ${errors.password_confirmation ? 'border-red-500' : ''}`} />
+                                        <div className="relative">
+                                            <Input id="reg-confirm" name="password_confirmation" type={showConfirm ? 'text' : 'password'} value={formData.password_confirmation} required onChange={handleChange} placeholder="Repeat password" className={`h-11 pr-11 ${errors.password_confirmation ? 'border-red-500' : ''}`} />
+                                            <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </button>
+                                        </div>
                                         {errors.password_confirmation && <p className="text-sm text-red-500">{errors.password_confirmation}</p>}
                                     </div>
                                 </div>
@@ -380,21 +400,18 @@ export default function Register() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="province">Province</Label>
-                                        <Input id="province" name="province" type="text" required onChange={handleChange} placeholder="e.g. Davao del Sur" className={`h-11 ${errors.province ? 'border-red-500' : ''}`} />
-                                        {errors.province && <p className="text-sm text-red-500">{errors.province}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="municipality">Municipality/City</Label>
-                                        <Input id="municipality" name="municipality" type="text" required onChange={handleChange} placeholder="e.g. Davao City" className={`h-11 ${errors.municipality ? 'border-red-500' : ''}`} />
-                                        {errors.municipality && <p className="text-sm text-red-500">{errors.municipality}</p>}
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="address">Specific Address (House #, Street, Barangay)</Label>
-                                    <Input id="address" name="address" type="text" required onChange={handleChange} placeholder="Full address details" className={`h-11 ${errors.address ? 'border-red-500' : ''}`} />
-                                    {errors.address && <p className="text-sm text-red-500">{errors.address}</p>}
+                                    <PhAddressFields
+                                        province={formData.province}
+                                        municipality={formData.municipality}
+                                        barangay={formData.barangay}
+                                        address={formData.address}
+                                        onProvinceChange={name => setFormData(prev => ({ ...prev, province: name, municipality: '', barangay: '' }))}
+                                        onMunicipalityChange={name => setFormData(prev => ({ ...prev, municipality: name, barangay: '' }))}
+                                        onBarangayChange={name => setFormData(prev => ({ ...prev, barangay: name }))}
+                                        onAddressChange={name => setFormData(prev => ({ ...prev, address: name }))}
+                                        errors={{ province: errors.province, municipality: errors.municipality, barangay: errors.barangay, address: errors.address }}
+                                        disabled={loading}
+                                    />
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -477,7 +494,7 @@ export default function Register() {
                         </Card>
 
                         <div className="text-center space-y-4">
-                            <Button type="submit" disabled={loading} className="w-full max-w-[340px] mx-auto h-12 text-[15px] font-bold shadow-md shadow-primary/20">
+                            <Button type="submit" disabled={loading} className="w-full max-w-[340px] mx-auto h-12 text-[15px] font-bold bg-[#F97316] hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25">
                                 {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating Account...</> : 'Join as Active Customer'}
                             </Button>
 
@@ -493,24 +510,28 @@ export default function Register() {
                 </div>
             </div>
 
-            {/* Right - Promo */}
-            <div className="hidden lg:flex flex-col items-center justify-center w-[480px] xl:w-[520px] p-12 text-white relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1e293b 100%)' }}
-            >
-                <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 50% 30%, #FF6B35, transparent 60%)' }} />
-                <div className="relative z-10 text-center max-w-sm">
-                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/15 border border-primary/25 mx-auto mb-8">
-                        <UserPlus className="h-10 w-10 text-primary" />
-                    </div>
-                    <h2 className="text-2xl font-black mb-3">Industrial Access</h2>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                        Register to unlock our complete catalog of professional construction materials and logistics services.
-                    </p>
-                    <div className="space-y-3 text-left">
-                        {['Direct Warehouse Pricing', 'Live GPS Order Tracking', 'Secure Digital Invoicing'].map((feat, i) => (
-                            <div key={i} className="flex items-center gap-3 rounded-lg bg-white/[0.06] border border-white/10 px-4 py-3">
-                                <CheckCircle className="h-4 w-4 text-slate-500 shrink-0" />
-                                <span className="text-sm font-semibold">{feat}</span>
+            {/* Right — Hardware Image Panel */}
+            <div className="hidden lg:flex flex-col justify-end w-[480px] xl:w-[560px] relative overflow-hidden">
+                <img
+                    src="https://img.pikbest.com/wp/202343/hardware-tools-displayed-against-textured-metal-background_9965912.jpg!f305cw"
+                    alt="Hardware Tools"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/55 to-black/20" />
+                <div className="relative z-10 p-10 pb-12">
+                    <p className="text-[#F97316] text-[11px] font-black uppercase tracking-[0.2em] mb-2">Join HRMS Today</p>
+                    <h2 className="text-3xl font-black text-white leading-tight mb-2">Start Shopping<br/>Hardware Products</h2>
+                    <p className="text-gray-400 text-sm mb-7 leading-relaxed">Register to access our complete catalog of tools, supplies and equipment.</p>
+                    <div className="space-y-3">
+                        {features.map(({ icon: Icon, label, desc }) => (
+                            <div key={label} className="flex items-center gap-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 px-4 py-3">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F97316]/20 border border-[#F97316]/30">
+                                    <Icon className="h-4 w-4 text-[#F97316]" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-white">{label}</p>
+                                    <p className="text-[11px] text-gray-400">{desc}</p>
+                                </div>
                             </div>
                         ))}
                     </div>
