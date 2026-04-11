@@ -36,3 +36,7 @@ build_error.log
 
 # Documentation folder
 # /documentation/
+
+# Certificates and Guides
+isrgrootx1.pem
+caching_and_silent_reload_guide.md
