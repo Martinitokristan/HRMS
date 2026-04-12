@@ -28,8 +28,8 @@ class ProductController extends Controller
                     'sold_count' => DB::table('sale_items')
                         ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                         ->whereColumn('sale_items.product_id', 'products.id')
-                        ->where('sales.status', 'completed')
-                        ->selectRaw('COALESCE(COUNT(*), 0)'),
+                        ->whereIn('sales.status', ['delivered', 'completed', 'processing', 'returned'])
+                        ->selectRaw('COALESCE(SUM(sale_items.quantity), 0)'),
                 ])
                 ->where('is_active', true) // Only show active products in customer shop
                 ->when($request->search, function($q) use ($request) {
