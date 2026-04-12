@@ -127,7 +127,7 @@ class ProductReviewController extends Controller
         // Calculate total sold quantity for this product
         $totalSold = \App\Models\SaleItem::where('product_id', $productId)
             ->whereHas('sale', function ($query) {
-                $query->whereIn('status', ['delivered', 'completed', 'processing', 'returned']);
+                $query->where('status', 'completed');
             })
             ->sum('quantity');
 
