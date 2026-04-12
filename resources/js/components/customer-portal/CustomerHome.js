@@ -23,50 +23,18 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
     const inStock = totalStock > 0;
     const imgSrc = product.image_path ? `/storage/${product.image_path}` : null;
     const [addingToCart, setAddingToCart] = useState(false);
-    const [productRating, setProductRating] = useState(null);
-    const [soldCount, setSoldCount] = useState(null);
 
     // Calculate sale information
     const saleInfo = getProductSaleInfo(product);
 
+    // Read aggregated data directly from product prop (provided by API index response)
+    const averageRating = Number(product.average_rating || 0);
+    const totalReviews  = Number(product.total_reviews  || 0);
+    const soldCount     = Number(product.sold_count     || 0);
+
     // Get unique sizes and colors for display
     const sizes = allVariants ? [...new Set(allVariants.map(v => v.size_value?.label).filter(Boolean))] : [];
     const colors = allVariants ? [...new Set(allVariants.map(v => v.color_value?.label).filter(Boolean))] : [];
-
-    // Fetch product rating and sold count (optimized - use prop data if exists)
-    useEffect(() => {
-        const fetchProductData = async () => {
-            if (!product?.id) return;
-
-            // Use existing rating data from prop to avoid loading if possible
-            if (product.average_rating !== undefined && product.total_reviews !== undefined && !productRating) {
-                setProductRating({
-                    average_rating: product.average_rating,
-                    total_reviews: product.total_reviews
-                });
-            }
-
-            try {
-                // Fetch sold count only if we don't have it (or always refresh metadata)
-                const soldRes = await api.get(`/products/${product.id}/sold-count`);
-                if (soldRes.data?.status === 'success') {
-                    setSoldCount(soldRes.data.sold_count || 0);
-                }
-
-                // Refresh rating data in background if not already initialized
-                if (!productRating) {
-                    const ratingRes = await api.get(`/products/${product.id}/reviews`);
-                    if (ratingRes.data?.data?.summary) {
-                        setProductRating(ratingRes.data.data.summary);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching product metadata:', error);
-            }
-        };
-
-        fetchProductData();
-    }, [product?.id]);
 
     const handleAddToCart = async (e) => {
         e.stopPropagation();
@@ -109,8 +77,7 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 isUpdate: !!product.cartId
             });
         } catch (error) {
-            console.error('Error adding to cart:', error);
-            // Error is handled in parent component
+            // silent fail
         } finally {
             setAddingToCart(false);
         }
@@ -146,13 +113,13 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 {/* Badges Overlay */}
                 <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
                     {/* Category Label */}
-                    <span className="bg-[#FF5A1F] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-orange-500/20">
+                    <span className="bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg shadow-orange-500/20">
                         {product.category?.name || 'Hand Tools'}
                     </span>
 
                     {/* Sale Badge */}
                     {saleInfo.isOnSale && (
-                        <span className="bg-[#FF4D4D] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-red-500/20">
+                        <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg shadow-red-500/20">
                             SALE -{saleInfo.salePercentage}%
                         </span>
                     )}
@@ -161,7 +128,7 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 {/* Out of Stock Overlay */}
                 {!inStock && (
                     <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
-                        <span className="bg-gray-900 text-white text-[8px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full shadow-2xl">
+                        <span className="bg-gray-900 text-white text-xs font-semibold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full shadow-2xl">
                             Sold Out
                         </span>
                     </div>
@@ -171,16 +138,16 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
             {/* Content Section */}
             <div className="p-4 space-y-3">
                 <div className="min-h-[60px]">
-                    <h3 className="text-base font-black text-gray-900 mb-1 leading-tight group-hover:text-[#FF5A1F] transition-colors line-clamp-1">{product.name}</h3>
-                    <p className="text-[9px] text-gray-500 leading-normal line-clamp-2 font-medium">
+                    <h3 className="text-base font-black text-gray-900 mb-1 leading-tight group-hover:text-orange-500 transition-colors line-clamp-1">{product.name}</h3>
+                    <p className="text-xs text-gray-500 leading-normal line-clamp-2 font-medium">
                         {product.description || "Premium quality product designed for durability and high performance in all specific applications."}
                     </p>
                 </div>
 
                 {/* Stock Indicator Pill - Mini Spec Modal Style */}
                 <div className="inline-flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100/50">
-                    <span className="text-[8.5px] font-black text-emerald-600 uppercase tracking-widest leading-none">Stock</span>
-                    <span className="text-[8.5px] font-black text-gray-900 uppercase tracking-widest leading-none">
+                    <span className="text-xs font-semibold text-emerald-600 leading-none">Stock</span>
+                    <span className="text-xs font-semibold text-gray-900 leading-none">
                         {totalStock} units
                     </span>
                 </div>
@@ -188,11 +155,11 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 {/* Pricing Area - Vertical Tight */}
                 <div className="pt-1.5 pb-0.5">
                     <div className="flex items-end gap-2">
-                        <div className="text-lg font-black text-[#FF5A1F] leading-none tracking-tighter">
+                        <div className="text-lg font-black text-orange-500 leading-none tracking-tighter">
                             ₱{saleInfo.isOnSale ? saleInfo.salePrice.toFixed(2) : saleInfo.originalPrice.toFixed(2)}
                         </div>
                         {saleInfo.isOnSale && (
-                           <span className="text-[9px] text-gray-400 line-through font-bold leading-none mb-0.5">
+                           <span className="text-xs text-gray-400 line-through font-bold leading-none mb-0.5">
                                ₱{saleInfo.originalPrice.toFixed(2)}
                            </span>
                         )}
@@ -202,14 +169,14 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 {/* Ratings & Sold Summary - Inline Mini */}
                 <div className="flex items-center gap-2 pt-0.5">
                     <div className="flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-100/50">
-                        <RatingStars rating={productRating?.average_rating || 0} size="sm" color="text-amber-500" showCount={false} />
-                        <span className="text-[9px] font-black text-amber-700 leading-none">
-                            {Number(productRating?.average_rating || 0).toFixed(1)}
+                        <RatingStars rating={averageRating} size="sm" color="text-amber-500" showCount={false} />
+                        <span className="text-xs font-semibold text-amber-700 leading-none">
+                            {averageRating.toFixed(1)}
                         </span>
                     </div>
                     <div className="w-1 h-1 rounded-full bg-gray-300"></div>
-                    <span className="text-[11px] font-black text-gray-900 uppercase tracking-widest leading-none whitespace-nowrap">
-                        {soldCount || 0} SOLD
+                    <span className="text-xs text-gray-500 leading-none whitespace-nowrap">
+                        {soldCount} SOLD
                     </span>
                 </div>
 
@@ -217,10 +184,10 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 <button
                     disabled={!inStock || addingToCart}
                     onClick={handleAddToCart}
-                    className="w-full h-9 bg-[#FF5A1F] hover:bg-orange-600 active:scale-95 text-white rounded-lg transition-all duration-300 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 disabled:bg-gray-100 disabled:text-gray-300"
+                    className="w-full h-9 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-xl transition-all duration-300 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 disabled:bg-gray-100 disabled:text-gray-300"
                 >
                     <ShoppingCart className="w-3.5 h-3.5" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.1em]">
+                    <span className="text-xs font-semibold">
                         {addingToCart ? 'Wait...' : 'Add to Cart'}
                     </span>
                 </button>
@@ -289,10 +256,15 @@ export default function CustomerHome() {
     }, []);
 
     // Listen for order placement to refresh product list
-    window.addEventListener('orderPlaced', (e) => {
-        console.log('Order placed event received, refreshing products...');
-        markStale(STALE_KEYS.CUSTOMER_SHOP);
-    });
+    useEffect(() => {
+        const handleOrderPlaced = () => {
+            markStale(STALE_KEYS.CUSTOMER_SHOP);
+        };
+        window.addEventListener('orderPlaced', handleOrderPlaced);
+        return () => {
+            window.removeEventListener('orderPlaced', handleOrderPlaced);
+        };
+    }, []);
 
     // Cart bump animation
     useEffect(() => {
@@ -348,9 +320,8 @@ export default function CustomerHome() {
                         setProducts(actualData);
                     }
                 })
-                .catch(err => {
-                    console.error('Error fetching products:', err);
-                    // never wipe existing data on background error
+                .catch(() => {
+                    // silent fail — never wipe existing data on background error
                 })
                 .finally(() => {
                     if (isMounted && !silent) setLoading(false);
@@ -496,13 +467,13 @@ export default function CustomerHome() {
                 <div className="max-w-[1500px] mx-auto px-6 h-14 flex items-center justify-between gap-6">
                     {/* Logo */}
                     <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => navigate('/shop')}>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF5A1F] text-white font-bold text-sm">H</div>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white font-bold text-sm">H</div>
                         <div className="text-base font-bold text-gray-900">HRMS</div>
                     </div>
 
                     {/* Search Bar */}
                     <div className="flex-1 max-w-xl relative group hidden sm:block">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-[#FF5A1F] transition-colors" />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
                         <Input 
                             type="text" 
                             placeholder="Search premium products..." 
@@ -520,10 +491,10 @@ export default function CustomerHome() {
                     {/* Right Actions */}
                     <div className="flex items-center gap-2">
                         {/* Cart */}
-                        <Link to="/shop/cart" id="cart-icon-btn" className="relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-[#FF5A1F] transition-all rounded-xl">
+                        <Link to="/shop/cart" id="cart-icon-btn" className="relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl">
                             <ShoppingCart className="h-5 w-5" />
                             {cartCount > 0 && (
-                                <span id="cart-count-badge" className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-[#FF5A1F] text-white text-[9px] font-black rounded-full px-1.5 shadow-lg shadow-orange-500/20 ring-2 ring-white">
+                                <span id="cart-count-badge" className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-orange-500 text-white text-xs font-black rounded-full px-1.5 shadow-lg shadow-orange-500/20 ring-2 ring-white">
                                     {cartCount}
                                 </span>
                             )}
@@ -533,7 +504,7 @@ export default function CustomerHome() {
                         <div className="relative" ref={notifRef}>
                             <button
                                 type="button"
-                                className={`relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 rounded-xl transition-all ${notifOpen ? 'bg-gray-50 text-[#FF5A1F]' : ''}`}
+                                className={`relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 rounded-xl transition-all ${notifOpen ? 'bg-gray-50 text-orange-500' : ''}`}
                                 onClick={(e) => { e.stopPropagation(); setNotifOpen(prev => !prev); }}
                             >
                                 <Bell className="h-5 w-5" />
@@ -565,7 +536,7 @@ export default function CustomerHome() {
                                     return (
                                         <button
                                             onClick={(e) => { e.stopPropagation(); setProofModalUrl(proofUrl); setNotifOpen(false); }}
-                                            className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FF5A1F] hover:bg-orange-600 text-white text-[11px] font-bold rounded-lg transition-colors"
+                                            className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg transition-colors"
                                         >
                                             View Proof
                                         </button>
@@ -575,7 +546,7 @@ export default function CustomerHome() {
                         </div>
 
                         {/* My Orders */}
-                        <Link to="/shop/history" className="hidden sm:flex items-center gap-1.5 h-10 px-3 text-gray-600 hover:bg-gray-50 hover:text-[#FF5A1F] transition-all rounded-xl text-sm font-semibold">
+                        <Link to="/shop/history" className="hidden sm:flex items-center gap-1.5 h-10 px-3 text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl text-sm font-semibold">
                             <ClipboardList className="h-4 w-4" />
                             <span>My Orders</span>
                         </Link>
@@ -586,7 +557,7 @@ export default function CustomerHome() {
                                 onClick={() => setProfileOpen(!profileOpen)}
                                 className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
                             >
-                                <div className="h-8 w-8 rounded-lg bg-[#FF5A1F] overflow-hidden flex items-center justify-center text-white font-black text-[10px] shadow-lg shadow-orange-500/10 group-hover:scale-105 transition-transform">
+                                <div className="h-8 w-8 rounded-lg bg-orange-500 overflow-hidden flex items-center justify-center text-white font-black text-xs shadow-lg shadow-orange-500/10 group-hover:scale-105 transition-transform">
                                     {user?.photo
                                         ? <img src={user.photo} alt={user.name} className="h-full w-full object-cover" />
                                         : user?.name?.charAt(0).toUpperCase()
@@ -601,10 +572,10 @@ export default function CustomerHome() {
                                         <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-0.5">Personal Account</p>
                                         <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
                                     </div>
-                                    <Link to="/shop/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-[#FF5A1F] transition-all rounded-xl">
+                                    <Link to="/shop/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl">
                                         <Settings className="h-4 w-4" /> Settings
                                     </Link>
-                                    <Link to="/shop/history" className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-[#FF5A1F] transition-all rounded-xl">
+                                    <Link to="/shop/history" className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl">
                                         <ClipboardList className="h-4 w-4" /> Order History
                                     </Link>
                                     <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-50 transition-all rounded-xl">
@@ -631,7 +602,7 @@ export default function CustomerHome() {
                 {recommendations.length > 0 && (
                     <div className="mb-8">
                         <div className="flex items-center gap-2 mb-4">
-                            <Sparkles className="h-5 w-5 text-[#FF5A1F]" />
+                            <Sparkles className="h-5 w-5 text-orange-500" />
                             <h2 className="text-lg font-black text-gray-900">Recommended for You</h2>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
@@ -671,7 +642,7 @@ export default function CustomerHome() {
                             onClick={() => handleCategoryClick('')}
                             className={`pb-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                                 !categoryFilter
-                                    ? 'border-[#FF5A1F] text-[#FF5A1F]'
+                                    ? 'border-orange-500 text-orange-500'
                                     : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
                         >
@@ -683,7 +654,7 @@ export default function CustomerHome() {
                                 onClick={() => handleCategoryClick(cat.id)}
                                 className={`pb-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                                     categoryFilter === cat.id
-                                        ? 'border-[#FF5A1F] text-[#FF5A1F]'
+                                        ? 'border-orange-500 text-orange-500'
                                         : 'border-transparent text-gray-500 hover:text-gray-700'
                                 }`}
                             >
@@ -765,7 +736,7 @@ export default function CustomerHome() {
             {/* Flying Item Animation Container */}
             {flyingItem && (
                 <div className="fixed inset-0 pointer-events-none z-[9999]">
-                    <div className="flying-item font-black text-[10px] text-[#FF5A1F]">
+                    <div className="flying-item font-black text-xs text-orange-500">
                         +1 {flyingItem.name}
                     </div>
                 </div>

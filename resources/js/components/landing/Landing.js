@@ -4,11 +4,10 @@ import { silentApi } from "../../lib/api";
 import {
     Package, ShieldCheck, Truck, Wrench, ShoppingCart, ArrowRight,
     X, Headphones, RefreshCw, Wallet, Zap, Hammer, Ruler,
-    Paintbrush, Scissors, Settings, Box, Layers, Star, Send, CheckCircle
+    Paintbrush, Scissors, Settings, Box, Layers, Star, Send, CheckCircle, Menu, ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 
 const BENEFITS = [
     { icon: Truck,      title: 'Express Delivery',   desc: 'Fast and reliable delivery to your site or home.' },
@@ -54,16 +53,16 @@ const LandingProductCard = ({ product, onLoginPrompt }) => {
 
     return (
         <div
-            className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-gray-200/60 hover:-translate-y-1"
+            className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-gray-200/60 hover:-translate-y-1 max-w-[280px]"
             onClick={onLoginPrompt}
         >
-            <div className="relative aspect-square overflow-hidden bg-gray-50 border-b border-gray-100">
+            <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 border-b border-gray-100">
                 {imgSrc ? (
                     <img
                         src={imgSrc}
                         alt={product.name}
                         loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -71,39 +70,37 @@ const LandingProductCard = ({ product, onLoginPrompt }) => {
                     </div>
                 )}
                 <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-                    <span className="bg-[#F97316] text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-orange-500/20">
+                    <span className="bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg shadow-orange-500/20">
                         {product.category?.name || 'Hardware'}
                     </span>
                     {isOnSale && (
-                        <span className="bg-red-500 text-white text-[7px] font-black uppercase tracking-[0.1em] px-2 py-1 rounded-full shadow-lg shadow-red-500/20">
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg shadow-red-500/20">
                             SALE -{saleAmt}%
                         </span>
                     )}
                 </div>
             </div>
             <div className="p-4 space-y-3">
-                <div className="min-h-[52px]">
-                    <h3 className="text-base font-black text-gray-900 leading-tight group-hover:text-[#F97316] transition-colors line-clamp-1">{product.name}</h3>
-                    <p className="text-[9px] text-gray-500 leading-normal line-clamp-2 font-medium mt-1">
-                        {product.description || 'Premium quality hardware for any construction or repair project.'}
-                    </p>
-                </div>
+                <h3 className="text-sm font-bold text-gray-900 leading-tight group-hover:text-orange-500 transition-colors line-clamp-2">{product.name}</h3>
+                <p className="text-xs text-gray-500 leading-normal line-clamp-2 font-medium">
+                    {product.description || 'Premium quality hardware for any construction or repair project.'}
+                </p>
                 <div className="flex items-end gap-2 pt-1">
-                    <span className="text-lg font-black text-[#F97316] leading-none">
+                    <span className="text-base font-bold text-orange-500 leading-none">
                         ₱{displayPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </span>
                     {isOnSale && (
-                        <span className="text-[9px] text-gray-400 line-through font-bold leading-none mb-0.5">
+                        <span className="text-xs text-gray-400 line-through font-bold leading-none mb-0.5">
                             ₱{originalPrice.toFixed(2)}
                         </span>
                     )}
                 </div>
                 <button
                     onClick={(e) => { e.stopPropagation(); onLoginPrompt(); }}
-                    className="w-full h-9 bg-[#F97316] hover:bg-orange-600 active:scale-95 text-white rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
+                    className="w-full h-8 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
                 >
                     <ShoppingCart className="w-3.5 h-3.5" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.1em]">Login to Shop</span>
+                    <span className="text-xs font-semibold">Login to Shop</span>
                 </button>
             </div>
         </div>
@@ -124,11 +121,13 @@ export default function Landing() {
     const [categorySearch, setCategorySearch]     = useState('');
     const [bestSellers, setBestSellers]           = useState([]);
     const [testimonials, setTestimonials]         = useState([]);
-    const { refreshTrigger } = useSilentRefresh('landing_products');
+    const [mobileMenuOpen, setMobileMenuOpen]     = useState(false);
+    const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+    const [newsletterError, setNewsletterError] = useState('');
 
     useEffect(() => {
         let mounted = true;
-        const t = setTimeout(async () => {
+        const loadData = async () => {
             if (!mounted) return;
             setLoading(true);
             try {
@@ -169,9 +168,10 @@ export default function Landing() {
             } finally {
                 if (mounted) setLoading(false);
             }
-        }, 400);
-        return () => { mounted = false; clearTimeout(t); };
-    }, [refreshTrigger]);
+        };
+        loadData();
+        return () => { mounted = false; };
+    }, []);
 
     useEffect(() => {
         if (!activeCategory || isNaN(Number(activeCategory))) {
@@ -230,8 +230,8 @@ export default function Landing() {
                 )}
                 onClick={() => navigate('/login')}
             >
-                <ShieldCheck className="h-4 w-4 text-[#F97316]" />
-                <span className="text-[13px] font-bold">Please <span className="text-[#F97316] underline">sign in</span> to shop</span>
+                <ShieldCheck className="h-4 w-4 text-orange-500" />
+                <span className="text-sm font-bold">Please <span className="text-orange-500 underline">sign in</span> to shop</span>
                 <button className="ml-1 h-5 w-5 flex items-center justify-center text-white/50 hover:text-white" onClick={(e) => { e.stopPropagation(); setNotification(false); }}>
                     <X className="h-3.5 w-3.5" />
                 </button>
@@ -241,7 +241,7 @@ export default function Landing() {
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200 shadow-sm">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10 flex items-center justify-between h-16">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F97316]">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
                             <span className="text-xs font-black text-white">H</span>
                         </div>
                         <span className="text-lg font-black text-gray-900">HRMS</span>
@@ -256,28 +256,57 @@ export default function Landing() {
                             { href: '#testimonials', label: 'Testimonials' },
                             { href: '#newsletter',   label: 'Newsletter' },
                         ].map(({ href, label }) => (
-                            <a key={href} href={href} className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold text-gray-600 hover:bg-orange-50 hover:text-[#F97316] transition-colors whitespace-nowrap">
+                            <a key={href} href={href} className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors whitespace-nowrap">
                                 {label}
                             </a>
                         ))}
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="ghost" className="font-semibold text-gray-600" asChild><Link to="/login">Log in</Link></Button>
-                        <Button className="bg-[#F97316] hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/20" asChild>
+                        <Button variant="ghost" className="font-semibold text-gray-600 hidden sm:flex" asChild><Link to="/login">Log in</Link></Button>
+                        <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/20 hidden sm:flex" asChild>
                             <Link to="/register">Get Started <ArrowRight className="h-4 w-4" /></Link>
                         </Button>
+                        <button className="lg:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                            <Menu className="h-6 w-6 text-gray-700" />
+                        </button>
                     </div>
                 </div>
+                {/* Mobile Menu */}
+                {mobileMenuOpen && (
+                    <div className="lg:hidden bg-white border-t border-gray-200">
+                        <div className="px-6 py-4 space-y-3">
+                            {[
+                                { href: '#hero',         label: 'Home' },
+                                { href: '#categories',   label: 'Categories' },
+                                { href: '#products',     label: 'Popular Products' },
+                                { href: '#deals',        label: 'Best Sellers' },
+                                { href: '#benefits',     label: 'Benefits' },
+                                { href: '#testimonials', label: 'Testimonials' },
+                                { href: '#newsletter',   label: 'Newsletter' },
+                            ].map(({ href, label }) => (
+                                <a key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+                                    {label}
+                                </a>
+                            ))}
+                            <div className="pt-3 border-t border-gray-100 space-y-2">
+                                <Button variant="ghost" className="w-full font-semibold text-gray-600" asChild><Link to="/login" onClick={() => setMobileMenuOpen(false)}>Log in</Link></Button>
+                                <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/20" asChild>
+                                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>Get Started <ArrowRight className="h-4 w-4" /></Link>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </nav>
 
             {/* ── SECTION 1: HERO ── */}
-            <header id="hero" className="relative pt-16 min-h-[520px] md:min-h-[600px] flex items-center overflow-hidden">
+            <header id="hero" className="relative pt-16 min-h-[480px] md:min-h-[560px] flex items-center overflow-hidden">
                 <div className="absolute inset-0">
-                    <img src="https://img.pikbest.com/wp/202343/hardware-tools-displayed-against-textured-metal-background_9965912.jpg!f305cw" alt="" className="w-full h-full object-cover object-center md:object-right" />
+                    <img src="/images/hero-banner.png" alt="" className="w-full h-full object-cover object-center md:object-right" />
                     <div className="absolute inset-0 bg-black/65" />
                 </div>
                 <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-10 py-20 md:py-28">
-                    <p className="text-[#F97316] font-black uppercase tracking-[0.2em] text-xs mb-4">Your Trusted Hardware Store</p>
+                    <p className="text-orange-500 font-black uppercase tracking-[0.2em] text-xs mb-4">Your Trusted Hardware Store</p>
                     <h1 className="text-4xl sm:text-5xl md:text-[3.75rem] font-black text-white leading-[1.08] tracking-tight mb-5 max-w-2xl">
                         For all your Home and<br />Hardware Needs
                     </h1>
@@ -288,41 +317,27 @@ export default function Landing() {
                         <Button size="lg" className="h-12 px-8 bg-white text-gray-900 hover:bg-gray-100 font-bold text-sm shadow-xl" onClick={triggerLoginNotice}>
                             <ShoppingCart className="h-4 w-4" /> Explore Products
                         </Button>
-                        <Button size="lg" className="h-12 px-8 bg-[#F97316] hover:bg-orange-600 text-white font-bold text-sm shadow-xl shadow-orange-500/30" asChild>
+                        <Button size="lg" className="h-12 px-8 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-xl shadow-orange-500/30" asChild>
                             <Link to="/supplier/register">Partner with Us <ArrowRight className="h-4 w-4" /></Link>
                         </Button>
                     </div>
                 </div>
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce">
+                    <ChevronDown className="h-8 w-8 text-white/70" />
+                </div>
             </header>
 
-            {/* ── SECTION 2: BENEFITS STRIP ── */}
-            <div className="bg-[#F97316]">
-                <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-5 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {BENEFITS.map(({ icon: Icon, title, desc }) => (
-                        <div key={title} className="flex items-start gap-3">
-                            <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                                <Icon className="h-5 w-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-black text-white leading-tight">{title}</p>
-                                <p className="text-[11px] text-orange-100 leading-tight mt-0.5">{desc}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* ── SECTION 3: EXPLORE BY CATEGORY ── */}
-            <section id="categories" className="py-14 md:py-20 bg-white">
+            {/* ── SECTION 2: EXPLORE BY CATEGORY ── */}
+            <section id="categories" className="py-12 md:py-16 bg-white">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
-                        <p className="text-[#F97316] font-black uppercase tracking-[0.15em] text-xs mb-2">Browse</p>
+                        <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Browse</p>
                         <h2 className="text-2xl md:text-3xl font-black text-gray-900">Explore by Category</h2>
                     </div>
                     <div className="flex flex-col md:flex-row gap-8">
-                        {/* Category sidebar with search */}
-                        <div className="md:w-52 shrink-0 flex flex-col gap-2">
-                            <div className="relative">
+                        {/* Mobile: horizontal pills, Desktop: sidebar */}
+                        <div className="md:w-52 shrink-0">
+                            <div className="relative md:block hidden">
                                 <input
                                     type="text"
                                     value={categorySearch}
@@ -332,7 +347,25 @@ export default function Landing() {
                                 />
                                 <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                             </div>
-                            <div className="flex flex-col gap-0.5 max-h-72 overflow-y-auto pr-1">
+                            {/* Mobile horizontal pills */}
+                            <div className="md:hidden flex overflow-x-auto gap-2 pb-2 no-scrollbar">
+                                {displayCats.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setActiveCategory(String(cat.id))}
+                                        className={cn(
+                                            "shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap",
+                                            activeCategory === String(cat.id)
+                                                ? "bg-orange-500 text-white"
+                                                : "bg-gray-100 text-gray-600"
+                                        )}
+                                    >
+                                        {cat.name}
+                                    </button>
+                                ))}
+                            </div>
+                            {/* Desktop sidebar */}
+                            <div className="hidden md:flex flex-col gap-0.5 max-h-72 overflow-y-auto pr-1 mt-2">
                                 {displayCats
                                     .filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase()))
                                     .map(cat => (
@@ -342,25 +375,25 @@ export default function Landing() {
                                             className={cn(
                                                 "text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all",
                                                 activeCategory === String(cat.id)
-                                                    ? "bg-[#F97316] text-white shadow-md shadow-orange-500/20"
-                                                    : "text-gray-600 hover:bg-orange-50 hover:text-[#F97316]"
+                                                    ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
+                                                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-500"
                                             )}
                                         >
                                             {cat.name}
                                         </button>
                                     ))}
                             </div>
-                            <Button variant="outline" className="mt-1 border-[#F97316] text-[#F97316] hover:bg-orange-50 font-bold text-sm" onClick={triggerLoginNotice}>
+                            <Button variant="outline" className="hidden md:flex mt-1 border-orange-500 text-orange-500 hover:bg-orange-50 font-bold text-sm" onClick={triggerLoginNotice}>
                                 All Categories <ArrowRight className="h-4 w-4" />
                             </Button>
                         </div>
                         {/* Products in selected category */}
                         <div className="flex-1">
                             {(categories.length > 0 ? categoryLoading : loading) ? (
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     {[...Array(4)].map((_, i) => (
                                         <div key={i} className="animate-pulse">
-                                            <div className="aspect-square bg-gray-200 rounded-xl mb-3" />
+                                            <div className="aspect-[4/3] bg-gray-200 rounded-xl mb-3" />
                                             <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
                                             <div className="h-3 bg-gray-100 rounded w-1/2" />
                                         </div>
@@ -372,7 +405,7 @@ export default function Landing() {
                                     <p className="text-sm text-gray-400 font-medium">No products in this category yet.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     {(categories.length > 0 ? categoryProducts : popularProducts.slice(0, 6)).map(p => (
                                         <LandingProductCard key={p.id} product={p} onLoginPrompt={triggerLoginNotice} />
                                     ))}
@@ -383,18 +416,18 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* ── SECTION 4: POPULAR PRODUCTS ── */}
-            <section id="products" className="py-14 md:py-20 bg-gray-50">
+            {/* ── SECTION 3: POPULAR PRODUCTS ── */}
+            <section id="products" className="py-12 md:py-16 bg-gray-50">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
-                        <p className="text-[#F97316] font-black uppercase tracking-[0.15em] text-xs mb-2">Top Rated</p>
+                        <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Top Rated</p>
                         <h2 className="text-2xl md:text-3xl font-black text-gray-900">Popular Products</h2>
                     </div>
                     {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                             {[...Array(8)].map((_, i) => (
                                 <div key={i} className="animate-pulse">
-                                    <div className="aspect-square bg-gray-200 rounded-2xl mb-4" />
+                                    <div className="aspect-[4/3] bg-gray-200 rounded-2xl mb-3" />
                                     <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
                                     <div className="h-3 bg-gray-100 rounded w-1/2" />
                                 </div>
@@ -406,26 +439,26 @@ export default function Landing() {
                             <p className="text-gray-400 font-medium">No products available yet. Check back soon!</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                             {popularProducts.map(p => <LandingProductCard key={p.id} product={p} onLoginPrompt={triggerLoginNotice} />)}
                         </div>
                     )}
                     <div className="text-center mt-10">
-                        <Button size="lg" className="bg-[#F97316] hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/20 h-12 px-10" onClick={triggerLoginNotice}>
+                        <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/20 h-12 px-10" onClick={triggerLoginNotice}>
                             Explore all items <ArrowRight className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
             </section>
 
-            {/* ── SECTION 5: BEST SELLERS ── */}
-            <section id="deals" className="py-14 md:py-20 bg-white">
+            {/* ── SECTION 4: BEST SELLERS ── */}
+            <section id="deals" className="py-12 md:py-16 bg-white">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                        <div className="rounded-2xl bg-[#F97316] p-8 md:p-12 text-white order-2 md:order-1">
-                            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-200 mb-3">Top Selling</p>
+                        <div className="rounded-2xl bg-orange-500 p-8 md:p-12 text-white order-2 md:order-1">
+                            <p className="text-xs font-bold uppercase tracking-widest text-orange-200 mb-3">Top Selling</p>
                             <h2 className="text-3xl md:text-4xl font-black leading-tight mb-4">Our Best Sellers<br />— Loved by Customers</h2>
-                            <p className="text-sm text-orange-100 leading-relaxed mb-5">These are the most purchased products by our customers. Trusted quality, proven performance.</p>
+                            <p className="text-sm text-orange-100 leading-relaxed mb-5 font-medium">These are the most purchased products by our customers. Trusted quality, proven performance.</p>
                             {bestSellers.length > 0 && (() => {
                                 const avg = bestSellers.reduce((s, p) => s + Number(p.average_rating || 0), 0) / bestSellers.length;
                                 return (
@@ -435,7 +468,7 @@ export default function Landing() {
                                     </div>
                                 );
                             })()}
-                            <Button size="lg" className="bg-white text-[#F97316] hover:bg-gray-100 font-black h-11 px-7 text-sm" onClick={triggerLoginNotice}>
+                            <Button size="lg" className="bg-white text-orange-500 hover:bg-gray-100 font-black h-11 px-7 text-sm" onClick={triggerLoginNotice}>
                                 Shop Best Sellers <ArrowRight className="h-4 w-4" />
                             </Button>
                         </div>
@@ -448,30 +481,30 @@ export default function Landing() {
                                     const Icon = getCategoryIcon(p.category?.name || '');
                                     const isOnSale = p.sale_price && Number(p.sale_price) < Number(p.sell_price);
                                     return (
-                                        <div key={p.id} className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden aspect-square cursor-pointer group" onClick={triggerLoginNotice}>
+                                        <div key={p.id} className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden aspect-[4/3] cursor-pointer group" onClick={triggerLoginNotice}>
                                             {img
                                                 ? <img src={img} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-65 transition-opacity" />
                                                 : <div className="absolute inset-0 flex items-center justify-center"><Icon className="h-12 w-12 text-white/20" /></div>
                                             }
                                             {isOnSale && (
-                                                <span className="absolute top-2 right-2 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
+                                                <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                                                     SALE
                                                 </span>
                                             )}
                                             <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                                                <p className="text-[11px] font-black text-white line-clamp-1">{p.name}</p>
-                                                <p className="text-[10px] text-orange-300 font-bold">₱{Number(p.sale_price || p.sell_price || 0).toLocaleString()}</p>
+                                                <p className="text-xs font-black text-white line-clamp-1">{p.name}</p>
+                                                <p className="text-xs text-orange-300 font-bold">₱{Number(p.sale_price || p.sell_price || 0).toLocaleString()}</p>
                                             </div>
                                         </div>
                                     );
                                 }
                                 const { gradient, icon: Icon, title, sub } = item;
                                 return (
-                                    <div key={title} className={`relative bg-gradient-to-br ${gradient} rounded-2xl overflow-hidden aspect-square cursor-pointer flex items-center justify-center group`} onClick={triggerLoginNotice}>
+                                    <div key={title} className={`relative bg-gradient-to-br ${gradient} rounded-2xl overflow-hidden aspect-[4/3] cursor-pointer flex items-center justify-center group`} onClick={triggerLoginNotice}>
                                         <Icon className="h-12 w-12 text-white/20 group-hover:text-white/30 transition-colors" />
                                         <div className="absolute bottom-0 left-0 right-0 p-3 bg-black/40">
                                             <p className="text-sm font-black text-white">{title}</p>
-                                            <p className="text-[10px] text-gray-300">{sub}</p>
+                                            <p className="text-xs text-gray-300">{sub}</p>
                                         </div>
                                     </div>
                                 );
@@ -481,32 +514,32 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* ── SECTION 6: BENEFITS FOR YOUR EXPERIENCE ── */}
-            <section id="benefits" className="py-14 md:py-20 bg-gray-100">
+            {/* ── SECTION 5: BENEFITS FOR YOUR EXPERIENCE ── */}
+            <section id="benefits" className="py-12 md:py-16 bg-gray-100">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
-                        <p className="text-[#F97316] font-black uppercase tracking-[0.15em] text-xs mb-1">Why Choose Us</p>
+                        <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Why Choose Us</p>
                         <h2 className="text-2xl md:text-3xl font-black text-gray-900">Benefits for your experience</h2>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         {BENEFITS.map(({ icon: Icon, title, desc }) => (
-                            <div key={title} className="flex flex-col items-center text-center gap-3 p-6 bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-xl transition-shadow">
+                            <div key={title} className="flex flex-col items-center text-center gap-3 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 border-2 border-orange-100">
-                                    <Icon className="h-7 w-7 text-[#F97316]" />
+                                    <Icon className="h-7 w-7 text-orange-500" />
                                 </div>
-                                <p className="text-[13px] font-black text-gray-900">{title}</p>
-                                <p className="text-[11px] text-gray-500 leading-relaxed">{desc}</p>
+                                <p className="text-sm font-black text-gray-900">{title}</p>
+                                <p className="text-xs text-gray-500 leading-relaxed font-medium">{desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* ── SECTION 7: CUSTOMER FEEDBACK ── */}
-            <section id="testimonials" className="py-14 md:py-20 bg-white">
+            {/* ── SECTION 6: CUSTOMER FEEDBACK ── */}
+            <section id="testimonials" className="py-12 md:py-16 bg-white">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
-                        <p className="text-[#F97316] font-black uppercase tracking-[0.15em] text-xs mb-1">Customer Feedback</p>
+                        <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Customer Feedback</p>
                         <h2 className="text-2xl md:text-3xl font-black text-gray-900">What Our Customers Say</h2>
                     </div>
                     {testimonials.length === 0 ? (
@@ -524,18 +557,18 @@ export default function Landing() {
                                 return (
                                     <div key={review.id} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-md flex flex-col gap-3">
                                         <RatingStars rating={rating} />
-                                        {text && <p className="text-sm text-gray-600 leading-relaxed flex-1">"{text}"</p>}
+                                        {text && <p className="text-sm text-gray-600 leading-relaxed flex-1 font-medium">"{text}"</p>}
                                         {productName && (
-                                            <p className="text-[10px] text-[#F97316] font-bold uppercase tracking-wide">re: {productName}</p>
+                                            <p className="text-xs text-orange-500 font-bold uppercase tracking-wide">re: {productName}</p>
                                         )}
                                         <div className="flex items-center gap-3 pt-1 border-t border-gray-100">
-                                            <div className="h-9 w-9 rounded-full bg-[#F97316] flex items-center justify-center text-white font-black text-sm shrink-0">
+                                            <div className="h-9 w-9 rounded-full bg-orange-500 flex items-center justify-center text-white font-black text-sm shrink-0">
                                                 {name[0].toUpperCase()}
                                             </div>
                                             <div>
-                                                <p className="text-[13px] font-black text-gray-900">{name}</p>
+                                                <p className="text-sm font-black text-gray-900">{name}</p>
                                                 {review.is_verified_purchase && (
-                                                    <p className="text-[10px] text-green-600 font-semibold flex items-center gap-1">
+                                                    <p className="text-xs text-green-600 font-semibold flex items-center gap-1">
                                                         <CheckCircle className="h-3 w-3" /> Verified Purchase
                                                     </p>
                                                 )}
@@ -549,25 +582,45 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* ── SECTION 8: NEWSLETTER ── */}
-            <section id="newsletter" className="py-14 md:py-20 bg-gray-900">
+            {/* ── SECTION 7: NEWSLETTER ── */}
+            <section id="newsletter" className="py-12 md:py-16 bg-gray-900">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10 text-center">
-                    <p className="text-[#F97316] font-black uppercase tracking-[0.15em] text-xs mb-3">Stay Updated</p>
+                    <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-3">Stay Updated</p>
                     <h2 className="text-2xl md:text-3xl font-black text-white mb-2">Join Our Newsletter</h2>
-                    <p className="text-sm text-gray-400 mb-8 max-w-md mx-auto">Get the latest hardware deals, new arrivals, and exclusive offers delivered to your inbox.</p>
-                    <div className="flex gap-3 max-w-md mx-auto">
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Enter your email address"
-                            className="flex-1 h-11 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-gray-500 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F97316]"
-                        />
-                        <Button className="h-11 px-6 bg-[#F97316] hover:bg-orange-600 text-white font-bold shrink-0" onClick={triggerLoginNotice}>
-                            <Send className="h-4 w-4" /> Subscribe
-                        </Button>
-                    </div>
-                    <p className="text-[11px] text-gray-600 mt-3">No spam, unsubscribe anytime.</p>
+                    <p className="text-sm text-gray-400 mb-8 max-w-md mx-auto font-medium">Get the latest hardware deals, new arrivals, and exclusive offers delivered to your inbox.</p>
+                    {newsletterSuccess ? (
+                        <div className="flex flex-col items-center gap-2 max-w-md mx-auto">
+                            <CheckCircle className="h-12 w-12 text-green-500" />
+                            <p className="text-sm text-white font-semibold">Thanks! We'll be in touch.</p>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-3 max-w-md mx-auto">
+                            <div className="flex gap-3">
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => { setEmail(e.target.value); setNewsletterError(''); }}
+                                    placeholder="Enter your email address"
+                                    className="flex-1 h-11 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-gray-500 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                />
+                                <Button className="h-11 px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold shrink-0" onClick={() => {
+                                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                    if (!email.trim()) {
+                                        setNewsletterError('Please enter your email');
+                                    } else if (!emailRegex.test(email)) {
+                                        setNewsletterError('Please enter a valid email');
+                                    } else {
+                                        setNewsletterSuccess(true);
+                                        setEmail('');
+                                    }
+                                }}>
+                                    <Send className="h-4 w-4" /> Subscribe
+                                </Button>
+                            </div>
+                            {newsletterError && <p className="text-xs text-red-400">{newsletterError}</p>}
+                        </div>
+                    )}
+                    <p className="text-xs text-gray-600 mt-3">No spam, unsubscribe anytime.</p>
                 </div>
             </section>
 
@@ -577,12 +630,12 @@ export default function Landing() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-white/10">
                         <div>
                             <div className="flex items-center gap-2 mb-4">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F97316]">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
                                     <span className="text-xs font-black text-white">H</span>
                                 </div>
                                 <span className="text-base font-black">HRMS Hardware Store</span>
                             </div>
-                            <p className="text-sm text-gray-400 leading-relaxed">Your one-stop shop for quality hardware, tools, and construction supplies for every project.</p>
+                            <p className="text-sm text-gray-400 leading-relaxed font-medium">Your one-stop shop for quality hardware, tools, and construction supplies for every project.</p>
                         </div>
                         <div>
                             <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Quick Links</p>
@@ -597,7 +650,7 @@ export default function Landing() {
                             <div className="space-y-2">
                                 {BENEFITS.map(({ title }) => (
                                     <div key={title} className="flex items-center gap-2">
-                                        <CheckCircle className="h-3.5 w-3.5 text-[#F97316] shrink-0" />
+                                        <CheckCircle className="h-3.5 w-3.5 text-orange-500 shrink-0" />
                                         <span className="text-sm text-gray-400">{title}</span>
                                     </div>
                                 ))}

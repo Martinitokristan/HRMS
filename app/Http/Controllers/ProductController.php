@@ -20,8 +20,17 @@ class ProductController extends Controller
         $cacheKey = 'products:' . md5(json_encode($request->only(['search', 'category_id', 'status', 'page', 'per_page'])));
 
         $result = Cache::tags(['products'])->remember($cacheKey, 900, function () use ($request) {
-            // Optimized: Load essential relationships for list view including variants and reviews
-            $query = Product::with(['category', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue', 'approvedReviews'])
+            // Eager-load relations; use aggregate methods to avoid N+1 for rating/review/sold data
+            $query = Product::with(['category', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])
+                ->withCount('approvedReviews as total_reviews')
+                ->withAvg('approvedReviews as average_rating', 'rating')
+                ->addSelect([
+                    'sold_count' => DB::table('sale_items')
+                        ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                        ->whereColumn('sale_items.product_id', 'products.id')
+                        ->where('sales.status', 'completed')
+                        ->selectRaw('COALESCE(COUNT(*), 0)'),
+                ])
                 ->where('is_active', true) // Only show active products in customer shop
                 ->when($request->search, function($q) use ($request) {
                     return $q->where('name', 'like', "%{$request->search}%")
@@ -37,10 +46,11 @@ class ProductController extends Controller
             $perPage = $request->get('per_page', 15);
             $products = $query->paginate($perPage);
 
-            // Append computed attributes
+            // Cast average_rating to float (withAvg returns string from DB)
             $products->getCollection()->transform(function ($product) {
-                $product->average_rating = $product->averageRating();
-                $product->total_reviews = $product->totalReviews();
+                $product->average_rating = $product->average_rating !== null ? (float) $product->average_rating : null;
+                $product->sold_count     = (int) ($product->sold_count ?? 0);
+                $product->total_reviews  = (int) ($product->total_reviews ?? 0);
                 return $product;
             });
 
