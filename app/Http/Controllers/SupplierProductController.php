@@ -38,7 +38,7 @@ class SupplierProductController extends Controller
 
         $supplierId = $this->resolveSupplierID($request);
 
-        $query = SupplierProduct::with(['category', 'variants'])
+        $query = SupplierProduct::with(['category', 'variants', 'brand'])
             ->where('supplier_id', $supplierId)
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
@@ -78,6 +78,7 @@ class SupplierProductController extends Controller
             'base_size'      => 'nullable|string|max:50',
             'is_promoted'    => 'nullable|boolean',
             'variants'       => 'nullable|string',
+            'brand_id'       => 'nullable|exists:brands,id',
         ]);
 
         $product = DB::transaction(function () use ($data, $request, $supplierId) {
@@ -99,6 +100,7 @@ class SupplierProductController extends Controller
                 'barcode'           => $data['barcode'],
                 'description'       => $data['description'] ?? null,
                 'category_id'       => $data['category_id'] ?? null,
+                'brand_id'          => $data['brand_id'] ?? null,
                 'price'             => $data['price'],
                 'min_order_qty'     => $data['min_order_qty'] ?? 1,
                 'total_stock'       => $data['total_stock'] ?? 0,
@@ -176,6 +178,7 @@ class SupplierProductController extends Controller
             'base_size'      => 'nullable|string|max:50',
             'is_promoted'    => 'nullable|boolean',
             'variants'       => 'nullable|string',
+            'brand_id'       => 'nullable|exists:brands,id',
         ]);
 
         DB::transaction(function () use ($product, $data, $request) {
@@ -266,7 +269,7 @@ class SupplierProductController extends Controller
     // Admin-facing: list all supplier products (catalog view)
     public function adminIndex(Request $request)
     {
-        $query = SupplierProduct::with(['supplier', 'category', 'variants'])
+        $query = SupplierProduct::with(['supplier', 'category', 'variants', 'brand'])
             ->where('status', 'active')
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
@@ -295,7 +298,7 @@ class SupplierProductController extends Controller
     // Admin-facing: show a single supplier product
     public function adminShow($id)
     {
-        $product = SupplierProduct::with(['supplier', 'category', 'variants'])->findOrFail($id);
+        $product = SupplierProduct::with(['supplier', 'category', 'variants', 'brand'])->findOrFail($id);
 
         return response()->json([
             'data' => $product,

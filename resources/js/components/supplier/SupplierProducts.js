@@ -22,6 +22,7 @@ export default function SupplierProducts() {
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_PRODUCTS);
     const [products, setProducts] = useState({ data: [], total: 0 });
     const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(products.data.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
@@ -70,7 +71,7 @@ export default function SupplierProducts() {
     useEffect(() => { 
         fetchProducts(products.data.length > 0); 
     }, [page, search, categoryFilter, refreshTrigger]);
-    useEffect(() => { fetchCategories(); fetchVariantValues(); }, []);
+    useEffect(() => { fetchCategories(); fetchBrands(); fetchVariantValues(); }, []);
 
     // Sync URL search params with local state
     useEffect(() => {
@@ -99,6 +100,14 @@ export default function SupplierProducts() {
             const res = await api.get('/supplier/categories');
             const data = res.data?.data !== undefined ? res.data.data : res.data;
             setCategories(Array.isArray(data) ? data : []);
+        } catch (e) { console.error(e); }
+    };
+
+    const fetchBrands = async () => {
+        try {
+            const res = await api.get('/supplier/brands');
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            setBrands(Array.isArray(data) ? data : []);
         } catch (e) { console.error(e); }
     };
 
@@ -170,7 +179,7 @@ export default function SupplierProducts() {
 
     const openCreate = () => {
         setEditing(null);
-        setForm({ name: '', barcode: '', description: '', category_id: '', price: '', min_order_qty: '1', total_stock: '0', is_promoted: false, image: null, base_size: '', additional_images: [] });
+        setForm({ name: '', barcode: '', description: '', category_id: '', brand_id: '', price: '', min_order_qty: '1', total_stock: '0', is_promoted: false, image: null, base_size: '', additional_images: [] });
         setVariants([]);
         setVariantImages({});
         setVariantExtraImages({});
@@ -186,7 +195,7 @@ export default function SupplierProducts() {
         setEditing(product);
         setForm({
             name: product.name, barcode: product.barcode || '', sku: product.sku || '', description: product.description || '',
-            category_id: product.category_id || '', price: product.price,
+            category_id: product.category_id || '', brand_id: product.brand_id ? String(product.brand_id) : '', price: product.price,
             min_order_qty: product.min_order_qty || '1', total_stock: product.total_stock || '0',
             is_promoted: product.is_promoted, image: null,
             base_size: product.base_size || '',
@@ -375,6 +384,7 @@ export default function SupplierProducts() {
             fd.append('barcode', form.barcode);
             fd.append('description', form.description);
             if (form.category_id) fd.append('category_id', form.category_id);
+            if (form.brand_id) fd.append('brand_id', form.brand_id);
             fd.append('price', form.price);
             fd.append('min_order_qty', form.min_order_qty);
             // total_stock = base product's own stock (always independent from variant stocks)
@@ -489,6 +499,19 @@ export default function SupplierProducts() {
                                         <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })}>
                                             <option value="">Select Category</option>
                                             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label>Brand <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label>
+                                        <select
+                                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                            value={form.brand_id}
+                                            onChange={e => setForm(f => ({ ...f, brand_id: e.target.value }))}
+                                        >
+                                            <option value="">No Brand</option>
+                                            {brands.map(b => (
+                                                <option key={b.id} value={b.id}>{b.name}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="space-y-1.5 col-span-2">

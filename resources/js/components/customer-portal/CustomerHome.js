@@ -139,6 +139,9 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
             <div className="p-4 space-y-3">
                 <div className="min-h-[60px]">
                     <h3 className="text-base font-black text-gray-900 mb-1 leading-tight group-hover:text-orange-500 transition-colors line-clamp-1">{product.name}</h3>
+                    {product.brand?.name && (
+                        <p className="text-xs text-orange-500 font-semibold mt-0.5 leading-none">{product.brand.name}</p>
+                    )}
                     <p className="text-xs text-gray-500 leading-normal line-clamp-2 font-medium">
                         {product.description || "Premium quality product designed for durability and high performance in all specific applications."}
                     </p>

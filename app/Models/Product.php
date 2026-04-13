@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'barcode', 'name', 'description', 'category_id', 'unit_type_id', 'supplier_id',
+        'barcode', 'name', 'description', 'category_id', 'brand_id', 'unit_type_id', 'supplier_id',
         'purchase_price', 'sell_price', 'sale_percentage', 'image_path', 'image_banner_path', 'banner_bg_path', 'is_active',
     ];
 
@@ -17,6 +17,11 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
     }
 
     public function unitType()

@@ -82,6 +82,9 @@ const LandingProductCard = ({ product, onLoginPrompt }) => {
             </div>
             <div className="p-4 space-y-3">
                 <h3 className="text-sm font-bold text-gray-900 leading-tight group-hover:text-orange-500 transition-colors line-clamp-2">{product.name}</h3>
+                {product.brand?.name && (
+                    <p className="text-xs text-orange-500 font-semibold leading-none">{product.brand.name}</p>
+                )}
                 <p className="text-xs text-gray-500 leading-normal line-clamp-2 font-medium">
                     {product.description || 'Premium quality hardware for any construction or repair project.'}
                 </p>

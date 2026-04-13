@@ -198,6 +198,9 @@ export default function SupplierCatalog() {
                             </div>
                             <div className="p-4">
                                 <div className="font-bold text-foreground mb-1">{p.name}</div>
+                                {p.brand && (
+                                    <div className="text-[11px] font-semibold text-orange-500 mb-0.5">{p.brand.name}</div>
+                                )}
                                 <div className="text-[12px] text-muted-foreground mb-1">{p.supplier?.name || 'Unknown Supplier'}</div>
                                 <div className="text-[12px] text-muted-foreground mb-2">
                                     {p.category?.name || 'Uncategorized'} &bull; {p.product_variants?.length || p.variants?.length || 0} variant{(p.product_variants?.length || p.variants?.length) !== 1 ? 's' : ''}
@@ -351,6 +354,12 @@ export default function SupplierCatalog() {
                                         <span className="text-gray-400 font-bold uppercase tracking-wider">Supplier</span>
                                         <span className="font-bold text-gray-700">{viewProduct.supplier?.name}</span>
                                     </div>
+                                    {viewProduct.brand && (
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-gray-400 font-bold uppercase tracking-wider">Brand</span>
+                                            <span className="font-bold text-orange-500">{viewProduct.brand.name}</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {hasVariants && (

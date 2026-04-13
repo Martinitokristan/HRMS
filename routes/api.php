@@ -27,6 +27,7 @@ use App\Http\Controllers\CartReservationController;
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\GCashController;
 use App\Http\Controllers\RecommendationController;
+use App\Http\Controllers\BrandController;
 
 // Auth (public)
 Route::post('/auth/register', [AuthController::class , 'register']);
@@ -170,6 +171,8 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     Route::delete('/notifications/{id}', [SettingsController::class , 'deleteNotification']);
     Route::post('/notifications/delete-batch', [SettingsController::class , 'deleteBatchNotifications']);
     Route::post('/notifications/delete-all', [SettingsController::class , 'deleteAllNotifications']);
+    // Brands (admin — view all brands)
+    Route::get('/brands', [BrandController::class, 'adminIndex']);
     // Supplier Catalog (admin views)
     Route::get('/supplier-catalog', [SupplierProductController::class , 'adminIndex']);
     Route::get('/supplier-catalog/{id}', [SupplierProductController::class , 'adminShow']);
@@ -290,6 +293,10 @@ Route::middleware(['auth.token', 'role:supplier'])->group(function () {
     Route::get('/supplier/unit-types', [SettingsController::class , 'getUnitTypes']);
     Route::post('/supplier/unit-types', [SettingsController::class , 'storeUnitType']);
     Route::delete('/supplier/unit-types/{id}', [SettingsController::class , 'deleteUnitType']);
+    // Supplier Brands
+    Route::get('/supplier/brands', [BrandController::class, 'index']);
+    Route::post('/supplier/brands', [BrandController::class, 'store']);
+    Route::delete('/supplier/brands/{id}', [BrandController::class, 'destroy']);
     // Supplier Notifications
     Route::get('/supplier/notifications', [SettingsController::class , 'getNotifications']);
     Route::post('/supplier/notifications/mark-all-read', [SettingsController::class , 'markAllNotificationsRead']);

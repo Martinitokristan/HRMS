@@ -16,13 +16,25 @@ import { Package, Percent, Tag, Barcode, Plus, Trash2, Upload, Image, AlertTrian
 export default function ProductForm({ product, categories, suppliers, unitTypes, variants, onSuccess, onCancel }) {
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [brands, setBrands] = useState([]);
     const [errors, setErrors] = useState({});
 
     const [variantValues, setVariantValues] = useState({ sizes: [], colors: [], weights: [] });
     
     useEffect(() => { 
-        fetchVariantValues(); 
+        fetchVariantValues();
+        fetchBrands();
     }, []);
+
+    const fetchBrands = async () => {
+        try {
+            const res = await api.get('/brands');
+            const data = res.data?.data !== undefined ? res.data.data : (res.data || []);
+            setBrands(Array.isArray(data) ? data : []);
+        } catch (e) {
+            // Brands are optional - silently fail
+        }
+    };
 
     // Fetch variant values for fallback when relationships fail
     const fetchVariantValues = async () => {
@@ -61,6 +73,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
         category_id: '', 
         supplier_id: '', 
         unit_type_id: '',
+        brand_id: '',
         purchase_price: '', 
         sell_price: '', 
         sale_percentage: '',
@@ -90,6 +103,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                 category_id: product.category_id || '',
                 supplier_id: product.supplier_id || '',
                 unit_type_id: product.unit_type_id || '',
+                brand_id: product.brand_id || '',
                 purchase_price: product.purchase_price || '',
                 sell_price: product.sell_price || '',
                 sale_percentage: product.sale_percentage || '',
@@ -138,6 +152,7 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                 category_id: '', 
                 supplier_id: '', 
                 unit_type_id: '', 
+                brand_id: '',
                 purchase_price: '', 
                 sell_price: '', 
                 sale_percentage: '',
@@ -339,6 +354,24 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
                                         <SelectContent>
                                             {(Array.isArray(suppliers) ? suppliers : []).map(s => (
                                                 <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="brand_id">Brand</Label>
+                                    <Select 
+                                        value={form.brand_id?.toString() || ''} 
+                                        onValueChange={(value) => setForm(prev => ({ ...prev, brand_id: value }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Brand (Optional)" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">No Brand</SelectItem>
+                                            {(Array.isArray(brands) ? brands : []).map(b => (
+                                                <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>

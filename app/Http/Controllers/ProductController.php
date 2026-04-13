@@ -21,7 +21,7 @@ class ProductController extends Controller
 
         $result = Cache::tags(['products'])->remember($cacheKey, 900, function () use ($request) {
             // Eager-load relations; use aggregate methods to avoid N+1 for rating/review/sold data
-            $query = Product::with(['category', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])
+            $query = Product::with(['category', 'inventory', 'brand', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])
                 ->withCount('approvedReviews as total_reviews')
                 ->withAvg('approvedReviews as average_rating', 'rating')
                 ->addSelect([
@@ -72,6 +72,7 @@ class ProductController extends Controller
             'barcode'           => 'required|string|max:50|unique:products,barcode',
             'name'              => 'required|string|max:150',
             'category_id'       => 'required|exists:categories,id',
+            'brand_id'          => 'nullable|exists:brands,id',
             'unit_type_id'      => 'required|exists:unit_types,id',
             'supplier_id'       => 'nullable|exists:suppliers,id',
             'purchase_price'    => 'required|numeric|min:0',
@@ -178,6 +179,7 @@ class ProductController extends Controller
             'barcode'        => "required|string|max:50|unique:products,barcode,{$id}",
             'name'           => 'required|string|max:150',
             'category_id'    => 'required|exists:categories,id',
+            'brand_id'       => 'nullable|exists:brands,id',
             'unit_type_id'   => 'required|exists:unit_types,id',
             'supplier_id'    => 'nullable|exists:suppliers,id',
             'purchase_price' => 'required|numeric|min:0',

@@ -3962,6 +3962,9 @@ input, select, textarea {
 .text-muted-foreground\/40{
   color: hsl(var(--muted-foreground) / 0.4);
 }
+.text-muted-foreground\/50{
+  color: hsl(var(--muted-foreground) / 0.5);
+}
 .text-orange-100{
   --tw-text-opacity: 1;
   color: rgb(255 237 213 / var(--tw-text-opacity));
@@ -6148,6 +6151,10 @@ input, select, textarea {
 
   .sm\:grid-cols-3{
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-\[1fr_2fr_auto\]{
+    grid-template-columns: 1fr 2fr auto;
   }
 
   .sm\:flex-row{

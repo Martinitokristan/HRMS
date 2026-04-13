@@ -20,6 +20,7 @@ export const STALE_KEYS = {
     SUPPLIER_DASHBOARD: 'supplier_dashboard',
     SUPPLIER_ORDERS: 'supplier_orders',
     SUPPLIER_PRODUCTS: 'supplier_products',
+    SUPPLIER_BRANDS: 'supplier_brands',
     SUPPLIER_NOTIFICATIONS: 'supplier_notifications',
     SUPPLIER_SETTINGS: 'supplier_settings',
     CUSTOMER_SHOP: 'customer_shop',

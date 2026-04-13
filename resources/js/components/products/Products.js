@@ -218,6 +218,9 @@ export default function Products() {
                                     <TableCell className="px-4 py-3">
                                         <div className="font-bold text-foreground">{p.name}</div>
                                         <div className="text-xs text-muted-foreground mt-0.5">{p.supplier?.name || 'In-house'}</div>
+                                        {p.brand && (
+                                            <div className="text-[10px] font-semibold text-orange-500 mt-0.5">{p.brand.name}</div>
+                                        )}
                                     </TableCell>
                                     <TableCell className="px-4 py-3">
                                         <Badge variant="secondary" className="font-semibold">{p.category?.name || 'Uncategorized'}</Badge>

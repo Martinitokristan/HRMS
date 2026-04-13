@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SupplierProduct extends Model
 {
     protected $fillable = [
-        'supplier_id', 'name', 'barcode', 'description', 'category_id',
+        'supplier_id', 'name', 'barcode', 'description', 'category_id', 'brand_id',
         'price', 'min_order_qty', 'total_stock', 'base_size', 'image_path', 'additional_images', 'is_promoted', 'status',
     ];
 
@@ -19,6 +19,11 @@ class SupplierProduct extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
     }
 
     public function category()

@@ -37,6 +37,11 @@ class Supplier extends Authenticatable
         return $this->hasMany(Product::class);
     }
 
+    public function brands()
+    {
+        return $this->hasMany(Brand::class);
+    }
+
     public function purchaseOrders()
     {
         return $this->hasMany(PurchaseOrder::class);

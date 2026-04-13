@@ -9,9 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Trash2, User, FolderOpen, Lock, Bell, Ruler, Palette, Weight, RefreshCw } from 'lucide-react';
+import { Trash2, User, FolderOpen, Lock, Bell, Ruler, Palette, Weight, RefreshCw, Tag } from 'lucide-react';
 import SupplierVariantSettings from './SupplierVariantSettings';
 import SupplierUnitSettings from './SupplierUnitSettings';
+import SupplierBrandSettings from './SupplierBrandSettings';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
@@ -59,6 +60,7 @@ export default function SupplierSettings() {
         { id: 'profile', label: 'Company Profile', Icon: User, isSystem: false },
         { id: 'security', label: 'Security & Auth', Icon: Lock, isSystem: false },
         { id: 'categories', label: 'Product Categories', Icon: FolderOpen, isSystem: false },
+        { id: 'brands', label: 'Brands', Icon: Tag, isSystem: false },
         { id: 'notifications', label: 'Notifications', Icon: Bell, isSystem: false },
         { id: 'sizes', label: 'Size Config', Icon: Ruler, isSystem: true },
         { id: 'colors', label: 'Color Palette', Icon: Palette, isSystem: true },
@@ -368,6 +370,10 @@ export default function SupplierSettings() {
 
                 {(activeTab === 'sizes' || activeTab === 'colors' || activeTab === 'weights') && (
                     <SupplierVariantSettings initialTab={activeTab} />
+                )}
+
+                {activeTab === 'brands' && (
+                    <SupplierBrandSettings />
                 )}
 
                 {activeTab === 'units' && (

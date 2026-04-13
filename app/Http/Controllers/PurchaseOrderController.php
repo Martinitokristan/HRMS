@@ -517,6 +517,7 @@ class PurchaseOrderController extends Controller
                                     'name' => $supplierProduct->name,
                                     'description' => $supplierProduct->description,
                                     'category_id' => $supplierProduct->category_id,
+                                    'brand_id' => $supplierProduct->brand_id,
                                     'unit_type_id' => 1, // Default unit type
                                     'supplier_id' => $supplierProduct->supplier_id ?? 1,
                                     'purchase_price' => $supplierProduct->price,

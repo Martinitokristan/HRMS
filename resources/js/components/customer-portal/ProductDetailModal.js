@@ -365,6 +365,15 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                             {product.name}
                         </h2>
 
+                        {/* Brand Badge */}
+                        {product.brand?.name && (
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-bold uppercase tracking-widest text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                                    {product.brand.name}
+                                </span>
+                            </div>
+                        )}
+
                         {/* Description */}
                         {product.description && (
                             <p className="text-xs text-gray-500 leading-relaxed mb-3">
