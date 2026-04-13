@@ -157,7 +157,7 @@ class ProductController extends Controller
         }
 
         return response()->json([
-            'data'    => $product->load(['category', 'unitType', 'supplier', 'inventory']),
+            'data'    => $product->load(['category', 'unitType', 'supplier', 'inventory', 'brand']),
             'message' => 'Product created successfully',
             'status'  => 'success',
         ], 201);
@@ -166,7 +166,7 @@ class ProductController extends Controller
     public function show($id)
     {
         // Optimized: Load essential relationships, add variant relationships only for detail view
-        $product = Product::with(['category', 'unitType', 'supplier', 'inventory', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])->findOrFail($id);
+        $product = Product::with(['category', 'unitType', 'supplier', 'inventory', 'brand', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])->findOrFail($id);
         
         return response()->json(['data' => $product, 'status' => 'success']);
     }
@@ -272,13 +272,13 @@ class ProductController extends Controller
             ->pluck('sale_items.product_id');
 
         if ($topIds->isEmpty()) {
-            $products = Product::with(['category', 'inventory', 'approvedReviews'])
+            $products = Product::with(['category', 'inventory', 'brand', 'approvedReviews'])
                 ->where('is_active', true)
                 ->latest()
                 ->limit($limit)
                 ->get();
         } else {
-            $products = Product::with(['category', 'inventory', 'approvedReviews'])
+            $products = Product::with(['category', 'inventory', 'brand', 'approvedReviews'])
                 ->where('is_active', true)
                 ->whereIn('id', $topIds)
                 ->get()

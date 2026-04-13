@@ -80,7 +80,7 @@ class RecommendationService
         if ($trending->isNotEmpty()) {
             return Product::whereIn('id', $trending)
                 ->where('is_active', true)
-                ->with(['category', 'inventory', 'productVariants'])
+                ->with(['category', 'inventory', 'brand', 'productVariants'])
                 ->get()
                 ->sortBy(function ($p) use ($trending) {
                     return $trending->search($p->id);
@@ -93,7 +93,7 @@ class RecommendationService
             ->when(count($excludedIds) > 0, function ($q) use ($excludedIds) {
                 $q->whereNotIn('id', $excludedIds);
             })
-            ->with(['category', 'inventory', 'productVariants'])
+            ->with(['category', 'inventory', 'brand', 'productVariants'])
             ->orderByDesc('sell_price')
             ->limit($limit)
             ->get();
@@ -155,7 +155,7 @@ class RecommendationService
             ->when(count($allExcluded) > 0, function ($q) use ($allExcluded) {
                 $q->whereNotIn('id', $allExcluded);
             })
-            ->with(['category', 'inventory', 'productVariants'])
+            ->with(['category', 'inventory', 'brand', 'productVariants'])
             ->get();
 
         // 6. Score each candidate
