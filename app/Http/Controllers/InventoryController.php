@@ -31,7 +31,7 @@ class InventoryController extends Controller
     private function buildInventoryResponse(Request $request): array
     {
         // Optimized: Load essential relationships for list view including variants
-        $pQuery = Product::with(['category', 'inventory', 'inventory.supplierProduct.variants', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue']);
+        $pQuery = Product::with(['category', 'inventory', 'inventory.supplierProduct.variants', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue', 'unitType']);
         
         // Query warehouse-only items (orphans)
         $wQuery = Inventory::with(['supplierProduct.category', 'supplierProduct.supplier'])

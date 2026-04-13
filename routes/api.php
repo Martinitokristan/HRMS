@@ -175,8 +175,6 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     Route::get('/supplier-catalog/{id}', [SupplierProductController::class , 'adminShow']);
     // Reviews (admin moderation)
     Route::get('/reviews', [ProductReviewController::class , 'index']);
-    Route::post('/reviews/{id}/respond', [ProductReviewController::class , 'respond']);
-    Route::put('/reviews/{id}/status', [ProductReviewController::class , 'updateStatus']);
     Route::delete('/reviews/{id}', [ProductReviewController::class , 'destroy']);
 });
 

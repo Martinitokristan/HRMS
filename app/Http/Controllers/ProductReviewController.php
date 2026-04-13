@@ -7,6 +7,7 @@ use App\Models\ProductReview;
 use App\Models\ReviewHelpfulness;
 use App\Models\Sale;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ProductReviewController extends Controller
@@ -112,6 +113,8 @@ class ProductReviewController extends Controller
 
         \Log::info('ProductReview Store - Created review:', $review->toArray());
 
+        Cache::tags(['products'])->flush();
+
         broadcast(new DataMutated('private-admin', ['admin_reviews', 'admin_dashboard'], 'review.created'));
         broadcast(new DataMutated('shop', ['customer_shop'], 'review.created'));
 
@@ -137,32 +140,12 @@ class ProductReviewController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
-    {
-        $review = ProductReview::findOrFail($id);
-
-        $data = $request->validate([
-            'rating' => 'sometimes|integer|min:1|max:5',
-            'review' => 'sometimes|nullable|string|max:1000',
-            'status' => 'sometimes|in:pending,approved,rejected',
-        ]);
-
-        $review->update($data);
-
-        broadcast(new DataMutated('private-admin', ['admin_reviews'], 'review.updated'));
-        broadcast(new DataMutated('shop', ['customer_shop'], 'review.updated'));
-
-        return response()->json([
-            'data' => $review->load(['customer', 'product']),
-            'message' => 'Review updated successfully',
-            'status' => 'success',
-        ]);
-    }
-
     public function destroy($id)
     {
         $review = ProductReview::findOrFail($id);
         $review->delete();
+
+        Cache::tags(['products'])->flush();
 
         broadcast(new DataMutated('private-admin', ['admin_reviews'], 'review.deleted'));
         broadcast(new DataMutated('shop', ['customer_shop'], 'review.deleted'));

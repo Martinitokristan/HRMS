@@ -85,7 +85,7 @@ export default function ProductReviews({ productId }) {
                 review: review.trim()
             });
             
-            toast.success('Review submitted successfully! It will be visible after approval.');
+            toast.success('Review submitted successfully!');
             setRating(0);
             setReview('');
             setCanReview(false);
