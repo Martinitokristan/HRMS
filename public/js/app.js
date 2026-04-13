@@ -13727,6 +13727,7 @@ function CartPage() {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
         className: "space-y-3 mb-6",
         children: cart.map(function (item) {
+          var _item$brand;
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_8__.Card, {
             onClick: function onClick() {
               return toggleSelection(item.cartId);
@@ -13750,9 +13751,15 @@ function CartPage() {
               className: "flex-1 min-w-0",
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
                 className: "flex items-start justify-between gap-2 mb-1",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("h3", {
-                  className: "text-base font-bold text-foreground truncate",
-                  children: item.name
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsxs)("div", {
+                  className: "min-w-0",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("h3", {
+                    className: "text-base font-bold text-foreground truncate",
+                    children: item.name
+                  }), ((_item$brand = item.brand) === null || _item$brand === void 0 ? void 0 : _item$brand.name) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("p", {
+                    className: "text-xs font-semibold text-orange-500 leading-none mt-0.5",
+                    children: item.brand.name
+                  })]
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_7__.Button, {
                   variant: "ghost",
                   size: "icon",
@@ -15513,6 +15520,7 @@ function CustomerOrder() {
                   className: "font-bold text-foreground mb-3",
                   children: "Order Items"
                 }), Array.isArray(cart) && cart.map(function (item) {
+                  var _item$brand;
                   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsxs)("div", {
                     className: "flex gap-3 py-3 border-b border-border/50 items-start",
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
@@ -15529,7 +15537,10 @@ function CustomerOrder() {
                       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsxs)("span", {
                         className: "font-semibold",
                         children: [item.qty, "x"]
-                      }), " ", item.name, item.variantString && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsxs)("div", {
+                      }), " ", item.name, ((_item$brand = item.brand) === null || _item$brand === void 0 ? void 0 : _item$brand.name) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
+                        className: "text-xs font-semibold text-orange-500 mt-0.5",
+                        children: item.brand.name
+                      }), item.variantString && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsxs)("div", {
                         className: "text-sm text-muted-foreground mt-0.5",
                         children: ["[", item.variantString, "]"]
                       })]
@@ -16216,7 +16227,7 @@ function CustomerOrder() {
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
             className: "space-y-0 mb-4",
             children: Array.isArray(cart) && cart.map(function (item) {
-              var _item$product_variant;
+              var _item$brand2, _item$product_variant;
               return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsxs)("div", {
                 className: "flex gap-3 py-3 border-b border-border/50 items-center",
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
@@ -16233,6 +16244,9 @@ function CustomerOrder() {
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
                     className: "font-semibold text-foreground text-sm truncate",
                     children: item.name
+                  }), ((_item$brand2 = item.brand) === null || _item$brand2 === void 0 ? void 0 : _item$brand2.name) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
+                    className: "text-xs font-semibold text-orange-500",
+                    children: item.brand.name
                   }), item.variantString && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
                     className: "text-xs text-muted-foreground",
                     children: item.variantString
@@ -24128,7 +24142,8 @@ function StockTab() {
       unit_type_id: 1,
       sell_price: '',
       description: '',
-      purchase_price: 0
+      purchase_price: 0,
+      brand_name: ''
     }),
     _useState26 = _slicedToArray(_useState25, 2),
     transferForm = _useState26[0],
@@ -24425,7 +24440,8 @@ function StockTab() {
   }();
   var openTransferModal = /*#__PURE__*/function () {
     var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(item) {
-      var _categoriesRes$data, _unitTypesRes$data, _yield$Promise$all, _yield$Promise$all2, categoriesRes, unitTypesRes, fetchedCategories, fetchedUnitTypes, category_id, unit_type_id, _productRes$data, productRes, product, allVariants, _res$data8, _res$data9, res, inventoryData, _res$data0, _fetchedCategories, _fetchedUnitTypes, _categoriesRes$data2, _unitTypesRes$data2, _yield$Promise$all3, _yield$Promise$all4, _categoriesRes, _unitTypesRes, _res, supplierProduct, spVariants, _err$response2, _t2, _t3, _t4, _t5;
+      var _item$brand;
+      var _categoriesRes$data, _unitTypesRes$data, _yield$Promise$all, _yield$Promise$all2, categoriesRes, unitTypesRes, fetchedCategories, fetchedUnitTypes, category_id, unit_type_id, _productRes$data, productRes, product, allVariants, _res$data8, _res$data9, res, inventoryData, _res$data0, _supplierProduct$bran, _item$brand2, _fetchedCategories, _fetchedUnitTypes, _categoriesRes$data2, _unitTypesRes$data2, _yield$Promise$all3, _yield$Promise$all4, _categoriesRes, _unitTypesRes, _res, supplierProduct, spVariants, _err$response2, _t2, _t3, _t4, _t5;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
@@ -24488,7 +24504,8 @@ function StockTab() {
               sell_price: item.sell_price || parseFloat(((item.purchase_price || 0) * 1.3).toFixed(2)),
               // 30% markup default
               description: item.description || '',
-              purchase_price: item.purchase_price || 0
+              purchase_price: item.purchase_price || 0,
+              brand_name: ((_item$brand = item.brand) === null || _item$brand === void 0 ? void 0 : _item$brand.name) || ''
             });
             allVariants = [];
             if (!(item.product_id && !item.is_variant)) {
@@ -24552,7 +24569,8 @@ function StockTab() {
               sell_price: parseFloat((((supplierProduct === null || supplierProduct === void 0 ? void 0 : supplierProduct.price) || item.purchase_price || 0) * 1.3).toFixed(2)),
               // 30% markup default
               description: (supplierProduct === null || supplierProduct === void 0 ? void 0 : supplierProduct.description) || item.description || '',
-              purchase_price: (supplierProduct === null || supplierProduct === void 0 ? void 0 : supplierProduct.price) || item.purchase_price || 0
+              purchase_price: (supplierProduct === null || supplierProduct === void 0 ? void 0 : supplierProduct.price) || item.purchase_price || 0,
+              brand_name: (supplierProduct === null || supplierProduct === void 0 || (_supplierProduct$bran = supplierProduct.brand) === null || _supplierProduct$bran === void 0 ? void 0 : _supplierProduct$bran.name) || ((_item$brand2 = item.brand) === null || _item$brand2 === void 0 ? void 0 : _item$brand2.name) || ''
             });
             allVariants = spVariants.filter(function (v) {
               return (v.stock || 0) > 0;
@@ -25161,6 +25179,15 @@ function StockTab() {
                       children: [u.purchase_unit, " / ", u.sell_unit]
                     }, u.id);
                   })]
+                })]
+              }), transferForm.brand_name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+                className: "space-y-0.5",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_10__.Label, {
+                  className: "text-[9px] font-bold text-gray-500 uppercase",
+                  children: "Brand"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+                  className: "flex h-8 w-full items-center rounded-md border border-orange-200 bg-orange-50 px-2 text-[13px] font-semibold text-orange-700",
+                  children: transferForm.brand_name
                 })]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
                 className: "md:col-span-2 space-y-0.5",

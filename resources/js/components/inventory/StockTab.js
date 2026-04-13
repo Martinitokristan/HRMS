@@ -36,7 +36,7 @@ export default function StockTab() {
     const [unitTypes, setUnitTypes] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
     const [transferModal, setTransferModal] = useState({ show: false, item: null, qty: '1', allVariants: [] });
-    const [transferForm, setTransferForm] = useState({ name: '', barcode: '', category_id: '', unit_type_id: 1, sell_price: '', description: '', purchase_price: 0 });
+    const [transferForm, setTransferForm] = useState({ name: '', barcode: '', category_id: '', unit_type_id: 1, sell_price: '', description: '', purchase_price: 0, brand_name: '' });
     const [selectedVariantId, setSelectedVariantId] = useState('');
     const [transferLoading, setTransferLoading] = useState(false);
     const [expandedProducts, setExpandedProducts] = useState(new Set());
@@ -321,6 +321,7 @@ export default function StockTab() {
             sell_price: item.sell_price || parseFloat(((item.purchase_price || 0) * 1.3).toFixed(2)), // 30% markup default
             description: item.description || '',
             purchase_price: item.purchase_price || 0,
+            brand_name: item.brand?.name || '',
         });
 
         let allVariants = [];
@@ -372,6 +373,7 @@ export default function StockTab() {
                     sell_price: parseFloat(((supplierProduct?.price || item.purchase_price || 0) * 1.3).toFixed(2)), // 30% markup default
                     description: supplierProduct?.description || item.description || '',
                     purchase_price: supplierProduct?.price || item.purchase_price || 0,
+                    brand_name: supplierProduct?.brand?.name || item.brand?.name || '',
                 });
                 
                 allVariants = spVariants
@@ -773,6 +775,14 @@ export default function StockTab() {
                                         {unitTypes.map(u => <option key={u.id} value={u.id}>{u.purchase_unit} / {u.sell_unit}</option>)}
                                     </select>
                                 </div>
+                                {transferForm.brand_name && (
+                                    <div className="space-y-0.5">
+                                        <Label className="text-[9px] font-bold text-gray-500 uppercase">Brand</Label>
+                                        <div className="flex h-8 w-full items-center rounded-md border border-orange-200 bg-orange-50 px-2 text-[13px] font-semibold text-orange-700">
+                                            {transferForm.brand_name}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="md:col-span-2 space-y-0.5">
                                     <Label className="text-[9px] font-bold text-gray-500 uppercase">Description</Label>
                                     <Textarea

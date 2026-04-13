@@ -220,7 +220,12 @@ export default function CartPage() {
                             {/* Product Info */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2 mb-1">
-                                    <h3 className="text-base font-bold text-foreground truncate">{item.name}</h3>
+                                    <div className="min-w-0">
+                                        <h3 className="text-base font-bold text-foreground truncate">{item.name}</h3>
+                                        {item.brand?.name && (
+                                            <p className="text-xs font-semibold text-orange-500 leading-none mt-0.5">{item.brand.name}</p>
+                                        )}
+                                    </div>
                                     <Button
                                         variant="ghost"
                                         size="icon"

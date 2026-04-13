@@ -408,6 +408,7 @@ export default function CustomerOrder() {
                                             </div>
                                             <div className="flex-1">
                                                 <span className="font-semibold">{item.qty}x</span> {item.name}
+                                                {item.brand?.name && <div className="text-xs font-semibold text-orange-500 mt-0.5">{item.brand.name}</div>}
                                                 {item.variantString && <div className="text-sm text-muted-foreground mt-0.5">[{item.variantString}]</div>}
                                             </div>
                                             <div className="font-semibold text-right whitespace-nowrap">₱{(item.sell_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
@@ -779,6 +780,7 @@ export default function CustomerOrder() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="font-semibold text-foreground text-sm truncate">{item.name}</div>
+                                        {item.brand?.name && <div className="text-xs font-semibold text-orange-500">{item.brand.name}</div>}
                                         {item.variantString && <div className="text-xs text-muted-foreground">{item.variantString}</div>}
                                         <div className="text-xs text-muted-foreground">Qty: {item.qty} × ₱{(item.sell_price || 0).toLocaleString()}</div>
                                         <div className="flex gap-3 mt-1">
