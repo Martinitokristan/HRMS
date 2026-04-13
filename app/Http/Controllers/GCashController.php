@@ -12,6 +12,7 @@ use App\Events\DataMutated;
 use App\Notifications\GCashPaymentReceived;
 use App\Services\BrevoSmsService;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -129,6 +130,7 @@ class GCashController extends Controller
             $sale->status = 'confirmed';
             $sale->payment_confirmed_at = now();
             $sale->save();
+            Cache::tags(['products'])->flush();
 
             // Create GCash Transaction Log
             GCashTransaction::create([

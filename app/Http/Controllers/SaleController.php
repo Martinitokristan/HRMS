@@ -9,6 +9,7 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
@@ -239,6 +240,10 @@ class SaleController extends Controller
         }
 
         $sale->update(['status' => $newStatus]);
+
+        if ($newStatus === 'confirmed') {
+            Cache::tags(['products'])->flush();
+        }
 
         // Sync delivery status with sale status
         if ($sale->delivery) {

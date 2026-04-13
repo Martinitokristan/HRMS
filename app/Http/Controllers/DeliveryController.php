@@ -9,6 +9,7 @@ use App\Models\CustomerNotification;
 use App\Notifications\NewOrderAssigned;
 use App\Notifications\NewFeedbackReceived;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DeliveryController extends Controller
 {
@@ -237,6 +238,7 @@ class DeliveryController extends Controller
             $updates['delivered_at'] = now();
             // Update sale status
             $delivery->sale->update(['status' => 'delivered']);
+            Cache::tags(['products'])->flush();
             // Update rider stats
             if ($delivery->rider_id) {
                 $profile = RiderProfile::where('user_id', $delivery->rider_id)->first();
