@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, Percent, Tag, Barcode, Plus, Trash2, Upload, Image, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export default function ProductForm({ product, categories, suppliers, unitTypes, variants, onSuccess, onCancel }) {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [brands, setBrands] = useState([]);
     const [errors, setErrors] = useState({});
@@ -249,18 +250,18 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
             if (product) {
                 fd.append('_method', 'PUT');
                 await api.post(`/products/${product.id}`, fd);
-                sileo.success({ title: 'Product updated successfully' });
+                showToast('Product updated successfully');
             } else {
                 await api.post('/products', fd);
-                sileo.success({ title: 'Product created successfully' });
+                showToast('Product created successfully');
             }
             onSuccess();
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
-                sileo.error({ title: 'Please check the highlighted fields.' });
+                showToast('Please check the highlighted fields.', 'error');
             } else {
-                sileo.error({ title: err.response?.data?.message || 'Error saving product' });
+                showToast(err.response?.data?.message || 'Error saving product', 'error');
             }
         } finally {
             setLoading(false);

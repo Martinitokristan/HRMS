@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 
 export default function RatingModal({ isOpen, onClose, delivery, onSuccess }) {
+    const { showToast } = useToast();
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
@@ -13,7 +14,7 @@ export default function RatingModal({ isOpen, onClose, delivery, onSuccess }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (rating === 0) {
-            sileo.error({ title: 'Please select a rating' });
+            showToast('Please select a rating', 'error');
             return;
         }
 
@@ -23,11 +24,11 @@ export default function RatingModal({ isOpen, onClose, delivery, onSuccess }) {
                 rating,
                 comment: comment.trim()
             });
-            sileo.success({ title: 'Thank you for your feedback!' });
+            showToast('Thank you for your feedback!', 'success');
             if (onSuccess) onSuccess();
             onClose();
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to submit rating' });
+            showToast(err.response?.data?.message || 'Failed to submit rating', 'error');
         } finally {
             setSubmitting(false);
         }

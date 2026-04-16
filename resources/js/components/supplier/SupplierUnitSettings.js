@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierUnitSettings() {
+    const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_SETTINGS);
     const [unitTypes, setUnitTypes] = useState([]);
     const [loading, setLoading] = useState(unitTypes.length === 0);
@@ -52,18 +53,18 @@ export default function SupplierUnitSettings() {
 
     const handleSaveUnit = async () => {
         if (!newUnit.purchase_unit.trim() || !newUnit.sell_unit.trim()) {
-            sileo.error({ title: 'Please fill in all required fields' });
+            showToast('Please fill in all required fields', 'error');
             return;
         }
         setSaving(true);
         try {
             await api.post('/supplier/unit-types', newUnit);
-            sileo.success({ title: 'Unit type added successfully' });
+            showToast('Unit type added successfully');
             markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             setNewUnit({ purchase_unit: '', sell_unit: '', multiplier: 1 });
             fetchData(true);
         } catch (e) {
-            sileo.error({ title: e.response?.data?.message || 'Error saving unit type' });
+            showToast(e.response?.data?.message || 'Error saving unit type', 'error');
         } finally {
             setSaving(false);
         }
@@ -73,11 +74,11 @@ export default function SupplierUnitSettings() {
         closeConfirm();
         try {
             await api.delete(`/supplier/unit-types/${id}`);
-            sileo.success({ title: 'Unit type deleted' });
+            showToast('Unit type deleted');
             markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             fetchData(true);
         } catch (e) {
-            sileo.error({ title: 'Error deleting unit type' });
+            showToast('Error deleting unit type', 'error');
         }
     };
 

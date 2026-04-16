@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import Modal from '../shared/Modal';
 import { StatusBadge } from '../shared/Badge';
 
 export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
+    const { showToast } = useToast();
     const [delivery, setDelivery] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -22,7 +23,7 @@ export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
             })
             .catch(err => {
                 if (isMounted) {
-                    sileo.error({ title: 'Failed to load delivery details' });
+                    showToast('Failed to load delivery details', 'error');
                     setLoading(false);
                 }
             });

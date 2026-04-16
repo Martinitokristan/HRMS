@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -16,6 +16,7 @@ import { Store, ShoppingCart, Package, Minus, Plus, CheckCircle2 } from 'lucide-
 import VariantSelector from '../shared/VariantSelector';
 
 export default function SupplierCatalog() {
+    const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh('supplier_products');
     const [products, setProducts] = useState({ data: [], total: 0 });
     const [categories, setCategories] = useState([]);
@@ -72,7 +73,7 @@ export default function SupplierCatalog() {
             }
         } catch (e) {
             console.error('Failed to fetch catalog:', e);
-            sileo.error({ title: 'Failed to load supplier available products' });
+            showToast('Failed to load supplier available products', 'error');
             setProducts({ data: [], total: 0 });
         } finally {
             setLoading(false);
@@ -81,17 +82,17 @@ export default function SupplierCatalog() {
 
     const handleOrder = async () => {
         if (!viewProduct || orderQty < (viewProduct.min_order_qty || 1)) {
-            sileo.error({ title: 'Please enter a valid quantity.' });
+            showToast('Please enter a valid quantity.', 'error');
             return;
         }
 
         const currentStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
         if (currentStock <= 0) {
-            sileo.error({ title: 'This option is out of stock.' });
+            showToast('This option is out of stock.', 'error');
             return;
         }
         if (orderQty > currentStock) {
-            sileo.error({ title: `Only ${currentStock} units available for this option.` });
+            showToast(`Only ${currentStock} units available for this option.`, 'error');
             return;
         }
 
@@ -108,14 +109,14 @@ export default function SupplierCatalog() {
                     unit_cost: unitCost,
                 }]
             });
-            sileo.success({ title: 'Order request sent to supplier!' });
+            showToast('Order request sent to supplier!', 'success');
             setViewProduct(null);
             setSelectedVariant(null);
             setSelectedOptions({ size: '', color: '', weight: '' });
             setOrderQty(1);
             fetchProducts();
         } catch (e) {
-            sileo.error({ title: e.response?.data?.message || 'Failed to place order.' });
+            showToast(e.response?.data?.message || 'Failed to place order.', 'error');
         } finally {
             setActionLoading(false);
         }

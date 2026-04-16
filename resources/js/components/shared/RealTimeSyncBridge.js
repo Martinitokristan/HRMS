@@ -3,7 +3,6 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import { markStale } from '../../store/dataStore';
 import { useAuth } from '../../context/AuthContext';
-import { sileo } from 'sileo';
 
 // All env vars are MIX_ prefixed so laravel-mix (webpack) exposes them to the
 // browser bundle via process.env. Define these in .env (root):
@@ -88,18 +87,6 @@ export default function RealTimeSyncBridge() {
                 ch.listen('.data.mutated', (e) => {
                     if (Array.isArray(e.stale_keys) && e.stale_keys.length) {
                         markStale(...e.stale_keys);
-                    }
-                    
-                    if (e.event_type === 'payment.confirmed') {
-                        if (user.role === 'customer') {
-                            sileo.success({ title: "Payment Confirmed", description: "Your GCash payment has been successfully verified." });
-                        } else if (user.role === 'admin') {
-                            sileo.success({ title: "Payment Received", description: "A customer's GCash payment has been confirmed." });
-                        }
-                    } else if (e.event_type === 'payment.proof_submitted') {
-                        if (user.role === 'admin') {
-                            sileo.info({ title: "Payment Proof", description: "A customer has submitted GCash payment proof." });
-                        }
                     }
                 });
 

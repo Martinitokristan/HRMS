@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -22,6 +22,7 @@ import PoReceiptModal from '../shared/PoReceiptModal';
 
 export default function SupplierOrders({ mode = 'completed' }) {
     const isRequestMode = mode === 'requests';
+    const { showToast } = useToast();
     const { settings } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -105,11 +106,11 @@ export default function SupplierOrders({ mode = 'completed' }) {
         setSubmitting(true);
         try {
             await api.post(`/supplier/purchase-orders/${order.id}/accept`);
-            sileo.success({ title: `${order.po_number} accepted! You can now mark it as delivered when ready.` });
+            showToast(`${order.po_number} accepted! You can now mark it as delivered when ready.`, 'success');
             markStale(STALE_KEYS.SUPPLIER_ORDERS, STALE_KEYS.SUPPLIER_DASHBOARD, STALE_KEYS.ADMIN_PURCHASES);
             fetchOrders(true);
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to accept PO' });
+            showToast(err.response?.data?.message || 'Failed to accept PO', 'error');
         } finally {
             setSubmitting(false);
         }
@@ -139,13 +140,13 @@ export default function SupplierOrders({ mode = 'completed' }) {
             await api.post(`/supplier/purchase-orders/${rejectModal.id}/reject`, {
                 rejection_reason: rejectionReason.trim(),
             });
-            sileo.success({ title: `${rejectModal.po_number} rejected. The admin has been notified.` });
+            showToast(`${rejectModal.po_number} rejected. The admin has been notified.`, 'success');
             markStale(STALE_KEYS.SUPPLIER_ORDERS, STALE_KEYS.SUPPLIER_DASHBOARD, STALE_KEYS.ADMIN_PURCHASES);
             setRejectModal(null);
             setRejectionReason('');
             fetchOrders(true);
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to reject PO' });
+            showToast(err.response?.data?.message || 'Failed to reject PO', 'error');
         } finally {
             setSubmitting(false);
         }
@@ -159,13 +160,13 @@ export default function SupplierOrders({ mode = 'completed' }) {
             await api.post(`/supplier/purchase-orders/${selectedOrder.id}/deliver`, {
                 delivery_notes: deliveryNotes
             });
-            sileo.success({ title: 'Order marked as delivered successfully!' });
+            showToast('Order marked as delivered successfully!');
             markStale(STALE_KEYS.SUPPLIER_ORDERS, STALE_KEYS.SUPPLIER_DASHBOARD, STALE_KEYS.ADMIN_PURCHASES);
             setSelectedOrder(null);
             setDeliveryNotes('');
             fetchOrders(true);
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to mark as delivered' });
+            showToast(err.response?.data?.message || 'Failed to mark as delivered', 'error');
         } finally {
             setSubmitting(false);
         }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import StatCard from '../shared/StatCard';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -25,6 +25,7 @@ const STATUS_CONFIG = {
 };
 
 export default function Delivery() {
+    const { showToast } = useToast();
     
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_DELIVERIES);
     const [pageData, setPageData] = useState({
@@ -78,7 +79,7 @@ export default function Delivery() {
                 total: data.data?.total || dData.length
             });
         } catch (err) {
-            if (!silent) sileo.error({ title: 'Failed to fetch delivery data' });
+            if (!silent) showToast('Failed to fetch delivery data', 'error');
         } finally {
             if (!silent) setLoading(false);
         }
@@ -103,11 +104,11 @@ export default function Delivery() {
         if (!riderId) return;
         try {
             await api.put(`/deliveries/${deliveryId}/assign`, { rider_id: riderId });
-            sileo.success({ title: 'Rider assigned successfully' });
+            showToast('Rider assigned successfully');
             markStale(STALE_KEYS.ADMIN_DELIVERIES, STALE_KEYS.RIDER_DASHBOARD);
             fetchData(true);
         } catch (err) {
-            sileo.error({ title: 'Assignment failed' });
+            showToast('Assignment failed', 'error');
         }
     };
 
@@ -115,7 +116,7 @@ export default function Delivery() {
         try {
             await api.put(`/deliveries/${deliveryId}/status`, { status });
             const statusLabel = STATUS_CONFIG[status]?.label || status;
-            sileo.success({ title: `Delivery marked as ${statusLabel}` });
+            showToast(`Delivery marked as ${statusLabel}`);
             markStale(
                 STALE_KEYS.ADMIN_DELIVERIES,
                 STALE_KEYS.ADMIN_DASHBOARD,
@@ -124,14 +125,14 @@ export default function Delivery() {
             );
             fetchData(true);
         } catch (err) {
-            sileo.error({ title: 'Status update failed' });
+            showToast('Status update failed', 'error');
         }
     };
 
     const handleDeleteDelivery = async (id) => {
         try {
             await api.delete(`/deliveries/${id}`);
-            sileo.success({ title: 'Delivery deleted successfully' });
+            showToast('Delivery deleted successfully');
             markStale(
                 STALE_KEYS.ADMIN_DELIVERIES,
                 STALE_KEYS.ADMIN_DASHBOARD,
@@ -141,7 +142,7 @@ export default function Delivery() {
             fetchData(true);
             closeConfirm();
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Delete failed' });
+            showToast(err.response?.data?.message || 'Delete failed', 'error');
         }
     };
 
@@ -154,14 +155,14 @@ export default function Delivery() {
                     api.put(`/deliveries/${id}/assign`, { rider_id: bulkRiderId })
                 )
             );
-            sileo.success({ title: `Assigned ${selectedDeliveries.length} deliveries to rider` });
+            showToast(`Assigned ${selectedDeliveries.length} deliveries to rider`);
             markStale(STALE_KEYS.ADMIN_DELIVERIES, STALE_KEYS.RIDER_DASHBOARD);
             fetchData(true);
             setSelectedDeliveries([]);
             setShowBulkAssign(false);
             setBulkRiderId('');
         } catch (err) {
-            sileo.error({ title: 'Bulk assignment failed' });
+            showToast('Bulk assignment failed', 'error');
         }
     };
 

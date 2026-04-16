@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -47,6 +48,7 @@ function RecenterMap({ pos }) {
 
 export default function RiderApp() {
     const { user, logout } = useAuth();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('nearby');
     const [hideMap, setHideMap] = useState(false);
@@ -64,7 +66,7 @@ export default function RiderApp() {
     // Watch Geolocation
     useEffect(() => {
         if (!navigator.geolocation) {
-            sileo.error({ title: 'Geolocation is not supported by your browser' });
+            showToast('Geolocation is not supported by your browser', 'error');
             return;
         }
 
@@ -76,7 +78,7 @@ export default function RiderApp() {
             },
             (err) => {
                 console.warn('Geolocation error:', err);
-                sileo.warning({ title: 'Unable to get your location. Using default.' });
+                showToast('Unable to get your location. Using default.', 'warning');
             },
             { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
         );
@@ -100,7 +102,7 @@ export default function RiderApp() {
             setMyJobs(d.my_jobs || []);
             setCompleted(d.completed || []);
         } catch (e) {
-            sileo.error({ title: 'Failed to fetch dashboard data' });
+            showToast('Failed to fetch dashboard data', 'error');
         } finally {
             setLoading(false);
         }
@@ -125,7 +127,7 @@ export default function RiderApp() {
                     longitude: riderPos[1],
                 }).then(res => {
                     if (res.data.notified) {
-                        sileo.success({ title: `Customer notified — you're ${Math.round(res.data.distance_km * 1000)}m away!` });
+                        showToast(`Customer notified — you're ${Math.round(res.data.distance_km * 1000)}m away!`, 'success');
                     }
                 }).catch(() => { });
             });
@@ -144,10 +146,10 @@ export default function RiderApp() {
             } else {
                 await api.put(`/deliveries/${id}/status`, { status });
             }
-            sileo.success({ title: actionNote || 'Action successful' });
+            showToast(actionNote || 'Action successful');
             triggerRefresh();
         } catch (e) {
-            sileo.error({ title: 'Action failed' });
+            showToast('Action failed', 'error');
         }
     };
 

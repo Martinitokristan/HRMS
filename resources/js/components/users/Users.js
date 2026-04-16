@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import Modal from '../shared/Modal';
@@ -16,6 +16,7 @@ import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function Users() {
+    const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh('admin_users');
     const [users, setUsers] = useState({ data: [], total: 0 });
     const [loading, setLoading] = useState(users.data?.length === 0);
@@ -78,16 +79,16 @@ export default function Users() {
         try {
             if (modal.user) {
                 await api.put(`/users/${modal.user.id}`, formData);
-                sileo.success({ title: 'User updated successfully' });
+                showToast('User updated successfully');
             } else {
                 await api.post('/users', formData);
-                sileo.success({ title: 'User created successfully' });
+                showToast('User created successfully');
             }
             markStale(STALE_KEYS.ADMIN_USERS);
             fetchData(true);
             setModal({ open: false, user: null });
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Error saving user' });
+            showToast(err.response?.data?.message || 'Error saving user', 'error');
         } finally {
             setSaving(false);
         }
@@ -97,11 +98,11 @@ export default function Users() {
         closeConfirm();
         try {
             await api.put(`/users/${userId}/status`, { status: currentStatus === 'active' ? 'suspended' : 'active' });
-            sileo.success({ title: 'User status updated' });
+            showToast('User status updated');
             markStale(STALE_KEYS.ADMIN_USERS);
             fetchData(true);
         } catch (e) {
-            sileo.error({ title: 'Failed to update status' });
+            showToast('Failed to update status', 'error');
         }
     };
 

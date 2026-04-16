@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../lib/api";
 import { useNavigate } from "react-router-dom";
-import { sileo } from 'sileo';
+import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import ProductDetailModal from "./ProductDetailModal";
@@ -78,6 +78,7 @@ function CheckoutMapController({ position, onMapClick }) {
 
 export default function CustomerOrder() {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const { user, settings, refreshSettings } = useAuth();
     const { refreshTrigger } = useSilentRefresh('admin_settings');
     const gcashEnabled = !!(settings?.settings?.payments?.gcash_payload || settings?.payments?.gcash_payload);
@@ -136,7 +137,7 @@ export default function CustomerOrder() {
     // Get current GPS location
     const handleGetLocation = () => {
         if (!navigator.geolocation) {
-            sileo.error({ title: "Geolocation is not supported by your browser." });
+            showToast("Geolocation is not supported by your browser.", "error");
             return;
         }
         setGpsLoading(true);
@@ -144,10 +145,10 @@ export default function CustomerOrder() {
             (position) => {
                 setCheckoutPosition([position.coords.latitude, position.coords.longitude]);
                 setGpsLoading(false);
-                sileo.success({ title: "Location updated to your current GPS position." });
+                showToast("Location updated to your current GPS position.", "success");
             },
             (error) => {
-                sileo.error({ title: "Unable to get GPS location." });
+                showToast("Unable to get GPS location.", "error");
                 setGpsLoading(false);
             },
             { enableHighAccuracy: true }
@@ -262,14 +263,14 @@ export default function CustomerOrder() {
 
         // Validate address
         if (!deliveryStreet || !deliveryMunicipality || !deliveryProvince) {
-            sileo.error({ title: "Please complete your delivery address (province, municipality, and street are required)." });
+            showToast("Please complete your delivery address (province, municipality, and street are required).", "error");
             return;
         }
         const address = [deliveryStreet.trim(), deliveryBarangay, deliveryMunicipality, deliveryProvince].filter(Boolean).join(', ');
 
         // Validate cart has items
         if (!cart || cart.length === 0) {
-            sileo.error({ title: "Your cart is empty." });
+            showToast("Your cart is empty.", "error");
             return;
         }
 
@@ -305,7 +306,7 @@ export default function CustomerOrder() {
 
         } catch (err) {
             console.error('Order error:', err);
-            sileo.error({ title: err.response?.data?.message || "Failed to place order. Please try again." });
+            showToast(err.response?.data?.message || "Failed to place order. Please try again.", "error");
             setLoading(false);
         }
     };
@@ -688,7 +689,7 @@ export default function CustomerOrder() {
                                                 link.download = `GCash-Payment-${parseFloat(gcashAmount).toFixed(2)}.png`;
                                                 link.href = url;
                                                 link.click();
-                                                sileo.success({ title: "QR code saved to your device!" });
+                                                showToast("QR code saved to your device!", "success");
                                             }
                                         }}
                                     >

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierBrandSettings() {
+    const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_BRANDS);
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(brands.length === 0);
@@ -36,7 +37,7 @@ export default function SupplierBrandSettings() {
             const data = res.data?.data !== undefined ? res.data.data : res.data;
             setBrands(Array.isArray(data) ? data : []);
         } catch (err) {
-            if (!silent) sileo.error({ title: 'Failed to load brands' });
+            if (!silent) showToast('Failed to load brands', 'error');
         } finally {
             if (!silent) setLoading(false);
         }
@@ -49,7 +50,7 @@ export default function SupplierBrandSettings() {
     const handleAddBrand = async (e) => {
         e.preventDefault();
         if (!newBrand.name.trim()) {
-            sileo.error({ title: 'Brand name is required' });
+            showToast('Brand name is required', 'error');
             return;
         }
         setSaving(true);
@@ -58,12 +59,12 @@ export default function SupplierBrandSettings() {
                 name: newBrand.name.trim(),
                 description: newBrand.description.trim() || null,
             });
-            sileo.success({ title: 'Brand added successfully' });
+            showToast('Brand added successfully', 'success');
             markStale(STALE_KEYS.SUPPLIER_BRANDS);
             setNewBrand({ name: '', description: '' });
             fetchBrands(true);
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to add brand' });
+            showToast(err.response?.data?.message || 'Failed to add brand', 'error');
         } finally {
             setSaving(false);
         }
@@ -73,11 +74,11 @@ export default function SupplierBrandSettings() {
         closeConfirm();
         try {
             await api.delete(`/supplier/brands/${id}`);
-            sileo.success({ title: 'Brand deleted' });
+            showToast('Brand deleted', 'success');
             markStale(STALE_KEYS.SUPPLIER_BRANDS);
             fetchBrands(true);
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to delete brand' });
+            showToast(err.response?.data?.message || 'Failed to delete brand', 'error');
         }
     };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { X } from 'lucide-react';
 
 const inputClass = [
@@ -13,6 +13,7 @@ const inputClass = [
 const labelClass = 'block text-[11px] font-medium text-[#6b7280] uppercase tracking-[0.04em] mb-1';
 
 export default function SupplierForm({ isOpen, supplier, onSuccess, onCancel }) {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         name: '',
@@ -44,15 +45,15 @@ export default function SupplierForm({ isOpen, supplier, onSuccess, onCancel }) 
         try {
             if (supplier?.id) {
                 await api.put(`/suppliers/${supplier.id}`, form);
-                sileo.success({ title: 'Supplier updated successfully' });
+                showToast('Supplier updated successfully');
             } else {
                 await api.post('/suppliers', form);
-                sileo.success({ title: 'Supplier added successfully' });
+                showToast('Supplier added successfully');
             }
             onSuccess();
         } catch (error) {
             const msg = error.response?.data?.message || 'Error saving supplier';
-            sileo.error({ title: msg });
+            showToast(msg, 'error');
         } finally {
             setLoading(false);
         }

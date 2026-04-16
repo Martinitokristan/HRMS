@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -18,6 +18,7 @@ import ConfirmModal from '../shared/ConfirmModal';
 import PoReceiptModal from '../shared/PoReceiptModal';
 
 export default function PurchaseTab({ mode = 'completed' }) {
+    const { showToast } = useToast();
     const { settings } = useAuth();
     const isRequestMode = mode === 'requests';
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_PURCHASES);
@@ -83,7 +84,7 @@ export default function PurchaseTab({ mode = 'completed' }) {
         setActionLoading(true);
         try {
             await api.post(`/purchase-orders/${poId}/${action}`);
-            sileo.success({ title: `PO ${action}d successfully` });
+            showToast(`PO ${action}d successfully`);
             
             // Re-fetch quietly
             markStale(
@@ -97,7 +98,7 @@ export default function PurchaseTab({ mode = 'completed' }) {
             setViewPo(null);
             closeConfirm();
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || `Failed to ${action} PO` });
+            showToast(err.response?.data?.message || `Failed to ${action} PO`, 'error');
         } finally {
             setActionLoading(false);
         }

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import Modal from '../shared/Modal';
 
 export default function ProductModal({ isOpen, onClose, product, categories, suppliers, unitTypes, variants, onSuccess }) {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     const [imageFile, setImageFile] = useState(null);
@@ -118,18 +119,18 @@ export default function ProductModal({ isOpen, onClose, product, categories, sup
             if (product) {
                 fd.append('_method', 'PUT');
                 await api.post(`/products/${product.id}`, fd);
-                sileo.success({ title: 'Product updated' });
+                showToast('Product updated');
             } else {
                 await api.post('/products', fd);
-                sileo.success({ title: 'Product created' });
+                showToast('Product created');
             }
             onSuccess();
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
-                sileo.error({ title: 'Please check the highlighted fields.' });
+                showToast('Please check the highlighted fields.', 'error');
             } else {
-                sileo.error({ title: err.response?.data?.message || 'Error saving product' });
+                showToast(err.response?.data?.message || 'Error saving product', 'error');
             }
         } finally {
             setLoading(false);

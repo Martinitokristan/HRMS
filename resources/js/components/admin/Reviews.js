@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Star, MessageSquare, ThumbsUp, ThumbsDown, Search, ArrowLeft, ArrowRight, Table } from 'lucide-react';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import ConfirmModal from '../shared/ConfirmModal';
 import StatCard from '../shared/StatCard';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
@@ -18,6 +18,7 @@ export default function Reviews() {
     const [selectedReview, setSelectedReview] = useState(null);
     const [ratingFilter, setRatingFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_REVIEWS);
 
     const [confirmModal, setConfirmModal] = useState({
@@ -60,7 +61,7 @@ export default function Reviews() {
             const response = await api.get(`/reviews?${params.toString()}`);
             
             if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-                sileo.error({ title: 'Failed to load reviews: Server returned an invalid format' });
+                showToast('Failed to load reviews: Server returned an invalid format', 'error');
                 setReviews([]);
                 return;
             }
@@ -90,7 +91,7 @@ export default function Reviews() {
             }
         } catch (error) {
             console.error('Failed to fetch reviews:', error);
-            sileo.error({ title: 'Failed to load reviews' });
+            showToast('Failed to load reviews', 'error');
             setReviews([]);
         } finally {
             setLoading(false);
@@ -105,7 +106,7 @@ export default function Reviews() {
                 closeConfirm();
                 try {
                     await api.delete(`/reviews/${reviewId}`);
-                    sileo.success({ title: 'Review deleted successfully' });
+                    showToast('Review deleted successfully');
                     
                     // Trigger sync for Admin and Customer (storefront product ratings)
                     markStale(STALE_KEYS.ADMIN_REVIEWS, STALE_KEYS.CUSTOMER_SHOP);
@@ -113,7 +114,7 @@ export default function Reviews() {
                     setSelectedReview(null);
                 } catch (error) {
                     console.error('Failed to delete review:', error);
-                    sileo.error({ title: 'Failed to delete review' });
+                    showToast('Failed to delete review', 'error');
                 }
             },
             'destructive'

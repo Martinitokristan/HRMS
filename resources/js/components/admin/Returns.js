@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +33,7 @@ const REASON_LABELS = {
 };
 
 export default function Returns() {
+    const { showToast } = useToast();
     const [returns, setReturns] = useState([]);
     const [stats, setStats] = useState({});
     const [loading, setLoading] = useState(true);
@@ -63,7 +64,7 @@ export default function Returns() {
             setPagination(res.data.data !== undefined ? res.data.data : res.data);
             setStats(res.data.stats || {});
         } catch (err) {
-            sileo.error({ title: 'Failed to load returns' });
+            showToast('Failed to load returns', 'error');
         } finally {
             setLoading(false);
         }
@@ -72,33 +73,33 @@ export default function Returns() {
     useEffect(() => { fetchReturns(); }, [fetchReturns, returnsRefresh.refreshTrigger]);
 
     const handleApprove = async (id) => {
-        if (!refundMethod) { sileo.error({ title: 'Please select a refund method' }); return; }
+        if (!refundMethod) { showToast('Please select a refund method', 'error'); return; }
         setActionLoading(true);
         try {
             const res = await api.post(`/returns/${id}/approve`, {
                 refund_method: refundMethod,
                 admin_notes: adminNotes || null,
             });
-            sileo.success({ title: res.data.message || 'Return approved' });
+            showToast(res.data.message || 'Return approved');
             setSelectedReturn(res.data.data);
             
             // Notify Admin, Customer History, and Inventory (since stock moved)
             markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS, STALE_KEYS.ADMIN_INVENTORY);
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to approve' });
+            showToast(err.response?.data?.message || 'Failed to approve', 'error');
         } finally { setActionLoading(false); }
     };
 
     const handleReject = async (id) => {
-        if (!adminNotes.trim()) { sileo.error({ title: 'Please provide a reason for rejection' }); return; }
+        if (!adminNotes.trim()) { showToast('Please provide a reason for rejection', 'error'); return; }
         setActionLoading(true);
         try {
             const res = await api.post(`/returns/${id}/reject`, { admin_notes: adminNotes });
-            sileo.success({ title: res.data.message || 'Return rejected' });
+            showToast(res.data.message || 'Return rejected');
             setSelectedReturn(res.data.data);
             markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS);
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to reject' });
+            showToast(err.response?.data?.message || 'Failed to reject', 'error');
         } finally { setActionLoading(false); }
     };
 
@@ -106,11 +107,11 @@ export default function Returns() {
         setActionLoading(true);
         try {
             const res = await api.post(`/returns/${id}/complete`);
-            sileo.success({ title: res.data.message || 'Refund processed' });
+            showToast(res.data.message || 'Refund processed');
             setSelectedReturn(res.data.data);
             markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS, STALE_KEYS.ADMIN_DASHBOARD);
         } catch (err) {
-            sileo.error({ title: err.response?.data?.message || 'Failed to complete' });
+            showToast(err.response?.data?.message || 'Failed to complete', 'error');
         } finally { setActionLoading(false); }
     };
 
@@ -121,7 +122,7 @@ export default function Returns() {
             setAdminNotes(res.data.data.admin_notes || '');
             setRefundMethod(res.data.data.refund_method || 'original_payment');
         } catch (err) {
-            sileo.error({ title: 'Failed to load return details' });
+            showToast('Failed to load return details', 'error');
         }
     };
 
@@ -320,7 +321,7 @@ export default function Returns() {
                                                         <button
                                                             onClick={() => {
                                                                 navigator.clipboard.writeText(r.sale.payment_phone_number);
-                                                                sileo.success({ title: 'Number copied to clipboard' });
+                                                                showToast('Number copied to clipboard', 'success');
                                                             }}
                                                             className="text-green-600 hover:text-green-800 transition-colors p-1 rounded"
                                                             title="Copy number"

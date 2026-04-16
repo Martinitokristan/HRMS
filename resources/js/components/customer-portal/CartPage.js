@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { useNavigate, Link } from 'react-router-dom';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import ProductDetailModal from './ProductDetailModal';
 import Modal from '../shared/Modal';
@@ -11,6 +11,7 @@ import { ArrowLeft, Trash2, ShoppingCart, Minus, Plus, Check, X, Package, ArrowR
 
 export default function CartPage() {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const { user } = useAuth();
     
     const [cart, setCart] = useState([]);
@@ -56,13 +57,13 @@ export default function CartPage() {
 
     const removeItem = (cartId) => {
         setCart(prev => prev.filter(item => item.cartId !== cartId));
-        sileo.success({ title: 'Item removed from cart' });
+        showToast('Item removed from cart', 'success');
     };
 
     const clearCart = () => {
         setCart([]);
         setShowClearConfirm(false);
-        sileo.success({ title: 'Cart cleared' });
+        showToast('Cart cleared', 'success');
     };
 
     const updateCartItem = (product, options) => {
@@ -87,13 +88,13 @@ export default function CartPage() {
             return [...filtered, { ...product, sell_price: price, cartId: newCartId, qty, variantString, selectedVariants: variants, variant_id }];
         });
         setSelectedProduct(null);
-        sileo.success({ title: 'Item updated' });
+        showToast('Item updated', 'success');
     };
 
     const switchVariant = (item, newVariant) => {
         // Check if new variant is in stock
         if ((newVariant.stock || 0) <= 0) {
-            sileo.error({ title: 'This variant is out of stock' });
+            showToast('This variant is out of stock', 'error');
             return;
         }
 
@@ -137,7 +138,7 @@ export default function CartPage() {
                     : i
             );
         });
-        sileo.success({ title: `Switched to ${variantString}` });
+        showToast(`Switched to ${variantString}`, 'success');
     };
 
     const cartTotal = cart.reduce((sum, item) => sum + (item.sell_price * item.qty), 0);
@@ -146,7 +147,7 @@ export default function CartPage() {
     const handleCheckout = () => {
         const selectedCount = cart.filter(item => item.selectedForCheckout).length;
         if (selectedCount === 0) {
-            sileo.error({ title: 'Please select at least one item to checkout' });
+            showToast('Please select at least one item to checkout', 'error');
             return;
         }
         navigate('/shop/order');

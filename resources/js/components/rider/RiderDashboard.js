@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { sileo } from 'sileo';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -58,7 +58,7 @@ export default function RiderDashboard() {
             const response = await api.get('/riders/me/dashboard');
             setDashboard(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
-            sileo.error({ title: 'Failed to fetch dashboard data' });
+            toast.error('Failed to fetch dashboard data');
         } finally {
             setLoading(false);
         }
@@ -102,20 +102,20 @@ export default function RiderDashboard() {
                 availability: response.data.data?.availability || response.data.availability
             }));
             const availability = response.data.data?.availability || response.data.availability;
-            sileo.success({ title: `You are now ${availability === 'online' ? 'Online' : 'Offline'}` });
+            toast.success(`You are now ${availability === 'online' ? 'Online' : 'Offline'}`);
         } catch (error) {
-            sileo.error({ title: 'Failed to update status' });
+            toast.error('Failed to update status');
         }
     };
 
     const acceptDelivery = async (deliveryId) => {
         try {
             await api.post(`/deliveries/${deliveryId}/self-assign`);
-            sileo.success({ title: 'Delivery accepted successfully' });
+            toast.success('Delivery accepted successfully');
             fetchActiveDelivery();
             fetchDashboard();
         } catch (error) {
-            sileo.error({ title: 'Failed to accept delivery' });
+            toast.error('Failed to accept delivery');
         }
     };
 
@@ -124,11 +124,11 @@ export default function RiderDashboard() {
         
         try {
             await api.post(`/deliveries/${activeDelivery.id}/status`, { status });
-            sileo.success({ title: `Delivery status updated to ${status}` });
+            toast.success(`Delivery status updated to ${status}`);
             fetchActiveDelivery();
             fetchDashboard();
         } catch (error) {
-            sileo.error({ title: 'Failed to update delivery status' });
+            toast.error('Failed to update delivery status');
         }
     };
 

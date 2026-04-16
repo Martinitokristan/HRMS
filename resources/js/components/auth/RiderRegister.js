@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,6 +41,7 @@ export default function RiderRegister() {
     ];
     const [idFile, setIdFile] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const { showToast } = useToast();
     const navigate = useNavigate();
     const [successMsg, setSuccessMsg] = useState('');
     const [capsWarning, setCapsWarning] = useState(false);
@@ -115,7 +116,7 @@ export default function RiderRegister() {
         }
 
         if (nameErr || phoneErr || passErr || idErr || form.password !== form.password_confirmation) {
-            sileo.error({ title: 'Please fix the validation errors.' });
+            showToast('Please fix the validation errors.', 'error');
             return;
         }
 
@@ -136,10 +137,10 @@ export default function RiderRegister() {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setSuccessMsg('Application submitted! Please check your email to verify your account.');
-            sileo.success({ title: 'Application submitted successfully!' });
+            showToast('Application submitted successfully!', 'success');
         } catch (err) {
             const errorMsg = err.response?.data?.message || 'Registration failed';
-            sileo.error({ title: errorMsg });
+            showToast(errorMsg, 'error');
             setError('form', errorMsg);
             if (err.response?.data?.errors) {
                 Object.keys(err.response.data.errors).forEach(key => {

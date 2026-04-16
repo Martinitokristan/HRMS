@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { sileo } from 'sileo';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -49,7 +49,7 @@ export default function ProductCatalog() {
             const response = await api.get(`/supplier/products?${params}`);
             setProducts(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
-            sileo.error({ title: 'Failed to fetch products' });
+            toast.error('Failed to fetch products');
         } finally {
             setLoading(false);
         }
@@ -78,11 +78,11 @@ export default function ProductCatalog() {
         
         try {
             await api.delete(`/supplier/products/${productId}`);
-            sileo.success({ title: 'Product deleted successfully' });
+            toast.success('Product deleted successfully');
             fetchProducts();
             fetchStats();
         } catch (error) {
-            sileo.error({ title: 'Failed to delete product' });
+            toast.error('Failed to delete product');
         }
     };
 
@@ -91,11 +91,11 @@ export default function ProductCatalog() {
         
         try {
             await api.put(`/supplier/products/${productId}`, { is_active: newStatus === 'active' });
-            sileo.success({ title: `Product ${newStatus === 'active' ? 'activated' : 'deactivated'}` });
+            toast.success(`Product ${newStatus === 'active' ? 'activated' : 'deactivated'}`);
             fetchProducts();
             fetchStats();
         } catch (error) {
-            sileo.error({ title: 'Failed to update product status' });
+            toast.error('Failed to update product status');
         }
     };
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { sileo } from 'sileo';
+import { useToast } from '../../context/ToastContext';
 
 export default function SupplierModal({ isOpen, onClose, onSave, supplier = null }) {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         name: '',
@@ -39,16 +40,16 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier = null
         try {
             if (supplier?.id) {
                 await api.put(`/suppliers/${supplier.id}`, form);
-                sileo.success({ title: 'Supplier updated successfully' });
+                showToast('Supplier updated successfully');
             } else {
                 await api.post('/suppliers', form);
-                sileo.success({ title: 'Supplier added successfully' });
+                showToast('Supplier added successfully');
             }
             onSave();
             onClose();
         } catch (error) {
             const msg = error.response?.data?.message || 'Error saving supplier';
-            sileo.error({ title: msg });
+            showToast(msg, 'error');
         } finally {
             setLoading(false);
         }
