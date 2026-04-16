@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { toast } from 'sonner';
+import { sileo } from 'sileo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -74,7 +74,7 @@ export default function ProductReviews({ productId }) {
 
     const submitReview = async () => {
         if (rating === 0) {
-            toast.error('Please select a rating');
+            sileo.error('Please select a rating');
             return;
         }
 
@@ -85,14 +85,14 @@ export default function ProductReviews({ productId }) {
                 review: review.trim()
             });
             
-            toast.success('Review submitted successfully!');
+            sileo.success('Review submitted successfully!');
             setRating(0);
             setReview('');
             setCanReview(false);
             markStale(STALE_KEYS.ADMIN_REVIEWS, STALE_KEYS.ADMIN_DASHBOARD);
             fetchReviews(true);
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to submit review');
+            sileo.error(error.response?.data?.message || 'Failed to submit review');
         } finally {
             setSubmitting(false);
         }
@@ -103,9 +103,9 @@ export default function ProductReviews({ productId }) {
             await api.post(`/reviews/${reviewId}/helpful`, { is_helpful: true });
             markStale(STALE_KEYS.ADMIN_REVIEWS);
             fetchReviews(true);
-            toast.success('Thank you for your feedback!');
+            sileo.success('Thank you for your feedback!');
         } catch (error) {
-            toast.error('Failed to mark as helpful');
+            sileo.error('Failed to mark as helpful');
         }
     };
 

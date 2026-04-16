@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
-import { useAuth } from '../../context/AuthContext';
+import { sileo } from 'sileo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,7 +19,6 @@ const TABS = [
 ];
 
 export default function Settings() {
-    const { showToast } = useToast();
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('general');
     const [settings, setSettings] = useState({});
@@ -44,7 +42,7 @@ export default function Settings() {
                 const data = res.data?.data !== undefined ? res.data.data : res.data;
                 setSettings(data?.settings || {});
             } catch (err) {
-                if (isMounted) showToast('Failed to load settings', 'error');
+                if (isMounted) sileo.error('Failed to load settings');
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -70,10 +68,10 @@ export default function Settings() {
                 group: activeTab,
                 settings: settings[activeTab] || {}
             });
-            showToast('Settings saved');
+            sileo.success('Settings saved');
             triggerRefresh();
         } catch (e) {
-            showToast('Failed to save', 'error');
+            sileo.error('Failed to save');
         } finally {
             setSaving(false);
         }
@@ -97,12 +95,12 @@ export default function Settings() {
         setAddingLoading(true);
         try {
             await api.put('/settings', { group: 'payments', settings: { gcash_payload: newPayload.trim() } });
-            showToast('GCash payload saved');
+            sileo.success('GCash payload saved');
             setAddingPayload(false);
             setNewPayload('');
             triggerRefresh();
         } catch (e) {
-            showToast('Failed to save payload', 'error');
+            sileo.error('Failed to save payload');
         } finally {
             setAddingLoading(false);
         }
@@ -112,10 +110,10 @@ export default function Settings() {
         if (!confirm('Remove the GCash payload? GCash payments will be hidden from checkout until a new payload is added.')) return;
         try {
             await api.put('/settings', { group: 'payments', settings: { gcash_payload: '' } });
-            showToast('GCash payload removed');
+            sileo.success('GCash payload removed');
             triggerRefresh();
         } catch (e) {
-            showToast('Failed to remove payload', 'error');
+            sileo.error('Failed to remove payload');
         }
     };
 

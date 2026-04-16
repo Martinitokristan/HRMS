@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import StatCard from '../shared/StatCard';
@@ -26,7 +26,6 @@ const SupplierStatusBadge = ({ status }) => {
 };
 
 export default function Suppliers() {
-    const { showToast } = useToast();
     const [suppliers, setSuppliers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -83,7 +82,7 @@ export default function Suppliers() {
             }
         } catch (error) {
             console.error('Error fetching suppliers:', error);
-            showToast('Error fetching suppliers', 'error');
+            sileo.error('Error fetching suppliers');
             setSuppliers([]);
             setTotal(0);
         } finally {
@@ -109,14 +108,14 @@ export default function Suppliers() {
             const data = res.data?.data !== undefined ? res.data.data : res.data;
             
             if (data && (res.data.status === 'success' || !res.data.status)) {
-                showToast('Supplier deleted successfully');
+                sileo.success('Supplier deleted successfully');
                 markStale(STALE_KEYS.ADMIN_SUPPLIERS);
             } else {
-                showToast(res.data.message || 'Error deleting supplier', 'error');
+                sileo.error(res.data.message || 'Error deleting supplier');
             }
         } catch (error) {
             const msg = error.response?.data?.message || 'Error deleting supplier';
-            showToast(msg, 'error');
+            sileo.error(msg);
         }
     };
 

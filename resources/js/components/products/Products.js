@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import ConfirmModal from '../shared/ConfirmModal';
@@ -42,7 +42,6 @@ export default function Products() {
             onConfirm: null, variant: 'default'
         });
     };
-    const { showToast } = useToast();
 
     const openCreate = () => { setEditingProduct(null); setView('form'); };
     const openEdit   = (p) => { setEditingProduct(p);    setView('form'); };
@@ -89,7 +88,7 @@ export default function Products() {
             }
         } catch (err) {
             console.error('Failed to fetch products:', err);
-            showToast('Failed to load products list', 'error');
+            sileo.error('Failed to load products list');
             setProducts({ data: [], total: 0, current_page: 1 });
         } finally {
             if (!silent) setLoading(false);
@@ -114,11 +113,11 @@ export default function Products() {
         closeConfirm();
         try {
             await api.delete(`/products/${id}`);
-            showToast('Product deleted successfully');
+            sileo.success('Product deleted successfully');
             markStale(STALE_KEYS.ADMIN_PRODUCTS, STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.SUPPLIER_PRODUCTS);
             fetchData(true);
         } catch (err) {
-            showToast('Failed to delete product', 'error');
+            sileo.error('Failed to delete product');
         }
     };
 

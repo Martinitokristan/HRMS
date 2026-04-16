@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,6 @@ const TABS = [
 ];
 
 export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
-    const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_SETTINGS);
     const [activeTab, setActiveTab] = useState(initialTab);
     const [variants, setVariants] = useState([]);
@@ -70,18 +69,18 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
 
     const handleSaveVal = async (variantId) => {
         if (!newVal.label.trim()) {
-            showToast('Please enter a label', 'error');
+            sileo.error('Please enter a label');
             return;
         }
         setSaving(true);
         try {
             await api.post('/supplier/variant-values', { ...newVal, variant_id: variantId });
-            showToast('Value added successfully');
+            sileo.success('Value added successfully');
             markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             setNewVal({ variant_id: '', label: '', hex_code: '', description: '', category: '' });
             fetchData(true);
         } catch (e) {
-            showToast(e.response?.data?.message || 'Error saving value', 'error');
+            sileo.error(e.response?.data?.message || 'Error saving value');
         } finally {
             setSaving(false);
         }
@@ -91,11 +90,11 @@ export default function SupplierVariantSettings({ initialTab = 'sizes' }) {
         closeConfirm();
         try {
             await api.delete(`/supplier/variant-values/${id}`);
-            showToast('Value deleted');
+            sileo.success('Value deleted');
             markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             fetchData(true);
         } catch (e) {
-            showToast('Error deleting value', 'error');
+            sileo.error('Error deleting value');
         }
     };
 

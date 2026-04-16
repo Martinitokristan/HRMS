@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
+import { sileo } from 'sileo';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import { StatusBadge } from '../shared/Badge';
@@ -110,7 +111,7 @@ export default function Customers() {
                                 <TableCell className="px-4 py-3 text-muted-foreground">{u.last_order_date ? new Date(u.last_order_date).toLocaleDateString() : 'Never'}</TableCell>
                                 <TableCell className="px-4 py-3"><StatusBadge status={u.status} /></TableCell>
                                 <TableCell className="px-4 py-3">
-                                    <Button variant="ghost" size="sm" onClick={() => alert('Customer detail view coming soon')} className="h-7 px-2 gap-1">
+                                    <Button variant="ghost" size="sm" onClick={() => sileo('Customer detail view coming soon')} className="h-7 px-2 gap-1">
                                         <Eye className="h-3.5 w-3.5" /> View Orders
                                     </Button>
                                 </TableCell>

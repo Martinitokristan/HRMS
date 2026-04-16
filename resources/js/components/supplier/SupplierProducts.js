@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import Modal from '../shared/Modal';
@@ -18,7 +18,6 @@ import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 
 export default function SupplierProducts() {
-    const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_PRODUCTS);
     const [products, setProducts] = useState({ data: [], total: 0 });
     const [categories, setCategories] = useState([]);
@@ -120,9 +119,9 @@ export default function SupplierProducts() {
             await fetchCategories();
             if (created?.id) setForm(f => ({ ...f, category_id: String(created.id) }));
             setNewCategoryName('');
-            showToast('Category created!', 'success');
+            sileo.success('Category created!');
         } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to create category', 'error');
+            sileo.error(err.response?.data?.message || 'Failed to create category');
         } finally {
             setCreatingCategory(false);
         }
@@ -373,7 +372,7 @@ export default function SupplierProducts() {
         );
         
         if (variants.length > 0 && validVariants.length === 0) {
-            showToast('Please fill in at least one field for each variant or remove empty variants', 'error');
+            sileo.error('Please fill in at least one field for each variant or remove empty variants');
             return;
         }
         
@@ -417,10 +416,10 @@ export default function SupplierProducts() {
             if (editing) {
                 fd.append('_method', 'PUT');
                 await api.post(`/supplier/products/${editing.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-                showToast('Product updated!', 'success');
+                sileo.success('Product updated!');
             } else {
                 await api.post('/supplier/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-                showToast('Product created!', 'success');
+                sileo.success('Product created!');
             }
             markStale(STALE_KEYS.SUPPLIER_PRODUCTS, STALE_KEYS.ADMIN_INVENTORY, STALE_KEYS.CUSTOMER_SHOP);
             setFormOpen(false);
@@ -429,9 +428,9 @@ export default function SupplierProducts() {
             const data = err.response?.data;
             if (data?.errors) {
                 const firstError = Object.values(data.errors).flat()[0];
-                showToast(firstError || data.message || 'Validation failed', 'error');
+                sileo.error(firstError || data.message || 'Validation failed');
             } else {
-                showToast(data?.message || 'Failed to save product', 'error');
+                sileo.error(data?.message || 'Failed to save product');
             }
         } finally {
             setSubmitting(false);
@@ -442,11 +441,11 @@ export default function SupplierProducts() {
         closeConfirm();
         try {
             await api.delete(`/supplier/products/${id}`);
-            showToast('Product deleted', 'success');
+            sileo.success('Product deleted');
             markStale(STALE_KEYS.SUPPLIER_PRODUCTS, STALE_KEYS.ADMIN_INVENTORY, STALE_KEYS.CUSTOMER_SHOP);
             fetchProducts(true);
         } catch (err) {
-            showToast('Failed to delete product', 'error');
+            sileo.error('Failed to delete product');
         }
     };
 

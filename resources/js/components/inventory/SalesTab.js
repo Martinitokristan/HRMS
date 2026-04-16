@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import { useAuth } from '../../context/AuthContext';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
@@ -16,7 +16,6 @@ import ConfirmModal from '../shared/ConfirmModal';
 import { X, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 export default function SalesTab() {
-    const { showToast } = useToast();
     const { settings } = useAuth();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_ORDERS);
     
@@ -83,7 +82,7 @@ export default function SalesTab() {
     const performReturn = async (saleId) => {
         try {
             await api.post(`/sales/${saleId}/return`);
-            showToast('Order returned and stock restored');
+            sileo.success('Order returned and stock restored');
             markStale(
                 STALE_KEYS.ADMIN_ORDERS,
                 STALE_KEYS.ADMIN_INVENTORY,
@@ -94,7 +93,7 @@ export default function SalesTab() {
             setViewOrder(null);
             closeConfirm();
         } catch (err) {
-            showToast('Failed to return order', 'error');
+            sileo.error('Failed to return order');
         }
     };
 
@@ -110,7 +109,7 @@ export default function SalesTab() {
     const performUpdateStatus = async (saleId, newStatus) => {
         try {
             const res = await api.put(`/sales/${saleId}/status`, { status: newStatus });
-            showToast(res.data.message || 'Status updated');
+            sileo.success(res.data.message || 'Status updated');
             setViewOrder(res.data.data);
             markStale(
                 STALE_KEYS.ADMIN_ORDERS,
@@ -122,7 +121,7 @@ export default function SalesTab() {
             fetchProds(true);
             closeConfirm();
         } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to update status', 'error');
+            sileo.error(err.response?.data?.message || 'Failed to update status');
         }
     };
 

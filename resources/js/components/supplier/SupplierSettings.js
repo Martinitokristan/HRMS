@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import api from '../../lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,7 +23,6 @@ export default function SupplierSettings() {
     const [activeTab, setActiveTab] = useState('profile');
     const [saving, setSaving] = useState(false);
     const [loadingCats, setLoadingCats] = useState(false);
-    const { showToast } = useToast();
 
     // State for Profile
     const [profile, setProfile] = useState({
@@ -104,10 +103,10 @@ export default function SupplierSettings() {
         setSaving(true);
         try {
             await api.put('/supplier/auth/profile', profile);
-            showToast('Profile updated successfully', 'success');
+            sileo.success('Profile updated successfully');
             if (refreshSettings) await refreshSettings();
         } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to update profile', 'error');
+            sileo.error(err.response?.data?.message || 'Failed to update profile');
         } finally {
             setSaving(false);
         }
@@ -116,16 +115,16 @@ export default function SupplierSettings() {
     const handleChangePassword = async (e) => {
         e.preventDefault();
         if (passwords.new_password !== passwords.new_password_confirmation) {
-            showToast('Passwords do not match', 'error');
+            sileo.error('Passwords do not match');
             return;
         }
         setSaving(true);
         try {
             await api.put('/supplier/auth/change-password', passwords);
-            showToast('Password changed successfully', 'success');
+            sileo.success('Password changed successfully');
             setPasswords({ current_password: '', new_password: '', new_password_confirmation: '' });
         } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to change password', 'error');
+            sileo.error(err.response?.data?.message || 'Failed to change password');
         } finally {
             setSaving(false);
         }
@@ -142,9 +141,9 @@ export default function SupplierSettings() {
             if (refreshSettings) await refreshSettings();
             if (refreshCategories) await refreshCategories();
             fetchCategories(true);
-            showToast('Category added', 'success');
+            sileo.success('Category added');
         } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to add category', 'error');
+            sileo.error(err.response?.data?.message || 'Failed to add category');
         } finally {
             setSaving(false);
         }
@@ -158,9 +157,9 @@ export default function SupplierSettings() {
             if (refreshSettings) await refreshSettings();
             if (refreshCategories) await refreshCategories();
             fetchCategories(true);
-            showToast('Category deleted', 'success');
+            sileo.success('Category deleted');
         } catch (err) {
-            showToast('Failed to delete category', 'error');
+            sileo.error('Failed to delete category');
         }
     };
 

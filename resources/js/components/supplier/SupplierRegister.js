@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,7 +34,6 @@ export default function SupplierRegister() {
         { icon: Star,    label: 'Real-time Sync',          desc: 'Live inventory and payment tracking' },
     ];
     const [loading, setLoading] = useState(false);
-    const { showToast } = useToast();
     const navigate = useNavigate();
     const [successMsg, setSuccessMsg] = useState('');
     const [capsWarning, setCapsWarning] = useState(false);
@@ -111,10 +110,10 @@ export default function SupplierRegister() {
             };
             const response = await api.post('/supplier/auth/register', dataToSubmit);
             setSuccessMsg('Supplier account created successfully! Please check your email to verify your account.');
-            showToast('Registration successful!', 'success');
+            sileo.success('Registration successful!');
         } catch (error) {
             const errorMsg = error.response?.data?.message || 'Failed to register';
-            showToast(errorMsg, 'error');
+            sileo.error(errorMsg);
             setError('form', errorMsg);
             if (error.response?.data?.errors) {
                 Object.keys(error.response.data.errors).forEach(key => {

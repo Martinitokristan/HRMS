@@ -76,11 +76,7 @@ class SaleController extends Controller
                 $totalStock = $inv ? $inv->current_stock : 0;
             }
 
-            // Subtract reservations by OTHER customers (this customer's reservation is theirs to use)
-            $othersReserved = \App\Models\CartReservation::getReservedQuantity(
-                $item['product_id'], $variantId, $customerId
-            );
-            $available = max(0, $totalStock - $othersReserved);
+            $available = max(0, $totalStock);
 
             if ($item['quantity'] > $available) {
                 return response()->json([
@@ -183,10 +179,7 @@ class SaleController extends Controller
                 'longitude'       => $customerProfile->longitude ?? null,
             ]);
 
-            // Convert all active reservations for this customer to 'converted'
-            \App\Models\CartReservation::where('customer_id', $data['customer_id'])
-                ->where('status', 'active')
-                ->update(['status' => 'converted']);
+
 
             return $sale;
         });

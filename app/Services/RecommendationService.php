@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\CartReservation;
+
 use App\Models\Product;
 use App\Models\ProductSimilarity;
 use App\Models\SaleItem;
@@ -49,13 +49,7 @@ class RecommendationService
             $q->where('customer_id', $userId)->where('status', 'delivered');
         })->pluck('product_id')->toArray();
 
-        // Products currently in active cart
-        $inCart = CartReservation::where('customer_id', $userId)
-            ->where('status', 'active')
-            ->pluck('product_id')
-            ->toArray();
-
-        return array_unique(array_merge($purchased, $inCart));
+        return $purchased;
     }
 
     /**

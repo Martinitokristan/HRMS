@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import { X, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -40,7 +40,6 @@ const POBadge = ({ status }) => {
 };
 
 export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit }) {
-    const { showToast } = useToast();
     const [supplier, setSupplier] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -71,9 +70,9 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
                 status: nextStatus,
             }));
 
-            showToast(successMessage);
+            sileo.success(successMessage);
         } catch (error) {
-            showToast(error.response?.data?.message || 'Failed to update supplier status', 'error');
+            sileo.error(error.response?.data?.message || 'Failed to update supplier status');
         } finally {
             setActionLoading(false);
         }
@@ -92,7 +91,7 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
             })
             .catch(() => {
                 if (isMounted) {
-                    showToast('Failed to load supplier details', 'error');
+                    sileo.error('Failed to load supplier details');
                     setLoading(false);
                 }
             });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { toast } from 'sonner';
+import { sileo } from 'sileo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -58,7 +58,7 @@ export default function RiderDashboard() {
             const response = await api.get('/riders/me/dashboard');
             setDashboard(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
-            toast.error('Failed to fetch dashboard data');
+            sileo.error('Failed to fetch dashboard data');
         } finally {
             setLoading(false);
         }
@@ -102,20 +102,20 @@ export default function RiderDashboard() {
                 availability: response.data.data?.availability || response.data.availability
             }));
             const availability = response.data.data?.availability || response.data.availability;
-            toast.success(`You are now ${availability === 'online' ? 'Online' : 'Offline'}`);
+            sileo.success(`You are now ${availability === 'online' ? 'Online' : 'Offline'}`);
         } catch (error) {
-            toast.error('Failed to update status');
+            sileo.error('Failed to update status');
         }
     };
 
     const acceptDelivery = async (deliveryId) => {
         try {
             await api.post(`/deliveries/${deliveryId}/self-assign`);
-            toast.success('Delivery accepted successfully');
+            sileo.success('Delivery accepted successfully');
             fetchActiveDelivery();
             fetchDashboard();
         } catch (error) {
-            toast.error('Failed to accept delivery');
+            sileo.error('Failed to accept delivery');
         }
     };
 
@@ -124,11 +124,11 @@ export default function RiderDashboard() {
         
         try {
             await api.post(`/deliveries/${activeDelivery.id}/status`, { status });
-            toast.success(`Delivery status updated to ${status}`);
+            sileo.success(`Delivery status updated to ${status}`);
             fetchActiveDelivery();
             fetchDashboard();
         } catch (error) {
-            toast.error('Failed to update delivery status');
+            sileo.error('Failed to update delivery status');
         }
     };
 

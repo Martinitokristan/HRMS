@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext';
+import SileoToaster from './components/shared/SileoToaster';
 import RealTimeSyncBridge from './components/shared/RealTimeSyncBridge';
 import '../css/globals.css';
 
@@ -176,10 +176,9 @@ if (document.getElementById('app')) {
     root.render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AuthProvider>
-                <ToastProvider>
-                    <RealTimeSyncBridge />
-                    <AppRouter />
-                </ToastProvider>
+                <SileoToaster />
+                <RealTimeSyncBridge />
+                <AppRouter />
             </AuthProvider>
         </BrowserRouter>
     );

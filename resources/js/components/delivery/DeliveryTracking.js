@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { sileo } from 'sileo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,7 @@ export default function DeliveryTracking({ deliveryId }) {
                 });
             }
         } catch (error) {
-            toast.error('Failed to fetch delivery details');
+            sileo.error('Failed to fetch delivery details');
         } finally {
             setLoading(false);
         }

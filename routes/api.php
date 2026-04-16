@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,7 +23,7 @@ use App\Http\Controllers\SupplierAuthController;
 use App\Http\Controllers\SupplierProductController;
 use App\Http\Controllers\RouteController;
 use App\Http\Controllers\ReturnController;
-use App\Http\Controllers\CartReservationController;
+
 use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\GCashController;
 use App\Http\Controllers\RecommendationController;
@@ -206,12 +206,7 @@ Route::middleware(['auth.token', 'role:customer'])->group(function () {
     // Place orders
     Route::post('/sales', [SaleController::class , 'store']);
     Route::get('/gcash/status/{saleId}', [GCashController::class, 'checkStatus']);
-    // Cart
-    Route::post('/cart/reserve', [CartReservationController::class , 'reserve']);
-    Route::delete('/cart/release/{id}', [CartReservationController::class , 'release']);
-    Route::delete('/cart/release-all', [CartReservationController::class , 'releaseAll']);
-    Route::post('/cart/check-availability', [CartReservationController::class , 'checkAvailability']);
-    Route::get('/cart/reservations', [CartReservationController::class , 'myReservations']);
+
     // Customer profile & orders
     Route::get('/customer/orders', [CustomerController::class , 'myOrders']);
     Route::get('/customer/profile', [CustomerController::class , 'myProfile']);

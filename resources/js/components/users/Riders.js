@@ -3,7 +3,7 @@ import api from '../../lib/api';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import { StatusBadge } from '../shared/Badge';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import RiderDetailsModal from './RiderDetailsModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ export default function Riders() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [selectedRider, setSelectedRider] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { showToast } = useToast();
+
 
     const [confirmModal, setConfirmModal] = useState({
         show: false, title: '', message: '',
@@ -73,11 +73,11 @@ export default function Riders() {
         if (!datetime) return;
         try {
             await api.post(`/riders/${id}/interview`, { interview_at: datetime });
-            showToast('Interview scheduled!', 'success');
+            sileo.success('Interview scheduled!');
             markStale(STALE_KEYS.ADMIN_RIDERS);
             fetchData(true);
         } catch (err) {
-            showToast('Failed to schedule interview', 'error');
+            sileo.error('Failed to schedule interview');
         }
     };
 
@@ -85,11 +85,11 @@ export default function Riders() {
         closeConfirm();
         try {
             await api.post(`/riders/${id}/approve`);
-            showToast('Rider hired and account activated!', 'success');
+            sileo.success('Rider hired and account activated!');
             markStale(STALE_KEYS.ADMIN_RIDERS);
             fetchData(true);
         } catch (err) {
-            showToast('Failed to hire rider', 'error');
+            sileo.error('Failed to hire rider');
         }
     };
 

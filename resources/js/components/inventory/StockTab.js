@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../../lib/api';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import FilterBar from '../shared/FilterBar';
 import Pagination from '../shared/Pagination';
 import Modal from '../shared/Modal';
@@ -16,7 +16,6 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 
 export default function StockTab() {
-    const { showToast } = useToast();
     const [inventory, setInventory] = useState({ data: [], total: 0 });
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -223,17 +222,17 @@ export default function StockTab() {
         const available = parseFloat(transferModal.item.warehouse_stock);
 
         if (!transferModal.item || isNaN(qty) || qty < 1 || qty > available) {
-            showToast('Invalid transfer quantity', 'error');
+            sileo.error('Invalid transfer quantity');
             return;
         }
 
         if (!transferForm.unit_type_id) {
-            showToast('Please select a unit type', 'error');
+            sileo.error('Please select a unit type');
             return;
         }
 
         if (!transferForm.sell_price || parseFloat(transferForm.sell_price) <= 0) {
-            showToast('Please enter a valid retail price', 'error');
+            sileo.error('Please enter a valid retail price');
             return;
         }
 
@@ -253,7 +252,7 @@ export default function StockTab() {
                     purchase_price: transferForm.purchase_price,
                 },
             });
-            showToast('Stock displayed to storefront successfully!');
+            sileo.success('Stock displayed to storefront successfully!');
             if (viewVariantItem) {
                 // Keep viewVariantItem set so the breakdown modal restores after transfer
             }
@@ -265,7 +264,7 @@ export default function StockTab() {
             
             setExpandedProducts(new Set());
         } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to transfer stock', 'error');
+            sileo.error(err.response?.data?.message || 'Failed to transfer stock');
         } finally {
             setTransferLoading(false);
         }

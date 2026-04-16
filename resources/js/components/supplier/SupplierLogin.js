@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { sileo } from 'sileo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,6 @@ export default function SupplierLogin() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [submitting, setSubmitting] = useState(false);
     const { login } = useAuth();
-    const { showToast } = useToast();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -21,10 +20,10 @@ export default function SupplierLogin() {
         setSubmitting(true);
         try {
             await login(form.email, form.password);
-            showToast('Login successful!');
+            sileo.success('Login successful!');
             navigate('/supplier/dashboard');
         } catch (err) {
-            showToast(err.response?.data?.message || 'Invalid credentials', 'error');
+            sileo.error(err.response?.data?.message || 'Invalid credentials');
             setSubmitting(false);
         }
     };
