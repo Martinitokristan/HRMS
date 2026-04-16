@@ -74,7 +74,7 @@ export default function ProductReviews({ productId }) {
 
     const submitReview = async () => {
         if (rating === 0) {
-            sileo.error('Please select a rating');
+            sileo.error({ title: 'Please select a rating' });
             return;
         }
 
@@ -85,14 +85,14 @@ export default function ProductReviews({ productId }) {
                 review: review.trim()
             });
             
-            sileo.success('Review submitted successfully!');
+            sileo.success({ title: 'Review submitted successfully!' });
             setRating(0);
             setReview('');
             setCanReview(false);
             markStale(STALE_KEYS.ADMIN_REVIEWS, STALE_KEYS.ADMIN_DASHBOARD);
             fetchReviews(true);
         } catch (error) {
-            sileo.error(error.response?.data?.message || 'Failed to submit review');
+            sileo.error({ title: error.response?.data?.message || 'Failed to submit review' });
         } finally {
             setSubmitting(false);
         }
@@ -103,9 +103,9 @@ export default function ProductReviews({ productId }) {
             await api.post(`/reviews/${reviewId}/helpful`, { is_helpful: true });
             markStale(STALE_KEYS.ADMIN_REVIEWS);
             fetchReviews(true);
-            sileo.success('Thank you for your feedback!');
+            sileo.success({ title: 'Thank you for your feedback!' });
         } catch (error) {
-            sileo.error('Failed to mark as helpful');
+            sileo.error({ title: 'Failed to mark as helpful' });
         }
     };
 

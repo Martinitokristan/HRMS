@@ -42,7 +42,7 @@ export default function Settings() {
                 const data = res.data?.data !== undefined ? res.data.data : res.data;
                 setSettings(data?.settings || {});
             } catch (err) {
-                if (isMounted) sileo.error('Failed to load settings');
+                if (isMounted) sileo.error({ title: 'Failed to load settings' });
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -68,10 +68,10 @@ export default function Settings() {
                 group: activeTab,
                 settings: settings[activeTab] || {}
             });
-            sileo.success('Settings saved');
+            sileo.success({ title: 'Settings saved' });
             triggerRefresh();
         } catch (e) {
-            sileo.error('Failed to save');
+            sileo.error({ title: 'Failed to save' });
         } finally {
             setSaving(false);
         }
@@ -95,12 +95,12 @@ export default function Settings() {
         setAddingLoading(true);
         try {
             await api.put('/settings', { group: 'payments', settings: { gcash_payload: newPayload.trim() } });
-            sileo.success('GCash payload saved');
+            sileo.success({ title: 'GCash payload saved' });
             setAddingPayload(false);
             setNewPayload('');
             triggerRefresh();
         } catch (e) {
-            sileo.error('Failed to save payload');
+            sileo.error({ title: 'Failed to save payload' });
         } finally {
             setAddingLoading(false);
         }
@@ -110,10 +110,10 @@ export default function Settings() {
         if (!confirm('Remove the GCash payload? GCash payments will be hidden from checkout until a new payload is added.')) return;
         try {
             await api.put('/settings', { group: 'payments', settings: { gcash_payload: '' } });
-            sileo.success('GCash payload removed');
+            sileo.success({ title: 'GCash payload removed' });
             triggerRefresh();
         } catch (e) {
-            sileo.error('Failed to remove payload');
+            sileo.error({ title: 'Failed to remove payload' });
         }
     };
 

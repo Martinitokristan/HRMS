@@ -8980,7 +8980,9 @@ function Returns() {
         case 3:
           _context.p = 3;
           _t = _context.v;
-          sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to load returns');
+          sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+            title: 'Failed to load returns'
+          });
         case 4:
           _context.p = 4;
           setLoading(false);
@@ -9003,7 +9005,9 @@ function Returns() {
               _context2.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Please select a refund method');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Please select a refund method'
+            });
             return _context2.a(2);
           case 1:
             setActionLoading(true);
@@ -9015,7 +9019,9 @@ function Returns() {
             });
           case 3:
             res = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success(res.data.message || 'Return approved');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: res.data.message || 'Return approved'
+            });
             setSelectedReturn(res.data.data);
 
             // Notify Admin, Customer History, and Inventory (since stock moved)
@@ -9025,7 +9031,9 @@ function Returns() {
           case 4:
             _context2.p = 4;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to approve');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to approve'
+            });
           case 5:
             _context2.p = 5;
             setActionLoading(false);
@@ -9049,7 +9057,9 @@ function Returns() {
               _context3.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Please provide a reason for rejection');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Please provide a reason for rejection'
+            });
             return _context3.a(2);
           case 1:
             setActionLoading(true);
@@ -9060,7 +9070,9 @@ function Returns() {
             });
           case 3:
             res = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success(res.data.message || 'Return rejected');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: res.data.message || 'Return rejected'
+            });
             setSelectedReturn(res.data.data);
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.ADMIN_RETURNS, _store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.CUSTOMER_RETURNS);
             _context3.n = 5;
@@ -9068,7 +9080,9 @@ function Returns() {
           case 4:
             _context3.p = 4;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to reject');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to reject'
+            });
           case 5:
             _context3.p = 5;
             setActionLoading(false);
@@ -9094,7 +9108,9 @@ function Returns() {
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/returns/".concat(id, "/complete"));
           case 2:
             res = _context4.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success(res.data.message || 'Refund processed');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: res.data.message || 'Refund processed'
+            });
             setSelectedReturn(res.data.data);
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.ADMIN_RETURNS, _store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.CUSTOMER_RETURNS, _store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.ADMIN_DASHBOARD);
             _context4.n = 4;
@@ -9102,7 +9118,9 @@ function Returns() {
           case 3:
             _context4.p = 3;
             _t4 = _context4.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to complete');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to complete'
+            });
           case 4:
             _context4.p = 4;
             setActionLoading(false);
@@ -9135,7 +9153,9 @@ function Returns() {
           case 2:
             _context5.p = 2;
             _t5 = _context5.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to load return details');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to load return details'
+            });
           case 3:
             return _context5.a(2);
         }
@@ -9430,7 +9450,9 @@ function Returns() {
                       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsx)("button", {
                         onClick: function onClick() {
                           navigator.clipboard.writeText(r.sale.payment_phone_number);
-                          sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Number copied to clipboard');
+                          sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+                            title: 'Number copied to clipboard'
+                          });
                         },
                         className: "text-green-600 hover:text-green-800 transition-colors p-1 rounded",
                         title: "Copy number",
@@ -9923,7 +9945,9 @@ function Reviews() {
               _context.n = 3;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_13__.sileo.error('Failed to load reviews: Server returned an invalid format');
+            sileo__WEBPACK_IMPORTED_MODULE_13__.sileo.error({
+              title: 'Failed to load reviews: Server returned an invalid format'
+            });
             setReviews([]);
             return _context.a(2);
           case 3:
@@ -9957,7 +9981,9 @@ function Reviews() {
             _context.p = 4;
             _t = _context.v;
             console.error('Failed to fetch reviews:', _t);
-            sileo__WEBPACK_IMPORTED_MODULE_13__.sileo.error('Failed to load reviews');
+            sileo__WEBPACK_IMPORTED_MODULE_13__.sileo.error({
+              title: 'Failed to load reviews'
+            });
             setReviews([]);
           case 5:
             _context.p = 5;
@@ -9987,7 +10013,9 @@ function Reviews() {
                     _context2.n = 2;
                     return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"]["delete"]("/reviews/".concat(reviewId));
                   case 2:
-                    sileo__WEBPACK_IMPORTED_MODULE_13__.sileo.success('Review deleted successfully');
+                    sileo__WEBPACK_IMPORTED_MODULE_13__.sileo.success({
+                      title: 'Review deleted successfully'
+                    });
 
                     // Trigger sync for Admin and Customer (storefront product ratings)
                     (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_17__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_17__.STALE_KEYS.ADMIN_REVIEWS, _store_dataStore__WEBPACK_IMPORTED_MODULE_17__.STALE_KEYS.CUSTOMER_SHOP);
@@ -9998,7 +10026,9 @@ function Reviews() {
                     _context2.p = 3;
                     _t2 = _context2.v;
                     console.error('Failed to delete review:', _t2);
-                    sileo__WEBPACK_IMPORTED_MODULE_13__.sileo.error('Failed to delete review');
+                    sileo__WEBPACK_IMPORTED_MODULE_13__.sileo.error({
+                      title: 'Failed to delete review'
+                    });
                   case 4:
                     return _context2.a(2);
                 }
@@ -12691,7 +12721,9 @@ function RiderRegister() {
               _context.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error('Please fix the validation errors.');
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error({
+              title: 'Please fix the validation errors.'
+            });
             return _context.a(2);
           case 1:
             formData = new FormData();
@@ -12714,14 +12746,18 @@ function RiderRegister() {
             });
           case 3:
             setSuccessMsg('Application submitted! Please check your email to verify your account.');
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success('Application submitted successfully!');
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success({
+              title: 'Application submitted successfully!'
+            });
             _context.n = 5;
             break;
           case 4:
             _context.p = 4;
             _t = _context.v;
             errorMsg = ((_err$response = _t.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Registration failed';
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error(errorMsg);
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error({
+              title: errorMsg
+            });
             setError('form', errorMsg);
             if ((_err$response2 = _t.response) !== null && _err$response2 !== void 0 && (_err$response2 = _err$response2.data) !== null && _err$response2 !== void 0 && _err$response2.errors) {
               Object.keys(_t.response.data.errors).forEach(function (key) {
@@ -13537,12 +13573,16 @@ function CartPage() {
         return item.cartId !== cartId;
       });
     });
-    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success('Item removed from cart');
+    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+      title: 'Item removed from cart'
+    });
   };
   var clearCart = function clearCart() {
     setCart([]);
     setShowClearConfirm(false);
-    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success('Cart cleared');
+    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+      title: 'Cart cleared'
+    });
   };
   var updateCartItem = function updateCartItem(product, options) {
     var qty = options.qty || 1;
@@ -13580,12 +13620,16 @@ function CartPage() {
       })]);
     });
     setSelectedProduct(null);
-    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success('Item updated');
+    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+      title: 'Item updated'
+    });
   };
   var switchVariant = function switchVariant(item, newVariant) {
     // Check if new variant is in stock
     if ((newVariant.stock || 0) <= 0) {
-      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error('This variant is out of stock');
+      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+        title: 'This variant is out of stock'
+      });
       return;
     }
     var variantLabels = [];
@@ -13627,7 +13671,9 @@ function CartPage() {
         }) : i;
       });
     });
-    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success("Switched to ".concat(variantString));
+    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+      title: "Switched to ".concat(variantString)
+    });
   };
   var cartTotal = cart.reduce(function (sum, item) {
     return sum + item.sell_price * item.qty;
@@ -13640,7 +13686,9 @@ function CartPage() {
       return item.selectedForCheckout;
     }).length;
     if (selectedCount === 0) {
-      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error('Please select at least one item to checkout');
+      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+        title: 'Please select at least one item to checkout'
+      });
       return;
     }
     navigate('/shop/order');
@@ -15199,16 +15247,22 @@ function CustomerOrder() {
   // Get current GPS location
   var handleGetLocation = function handleGetLocation() {
     if (!navigator.geolocation) {
-      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error("Geolocation is not supported by your browser.");
+      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+        title: "Geolocation is not supported by your browser."
+      });
       return;
     }
     setGpsLoading(true);
     navigator.geolocation.getCurrentPosition(function (position) {
       setCheckoutPosition([position.coords.latitude, position.coords.longitude]);
       setGpsLoading(false);
-      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success("Location updated to your current GPS position.");
+      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+        title: "Location updated to your current GPS position."
+      });
     }, function (error) {
-      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error("Unable to get GPS location.");
+      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+        title: "Unable to get GPS location."
+      });
       setGpsLoading(false);
     }, {
       enableHighAccuracy: true
@@ -15323,7 +15377,9 @@ function CustomerOrder() {
               _context.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error("Please complete your delivery address (province, municipality, and street are required).");
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+              title: "Please complete your delivery address (province, municipality, and street are required)."
+            });
             return _context.a(2);
           case 1:
             address = [deliveryStreet.trim(), deliveryBarangay, deliveryMunicipality, deliveryProvince].filter(Boolean).join(', '); // Validate cart has items
@@ -15331,7 +15387,9 @@ function CustomerOrder() {
               _context.n = 2;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error("Your cart is empty.");
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+              title: "Your cart is empty."
+            });
             return _context.a(2);
           case 2:
             setLoading(true);
@@ -15374,7 +15432,9 @@ function CustomerOrder() {
             _context.p = 6;
             _t = _context.v;
             console.error('Order error:', _t);
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error(((_err$response = _t.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || "Failed to place order. Please try again.");
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+              title: ((_err$response = _t.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || "Failed to place order. Please try again."
+            });
             setLoading(false);
           case 7:
             return _context.a(2);
@@ -16025,7 +16085,9 @@ function CustomerOrder() {
                     link.download = "GCash-Payment-".concat(parseFloat(gcashAmount).toFixed(2), ".png");
                     link.href = url;
                     link.click();
-                    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success("QR code saved to your device!");
+                    sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+                      title: "QR code saved to your device!"
+                    });
                   }
                 },
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_23__["default"], {
@@ -17961,7 +18023,9 @@ function OrderHistory() {
               notes: cancelNotes || null
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.success("Order cancelled successfully");
+            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.success({
+              title: "Order cancelled successfully"
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_SHOP, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_INVENTORY);
             fetchData(true);
             closeCancelModal();
@@ -17970,7 +18034,9 @@ function OrderHistory() {
           case 4:
             _context2.p = 4;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error(((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || "Failed to cancel order");
+            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error({
+              title: ((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || "Failed to cancel order"
+            });
           case 5:
             _context2.p = 5;
             setCancellingId(null);
@@ -18030,7 +18096,9 @@ function OrderHistory() {
               _context3.n = 2;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error('Please select at least one item to return');
+            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error({
+              title: 'Please select at least one item to return'
+            });
             return _context3.a(2);
           case 2:
             setSubmittingReturn(true);
@@ -18048,7 +18116,9 @@ function OrderHistory() {
               })
             });
           case 4:
-            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.success('Return request submitted successfully! You will be notified when it is reviewed.');
+            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.success({
+              title: 'Return request submitted successfully! You will be notified when it is reviewed.'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_RETURNS);
             fetchData(true);
             closeReturnModal();
@@ -18061,10 +18131,14 @@ function OrderHistory() {
             errors = (_err$response3 = _t3.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.errors;
             if (errors) {
               errorDetails = Object.values(errors).flat().join(', ');
-              sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error("".concat(errorMsg, ": ").concat(errorDetails));
+              sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error({
+                title: "".concat(errorMsg, ": ").concat(errorDetails)
+              });
               console.error('Return validation errors:', errors);
             } else {
-              sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error(errorMsg);
+              sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error({
+                title: errorMsg
+              });
             }
           case 6:
             _context3.p = 6;
@@ -18119,7 +18193,9 @@ function OrderHistory() {
               }
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.success("Payment proof uploaded! Please wait for verification.");
+            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.success({
+              title: "Payment proof uploaded! Please wait for verification."
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD);
             fetchData(true);
             closeProofModal();
@@ -18128,7 +18204,9 @@ function OrderHistory() {
           case 4:
             _context4.p = 4;
             _t4 = _context4.v;
-            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error(((_err$response4 = _t4.response) === null || _err$response4 === void 0 || (_err$response4 = _err$response4.data) === null || _err$response4 === void 0 ? void 0 : _err$response4.message) || "Failed to upload proof");
+            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error({
+              title: ((_err$response4 = _t4.response) === null || _err$response4 === void 0 || (_err$response4 = _err$response4.data) === null || _err$response4 === void 0 ? void 0 : _err$response4.message) || "Failed to upload proof"
+            });
           case 5:
             _context4.p = 5;
             setSubmittingProof(false);
@@ -18162,7 +18240,9 @@ function OrderHistory() {
               comment: ratingComment
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.success("Rating submitted successfully");
+            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.success({
+              title: "Rating submitted successfully"
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_REVIEWS);
             fetchData(true);
             setRatingOrder(null);
@@ -18173,7 +18253,9 @@ function OrderHistory() {
           case 4:
             _context5.p = 4;
             _t5 = _context5.v;
-            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error(((_err$response5 = _t5.response) === null || _err$response5 === void 0 || (_err$response5 = _err$response5.data) === null || _err$response5 === void 0 ? void 0 : _err$response5.message) || "Failed to submit rating");
+            sileo__WEBPACK_IMPORTED_MODULE_21__.sileo.error({
+              title: ((_err$response5 = _t5.response) === null || _err$response5 === void 0 || (_err$response5 = _err$response5.data) === null || _err$response5 === void 0 ? void 0 : _err$response5.message) || "Failed to submit rating"
+            });
           case 5:
             _context5.p = 5;
             setSubmittingRating(false);
@@ -21228,7 +21310,9 @@ function Delivery() {
           case 3:
             _context.p = 3;
             _t = _context.v;
-            if (!silent) sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to fetch delivery data');
+            if (!silent) sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to fetch delivery data'
+            });
           case 4:
             _context.p = 4;
             if (!silent) setLoading(false);
@@ -21275,7 +21359,9 @@ function Delivery() {
               rider_id: riderId
             });
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Rider assigned successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Rider assigned successfully'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DELIVERIES, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD);
             fetchData(true);
             _context2.n = 4;
@@ -21283,7 +21369,9 @@ function Delivery() {
           case 3:
             _context2.p = 3;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Assignment failed');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Assignment failed'
+            });
           case 4:
             return _context2.a(2);
         }
@@ -21306,7 +21394,9 @@ function Delivery() {
             });
           case 1:
             statusLabel = ((_STATUS_CONFIG$status = STATUS_CONFIG[status]) === null || _STATUS_CONFIG$status === void 0 ? void 0 : _STATUS_CONFIG$status.label) || status;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success("Delivery marked as ".concat(statusLabel));
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: "Delivery marked as ".concat(statusLabel)
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DELIVERIES, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS);
             fetchData(true);
             _context3.n = 3;
@@ -21314,7 +21404,9 @@ function Delivery() {
           case 2:
             _context3.p = 2;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Status update failed');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Status update failed'
+            });
           case 3:
             return _context3.a(2);
         }
@@ -21334,7 +21426,9 @@ function Delivery() {
             _context4.n = 1;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"]["delete"]("/deliveries/".concat(id));
           case 1:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Delivery deleted successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Delivery deleted successfully'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DELIVERIES, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS);
             fetchData(true);
             closeConfirm();
@@ -21343,7 +21437,9 @@ function Delivery() {
           case 2:
             _context4.p = 2;
             _t4 = _context4.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response = _t4.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Delete failed');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response = _t4.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Delete failed'
+            });
           case 3:
             return _context4.a(2);
         }
@@ -21373,7 +21469,9 @@ function Delivery() {
               });
             }));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success("Assigned ".concat(selectedDeliveries.length, " deliveries to rider"));
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: "Assigned ".concat(selectedDeliveries.length, " deliveries to rider")
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DELIVERIES, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD);
             fetchData(true);
             setSelectedDeliveries([]);
@@ -21384,7 +21482,9 @@ function Delivery() {
           case 3:
             _context5.p = 3;
             _t5 = _context5.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Bulk assignment failed');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Bulk assignment failed'
+            });
           case 4:
             return _context5.a(2);
         }
@@ -21818,7 +21918,9 @@ function DeliveryViewModal(_ref) {
       }
     })["catch"](function (err) {
       if (isMounted) {
-        sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to load delivery details');
+        sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+          title: 'Failed to load delivery details'
+        });
         setLoading(false);
       }
     });
@@ -22643,7 +22745,9 @@ function PurchaseTab(_ref) {
             _context2.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/purchase-orders/".concat(poId, "/").concat(action));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success("PO ".concat(action, "d successfully"));
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: "PO ".concat(action, "d successfully")
+            });
 
             // Re-fetch quietly
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_19__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_19__.STALE_KEYS.ADMIN_PURCHASES, _store_dataStore__WEBPACK_IMPORTED_MODULE_19__.STALE_KEYS.ADMIN_INVENTORY, _store_dataStore__WEBPACK_IMPORTED_MODULE_19__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_19__.STALE_KEYS.SUPPLIER_ORDERS);
@@ -22655,7 +22759,9 @@ function PurchaseTab(_ref) {
           case 3:
             _context2.p = 3;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || "Failed to ".concat(action, " PO"));
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || "Failed to ".concat(action, " PO")
+            });
           case 4:
             _context2.p = 4;
             setActionLoading(false);
@@ -23254,7 +23360,9 @@ function SalesTab() {
             _context2.n = 1;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/sales/".concat(saleId, "/return"));
           case 1:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Order returned and stock restored');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Order returned and stock restored'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_13__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.ADMIN_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.ADMIN_INVENTORY, _store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.CUSTOMER_ORDERS);
             fetchProds(true);
             setViewOrder(null);
@@ -23264,7 +23372,9 @@ function SalesTab() {
           case 2:
             _context2.p = 2;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to return order');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to return order'
+            });
           case 3:
             return _context2.a(2);
         }
@@ -23292,7 +23402,9 @@ function SalesTab() {
             });
           case 1:
             res = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success(res.data.message || 'Status updated');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: res.data.message || 'Status updated'
+            });
             setViewOrder(res.data.data);
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_13__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.ADMIN_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.ADMIN_DELIVERIES, _store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.CUSTOMER_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_13__.STALE_KEYS.RIDER_DASHBOARD);
             fetchProds(true);
@@ -23302,7 +23414,9 @@ function SalesTab() {
           case 2:
             _context3.p = 2;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response = _t3.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to update status');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response = _t3.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to update status'
+            });
           case 3:
             return _context3.a(2);
         }
@@ -24348,21 +24462,27 @@ function StockTab() {
               _context2.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Invalid transfer quantity');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Invalid transfer quantity'
+            });
             return _context2.a(2);
           case 1:
             if (transferForm.unit_type_id) {
               _context2.n = 2;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Please select a unit type');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Please select a unit type'
+            });
             return _context2.a(2);
           case 2:
             if (!(!transferForm.sell_price || parseFloat(transferForm.sell_price) <= 0)) {
               _context2.n = 3;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Please enter a valid retail price');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Please enter a valid retail price'
+            });
             return _context2.a(2);
           case 3:
             setTransferLoading(true);
@@ -24382,7 +24502,9 @@ function StockTab() {
               }
             });
           case 5:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Stock displayed to storefront successfully!');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Stock displayed to storefront successfully!'
+            });
             if (viewVariantItem) {
               // Keep viewVariantItem set so the breakdown modal restores after transfer
             }
@@ -24402,7 +24524,9 @@ function StockTab() {
           case 6:
             _context2.p = 6;
             _t = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response = _t.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to transfer stock');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response = _t.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to transfer stock'
+            });
           case 7:
             _context2.p = 7;
             setTransferLoading(false);
@@ -27692,14 +27816,18 @@ function ProductForm(_ref) {
             _context3.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/products/".concat(product.id), fd);
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Product updated successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Product updated successfully'
+            });
             _context3.n = 5;
             break;
           case 3:
             _context3.n = 4;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/products', fd);
           case 4:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Product created successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Product created successfully'
+            });
           case 5:
             onSuccess();
             _context3.n = 7;
@@ -27709,9 +27837,13 @@ function ProductForm(_ref) {
             _t3 = _context3.v;
             if (((_err$response = _t3.response) === null || _err$response === void 0 ? void 0 : _err$response.status) === 422) {
               setErrors(_t3.response.data.errors || {});
-              sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Please check the highlighted fields.');
+              sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+                title: 'Please check the highlighted fields.'
+              });
             } else {
-              sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Error saving product');
+              sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+                title: ((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Error saving product'
+              });
             }
           case 7:
             _context3.p = 7;
@@ -28512,7 +28644,9 @@ function Products() {
             _context.p = 3;
             _t = _context.v;
             console.error('Failed to fetch products:', _t);
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to load products list');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to load products list'
+            });
             setProducts({
               data: [],
               total: 0,
@@ -28557,7 +28691,9 @@ function Products() {
             _context2.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"]["delete"]("/products/".concat(id));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Product deleted successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Product deleted successfully'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_14__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_14__.STALE_KEYS.ADMIN_PRODUCTS, _store_dataStore__WEBPACK_IMPORTED_MODULE_14__.STALE_KEYS.CUSTOMER_SHOP, _store_dataStore__WEBPACK_IMPORTED_MODULE_14__.STALE_KEYS.SUPPLIER_PRODUCTS);
             fetchData(true);
             _context2.n = 4;
@@ -28565,7 +28701,9 @@ function Products() {
           case 3:
             _context2.p = 3;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to delete product');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to delete product'
+            });
           case 4:
             return _context2.a(2);
         }
@@ -30476,7 +30614,9 @@ function RiderApp() {
   // Watch Geolocation
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (!navigator.geolocation) {
-      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error('Geolocation is not supported by your browser');
+      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+        title: 'Geolocation is not supported by your browser'
+      });
       return;
     }
     var watchId = navigator.geolocation.watchPosition(function (pos) {
@@ -30487,7 +30627,9 @@ function RiderApp() {
       setHasGeo(true);
     }, function (err) {
       console.warn('Geolocation error:', err);
-      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.warning('Unable to get your location. Using default.');
+      sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.warning({
+        title: 'Unable to get your location. Using default.'
+      });
     }, {
       enableHighAccuracy: true,
       maximumAge: 10000,
@@ -30535,7 +30677,9 @@ function RiderApp() {
           case 2:
             _context.p = 2;
             _t = _context.v;
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error('Failed to fetch dashboard data');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+              title: 'Failed to fetch dashboard data'
+            });
           case 3:
             _context.p = 3;
             setLoading(false);
@@ -30571,7 +30715,9 @@ function RiderApp() {
           longitude: riderPos[1]
         }).then(function (res) {
           if (res.data.notified) {
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success("Customer notified \u2014 you're ".concat(Math.round(res.data.distance_km * 1000), "m away!"));
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+              title: "Customer notified \u2014 you're ".concat(Math.round(res.data.distance_km * 1000), "m away!")
+            });
           }
         })["catch"](function () {});
       });
@@ -30607,14 +30753,18 @@ function RiderApp() {
               status: status
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success(actionNote || 'Action successful');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+              title: actionNote || 'Action successful'
+            });
             triggerRefresh();
             _context2.n = 5;
             break;
           case 4:
             _context2.p = 4;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error('Action failed');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+              title: 'Action failed'
+            });
           case 5:
             return _context2.a(2);
         }
@@ -33713,7 +33863,9 @@ function Settings() {
             case 3:
               _context.p = 3;
               _t = _context.v;
-              if (isMounted) sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to load settings');
+              if (isMounted) sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+                title: 'Failed to load settings'
+              });
             case 4:
               _context.p = 4;
               if (isMounted) setLoading(false);
@@ -33749,14 +33901,18 @@ function Settings() {
               settings: settings[activeTab] || {}
             });
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Settings saved');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Settings saved'
+            });
             triggerRefresh();
             _context2.n = 4;
             break;
           case 3:
             _context2.p = 3;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to save');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to save'
+            });
           case 4:
             _context2.p = 4;
             setSaving(false);
@@ -33806,7 +33962,9 @@ function Settings() {
               }
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('GCash payload saved');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'GCash payload saved'
+            });
             setAddingPayload(false);
             setNewPayload('');
             triggerRefresh();
@@ -33815,7 +33973,9 @@ function Settings() {
           case 4:
             _context3.p = 4;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to save payload');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to save payload'
+            });
           case 5:
             _context3.p = 5;
             setAddingLoading(false);
@@ -33850,14 +34010,18 @@ function Settings() {
               }
             });
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('GCash payload removed');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'GCash payload removed'
+            });
             triggerRefresh();
             _context4.n = 4;
             break;
           case 3:
             _context4.p = 3;
             _t4 = _context4.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to remove payload');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to remove payload'
+            });
           case 4:
             return _context4.a(2);
         }
@@ -36112,17 +36276,20 @@ function RealTimeSyncBridge() {
           }
           if (e.event_type === 'payment.confirmed') {
             if (user.role === 'customer') {
-              sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.success("Payment Confirmed", {
+              sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.success({
+                title: "Payment Confirmed",
                 description: "Your GCash payment has been successfully verified."
               });
             } else if (user.role === 'admin') {
-              sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.success("Payment Received", {
+              sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.success({
+                title: "Payment Received",
                 description: "A customer's GCash payment has been confirmed."
               });
             }
           } else if (e.event_type === 'payment.proof_submitted') {
             if (user.role === 'admin') {
-              sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.info("Payment Proof", {
+              sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.info({
+                title: "Payment Proof",
                 description: "A customer has submitted GCash payment proof."
               });
             }
@@ -36203,9 +36370,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var sileo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! sileo */ "./node_modules/sileo/dist/index.mjs");
-/* harmony import */ var sileo_styles_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! sileo/styles.css */ "./node_modules/sileo/dist/styles.css");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
-
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 
 
 
@@ -36215,7 +36380,7 @@ if (typeof window !== 'undefined') {
   window.sileo = sileo__WEBPACK_IMPORTED_MODULE_1__.sileo;
 }
 function SileoToaster() {
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(sileo__WEBPACK_IMPORTED_MODULE_1__.Toaster, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(sileo__WEBPACK_IMPORTED_MODULE_1__.Toaster, {
     position: "top-right",
     offset: 20
   });
@@ -36703,7 +36868,9 @@ function SupplierBrandSettings() {
           case 3:
             _context.p = 3;
             _t = _context.v;
-            if (!silent) sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to load brands');
+            if (!silent) sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to load brands'
+            });
           case 4:
             _context.p = 4;
             if (!silent) setLoading(false);
@@ -36731,7 +36898,9 @@ function SupplierBrandSettings() {
               _context2.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Brand name is required');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Brand name is required'
+            });
             return _context2.a(2);
           case 1:
             setSaving(true);
@@ -36742,7 +36911,9 @@ function SupplierBrandSettings() {
               description: newBrand.description.trim() || null
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Brand added successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Brand added successfully'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.SUPPLIER_BRANDS);
             setNewBrand({
               name: '',
@@ -36754,7 +36925,9 @@ function SupplierBrandSettings() {
           case 4:
             _context2.p = 4;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to add brand');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to add brand'
+            });
           case 5:
             _context2.p = 5;
             setSaving(false);
@@ -36779,7 +36952,9 @@ function SupplierBrandSettings() {
             _context3.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"]["delete"]("/supplier/brands/".concat(id));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Brand deleted');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Brand deleted'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.SUPPLIER_BRANDS);
             fetchBrands(true);
             _context3.n = 4;
@@ -36787,7 +36962,9 @@ function SupplierBrandSettings() {
           case 3:
             _context3.p = 3;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to delete brand');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to delete brand'
+            });
           case 4:
             return _context3.a(2);
         }
@@ -37692,7 +37869,9 @@ function SupplierOrders(_ref) {
             _context2.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_3__["default"].post("/supplier/purchase-orders/".concat(order.id, "/accept"));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success("".concat(order.po_number, " accepted! You can now mark it as delivered when ready."));
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success({
+              title: "".concat(order.po_number, " accepted! You can now mark it as delivered when ready.")
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.SUPPLIER_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.SUPPLIER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.ADMIN_PURCHASES);
             fetchOrders(true);
             _context2.n = 4;
@@ -37700,7 +37879,9 @@ function SupplierOrders(_ref) {
           case 3:
             _context2.p = 3;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error(((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to accept PO');
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error({
+              title: ((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to accept PO'
+            });
           case 4:
             _context2.p = 4;
             setSubmitting(false);
@@ -37744,7 +37925,9 @@ function SupplierOrders(_ref) {
               rejection_reason: rejectionReason.trim()
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success("".concat(rejectModal.po_number, " rejected. The admin has been notified."));
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success({
+              title: "".concat(rejectModal.po_number, " rejected. The admin has been notified.")
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.SUPPLIER_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.SUPPLIER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.ADMIN_PURCHASES);
             setRejectModal(null);
             setRejectionReason('');
@@ -37754,7 +37937,9 @@ function SupplierOrders(_ref) {
           case 4:
             _context3.p = 4;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error(((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to reject PO');
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error({
+              title: ((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to reject PO'
+            });
           case 5:
             _context3.p = 5;
             setSubmitting(false);
@@ -37787,7 +37972,9 @@ function SupplierOrders(_ref) {
               delivery_notes: deliveryNotes
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success('Order marked as delivered successfully!');
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success({
+              title: 'Order marked as delivered successfully!'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.SUPPLIER_ORDERS, _store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.SUPPLIER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.ADMIN_PURCHASES);
             setSelectedOrder(null);
             setDeliveryNotes('');
@@ -37797,7 +37984,9 @@ function SupplierOrders(_ref) {
           case 4:
             _context4.p = 4;
             _t4 = _context4.v;
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error(((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to mark as delivered');
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error({
+              title: ((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to mark as delivered'
+            });
           case 5:
             _context4.p = 5;
             setSubmitting(false);
@@ -38867,13 +39056,17 @@ function SupplierProducts() {
               });
             });
             setNewCategoryName('');
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success('Category created!');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+              title: 'Category created!'
+            });
             _context3.n = 6;
             break;
           case 5:
             _context3.p = 5;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error(((_err$response = _t3.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to create category');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+              title: ((_err$response = _t3.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to create category'
+            });
           case 6:
             _context3.p = 6;
             setCreatingCategory(false);
@@ -39274,7 +39467,9 @@ function SupplierProducts() {
               _context6.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error('Please fill in at least one field for each variant or remove empty variants');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+              title: 'Please fill in at least one field for each variant or remove empty variants'
+            });
             return _context6.a(2);
           case 1:
             setSubmitting(true);
@@ -39329,7 +39524,9 @@ function SupplierProducts() {
               }
             });
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success('Product updated!');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+              title: 'Product updated!'
+            });
             _context6.n = 6;
             break;
           case 4:
@@ -39340,7 +39537,9 @@ function SupplierProducts() {
               }
             });
           case 5:
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success('Product created!');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+              title: 'Product created!'
+            });
           case 6:
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.SUPPLIER_PRODUCTS, _store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.ADMIN_INVENTORY, _store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.CUSTOMER_SHOP);
             setFormOpen(false);
@@ -39353,9 +39552,13 @@ function SupplierProducts() {
             data = (_err$response2 = _t6.response) === null || _err$response2 === void 0 ? void 0 : _err$response2.data;
             if (data !== null && data !== void 0 && data.errors) {
               firstError = Object.values(data.errors).flat()[0];
-              sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error(firstError || data.message || 'Validation failed');
+              sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+                title: firstError || data.message || 'Validation failed'
+              });
             } else {
-              sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error((data === null || data === void 0 ? void 0 : data.message) || 'Failed to save product');
+              sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+                title: (data === null || data === void 0 ? void 0 : data.message) || 'Failed to save product'
+              });
             }
           case 8:
             _context6.p = 8;
@@ -39381,7 +39584,9 @@ function SupplierProducts() {
             _context7.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_2__["default"]["delete"]("/supplier/products/".concat(id));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success('Product deleted');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.success({
+              title: 'Product deleted'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.SUPPLIER_PRODUCTS, _store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.ADMIN_INVENTORY, _store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.CUSTOMER_SHOP);
             fetchProducts(true);
             _context7.n = 4;
@@ -39389,7 +39594,9 @@ function SupplierProducts() {
           case 3:
             _context7.p = 3;
             _t7 = _context7.v;
-            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error('Failed to delete product');
+            sileo__WEBPACK_IMPORTED_MODULE_3__.sileo.error({
+              title: 'Failed to delete product'
+            });
           case 4:
             return _context7.a(2);
         }
@@ -40669,14 +40876,18 @@ function SupplierRegister() {
           case 3:
             response = _context.v;
             setSuccessMsg('Supplier account created successfully! Please check your email to verify your account.');
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success('Registration successful!');
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.success({
+              title: 'Registration successful!'
+            });
             _context.n = 5;
             break;
           case 4:
             _context.p = 4;
             _t = _context.v;
             errorMsg = ((_error$response = _t.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || 'Failed to register';
-            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error(errorMsg);
+            sileo__WEBPACK_IMPORTED_MODULE_4__.sileo.error({
+              title: errorMsg
+            });
             setError('form', errorMsg);
             if ((_error$response2 = _t.response) !== null && _error$response2 !== void 0 && (_error$response2 = _error$response2.data) !== null && _error$response2 !== void 0 && _error$response2.errors) {
               Object.keys(_t.response.data.errors).forEach(function (key) {
@@ -41488,7 +41699,9 @@ function SupplierSettings() {
             _context2.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_3__["default"].put('/supplier/auth/profile', profile);
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Profile updated successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Profile updated successfully'
+            });
             if (!refreshSettings) {
               _context2.n = 3;
               break;
@@ -41501,7 +41714,9 @@ function SupplierSettings() {
           case 4:
             _context2.p = 4;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to update profile');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to update profile'
+            });
           case 5:
             _context2.p = 5;
             setSaving(false);
@@ -41526,7 +41741,9 @@ function SupplierSettings() {
               _context3.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Passwords do not match');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Passwords do not match'
+            });
             return _context3.a(2);
           case 1:
             setSaving(true);
@@ -41534,7 +41751,9 @@ function SupplierSettings() {
             _context3.n = 3;
             return _lib_api__WEBPACK_IMPORTED_MODULE_3__["default"].put('/supplier/auth/change-password', passwords);
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Password changed successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Password changed successfully'
+            });
             setPasswords({
               current_password: '',
               new_password: '',
@@ -41545,7 +41764,9 @@ function SupplierSettings() {
           case 4:
             _context3.p = 4;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to change password');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to change password'
+            });
           case 5:
             _context3.p = 5;
             setSaving(false);
@@ -41596,13 +41817,17 @@ function SupplierSettings() {
             return refreshCategories();
           case 5:
             fetchCategories(true);
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Category added');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Category added'
+            });
             _context4.n = 7;
             break;
           case 6:
             _context4.p = 6;
             _t4 = _context4.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to add category');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response3 = _t4.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to add category'
+            });
           case 7:
             _context4.p = 7;
             setSaving(false);
@@ -41643,13 +41868,17 @@ function SupplierSettings() {
             return refreshCategories();
           case 4:
             fetchCategories(true);
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Category deleted');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Category deleted'
+            });
             _context5.n = 6;
             break;
           case 5:
             _context5.p = 5;
             _t5 = _context5.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to delete category');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to delete category'
+            });
           case 6:
             return _context5.a(2);
         }
@@ -42196,7 +42425,9 @@ function SupplierUnitSettings() {
               _context2.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Please fill in all required fields');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Please fill in all required fields'
+            });
             return _context2.a(2);
           case 1:
             setSaving(true);
@@ -42204,7 +42435,9 @@ function SupplierUnitSettings() {
             _context2.n = 3;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/supplier/unit-types', newUnit);
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Unit type added successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Unit type added successfully'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.SUPPLIER_SETTINGS);
             setNewUnit({
               purchase_unit: '',
@@ -42217,7 +42450,9 @@ function SupplierUnitSettings() {
           case 4:
             _context2.p = 4;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_e$response = _t2.response) === null || _e$response === void 0 || (_e$response = _e$response.data) === null || _e$response === void 0 ? void 0 : _e$response.message) || 'Error saving unit type');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_e$response = _t2.response) === null || _e$response === void 0 || (_e$response = _e$response.data) === null || _e$response === void 0 ? void 0 : _e$response.message) || 'Error saving unit type'
+            });
           case 5:
             _context2.p = 5;
             setSaving(false);
@@ -42242,7 +42477,9 @@ function SupplierUnitSettings() {
             _context3.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"]["delete"]("/supplier/unit-types/".concat(id));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Unit type deleted');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Unit type deleted'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.SUPPLIER_SETTINGS);
             fetchData(true);
             _context3.n = 4;
@@ -42250,7 +42487,9 @@ function SupplierUnitSettings() {
           case 3:
             _context3.p = 3;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Error deleting unit type');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Error deleting unit type'
+            });
           case 4:
             return _context3.a(2);
         }
@@ -42646,7 +42885,9 @@ function SupplierVariantSettings(_ref) {
               _context2.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Please enter a label');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Please enter a label'
+            });
             return _context2.a(2);
           case 1:
             setSaving(true);
@@ -42656,7 +42897,9 @@ function SupplierVariantSettings(_ref) {
               variant_id: variantId
             }));
           case 3:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Value added successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Value added successfully'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_14__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_14__.STALE_KEYS.SUPPLIER_SETTINGS);
             setNewVal({
               variant_id: '',
@@ -42671,7 +42914,9 @@ function SupplierVariantSettings(_ref) {
           case 4:
             _context2.p = 4;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_e$response = _t2.response) === null || _e$response === void 0 || (_e$response = _e$response.data) === null || _e$response === void 0 ? void 0 : _e$response.message) || 'Error saving value');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_e$response = _t2.response) === null || _e$response === void 0 || (_e$response = _e$response.data) === null || _e$response === void 0 ? void 0 : _e$response.message) || 'Error saving value'
+            });
           case 5:
             _context2.p = 5;
             setSaving(false);
@@ -42696,7 +42941,9 @@ function SupplierVariantSettings(_ref) {
             _context3.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"]["delete"]("/supplier/variant-values/".concat(id));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Value deleted');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Value deleted'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_14__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_14__.STALE_KEYS.SUPPLIER_SETTINGS);
             fetchData(true);
             _context3.n = 4;
@@ -42704,7 +42951,9 @@ function SupplierVariantSettings(_ref) {
           case 3:
             _context3.p = 3;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Error deleting value');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Error deleting value'
+            });
           case 4:
             return _context3.a(2);
         }
@@ -43438,7 +43687,9 @@ function SupplierCatalog() {
             _context.p = 3;
             _t = _context.v;
             console.error('Failed to fetch catalog:', _t);
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to load supplier available products');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to load supplier available products'
+            });
             setProducts({
               data: [],
               total: 0
@@ -43467,7 +43718,9 @@ function SupplierCatalog() {
               _context2.n = 1;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Please enter a valid quantity.');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Please enter a valid quantity.'
+            });
             return _context2.a(2);
           case 1:
             currentStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
@@ -43475,14 +43728,18 @@ function SupplierCatalog() {
               _context2.n = 2;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('This option is out of stock.');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'This option is out of stock.'
+            });
             return _context2.a(2);
           case 2:
             if (!(orderQty > currentStock)) {
               _context2.n = 3;
               break;
             }
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error("Only ".concat(currentStock, " units available for this option."));
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: "Only ".concat(currentStock, " units available for this option.")
+            });
             return _context2.a(2);
           case 3:
             unitCost = (_selectedVariant$pric = selectedVariant === null || selectedVariant === void 0 ? void 0 : selectedVariant.price_override) !== null && _selectedVariant$pric !== void 0 ? _selectedVariant$pric : viewProduct.price;
@@ -43499,7 +43756,9 @@ function SupplierCatalog() {
               }]
             });
           case 5:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Order request sent to supplier!');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Order request sent to supplier!'
+            });
             setViewProduct(null);
             setSelectedVariant(null);
             setSelectedOptions({
@@ -43514,7 +43773,9 @@ function SupplierCatalog() {
           case 6:
             _context2.p = 6;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_e$response = _t2.response) === null || _e$response === void 0 || (_e$response = _e$response.data) === null || _e$response === void 0 ? void 0 : _e$response.message) || 'Failed to place order.');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_e$response = _t2.response) === null || _e$response === void 0 || (_e$response = _e$response.data) === null || _e$response === void 0 ? void 0 : _e$response.message) || 'Failed to place order.'
+            });
           case 7:
             _context2.p = 7;
             setActionLoading(false);
@@ -44021,14 +44282,18 @@ function SupplierForm(_ref) {
             _context.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].put("/suppliers/".concat(supplier.id), form);
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Supplier updated successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Supplier updated successfully'
+            });
             _context.n = 5;
             break;
           case 3:
             _context.n = 4;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/suppliers', form);
           case 4:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Supplier added successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'Supplier added successfully'
+            });
           case 5:
             onSuccess();
             _context.n = 7;
@@ -44037,7 +44302,9 @@ function SupplierForm(_ref) {
             _context.p = 6;
             _t = _context.v;
             msg = ((_error$response = _t.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || 'Error saving supplier';
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(msg);
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: msg
+            });
           case 7:
             _context.p = 7;
             setLoading(false);
@@ -44407,7 +44674,9 @@ function SupplierViewModal(_ref3) {
       }
     })["catch"](function () {
       if (isMounted) {
-        sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to load supplier details');
+        sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+          title: 'Failed to load supplier details'
+        });
         setLoading(false);
       }
     });
@@ -44833,7 +45102,9 @@ function Suppliers() {
             _context.p = 3;
             _t = _context.v;
             console.error('Error fetching suppliers:', _t);
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Error fetching suppliers');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Error fetching suppliers'
+            });
             setSuppliers([]);
             setTotal(0);
           case 4:
@@ -44873,10 +45144,14 @@ function Suppliers() {
             res = _context2.v;
             data = ((_res$data2 = res.data) === null || _res$data2 === void 0 ? void 0 : _res$data2.data) !== undefined ? res.data.data : res.data;
             if (data && (res.data.status === 'success' || !res.data.status)) {
-              sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('Supplier deleted successfully');
+              sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+                title: 'Supplier deleted successfully'
+              });
               (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.ADMIN_SUPPLIERS);
             } else {
-              sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(res.data.message || 'Error deleting supplier');
+              sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+                title: res.data.message || 'Error deleting supplier'
+              });
             }
             _context2.n = 4;
             break;
@@ -44884,7 +45159,9 @@ function Suppliers() {
             _context2.p = 3;
             _t2 = _context2.v;
             msg = ((_error$response = _t2.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || 'Error deleting supplier';
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(msg);
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: msg
+            });
           case 4:
             return _context2.a(2);
         }
@@ -48645,7 +48922,9 @@ function Riders() {
               interview_at: datetime
             });
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.success('Interview scheduled!');
+            sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.success({
+              title: 'Interview scheduled!'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_16__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_16__.STALE_KEYS.ADMIN_RIDERS);
             fetchData(true);
             _context2.n = 4;
@@ -48653,7 +48932,9 @@ function Riders() {
           case 3:
             _context2.p = 3;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.error('Failed to schedule interview');
+            sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.error({
+              title: 'Failed to schedule interview'
+            });
           case 4:
             return _context2.a(2);
         }
@@ -48674,7 +48955,9 @@ function Riders() {
             _context3.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/riders/".concat(id, "/approve"));
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.success('Rider hired and account activated!');
+            sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.success({
+              title: 'Rider hired and account activated!'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_16__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_16__.STALE_KEYS.ADMIN_RIDERS);
             fetchData(true);
             _context3.n = 4;
@@ -48682,7 +48965,9 @@ function Riders() {
           case 3:
             _context3.p = 3;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.error('Failed to hire rider');
+            sileo__WEBPACK_IMPORTED_MODULE_5__.sileo.error({
+              title: 'Failed to hire rider'
+            });
           case 4:
             return _context3.a(2);
         }
@@ -49156,14 +49441,18 @@ function Users() {
             _context2.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].put("/users/".concat(modal.user.id), formData);
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('User updated successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'User updated successfully'
+            });
             _context2.n = 5;
             break;
           case 3:
             _context2.n = 4;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/users', formData);
           case 4:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('User created successfully');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'User created successfully'
+            });
           case 5:
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.ADMIN_USERS);
             fetchData(true);
@@ -49176,7 +49465,9 @@ function Users() {
           case 6:
             _context2.p = 6;
             _t2 = _context2.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error(((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Error saving user');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: ((_err$response = _t2.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Error saving user'
+            });
           case 7:
             _context2.p = 7;
             setSaving(false);
@@ -49203,7 +49494,9 @@ function Users() {
               status: currentStatus === 'active' ? 'suspended' : 'active'
             });
           case 2:
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success('User status updated');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.success({
+              title: 'User status updated'
+            });
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_18__.STALE_KEYS.ADMIN_USERS);
             fetchData(true);
             _context3.n = 4;
@@ -49211,7 +49504,9 @@ function Users() {
           case 3:
             _context3.p = 3;
             _t3 = _context3.v;
-            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error('Failed to update status');
+            sileo__WEBPACK_IMPORTED_MODULE_2__.sileo.error({
+              title: 'Failed to update status'
+            });
           case 4:
             return _context3.a(2);
         }
@@ -51092,30 +51387,6 @@ var ___CSS_LOADER_URL_REPLACEMENT_1___ = _css_loader_dist_runtime_getUrl_js__WEB
 var ___CSS_LOADER_URL_REPLACEMENT_2___ = _css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_1___default()(_images_marker_icon_png__WEBPACK_IMPORTED_MODULE_4__["default"]);
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, "/* required styles */\r\n\r\n.leaflet-pane,\r\n.leaflet-tile,\r\n.leaflet-marker-icon,\r\n.leaflet-marker-shadow,\r\n.leaflet-tile-container,\r\n.leaflet-pane > svg,\r\n.leaflet-pane > canvas,\r\n.leaflet-zoom-box,\r\n.leaflet-image-layer,\r\n.leaflet-layer {\r\n\tposition: absolute;\r\n\tleft: 0;\r\n\ttop: 0;\r\n\t}\r\n.leaflet-container {\r\n\toverflow: hidden;\r\n\t}\r\n.leaflet-tile,\r\n.leaflet-marker-icon,\r\n.leaflet-marker-shadow {\r\n\t-webkit-user-select: none;\r\n\t   -moz-user-select: none;\r\n\t        user-select: none;\r\n\t  -webkit-user-drag: none;\r\n\t}\r\n/* Prevents IE11 from highlighting tiles in blue */\r\n.leaflet-tile::-moz-selection {\r\n\tbackground: transparent;\r\n}\r\n.leaflet-tile::selection {\r\n\tbackground: transparent;\r\n}\r\n/* Safari renders non-retina tile on retina better with this, but Chrome is worse */\r\n.leaflet-safari .leaflet-tile {\r\n\timage-rendering: -webkit-optimize-contrast;\r\n\t}\r\n/* hack that prevents hw layers \"stretching\" when loading new tiles */\r\n.leaflet-safari .leaflet-tile-container {\r\n\twidth: 1600px;\r\n\theight: 1600px;\r\n\t-webkit-transform-origin: 0 0;\r\n\t}\r\n.leaflet-marker-icon,\r\n.leaflet-marker-shadow {\r\n\tdisplay: block;\r\n\t}\r\n/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */\r\n/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */\r\n.leaflet-container .leaflet-overlay-pane svg {\r\n\tmax-width: none !important;\r\n\tmax-height: none !important;\r\n\t}\r\n.leaflet-container .leaflet-marker-pane img,\r\n.leaflet-container .leaflet-shadow-pane img,\r\n.leaflet-container .leaflet-tile-pane img,\r\n.leaflet-container img.leaflet-image-layer,\r\n.leaflet-container .leaflet-tile {\r\n\tmax-width: none !important;\r\n\tmax-height: none !important;\r\n\twidth: auto;\r\n\tpadding: 0;\r\n\t}\r\n\r\n.leaflet-container img.leaflet-tile {\r\n\t/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */\r\n\tmix-blend-mode: plus-lighter;\r\n}\r\n\r\n.leaflet-container.leaflet-touch-zoom {\r\n\ttouch-action: pan-x pan-y;\r\n\t}\r\n.leaflet-container.leaflet-touch-drag {\r\n\t/* Fallback for FF which doesn't support pinch-zoom */\r\n\ttouch-action: none;\r\n\ttouch-action: pinch-zoom;\r\n}\r\n.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {\r\n\ttouch-action: none;\r\n}\r\n.leaflet-container {\r\n\t-webkit-tap-highlight-color: transparent;\r\n}\r\n.leaflet-container a {\r\n\t-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);\r\n}\r\n.leaflet-tile {\r\n\tfilter: inherit;\r\n\tvisibility: hidden;\r\n\t}\r\n.leaflet-tile-loaded {\r\n\tvisibility: inherit;\r\n\t}\r\n.leaflet-zoom-box {\r\n\twidth: 0;\r\n\theight: 0;\r\n\tbox-sizing: border-box;\r\n\tz-index: 800;\r\n\t}\r\n/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */\r\n.leaflet-overlay-pane svg {\r\n\t-moz-user-select: none;\r\n\t}\r\n\r\n.leaflet-pane         { z-index: 400; }\r\n\r\n.leaflet-tile-pane    { z-index: 200; }\r\n.leaflet-overlay-pane { z-index: 400; }\r\n.leaflet-shadow-pane  { z-index: 500; }\r\n.leaflet-marker-pane  { z-index: 600; }\r\n.leaflet-tooltip-pane   { z-index: 650; }\r\n.leaflet-popup-pane   { z-index: 700; }\r\n\r\n.leaflet-map-pane canvas { z-index: 100; }\r\n.leaflet-map-pane svg    { z-index: 200; }\r\n\r\n.leaflet-vml-shape {\r\n\twidth: 1px;\r\n\theight: 1px;\r\n\t}\r\n.lvml {\r\n\tbehavior: url(#default#VML);\r\n\tdisplay: inline-block;\r\n\tposition: absolute;\r\n\t}\r\n\r\n\r\n/* control positioning */\r\n\r\n.leaflet-control {\r\n\tposition: relative;\r\n\tz-index: 800;\r\n\tpointer-events: visiblePainted; /* IE 9-10 doesn't have auto */\r\n\tpointer-events: auto;\r\n\t}\r\n.leaflet-top,\r\n.leaflet-bottom {\r\n\tposition: absolute;\r\n\tz-index: 1000;\r\n\tpointer-events: none;\r\n\t}\r\n.leaflet-top {\r\n\ttop: 0;\r\n\t}\r\n.leaflet-right {\r\n\tright: 0;\r\n\t}\r\n.leaflet-bottom {\r\n\tbottom: 0;\r\n\t}\r\n.leaflet-left {\r\n\tleft: 0;\r\n\t}\r\n.leaflet-control {\r\n\tfloat: left;\r\n\tclear: both;\r\n\t}\r\n.leaflet-right .leaflet-control {\r\n\tfloat: right;\r\n\t}\r\n.leaflet-top .leaflet-control {\r\n\tmargin-top: 10px;\r\n\t}\r\n.leaflet-bottom .leaflet-control {\r\n\tmargin-bottom: 10px;\r\n\t}\r\n.leaflet-left .leaflet-control {\r\n\tmargin-left: 10px;\r\n\t}\r\n.leaflet-right .leaflet-control {\r\n\tmargin-right: 10px;\r\n\t}\r\n\r\n\r\n/* zoom and fade animations */\r\n\r\n.leaflet-fade-anim .leaflet-popup {\r\n\topacity: 0;\r\n\ttransition: opacity 0.2s linear;\r\n\t}\r\n.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {\r\n\topacity: 1;\r\n\t}\r\n.leaflet-zoom-animated {\r\n\ttransform-origin: 0 0;\r\n\t}\r\nsvg.leaflet-zoom-animated {\r\n\twill-change: transform;\r\n}\r\n\r\n.leaflet-zoom-anim .leaflet-zoom-animated {\r\n\ttransition:         transform 0.25s cubic-bezier(0,0,0.25,1);\r\n\t}\r\n.leaflet-zoom-anim .leaflet-tile,\r\n.leaflet-pan-anim .leaflet-tile {\r\n\ttransition: none;\r\n\t}\r\n\r\n.leaflet-zoom-anim .leaflet-zoom-hide {\r\n\tvisibility: hidden;\r\n\t}\r\n\r\n\r\n/* cursors */\r\n\r\n.leaflet-interactive {\r\n\tcursor: pointer;\r\n\t}\r\n.leaflet-grab {\r\n\tcursor:         grab;\r\n\t}\r\n.leaflet-crosshair,\r\n.leaflet-crosshair .leaflet-interactive {\r\n\tcursor: crosshair;\r\n\t}\r\n.leaflet-popup-pane,\r\n.leaflet-control {\r\n\tcursor: auto;\r\n\t}\r\n.leaflet-dragging .leaflet-grab,\r\n.leaflet-dragging .leaflet-grab .leaflet-interactive,\r\n.leaflet-dragging .leaflet-marker-draggable {\r\n\tcursor: move;\r\n\tcursor:         grabbing;\r\n\t}\r\n\r\n/* marker & overlays interactivity */\r\n.leaflet-marker-icon,\r\n.leaflet-marker-shadow,\r\n.leaflet-image-layer,\r\n.leaflet-pane > svg path,\r\n.leaflet-tile-container {\r\n\tpointer-events: none;\r\n\t}\r\n\r\n.leaflet-marker-icon.leaflet-interactive,\r\n.leaflet-image-layer.leaflet-interactive,\r\n.leaflet-pane > svg path.leaflet-interactive,\r\nsvg.leaflet-image-layer.leaflet-interactive path {\r\n\tpointer-events: visiblePainted; /* IE 9-10 doesn't have auto */\r\n\tpointer-events: auto;\r\n\t}\r\n\r\n/* visual tweaks */\r\n\r\n.leaflet-container {\r\n\tbackground: #ddd;\r\n\toutline-offset: 1px;\r\n\t}\r\n.leaflet-container a {\r\n\tcolor: #0078A8;\r\n\t}\r\n.leaflet-zoom-box {\r\n\tborder: 2px dotted #38f;\r\n\tbackground: rgba(255,255,255,0.5);\r\n\t}\r\n\r\n\r\n/* general typography */\r\n.leaflet-container {\r\n\tfont-family: \"Helvetica Neue\", Arial, Helvetica, sans-serif;\r\n\tfont-size: 12px;\r\n\tfont-size: 0.75rem;\r\n\tline-height: 1.5;\r\n\t}\r\n\r\n\r\n/* general toolbar styles */\r\n\r\n.leaflet-bar {\r\n\tbox-shadow: 0 1px 5px rgba(0,0,0,0.65);\r\n\tborder-radius: 4px;\r\n\t}\r\n.leaflet-bar a {\r\n\tbackground-color: #fff;\r\n\tborder-bottom: 1px solid #ccc;\r\n\twidth: 26px;\r\n\theight: 26px;\r\n\tline-height: 26px;\r\n\tdisplay: block;\r\n\ttext-align: center;\r\n\ttext-decoration: none;\r\n\tcolor: black;\r\n\t}\r\n.leaflet-bar a,\r\n.leaflet-control-layers-toggle {\r\n\tbackground-position: 50% 50%;\r\n\tbackground-repeat: no-repeat;\r\n\tdisplay: block;\r\n\t}\r\n.leaflet-bar a:hover,\r\n.leaflet-bar a:focus {\r\n\tbackground-color: #f4f4f4;\r\n\t}\r\n.leaflet-bar a:first-child {\r\n\tborder-top-left-radius: 4px;\r\n\tborder-top-right-radius: 4px;\r\n\t}\r\n.leaflet-bar a:last-child {\r\n\tborder-bottom-left-radius: 4px;\r\n\tborder-bottom-right-radius: 4px;\r\n\tborder-bottom: none;\r\n\t}\r\n.leaflet-bar a.leaflet-disabled {\r\n\tcursor: default;\r\n\tbackground-color: #f4f4f4;\r\n\tcolor: #bbb;\r\n\t}\r\n\r\n.leaflet-touch .leaflet-bar a {\r\n\twidth: 30px;\r\n\theight: 30px;\r\n\tline-height: 30px;\r\n\t}\r\n.leaflet-touch .leaflet-bar a:first-child {\r\n\tborder-top-left-radius: 2px;\r\n\tborder-top-right-radius: 2px;\r\n\t}\r\n.leaflet-touch .leaflet-bar a:last-child {\r\n\tborder-bottom-left-radius: 2px;\r\n\tborder-bottom-right-radius: 2px;\r\n\t}\r\n\r\n/* zoom control */\r\n\r\n.leaflet-control-zoom-in,\r\n.leaflet-control-zoom-out {\r\n\tfont: bold 18px 'Lucida Console', Monaco, monospace;\r\n\ttext-indent: 1px;\r\n\t}\r\n\r\n.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {\r\n\tfont-size: 22px;\r\n\t}\r\n\r\n\r\n/* layers control */\r\n\r\n.leaflet-control-layers {\r\n\tbox-shadow: 0 1px 5px rgba(0,0,0,0.4);\r\n\tbackground: #fff;\r\n\tborder-radius: 5px;\r\n\t}\r\n.leaflet-control-layers-toggle {\r\n\tbackground-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\r\n\twidth: 36px;\r\n\theight: 36px;\r\n\t}\r\n.leaflet-retina .leaflet-control-layers-toggle {\r\n\tbackground-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_1___ + ");\r\n\tbackground-size: 26px 26px;\r\n\t}\r\n.leaflet-touch .leaflet-control-layers-toggle {\r\n\twidth: 44px;\r\n\theight: 44px;\r\n\t}\r\n.leaflet-control-layers .leaflet-control-layers-list,\r\n.leaflet-control-layers-expanded .leaflet-control-layers-toggle {\r\n\tdisplay: none;\r\n\t}\r\n.leaflet-control-layers-expanded .leaflet-control-layers-list {\r\n\tdisplay: block;\r\n\tposition: relative;\r\n\t}\r\n.leaflet-control-layers-expanded {\r\n\tpadding: 6px 10px 6px 6px;\r\n\tcolor: #333;\r\n\tbackground: #fff;\r\n\t}\r\n.leaflet-control-layers-scrollbar {\r\n\toverflow-y: scroll;\r\n\toverflow-x: hidden;\r\n\tpadding-right: 5px;\r\n\t}\r\n.leaflet-control-layers-selector {\r\n\tmargin-top: 2px;\r\n\tposition: relative;\r\n\ttop: 1px;\r\n\t}\r\n.leaflet-control-layers label {\r\n\tdisplay: block;\r\n\tfont-size: 13px;\r\n\tfont-size: 1.08333em;\r\n\t}\r\n.leaflet-control-layers-separator {\r\n\theight: 0;\r\n\tborder-top: 1px solid #ddd;\r\n\tmargin: 5px -10px 5px -6px;\r\n\t}\r\n\r\n/* Default icon URLs */\r\n.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */\r\n\tbackground-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_2___ + ");\r\n\t}\r\n\r\n\r\n/* attribution and scale controls */\r\n\r\n.leaflet-container .leaflet-control-attribution {\r\n\tbackground: #fff;\r\n\tbackground: rgba(255, 255, 255, 0.8);\r\n\tmargin: 0;\r\n\t}\r\n.leaflet-control-attribution,\r\n.leaflet-control-scale-line {\r\n\tpadding: 0 5px;\r\n\tcolor: #333;\r\n\tline-height: 1.4;\r\n\t}\r\n.leaflet-control-attribution a {\r\n\ttext-decoration: none;\r\n\t}\r\n.leaflet-control-attribution a:hover,\r\n.leaflet-control-attribution a:focus {\r\n\ttext-decoration: underline;\r\n\t}\r\n.leaflet-attribution-flag {\r\n\tdisplay: inline !important;\r\n\tvertical-align: baseline !important;\r\n\twidth: 1em;\r\n\theight: 0.6669em;\r\n\t}\r\n.leaflet-left .leaflet-control-scale {\r\n\tmargin-left: 5px;\r\n\t}\r\n.leaflet-bottom .leaflet-control-scale {\r\n\tmargin-bottom: 5px;\r\n\t}\r\n.leaflet-control-scale-line {\r\n\tborder: 2px solid #777;\r\n\tborder-top: none;\r\n\tline-height: 1.1;\r\n\tpadding: 2px 5px 1px;\r\n\twhite-space: nowrap;\r\n\tbox-sizing: border-box;\r\n\tbackground: rgba(255, 255, 255, 0.8);\r\n\ttext-shadow: 1px 1px #fff;\r\n\t}\r\n.leaflet-control-scale-line:not(:first-child) {\r\n\tborder-top: 2px solid #777;\r\n\tborder-bottom: none;\r\n\tmargin-top: -2px;\r\n\t}\r\n.leaflet-control-scale-line:not(:first-child):not(:last-child) {\r\n\tborder-bottom: 2px solid #777;\r\n\t}\r\n\r\n.leaflet-touch .leaflet-control-attribution,\r\n.leaflet-touch .leaflet-control-layers,\r\n.leaflet-touch .leaflet-bar {\r\n\tbox-shadow: none;\r\n\t}\r\n.leaflet-touch .leaflet-control-layers,\r\n.leaflet-touch .leaflet-bar {\r\n\tborder: 2px solid rgba(0,0,0,0.2);\r\n\tbackground-clip: padding-box;\r\n\t}\r\n\r\n\r\n/* popup */\r\n\r\n.leaflet-popup {\r\n\tposition: absolute;\r\n\ttext-align: center;\r\n\tmargin-bottom: 20px;\r\n\t}\r\n.leaflet-popup-content-wrapper {\r\n\tpadding: 1px;\r\n\ttext-align: left;\r\n\tborder-radius: 12px;\r\n\t}\r\n.leaflet-popup-content {\r\n\tmargin: 13px 24px 13px 20px;\r\n\tline-height: 1.3;\r\n\tfont-size: 13px;\r\n\tfont-size: 1.08333em;\r\n\tmin-height: 1px;\r\n\t}\r\n.leaflet-popup-content p {\r\n\tmargin: 17px 0;\r\n\tmargin: 1.3em 0;\r\n\t}\r\n.leaflet-popup-tip-container {\r\n\twidth: 40px;\r\n\theight: 20px;\r\n\tposition: absolute;\r\n\tleft: 50%;\r\n\tmargin-top: -1px;\r\n\tmargin-left: -20px;\r\n\toverflow: hidden;\r\n\tpointer-events: none;\r\n\t}\r\n.leaflet-popup-tip {\r\n\twidth: 17px;\r\n\theight: 17px;\r\n\tpadding: 1px;\r\n\r\n\tmargin: -10px auto 0;\r\n\tpointer-events: auto;\r\n\ttransform: rotate(45deg);\r\n\t}\r\n.leaflet-popup-content-wrapper,\r\n.leaflet-popup-tip {\r\n\tbackground: white;\r\n\tcolor: #333;\r\n\tbox-shadow: 0 3px 14px rgba(0,0,0,0.4);\r\n\t}\r\n.leaflet-container a.leaflet-popup-close-button {\r\n\tposition: absolute;\r\n\ttop: 0;\r\n\tright: 0;\r\n\tborder: none;\r\n\ttext-align: center;\r\n\twidth: 24px;\r\n\theight: 24px;\r\n\tfont: 16px/24px Tahoma, Verdana, sans-serif;\r\n\tcolor: #757575;\r\n\ttext-decoration: none;\r\n\tbackground: transparent;\r\n\t}\r\n.leaflet-container a.leaflet-popup-close-button:hover,\r\n.leaflet-container a.leaflet-popup-close-button:focus {\r\n\tcolor: #585858;\r\n\t}\r\n.leaflet-popup-scrolled {\r\n\toverflow: auto;\r\n\t}\r\n\r\n.leaflet-oldie .leaflet-popup-content-wrapper {\r\n\t-ms-zoom: 1;\r\n\t}\r\n.leaflet-oldie .leaflet-popup-tip {\r\n\twidth: 24px;\r\n\tmargin: 0 auto;\r\n\r\n\t-ms-filter: \"progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)\";\r\n\tfilter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);\r\n\t}\r\n\r\n.leaflet-oldie .leaflet-control-zoom,\r\n.leaflet-oldie .leaflet-control-layers,\r\n.leaflet-oldie .leaflet-popup-content-wrapper,\r\n.leaflet-oldie .leaflet-popup-tip {\r\n\tborder: 1px solid #999;\r\n\t}\r\n\r\n\r\n/* div icon */\r\n\r\n.leaflet-div-icon {\r\n\tbackground: #fff;\r\n\tborder: 1px solid #666;\r\n\t}\r\n\r\n\r\n/* Tooltip */\r\n/* Base styles for the element that has a tooltip */\r\n.leaflet-tooltip {\r\n\tposition: absolute;\r\n\tpadding: 6px;\r\n\tbackground-color: #fff;\r\n\tborder: 1px solid #fff;\r\n\tborder-radius: 3px;\r\n\tcolor: #222;\r\n\twhite-space: nowrap;\r\n\t-webkit-user-select: none;\r\n\t-moz-user-select: none;\r\n\tuser-select: none;\r\n\tpointer-events: none;\r\n\tbox-shadow: 0 1px 3px rgba(0,0,0,0.4);\r\n\t}\r\n.leaflet-tooltip.leaflet-interactive {\r\n\tcursor: pointer;\r\n\tpointer-events: auto;\r\n\t}\r\n.leaflet-tooltip-top:before,\r\n.leaflet-tooltip-bottom:before,\r\n.leaflet-tooltip-left:before,\r\n.leaflet-tooltip-right:before {\r\n\tposition: absolute;\r\n\tpointer-events: none;\r\n\tborder: 6px solid transparent;\r\n\tbackground: transparent;\r\n\tcontent: \"\";\r\n\t}\r\n\r\n/* Directions */\r\n\r\n.leaflet-tooltip-bottom {\r\n\tmargin-top: 6px;\r\n}\r\n.leaflet-tooltip-top {\r\n\tmargin-top: -6px;\r\n}\r\n.leaflet-tooltip-bottom:before,\r\n.leaflet-tooltip-top:before {\r\n\tleft: 50%;\r\n\tmargin-left: -6px;\r\n\t}\r\n.leaflet-tooltip-top:before {\r\n\tbottom: 0;\r\n\tmargin-bottom: -12px;\r\n\tborder-top-color: #fff;\r\n\t}\r\n.leaflet-tooltip-bottom:before {\r\n\ttop: 0;\r\n\tmargin-top: -12px;\r\n\tmargin-left: -6px;\r\n\tborder-bottom-color: #fff;\r\n\t}\r\n.leaflet-tooltip-left {\r\n\tmargin-left: -6px;\r\n}\r\n.leaflet-tooltip-right {\r\n\tmargin-left: 6px;\r\n}\r\n.leaflet-tooltip-left:before,\r\n.leaflet-tooltip-right:before {\r\n\ttop: 50%;\r\n\tmargin-top: -6px;\r\n\t}\r\n.leaflet-tooltip-left:before {\r\n\tright: 0;\r\n\tmargin-right: -12px;\r\n\tborder-left-color: #fff;\r\n\t}\r\n.leaflet-tooltip-right:before {\r\n\tleft: 0;\r\n\tmargin-left: -12px;\r\n\tborder-right-color: #fff;\r\n\t}\r\n\r\n/* Printing */\r\n\r\n@media print {\r\n\t/* Prevent printers from removing background-images of controls. */\r\n\t.leaflet-control {\r\n\t\t-webkit-print-color-adjust: exact;\r\n\t\tprint-color-adjust: exact;\r\n\t\t}\r\n\t}\r\n", ""]);
-// Exports
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
-
-
-/***/ },
-
-/***/ "./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[6].oneOf[1].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[6].oneOf[1].use[2]!./node_modules/sileo/dist/styles.css"
-/*!******************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[6].oneOf[1].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[6].oneOf[1].use[2]!./node_modules/sileo/dist/styles.css ***!
-  \******************************************************************************************************************************************************************************************************/
-(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
-/* harmony import */ var _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__);
-// Imports
-
-var ___CSS_LOADER_EXPORT___ = _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
-// Module
-___CSS_LOADER_EXPORT___.push([module.id, "/* -------------------------------- Variables ------------------------------- */\n\n:root {\n\t--sileo-spring-easing: linear(\n\t\t0,\n\t\t0.002 0.6%,\n\t\t0.007 1.2%,\n\t\t0.015 1.8%,\n\t\t0.026 2.4%,\n\t\t0.041 3.1%,\n\t\t0.06 3.8%,\n\t\t0.108 5.3%,\n\t\t0.157 6.6%,\n\t\t0.214 8%,\n\t\t0.467 13.7%,\n\t\t0.577 16.3%,\n\t\t0.631 17.7%,\n\t\t0.682 19.1%,\n\t\t0.73 20.5%,\n\t\t0.771 21.8%,\n\t\t0.808 23.1%,\n\t\t0.844 24.5%,\n\t\t0.874 25.8%,\n\t\t0.903 27.2%,\n\t\t0.928 28.6%,\n\t\t0.952 30.1%,\n\t\t0.972 31.6%,\n\t\t0.988 33.1%,\n\t\t1.01 35.7%,\n\t\t1.025 38.5%,\n\t\t1.034 41.6%,\n\t\t1.038 45%,\n\t\t1.035 50.1%,\n\t\t1.012 64.2%,\n\t\t1.003 73%,\n\t\t0.999 83.7%,\n\t\t1\n\t);\n\n\t--sileo-duration: 600ms;\n\t--sileo-height: 40px;\n\t--sileo-width: 350px;\n\n\t--sileo-state-success: oklch(0.723 0.219 142.136);\n\t--sileo-state-loading: oklch(0.556 0 0);\n\t--sileo-state-error: oklch(0.637 0.237 25.331);\n\t--sileo-state-warning: oklch(0.795 0.184 86.047);\n\t--sileo-state-info: oklch(0.685 0.169 237.323);\n\t--sileo-state-action: oklch(0.623 0.214 259.815);\n}\n\n/* ---------------------------------- Toast --------------------------------- */\n\n[data-sileo-toast] {\n\tposition: relative;\n\tcursor: pointer;\n\tpointer-events: auto;\n\ttouch-action: none;\n\tborder: 0;\n\tbackground: transparent;\n\tpadding: 0;\n\twidth: var(--sileo-width);\n\theight: var(--_h, var(--sileo-height));\n\topacity: 0;\n\ttransform: translateZ(0) scale(0.95);\n\ttransform-origin: center;\n\tcontain: layout style;\n\toverflow: visible;\n}\n\n[data-sileo-toast][data-state=\"loading\"] {\n\tcursor: default;\n}\n\n[data-sileo-toast][data-ready=\"true\"] {\n\topacity: 1;\n\ttransform: translateZ(0) scale(1);\n\ttransition:\n\t\ttransform calc(var(--sileo-duration) * 0.66) var(--sileo-spring-easing),\n\t\topacity calc(var(--sileo-duration) * 0.66) var(--sileo-spring-easing),\n\t\tmargin-bottom calc(var(--sileo-duration) * 0.66) var(--sileo-spring-easing),\n\t\tmargin-top calc(var(--sileo-duration) * 0.66) var(--sileo-spring-easing),\n\t\theight var(--sileo-duration) var(--sileo-spring-easing);\n}\n\n/* Entry animation direction */\n[data-sileo-viewport][data-position^=\"top\"]\n\t[data-sileo-toast]:not([data-ready=\"true\"]) {\n\ttransform: translateY(-6px) scale(0.95);\n}\n\n[data-sileo-viewport][data-position^=\"bottom\"]\n\t[data-sileo-toast]:not([data-ready=\"true\"]) {\n\ttransform: translateY(6px) scale(0.95);\n}\n\n/* Exit */\n[data-sileo-toast][data-ready=\"true\"][data-exiting=\"true\"] {\n\topacity: 0;\n\tpointer-events: none;\n}\n\n[data-sileo-viewport][data-position^=\"top\"]\n\t[data-sileo-toast][data-ready=\"true\"][data-exiting=\"true\"] {\n\ttransform: translateY(-6px) scale(0.95);\n}\n\n[data-sileo-viewport][data-position^=\"bottom\"]\n\t[data-sileo-toast][data-ready=\"true\"][data-exiting=\"true\"] {\n\ttransform: translateY(6px) scale(0.95);\n}\n\n/* ------------------------------- SVG Canvas ------------------------------- */\n\n[data-sileo-canvas] {\n\tposition: absolute;\n\tleft: 0;\n\tright: 0;\n\tpointer-events: none;\n\ttransform: translateZ(0);\n\tcontain: layout style;\n\toverflow: visible;\n}\n\n[data-sileo-canvas][data-edge=\"top\"] {\n\tbottom: 0;\n\ttransform: scaleY(-1) translateZ(0);\n}\n\n[data-sileo-canvas][data-edge=\"bottom\"] {\n\ttop: 0;\n}\n\n[data-sileo-svg] {\n\toverflow: visible;\n}\n\n/* --------------------------------- Shapes --------------------------------- */\n\n/* --------------------------------- Header --------------------------------- */\n\n[data-sileo-header] {\n\tposition: absolute;\n\tz-index: 20;\n\tdisplay: flex;\n\talign-items: center;\n\tpadding: 0.5rem;\n\theight: var(--sileo-height);\n\toverflow: hidden;\n\tleft: var(--_px, 0px);\n\ttransform: var(--_ht);\n\tmax-width: var(--_pw);\n}\n\n[data-sileo-toast][data-ready=\"true\"] [data-sileo-header] {\n\ttransition:\n\t\ttransform var(--sileo-duration) var(--sileo-spring-easing),\n\t\tleft var(--sileo-duration) var(--sileo-spring-easing),\n\t\tmax-width var(--sileo-duration) var(--sileo-spring-easing);\n}\n\n[data-sileo-header][data-edge=\"top\"] {\n\tbottom: 0;\n}\n\n[data-sileo-header][data-edge=\"bottom\"] {\n\ttop: 0;\n}\n\n/* Header inner morphing */\n[data-sileo-header-stack] {\n\tposition: relative;\n\tdisplay: inline-flex;\n\talign-items: center;\n\theight: 100%;\n}\n\n[data-sileo-header-inner] {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.5rem;\n\twhite-space: nowrap;\n\topacity: 1;\n\tfilter: blur(0px);\n\ttransform: translateZ(0);\n}\n\n[data-sileo-header-inner][data-layer=\"current\"] {\n\tposition: relative;\n\tz-index: 1;\n\tanimation: sileo-header-enter var(--sileo-duration) var(--sileo-spring-easing)\n\t\tboth;\n}\n\n[data-sileo-header-inner][data-layer=\"current\"]:not(:only-child),\n[data-sileo-header-inner][data-exiting=\"true\"] {\n\twill-change: opacity, filter;\n}\n\n[data-sileo-header-inner][data-layer=\"prev\"] {\n\tposition: absolute;\n\tleft: 0;\n\ttop: 0;\n\tz-index: 0;\n\tpointer-events: none;\n}\n\n[data-sileo-header-inner][data-exiting=\"true\"] {\n\tanimation: sileo-header-exit calc(var(--sileo-duration) * 0.7) ease forwards;\n}\n\n/* ---------------------------------- Badge --------------------------------- */\n\n[data-sileo-badge] {\n\tdisplay: flex;\n\theight: 24px;\n\twidth: 24px;\n\tflex-shrink: 0;\n\talign-items: center;\n\tjustify-content: center;\n\tpadding: 2px;\n\tbox-sizing: border-box;\n\tborder-radius: 9999px;\n\tcolor: var(--sileo-tone, currentColor);\n\tbackground-color: var(--sileo-tone-bg, transparent);\n}\n\n/* ---------------------------------- Title --------------------------------- */\n\n[data-sileo-title] {\n\tfont-size: 0.825rem;\n\tline-height: 1rem;\n\tfont-weight: 500;\n\ttext-transform: capitalize;\n\tcolor: var(--sileo-tone, currentColor);\n}\n\n/* ------------------------------ State Colors ------------------------------ */\n\n:is([data-sileo-badge], [data-sileo-title], [data-sileo-button])[data-state] {\n\t--_c: var(--sileo-state-success);\n}\n\n:is(\n\t\t[data-sileo-badge],\n\t\t[data-sileo-title],\n\t\t[data-sileo-button]\n\t)[data-state=\"loading\"] {\n\t--_c: var(--sileo-state-loading);\n}\n\n:is(\n\t\t[data-sileo-badge],\n\t\t[data-sileo-title],\n\t\t[data-sileo-button]\n\t)[data-state=\"error\"] {\n\t--_c: var(--sileo-state-error);\n}\n\n:is(\n\t\t[data-sileo-badge],\n\t\t[data-sileo-title],\n\t\t[data-sileo-button]\n\t)[data-state=\"warning\"] {\n\t--_c: var(--sileo-state-warning);\n}\n\n:is(\n\t\t[data-sileo-badge],\n\t\t[data-sileo-title],\n\t\t[data-sileo-button]\n\t)[data-state=\"info\"] {\n\t--_c: var(--sileo-state-info);\n}\n\n:is(\n\t\t[data-sileo-badge],\n\t\t[data-sileo-title],\n\t\t[data-sileo-button]\n\t)[data-state=\"action\"] {\n\t--_c: var(--sileo-state-action);\n}\n\n:is([data-sileo-badge], [data-sileo-title])[data-state] {\n\t--sileo-tone: var(--_c);\n\t--sileo-tone-bg: color-mix(in oklch, var(--_c) 20%, transparent);\n}\n\n/* --------------------------------- Content -------------------------------- */\n\n[data-sileo-content] {\n\tposition: absolute;\n\tleft: 0;\n\tz-index: 10;\n\twidth: 100%;\n\tpointer-events: none;\n\topacity: var(--_co, 0);\n}\n\n[data-sileo-content]:not([data-visible=\"true\"]) {\n\tcontent-visibility: hidden;\n}\n\n[data-sileo-toast][data-ready=\"true\"] [data-sileo-content] {\n\ttransition: opacity calc(var(--sileo-duration) * 0.08) ease\n\t\tcalc(var(--sileo-duration) * 0.04);\n}\n\n[data-sileo-content][data-edge=\"top\"] {\n\ttop: 0;\n}\n\n[data-sileo-content][data-edge=\"bottom\"] {\n\ttop: var(--sileo-height);\n}\n\n[data-sileo-content][data-visible=\"true\"] {\n\tpointer-events: auto;\n}\n\n[data-sileo-toast][data-ready=\"true\"]\n\t[data-sileo-content][data-visible=\"true\"] {\n\ttransition: opacity calc(var(--sileo-duration) * 0.6) ease\n\t\tcalc(var(--sileo-duration) * 0.3);\n}\n\n[data-sileo-description] {\n\twidth: 100%;\n\ttext-align: left;\n\tpadding: 1rem;\n\tfont-size: 0.875rem;\n\tline-height: 1.25rem;\n\tcontain: layout style paint;\n\tcontent-visibility: auto;\n}\n\n/* --------------------------------- Button --------------------------------- */\n\n[data-sileo-button] {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\theight: 1.75rem;\n\tpadding: 0 0.625rem;\n\tmargin-top: 0.75rem;\n\tborder-radius: 9999px;\n\tborder: 0;\n\tfont-size: 0.75rem;\n\tfont-weight: 500;\n\tcursor: pointer;\n\tcolor: var(--sileo-btn-color, currentColor);\n\tbackground-color: var(--sileo-btn-bg, transparent);\n\ttransition: background-color 150ms ease;\n}\n\n[data-sileo-button]:hover {\n\tbackground-color: var(--sileo-btn-bg-hover, transparent);\n}\n\n[data-sileo-button][data-state] {\n\t--sileo-btn-color: var(--_c);\n\t--sileo-btn-bg: color-mix(in oklch, var(--_c) 15%, transparent);\n\t--sileo-btn-bg-hover: color-mix(in oklch, var(--_c) 25%, transparent);\n}\n\n/* -------------------------------- Animations ------------------------------ */\n\n[data-sileo-icon=\"spin\"] {\n\tanimation: sileo-spin 1s linear infinite;\n}\n\n@keyframes sileo-spin {\n\tto {\n\t\ttransform: rotate(360deg);\n\t}\n}\n\n@keyframes sileo-header-enter {\n\tfrom {\n\t\topacity: 0;\n\t\tfilter: blur(6px);\n\t}\n\tto {\n\t\topacity: 1;\n\t\tfilter: blur(0px);\n\t}\n}\n\n@keyframes sileo-header-exit {\n\tfrom {\n\t\topacity: 1;\n\t\tfilter: blur(0px);\n\t}\n\tto {\n\t\topacity: 0;\n\t\tfilter: blur(6px);\n\t}\n}\n\n/* -------------------------------- Viewports ------------------------------- */\n\n[data-sileo-viewport] {\n\tposition: fixed;\n\tz-index: 50;\n\tdisplay: flex;\n\tgap: 0.75rem;\n\tpadding: 0.75rem;\n\tpointer-events: none;\n\tmax-width: calc(100vw - 1.5rem);\n\tcontain: layout style;\n}\n\n[data-sileo-viewport][data-position^=\"top\"]\n\t[data-sileo-toast]:not([data-ready=\"true\"]) {\n\tmargin-bottom: calc(-1 * (var(--sileo-height) + 0.75rem));\n}\n\n[data-sileo-viewport][data-position^=\"bottom\"]\n\t[data-sileo-toast]:not([data-ready=\"true\"]) {\n\tmargin-top: calc(-1 * (var(--sileo-height) + 0.75rem));\n}\n\n/* Vertical edge */\n[data-sileo-viewport][data-position^=\"top\"] {\n\ttop: 0;\n\tflex-direction: column-reverse;\n}\n\n[data-sileo-viewport][data-position^=\"bottom\"] {\n\tbottom: 0;\n\tflex-direction: column;\n}\n\n/* Horizontal alignment */\n[data-sileo-viewport][data-position$=\"left\"] {\n\tleft: 0;\n\talign-items: flex-start;\n}\n\n[data-sileo-viewport][data-position$=\"right\"] {\n\tright: 0;\n\talign-items: flex-end;\n}\n\n[data-sileo-viewport][data-position$=\"center\"] {\n\tleft: 50%;\n\ttransform: translateX(-50%);\n\talign-items: center;\n}\n\n@media (prefers-reduced-motion: no-preference) {\n\t[data-sileo-toast][data-ready=\"true\"]:hover,\n\t[data-sileo-toast][data-ready=\"true\"][data-exiting=\"true\"] {\n\t\twill-change: transform, opacity, height;\n\t}\n}\n\n@media (prefers-reduced-motion: reduce) {\n\t[data-sileo-viewport],\n\t[data-sileo-viewport] *,\n\t[data-sileo-viewport] *::before,\n\t[data-sileo-viewport] *::after {\n\t\tanimation-duration: 0.01ms;\n\t\tanimation-iteration-count: 1;\n\t\ttransition-duration: 0.01ms;\n\t}\n}\n\n/* --------------------------------- Themes -------------------------------- */\n\n[data-sileo-viewport][data-theme=\"dark\"] [data-sileo-description] {\n\tcolor: rgba(0, 0, 0, 0.5);\n}\n\n[data-sileo-viewport][data-theme=\"light\"] [data-sileo-description] {\n\tcolor: rgba(255, 255, 255, 0.5);\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -115856,36 +116127,6 @@ var update = _style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMP
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_css_loader_dist_cjs_js_ruleSet_1_rules_6_oneOf_1_use_1_postcss_loader_dist_cjs_js_ruleSet_1_rules_6_oneOf_1_use_2_leaflet_css__WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
-
-/***/ },
-
-/***/ "./node_modules/sileo/dist/styles.css"
-/*!********************************************!*\
-  !*** ./node_modules/sileo/dist/styles.css ***!
-  \********************************************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
-/* harmony import */ var _style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _css_loader_dist_cjs_js_ruleSet_1_rules_6_oneOf_1_use_1_postcss_loader_dist_cjs_js_ruleSet_1_rules_6_oneOf_1_use_2_styles_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../css-loader/dist/cjs.js??ruleSet[1].rules[6].oneOf[1].use[1]!../../postcss-loader/dist/cjs.js??ruleSet[1].rules[6].oneOf[1].use[2]!./styles.css */ "./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[6].oneOf[1].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[6].oneOf[1].use[2]!./node_modules/sileo/dist/styles.css");
-
-            
-
-var options = {};
-
-options.insert = "head";
-options.singleton = false;
-
-var update = _style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_css_loader_dist_cjs_js_ruleSet_1_rules_6_oneOf_1_use_1_postcss_loader_dist_cjs_js_ruleSet_1_rules_6_oneOf_1_use_2_styles_css__WEBPACK_IMPORTED_MODULE_1__["default"], options);
-
-
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_css_loader_dist_cjs_js_ruleSet_1_rules_6_oneOf_1_use_1_postcss_loader_dist_cjs_js_ruleSet_1_rules_6_oneOf_1_use_2_styles_css__WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ },
 

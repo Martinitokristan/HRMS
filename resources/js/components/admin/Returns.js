@@ -63,7 +63,7 @@ export default function Returns() {
             setPagination(res.data.data !== undefined ? res.data.data : res.data);
             setStats(res.data.stats || {});
         } catch (err) {
-            sileo.error('Failed to load returns');
+            sileo.error({ title: 'Failed to load returns' });
         } finally {
             setLoading(false);
         }
@@ -72,33 +72,33 @@ export default function Returns() {
     useEffect(() => { fetchReturns(); }, [fetchReturns, returnsRefresh.refreshTrigger]);
 
     const handleApprove = async (id) => {
-        if (!refundMethod) { sileo.error('Please select a refund method'); return; }
+        if (!refundMethod) { sileo.error({ title: 'Please select a refund method' }); return; }
         setActionLoading(true);
         try {
             const res = await api.post(`/returns/${id}/approve`, {
                 refund_method: refundMethod,
                 admin_notes: adminNotes || null,
             });
-            sileo.success(res.data.message || 'Return approved');
+            sileo.success({ title: res.data.message || 'Return approved' });
             setSelectedReturn(res.data.data);
             
             // Notify Admin, Customer History, and Inventory (since stock moved)
             markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS, STALE_KEYS.ADMIN_INVENTORY);
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to approve');
+            sileo.error({ title: err.response?.data?.message || 'Failed to approve' });
         } finally { setActionLoading(false); }
     };
 
     const handleReject = async (id) => {
-        if (!adminNotes.trim()) { sileo.error('Please provide a reason for rejection'); return; }
+        if (!adminNotes.trim()) { sileo.error({ title: 'Please provide a reason for rejection' }); return; }
         setActionLoading(true);
         try {
             const res = await api.post(`/returns/${id}/reject`, { admin_notes: adminNotes });
-            sileo.success(res.data.message || 'Return rejected');
+            sileo.success({ title: res.data.message || 'Return rejected' });
             setSelectedReturn(res.data.data);
             markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS);
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to reject');
+            sileo.error({ title: err.response?.data?.message || 'Failed to reject' });
         } finally { setActionLoading(false); }
     };
 
@@ -106,11 +106,11 @@ export default function Returns() {
         setActionLoading(true);
         try {
             const res = await api.post(`/returns/${id}/complete`);
-            sileo.success(res.data.message || 'Refund processed');
+            sileo.success({ title: res.data.message || 'Refund processed' });
             setSelectedReturn(res.data.data);
             markStale(STALE_KEYS.ADMIN_RETURNS, STALE_KEYS.CUSTOMER_RETURNS, STALE_KEYS.ADMIN_DASHBOARD);
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to complete');
+            sileo.error({ title: err.response?.data?.message || 'Failed to complete' });
         } finally { setActionLoading(false); }
     };
 
@@ -121,7 +121,7 @@ export default function Returns() {
             setAdminNotes(res.data.data.admin_notes || '');
             setRefundMethod(res.data.data.refund_method || 'original_payment');
         } catch (err) {
-            sileo.error('Failed to load return details');
+            sileo.error({ title: 'Failed to load return details' });
         }
     };
 
@@ -320,7 +320,7 @@ export default function Returns() {
                                                         <button
                                                             onClick={() => {
                                                                 navigator.clipboard.writeText(r.sale.payment_phone_number);
-                                                                sileo.success('Number copied to clipboard');
+                                                                sileo.success({ title: 'Number copied to clipboard' });
                                                             }}
                                                             className="text-green-600 hover:text-green-800 transition-colors p-1 rounded"
                                                             title="Copy number"

@@ -56,13 +56,13 @@ export default function CartPage() {
 
     const removeItem = (cartId) => {
         setCart(prev => prev.filter(item => item.cartId !== cartId));
-        sileo.success('Item removed from cart');
+        sileo.success({ title: 'Item removed from cart' });
     };
 
     const clearCart = () => {
         setCart([]);
         setShowClearConfirm(false);
-        sileo.success('Cart cleared');
+        sileo.success({ title: 'Cart cleared' });
     };
 
     const updateCartItem = (product, options) => {
@@ -87,13 +87,13 @@ export default function CartPage() {
             return [...filtered, { ...product, sell_price: price, cartId: newCartId, qty, variantString, selectedVariants: variants, variant_id }];
         });
         setSelectedProduct(null);
-        sileo.success('Item updated');
+        sileo.success({ title: 'Item updated' });
     };
 
     const switchVariant = (item, newVariant) => {
         // Check if new variant is in stock
         if ((newVariant.stock || 0) <= 0) {
-            sileo.error('This variant is out of stock');
+            sileo.error({ title: 'This variant is out of stock' });
             return;
         }
 
@@ -137,7 +137,7 @@ export default function CartPage() {
                     : i
             );
         });
-        sileo.success(`Switched to ${variantString}`);
+        sileo.success({ title: `Switched to ${variantString}` });
     };
 
     const cartTotal = cart.reduce((sum, item) => sum + (item.sell_price * item.qty), 0);
@@ -146,7 +146,7 @@ export default function CartPage() {
     const handleCheckout = () => {
         const selectedCount = cart.filter(item => item.selectedForCheckout).length;
         if (selectedCount === 0) {
-            sileo.error('Please select at least one item to checkout');
+            sileo.error({ title: 'Please select at least one item to checkout' });
             return;
         }
         navigate('/shop/order');

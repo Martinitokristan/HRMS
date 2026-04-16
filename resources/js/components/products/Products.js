@@ -88,7 +88,7 @@ export default function Products() {
             }
         } catch (err) {
             console.error('Failed to fetch products:', err);
-            sileo.error('Failed to load products list');
+            sileo.error({ title: 'Failed to load products list' });
             setProducts({ data: [], total: 0, current_page: 1 });
         } finally {
             if (!silent) setLoading(false);
@@ -113,11 +113,11 @@ export default function Products() {
         closeConfirm();
         try {
             await api.delete(`/products/${id}`);
-            sileo.success('Product deleted successfully');
+            sileo.success({ title: 'Product deleted successfully' });
             markStale(STALE_KEYS.ADMIN_PRODUCTS, STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.SUPPLIER_PRODUCTS);
             fetchData(true);
         } catch (err) {
-            sileo.error('Failed to delete product');
+            sileo.error({ title: 'Failed to delete product' });
         }
     };
 

@@ -83,7 +83,7 @@ export default function PurchaseTab({ mode = 'completed' }) {
         setActionLoading(true);
         try {
             await api.post(`/purchase-orders/${poId}/${action}`);
-            sileo.success(`PO ${action}d successfully`);
+            sileo.success({ title: `PO ${action}d successfully` });
             
             // Re-fetch quietly
             markStale(
@@ -97,7 +97,7 @@ export default function PurchaseTab({ mode = 'completed' }) {
             setViewPo(null);
             closeConfirm();
         } catch (err) {
-            sileo.error(err.response?.data?.message || `Failed to ${action} PO`);
+            sileo.error({ title: err.response?.data?.message || `Failed to ${action} PO` });
         } finally {
             setActionLoading(false);
         }

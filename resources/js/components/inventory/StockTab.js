@@ -222,17 +222,17 @@ export default function StockTab() {
         const available = parseFloat(transferModal.item.warehouse_stock);
 
         if (!transferModal.item || isNaN(qty) || qty < 1 || qty > available) {
-            sileo.error('Invalid transfer quantity');
+            sileo.error({ title: 'Invalid transfer quantity' });
             return;
         }
 
         if (!transferForm.unit_type_id) {
-            sileo.error('Please select a unit type');
+            sileo.error({ title: 'Please select a unit type' });
             return;
         }
 
         if (!transferForm.sell_price || parseFloat(transferForm.sell_price) <= 0) {
-            sileo.error('Please enter a valid retail price');
+            sileo.error({ title: 'Please enter a valid retail price' });
             return;
         }
 
@@ -252,7 +252,7 @@ export default function StockTab() {
                     purchase_price: transferForm.purchase_price,
                 },
             });
-            sileo.success('Stock displayed to storefront successfully!');
+            sileo.success({ title: 'Stock displayed to storefront successfully!' });
             if (viewVariantItem) {
                 // Keep viewVariantItem set so the breakdown modal restores after transfer
             }
@@ -264,7 +264,7 @@ export default function StockTab() {
             
             setExpandedProducts(new Set());
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to transfer stock');
+            sileo.error({ title: err.response?.data?.message || 'Failed to transfer stock' });
         } finally {
             setTransferLoading(false);
         }

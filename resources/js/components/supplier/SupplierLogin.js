@@ -20,10 +20,10 @@ export default function SupplierLogin() {
         setSubmitting(true);
         try {
             await login(form.email, form.password);
-            sileo.success('Login successful!');
+            sileo.success({ title: 'Login successful!' });
             navigate('/supplier/dashboard');
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Invalid credentials');
+            sileo.error({ title: err.response?.data?.message || 'Invalid credentials' });
             setSubmitting(false);
         }
     };

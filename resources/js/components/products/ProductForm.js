@@ -249,18 +249,18 @@ export default function ProductForm({ product, categories, suppliers, unitTypes,
             if (product) {
                 fd.append('_method', 'PUT');
                 await api.post(`/products/${product.id}`, fd);
-                sileo.success('Product updated successfully');
+                sileo.success({ title: 'Product updated successfully' });
             } else {
                 await api.post('/products', fd);
-                sileo.success('Product created successfully');
+                sileo.success({ title: 'Product created successfully' });
             }
             onSuccess();
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
-                sileo.error('Please check the highlighted fields.');
+                sileo.error({ title: 'Please check the highlighted fields.' });
             } else {
-                sileo.error(err.response?.data?.message || 'Error saving product');
+                sileo.error({ title: err.response?.data?.message || 'Error saving product' });
             }
         } finally {
             setLoading(false);

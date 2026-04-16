@@ -72,7 +72,7 @@ export default function SupplierCatalog() {
             }
         } catch (e) {
             console.error('Failed to fetch catalog:', e);
-            sileo.error('Failed to load supplier available products');
+            sileo.error({ title: 'Failed to load supplier available products' });
             setProducts({ data: [], total: 0 });
         } finally {
             setLoading(false);
@@ -81,17 +81,17 @@ export default function SupplierCatalog() {
 
     const handleOrder = async () => {
         if (!viewProduct || orderQty < (viewProduct.min_order_qty || 1)) {
-            sileo.error('Please enter a valid quantity.');
+            sileo.error({ title: 'Please enter a valid quantity.' });
             return;
         }
 
         const currentStock = selectedVariant ? selectedVariant.stock : viewProduct.total_stock;
         if (currentStock <= 0) {
-            sileo.error('This option is out of stock.');
+            sileo.error({ title: 'This option is out of stock.' });
             return;
         }
         if (orderQty > currentStock) {
-            sileo.error(`Only ${currentStock} units available for this option.`);
+            sileo.error({ title: `Only ${currentStock} units available for this option.` });
             return;
         }
 
@@ -108,14 +108,14 @@ export default function SupplierCatalog() {
                     unit_cost: unitCost,
                 }]
             });
-            sileo.success('Order request sent to supplier!');
+            sileo.success({ title: 'Order request sent to supplier!' });
             setViewProduct(null);
             setSelectedVariant(null);
             setSelectedOptions({ size: '', color: '', weight: '' });
             setOrderQty(1);
             fetchProducts();
         } catch (e) {
-            sileo.error(e.response?.data?.message || 'Failed to place order.');
+            sileo.error({ title: e.response?.data?.message || 'Failed to place order.' });
         } finally {
             setActionLoading(false);
         }

@@ -78,16 +78,16 @@ export default function Users() {
         try {
             if (modal.user) {
                 await api.put(`/users/${modal.user.id}`, formData);
-                sileo.success('User updated successfully');
+                sileo.success({ title: 'User updated successfully' });
             } else {
                 await api.post('/users', formData);
-                sileo.success('User created successfully');
+                sileo.success({ title: 'User created successfully' });
             }
             markStale(STALE_KEYS.ADMIN_USERS);
             fetchData(true);
             setModal({ open: false, user: null });
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Error saving user');
+            sileo.error({ title: err.response?.data?.message || 'Error saving user' });
         } finally {
             setSaving(false);
         }
@@ -97,11 +97,11 @@ export default function Users() {
         closeConfirm();
         try {
             await api.put(`/users/${userId}/status`, { status: currentStatus === 'active' ? 'suspended' : 'active' });
-            sileo.success('User status updated');
+            sileo.success({ title: 'User status updated' });
             markStale(STALE_KEYS.ADMIN_USERS);
             fetchData(true);
         } catch (e) {
-            sileo.error('Failed to update status');
+            sileo.error({ title: 'Failed to update status' });
         }
     };
 

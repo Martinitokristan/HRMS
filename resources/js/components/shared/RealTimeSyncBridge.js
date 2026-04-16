@@ -92,13 +92,13 @@ export default function RealTimeSyncBridge() {
                     
                     if (e.event_type === 'payment.confirmed') {
                         if (user.role === 'customer') {
-                            sileo.success("Payment Confirmed", { description: "Your GCash payment has been successfully verified." });
+                            sileo.success({ title: "Payment Confirmed", description: "Your GCash payment has been successfully verified." });
                         } else if (user.role === 'admin') {
-                            sileo.success("Payment Received", { description: "A customer's GCash payment has been confirmed." });
+                            sileo.success({ title: "Payment Received", description: "A customer's GCash payment has been confirmed." });
                         }
                     } else if (e.event_type === 'payment.proof_submitted') {
                         if (user.role === 'admin') {
-                            sileo.info("Payment Proof", { description: "A customer has submitted GCash payment proof." });
+                            sileo.info({ title: "Payment Proof", description: "A customer has submitted GCash payment proof." });
                         }
                     }
                 });

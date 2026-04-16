@@ -36,7 +36,7 @@ export default function SupplierBrandSettings() {
             const data = res.data?.data !== undefined ? res.data.data : res.data;
             setBrands(Array.isArray(data) ? data : []);
         } catch (err) {
-            if (!silent) sileo.error('Failed to load brands');
+            if (!silent) sileo.error({ title: 'Failed to load brands' });
         } finally {
             if (!silent) setLoading(false);
         }
@@ -49,7 +49,7 @@ export default function SupplierBrandSettings() {
     const handleAddBrand = async (e) => {
         e.preventDefault();
         if (!newBrand.name.trim()) {
-            sileo.error('Brand name is required');
+            sileo.error({ title: 'Brand name is required' });
             return;
         }
         setSaving(true);
@@ -58,12 +58,12 @@ export default function SupplierBrandSettings() {
                 name: newBrand.name.trim(),
                 description: newBrand.description.trim() || null,
             });
-            sileo.success('Brand added successfully');
+            sileo.success({ title: 'Brand added successfully' });
             markStale(STALE_KEYS.SUPPLIER_BRANDS);
             setNewBrand({ name: '', description: '' });
             fetchBrands(true);
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to add brand');
+            sileo.error({ title: err.response?.data?.message || 'Failed to add brand' });
         } finally {
             setSaving(false);
         }
@@ -73,11 +73,11 @@ export default function SupplierBrandSettings() {
         closeConfirm();
         try {
             await api.delete(`/supplier/brands/${id}`);
-            sileo.success('Brand deleted');
+            sileo.success({ title: 'Brand deleted' });
             markStale(STALE_KEYS.SUPPLIER_BRANDS);
             fetchBrands(true);
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to delete brand');
+            sileo.error({ title: err.response?.data?.message || 'Failed to delete brand' });
         }
     };
 

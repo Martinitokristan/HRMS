@@ -1,6 +1,5 @@
 import React from 'react';
 import { Toaster, sileo } from "sileo";
-import "sileo/styles.css";
 
 // Expose globally so every component import works and console testing is possible
 if (typeof window !== 'undefined') {

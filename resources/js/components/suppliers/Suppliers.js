@@ -82,7 +82,7 @@ export default function Suppliers() {
             }
         } catch (error) {
             console.error('Error fetching suppliers:', error);
-            sileo.error('Error fetching suppliers');
+            sileo.error({ title: 'Error fetching suppliers' });
             setSuppliers([]);
             setTotal(0);
         } finally {
@@ -108,14 +108,14 @@ export default function Suppliers() {
             const data = res.data?.data !== undefined ? res.data.data : res.data;
             
             if (data && (res.data.status === 'success' || !res.data.status)) {
-                sileo.success('Supplier deleted successfully');
+                sileo.success({ title: 'Supplier deleted successfully' });
                 markStale(STALE_KEYS.ADMIN_SUPPLIERS);
             } else {
-                sileo.error(res.data.message || 'Error deleting supplier');
+                sileo.error({ title: res.data.message || 'Error deleting supplier' });
             }
         } catch (error) {
             const msg = error.response?.data?.message || 'Error deleting supplier';
-            sileo.error(msg);
+            sileo.error({ title: msg });
         }
     };
 

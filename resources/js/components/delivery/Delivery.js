@@ -78,7 +78,7 @@ export default function Delivery() {
                 total: data.data?.total || dData.length
             });
         } catch (err) {
-            if (!silent) sileo.error('Failed to fetch delivery data');
+            if (!silent) sileo.error({ title: 'Failed to fetch delivery data' });
         } finally {
             if (!silent) setLoading(false);
         }
@@ -103,11 +103,11 @@ export default function Delivery() {
         if (!riderId) return;
         try {
             await api.put(`/deliveries/${deliveryId}/assign`, { rider_id: riderId });
-            sileo.success('Rider assigned successfully');
+            sileo.success({ title: 'Rider assigned successfully' });
             markStale(STALE_KEYS.ADMIN_DELIVERIES, STALE_KEYS.RIDER_DASHBOARD);
             fetchData(true);
         } catch (err) {
-            sileo.error('Assignment failed');
+            sileo.error({ title: 'Assignment failed' });
         }
     };
 
@@ -115,7 +115,7 @@ export default function Delivery() {
         try {
             await api.put(`/deliveries/${deliveryId}/status`, { status });
             const statusLabel = STATUS_CONFIG[status]?.label || status;
-            sileo.success(`Delivery marked as ${statusLabel}`);
+            sileo.success({ title: `Delivery marked as ${statusLabel}` });
             markStale(
                 STALE_KEYS.ADMIN_DELIVERIES,
                 STALE_KEYS.ADMIN_DASHBOARD,
@@ -124,14 +124,14 @@ export default function Delivery() {
             );
             fetchData(true);
         } catch (err) {
-            sileo.error('Status update failed');
+            sileo.error({ title: 'Status update failed' });
         }
     };
 
     const handleDeleteDelivery = async (id) => {
         try {
             await api.delete(`/deliveries/${id}`);
-            sileo.success('Delivery deleted successfully');
+            sileo.success({ title: 'Delivery deleted successfully' });
             markStale(
                 STALE_KEYS.ADMIN_DELIVERIES,
                 STALE_KEYS.ADMIN_DASHBOARD,
@@ -141,7 +141,7 @@ export default function Delivery() {
             fetchData(true);
             closeConfirm();
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Delete failed');
+            sileo.error({ title: err.response?.data?.message || 'Delete failed' });
         }
     };
 
@@ -154,14 +154,14 @@ export default function Delivery() {
                     api.put(`/deliveries/${id}/assign`, { rider_id: bulkRiderId })
                 )
             );
-            sileo.success(`Assigned ${selectedDeliveries.length} deliveries to rider`);
+            sileo.success({ title: `Assigned ${selectedDeliveries.length} deliveries to rider` });
             markStale(STALE_KEYS.ADMIN_DELIVERIES, STALE_KEYS.RIDER_DASHBOARD);
             fetchData(true);
             setSelectedDeliveries([]);
             setShowBulkAssign(false);
             setBulkRiderId('');
         } catch (err) {
-            sileo.error('Bulk assignment failed');
+            sileo.error({ title: 'Bulk assignment failed' });
         }
     };
 

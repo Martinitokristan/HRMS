@@ -105,11 +105,11 @@ export default function SupplierOrders({ mode = 'completed' }) {
         setSubmitting(true);
         try {
             await api.post(`/supplier/purchase-orders/${order.id}/accept`);
-            sileo.success(`${order.po_number} accepted! You can now mark it as delivered when ready.`);
+            sileo.success({ title: `${order.po_number} accepted! You can now mark it as delivered when ready.` });
             markStale(STALE_KEYS.SUPPLIER_ORDERS, STALE_KEYS.SUPPLIER_DASHBOARD, STALE_KEYS.ADMIN_PURCHASES);
             fetchOrders(true);
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to accept PO');
+            sileo.error({ title: err.response?.data?.message || 'Failed to accept PO' });
         } finally {
             setSubmitting(false);
         }
@@ -139,13 +139,13 @@ export default function SupplierOrders({ mode = 'completed' }) {
             await api.post(`/supplier/purchase-orders/${rejectModal.id}/reject`, {
                 rejection_reason: rejectionReason.trim(),
             });
-            sileo.success(`${rejectModal.po_number} rejected. The admin has been notified.`);
+            sileo.success({ title: `${rejectModal.po_number} rejected. The admin has been notified.` });
             markStale(STALE_KEYS.SUPPLIER_ORDERS, STALE_KEYS.SUPPLIER_DASHBOARD, STALE_KEYS.ADMIN_PURCHASES);
             setRejectModal(null);
             setRejectionReason('');
             fetchOrders(true);
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to reject PO');
+            sileo.error({ title: err.response?.data?.message || 'Failed to reject PO' });
         } finally {
             setSubmitting(false);
         }
@@ -159,13 +159,13 @@ export default function SupplierOrders({ mode = 'completed' }) {
             await api.post(`/supplier/purchase-orders/${selectedOrder.id}/deliver`, {
                 delivery_notes: deliveryNotes
             });
-            sileo.success('Order marked as delivered successfully!');
+            sileo.success({ title: 'Order marked as delivered successfully!' });
             markStale(STALE_KEYS.SUPPLIER_ORDERS, STALE_KEYS.SUPPLIER_DASHBOARD, STALE_KEYS.ADMIN_PURCHASES);
             setSelectedOrder(null);
             setDeliveryNotes('');
             fetchOrders(true);
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to mark as delivered');
+            sileo.error({ title: err.response?.data?.message || 'Failed to mark as delivered' });
         } finally {
             setSubmitting(false);
         }

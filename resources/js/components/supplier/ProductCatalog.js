@@ -49,7 +49,7 @@ export default function ProductCatalog() {
             const response = await api.get(`/supplier/products?${params}`);
             setProducts(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
-            sileo.error('Failed to fetch products');
+            sileo.error({ title: 'Failed to fetch products' });
         } finally {
             setLoading(false);
         }
@@ -78,11 +78,11 @@ export default function ProductCatalog() {
         
         try {
             await api.delete(`/supplier/products/${productId}`);
-            sileo.success('Product deleted successfully');
+            sileo.success({ title: 'Product deleted successfully' });
             fetchProducts();
             fetchStats();
         } catch (error) {
-            sileo.error('Failed to delete product');
+            sileo.error({ title: 'Failed to delete product' });
         }
     };
 
@@ -91,11 +91,11 @@ export default function ProductCatalog() {
         
         try {
             await api.put(`/supplier/products/${productId}`, { is_active: newStatus === 'active' });
-            sileo.success(`Product ${newStatus === 'active' ? 'activated' : 'deactivated'}`);
+            sileo.success({ title: `Product ${newStatus === 'active' ? 'activated' : 'deactivated'}` });
             fetchProducts();
             fetchStats();
         } catch (error) {
-            sileo.error('Failed to update product status');
+            sileo.error({ title: 'Failed to update product status' });
         }
     };
 

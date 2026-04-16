@@ -135,12 +135,12 @@ export default function OrderHistory() {
                 reason: cancelReason,
                 notes: cancelNotes || null,
             });
-            sileo.success("Order cancelled successfully");
+            sileo.success({ title: "Order cancelled successfully" });
             markStale(STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_INVENTORY);
             fetchData(true);
             closeCancelModal();
         } catch (err) {
-            sileo.error(err.response?.data?.message || "Failed to cancel order");
+            sileo.error({ title: err.response?.data?.message || "Failed to cancel order" });
         } finally {
             setCancellingId(null);
         }
@@ -169,7 +169,7 @@ export default function OrderHistory() {
     const handleSubmitReturn = async () => {
         if (!returnModal.order || !returnReason) return;
         const selectedItems = returnItems.filter(i => i.selected && i.quantity > 0);
-        if (selectedItems.length === 0) { sileo.error('Please select at least one item to return'); return; }
+        if (selectedItems.length === 0) { sileo.error({ title: 'Please select at least one item to return' }); return; }
 
         setSubmittingReturn(true);
         try {
@@ -179,7 +179,7 @@ export default function OrderHistory() {
                 reason_details: returnDetails || null,
                 items: selectedItems.map(i => ({ sale_item_id: i.sale_item_id, quantity: parseInt(i.quantity) })),
             });
-            sileo.success('Return request submitted successfully! You will be notified when it is reviewed.');
+            sileo.success({ title: 'Return request submitted successfully! You will be notified when it is reviewed.' });
             markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.ADMIN_RETURNS);
             fetchData(true);
             closeReturnModal();
@@ -189,10 +189,10 @@ export default function OrderHistory() {
             
             if (errors) {
                 const errorDetails = Object.values(errors).flat().join(', ');
-                sileo.error(`${errorMsg}: ${errorDetails}`);
+                sileo.error({ title: `${errorMsg}: ${errorDetails}` });
                 console.error('Return validation errors:', errors);
             } else {
-                sileo.error(errorMsg);
+                sileo.error({ title: errorMsg });
             }
         } finally {
             setSubmittingReturn(false);
@@ -222,12 +222,12 @@ export default function OrderHistory() {
             await api.post(`/customer/orders/${proofModal.order.id}/upload-proof`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            sileo.success("Payment proof uploaded! Please wait for verification.");
+            sileo.success({ title: "Payment proof uploaded! Please wait for verification." });
             markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_DASHBOARD);
             fetchData(true);
             closeProofModal();
         } catch (err) {
-            sileo.error(err.response?.data?.message || "Failed to upload proof");
+            sileo.error({ title: err.response?.data?.message || "Failed to upload proof" });
         } finally {
             setSubmittingProof(false);
         }
@@ -241,14 +241,14 @@ export default function OrderHistory() {
                 rating: ratingValue,
                 comment: ratingComment,
             });
-            sileo.success("Rating submitted successfully");
+            sileo.success({ title: "Rating submitted successfully" });
             markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_REVIEWS);
             fetchData(true);
             setRatingOrder(null);
             setRatingValue(0);
             setRatingComment("");
         } catch (err) {
-            sileo.error(err.response?.data?.message || "Failed to submit rating");
+            sileo.error({ title: err.response?.data?.message || "Failed to submit rating" });
         } finally {
             setSubmittingRating(false);
         }

@@ -13,7 +13,7 @@ export default function RatingModal({ isOpen, onClose, delivery, onSuccess }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (rating === 0) {
-            sileo.error('Please select a rating');
+            sileo.error({ title: 'Please select a rating' });
             return;
         }
 
@@ -23,11 +23,11 @@ export default function RatingModal({ isOpen, onClose, delivery, onSuccess }) {
                 rating,
                 comment: comment.trim()
             });
-            sileo.success('Thank you for your feedback!');
+            sileo.success({ title: 'Thank you for your feedback!' });
             if (onSuccess) onSuccess();
             onClose();
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to submit rating');
+            sileo.error({ title: err.response?.data?.message || 'Failed to submit rating' });
         } finally {
             setSubmitting(false);
         }

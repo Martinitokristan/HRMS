@@ -110,10 +110,10 @@ export default function SupplierRegister() {
             };
             const response = await api.post('/supplier/auth/register', dataToSubmit);
             setSuccessMsg('Supplier account created successfully! Please check your email to verify your account.');
-            sileo.success('Registration successful!');
+            sileo.success({ title: 'Registration successful!' });
         } catch (error) {
             const errorMsg = error.response?.data?.message || 'Failed to register';
-            sileo.error(errorMsg);
+            sileo.error({ title: errorMsg });
             setError('form', errorMsg);
             if (error.response?.data?.errors) {
                 Object.keys(error.response.data.errors).forEach(key => {

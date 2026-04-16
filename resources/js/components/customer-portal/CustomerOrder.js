@@ -136,7 +136,7 @@ export default function CustomerOrder() {
     // Get current GPS location
     const handleGetLocation = () => {
         if (!navigator.geolocation) {
-            sileo.error("Geolocation is not supported by your browser.");
+            sileo.error({ title: "Geolocation is not supported by your browser." });
             return;
         }
         setGpsLoading(true);
@@ -144,10 +144,10 @@ export default function CustomerOrder() {
             (position) => {
                 setCheckoutPosition([position.coords.latitude, position.coords.longitude]);
                 setGpsLoading(false);
-                sileo.success("Location updated to your current GPS position.");
+                sileo.success({ title: "Location updated to your current GPS position." });
             },
             (error) => {
-                sileo.error("Unable to get GPS location.");
+                sileo.error({ title: "Unable to get GPS location." });
                 setGpsLoading(false);
             },
             { enableHighAccuracy: true }
@@ -262,14 +262,14 @@ export default function CustomerOrder() {
 
         // Validate address
         if (!deliveryStreet || !deliveryMunicipality || !deliveryProvince) {
-            sileo.error("Please complete your delivery address (province, municipality, and street are required).");
+            sileo.error({ title: "Please complete your delivery address (province, municipality, and street are required)." });
             return;
         }
         const address = [deliveryStreet.trim(), deliveryBarangay, deliveryMunicipality, deliveryProvince].filter(Boolean).join(', ');
 
         // Validate cart has items
         if (!cart || cart.length === 0) {
-            sileo.error("Your cart is empty.");
+            sileo.error({ title: "Your cart is empty." });
             return;
         }
 
@@ -305,7 +305,7 @@ export default function CustomerOrder() {
 
         } catch (err) {
             console.error('Order error:', err);
-            sileo.error(err.response?.data?.message || "Failed to place order. Please try again.");
+            sileo.error({ title: err.response?.data?.message || "Failed to place order. Please try again." });
             setLoading(false);
         }
     };
@@ -688,7 +688,7 @@ export default function CustomerOrder() {
                                                 link.download = `GCash-Payment-${parseFloat(gcashAmount).toFixed(2)}.png`;
                                                 link.href = url;
                                                 link.click();
-                                                sileo.success("QR code saved to your device!");
+                                                sileo.success({ title: "QR code saved to your device!" });
                                             }
                                         }}
                                     >

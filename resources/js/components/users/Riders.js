@@ -73,11 +73,11 @@ export default function Riders() {
         if (!datetime) return;
         try {
             await api.post(`/riders/${id}/interview`, { interview_at: datetime });
-            sileo.success('Interview scheduled!');
+            sileo.success({ title: 'Interview scheduled!' });
             markStale(STALE_KEYS.ADMIN_RIDERS);
             fetchData(true);
         } catch (err) {
-            sileo.error('Failed to schedule interview');
+            sileo.error({ title: 'Failed to schedule interview' });
         }
     };
 
@@ -85,11 +85,11 @@ export default function Riders() {
         closeConfirm();
         try {
             await api.post(`/riders/${id}/approve`);
-            sileo.success('Rider hired and account activated!');
+            sileo.success({ title: 'Rider hired and account activated!' });
             markStale(STALE_KEYS.ADMIN_RIDERS);
             fetchData(true);
         } catch (err) {
-            sileo.error('Failed to hire rider');
+            sileo.error({ title: 'Failed to hire rider' });
         }
     };
 

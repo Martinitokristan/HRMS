@@ -82,7 +82,7 @@ export default function SalesTab() {
     const performReturn = async (saleId) => {
         try {
             await api.post(`/sales/${saleId}/return`);
-            sileo.success('Order returned and stock restored');
+            sileo.success({ title: 'Order returned and stock restored' });
             markStale(
                 STALE_KEYS.ADMIN_ORDERS,
                 STALE_KEYS.ADMIN_INVENTORY,
@@ -93,7 +93,7 @@ export default function SalesTab() {
             setViewOrder(null);
             closeConfirm();
         } catch (err) {
-            sileo.error('Failed to return order');
+            sileo.error({ title: 'Failed to return order' });
         }
     };
 
@@ -109,7 +109,7 @@ export default function SalesTab() {
     const performUpdateStatus = async (saleId, newStatus) => {
         try {
             const res = await api.put(`/sales/${saleId}/status`, { status: newStatus });
-            sileo.success(res.data.message || 'Status updated');
+            sileo.success({ title: res.data.message || 'Status updated' });
             setViewOrder(res.data.data);
             markStale(
                 STALE_KEYS.ADMIN_ORDERS,
@@ -121,7 +121,7 @@ export default function SalesTab() {
             fetchProds(true);
             closeConfirm();
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to update status');
+            sileo.error({ title: err.response?.data?.message || 'Failed to update status' });
         }
     };
 

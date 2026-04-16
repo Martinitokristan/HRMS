@@ -58,7 +58,7 @@ export default function RiderDashboard() {
             const response = await api.get('/riders/me/dashboard');
             setDashboard(response.data.data !== undefined ? response.data.data : response.data);
         } catch (error) {
-            sileo.error('Failed to fetch dashboard data');
+            sileo.error({ title: 'Failed to fetch dashboard data' });
         } finally {
             setLoading(false);
         }
@@ -102,20 +102,20 @@ export default function RiderDashboard() {
                 availability: response.data.data?.availability || response.data.availability
             }));
             const availability = response.data.data?.availability || response.data.availability;
-            sileo.success(`You are now ${availability === 'online' ? 'Online' : 'Offline'}`);
+            sileo.success({ title: `You are now ${availability === 'online' ? 'Online' : 'Offline'}` });
         } catch (error) {
-            sileo.error('Failed to update status');
+            sileo.error({ title: 'Failed to update status' });
         }
     };
 
     const acceptDelivery = async (deliveryId) => {
         try {
             await api.post(`/deliveries/${deliveryId}/self-assign`);
-            sileo.success('Delivery accepted successfully');
+            sileo.success({ title: 'Delivery accepted successfully' });
             fetchActiveDelivery();
             fetchDashboard();
         } catch (error) {
-            sileo.error('Failed to accept delivery');
+            sileo.error({ title: 'Failed to accept delivery' });
         }
     };
 
@@ -124,11 +124,11 @@ export default function RiderDashboard() {
         
         try {
             await api.post(`/deliveries/${activeDelivery.id}/status`, { status });
-            sileo.success(`Delivery status updated to ${status}`);
+            sileo.success({ title: `Delivery status updated to ${status}` });
             fetchActiveDelivery();
             fetchDashboard();
         } catch (error) {
-            sileo.error('Failed to update delivery status');
+            sileo.error({ title: 'Failed to update delivery status' });
         }
     };
 

@@ -91,7 +91,7 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
             })
             .catch(() => {
                 if (isMounted) {
-                    sileo.error('Failed to load supplier details');
+                    sileo.error({ title: 'Failed to load supplier details' });
                     setLoading(false);
                 }
             });

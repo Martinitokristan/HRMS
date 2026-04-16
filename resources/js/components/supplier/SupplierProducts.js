@@ -119,9 +119,9 @@ export default function SupplierProducts() {
             await fetchCategories();
             if (created?.id) setForm(f => ({ ...f, category_id: String(created.id) }));
             setNewCategoryName('');
-            sileo.success('Category created!');
+            sileo.success({ title: 'Category created!' });
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to create category');
+            sileo.error({ title: err.response?.data?.message || 'Failed to create category' });
         } finally {
             setCreatingCategory(false);
         }
@@ -372,7 +372,7 @@ export default function SupplierProducts() {
         );
         
         if (variants.length > 0 && validVariants.length === 0) {
-            sileo.error('Please fill in at least one field for each variant or remove empty variants');
+            sileo.error({ title: 'Please fill in at least one field for each variant or remove empty variants' });
             return;
         }
         
@@ -416,10 +416,10 @@ export default function SupplierProducts() {
             if (editing) {
                 fd.append('_method', 'PUT');
                 await api.post(`/supplier/products/${editing.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-                sileo.success('Product updated!');
+                sileo.success({ title: 'Product updated!' });
             } else {
                 await api.post('/supplier/products', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-                sileo.success('Product created!');
+                sileo.success({ title: 'Product created!' });
             }
             markStale(STALE_KEYS.SUPPLIER_PRODUCTS, STALE_KEYS.ADMIN_INVENTORY, STALE_KEYS.CUSTOMER_SHOP);
             setFormOpen(false);
@@ -428,9 +428,9 @@ export default function SupplierProducts() {
             const data = err.response?.data;
             if (data?.errors) {
                 const firstError = Object.values(data.errors).flat()[0];
-                sileo.error(firstError || data.message || 'Validation failed');
+                sileo.error({ title: firstError || data.message || 'Validation failed' });
             } else {
-                sileo.error(data?.message || 'Failed to save product');
+                sileo.error({ title: data?.message || 'Failed to save product' });
             }
         } finally {
             setSubmitting(false);
@@ -441,11 +441,11 @@ export default function SupplierProducts() {
         closeConfirm();
         try {
             await api.delete(`/supplier/products/${id}`);
-            sileo.success('Product deleted');
+            sileo.success({ title: 'Product deleted' });
             markStale(STALE_KEYS.SUPPLIER_PRODUCTS, STALE_KEYS.ADMIN_INVENTORY, STALE_KEYS.CUSTOMER_SHOP);
             fetchProducts(true);
         } catch (err) {
-            sileo.error('Failed to delete product');
+            sileo.error({ title: 'Failed to delete product' });
         }
     };
 

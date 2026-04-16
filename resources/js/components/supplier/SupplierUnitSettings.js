@@ -52,18 +52,18 @@ export default function SupplierUnitSettings() {
 
     const handleSaveUnit = async () => {
         if (!newUnit.purchase_unit.trim() || !newUnit.sell_unit.trim()) {
-            sileo.error('Please fill in all required fields');
+            sileo.error({ title: 'Please fill in all required fields' });
             return;
         }
         setSaving(true);
         try {
             await api.post('/supplier/unit-types', newUnit);
-            sileo.success('Unit type added successfully');
+            sileo.success({ title: 'Unit type added successfully' });
             markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             setNewUnit({ purchase_unit: '', sell_unit: '', multiplier: 1 });
             fetchData(true);
         } catch (e) {
-            sileo.error(e.response?.data?.message || 'Error saving unit type');
+            sileo.error({ title: e.response?.data?.message || 'Error saving unit type' });
         } finally {
             setSaving(false);
         }
@@ -73,11 +73,11 @@ export default function SupplierUnitSettings() {
         closeConfirm();
         try {
             await api.delete(`/supplier/unit-types/${id}`);
-            sileo.success('Unit type deleted');
+            sileo.success({ title: 'Unit type deleted' });
             markStale(STALE_KEYS.SUPPLIER_SETTINGS);
             fetchData(true);
         } catch (e) {
-            sileo.error('Error deleting unit type');
+            sileo.error({ title: 'Error deleting unit type' });
         }
     };
 

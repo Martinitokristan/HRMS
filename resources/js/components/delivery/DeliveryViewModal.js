@@ -22,7 +22,7 @@ export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
             })
             .catch(err => {
                 if (isMounted) {
-                    sileo.error('Failed to load delivery details');
+                    sileo.error({ title: 'Failed to load delivery details' });
                     setLoading(false);
                 }
             });

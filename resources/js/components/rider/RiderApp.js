@@ -64,7 +64,7 @@ export default function RiderApp() {
     // Watch Geolocation
     useEffect(() => {
         if (!navigator.geolocation) {
-            sileo.error('Geolocation is not supported by your browser');
+            sileo.error({ title: 'Geolocation is not supported by your browser' });
             return;
         }
 
@@ -76,7 +76,7 @@ export default function RiderApp() {
             },
             (err) => {
                 console.warn('Geolocation error:', err);
-                sileo.warning('Unable to get your location. Using default.');
+                sileo.warning({ title: 'Unable to get your location. Using default.' });
             },
             { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
         );
@@ -100,7 +100,7 @@ export default function RiderApp() {
             setMyJobs(d.my_jobs || []);
             setCompleted(d.completed || []);
         } catch (e) {
-            sileo.error('Failed to fetch dashboard data');
+            sileo.error({ title: 'Failed to fetch dashboard data' });
         } finally {
             setLoading(false);
         }
@@ -125,7 +125,7 @@ export default function RiderApp() {
                     longitude: riderPos[1],
                 }).then(res => {
                     if (res.data.notified) {
-                        sileo.success(`Customer notified — you're ${Math.round(res.data.distance_km * 1000)}m away!`);
+                        sileo.success({ title: `Customer notified — you're ${Math.round(res.data.distance_km * 1000)}m away!` });
                     }
                 }).catch(() => { });
             });
@@ -144,10 +144,10 @@ export default function RiderApp() {
             } else {
                 await api.put(`/deliveries/${id}/status`, { status });
             }
-            sileo.success(actionNote || 'Action successful');
+            sileo.success({ title: actionNote || 'Action successful' });
             triggerRefresh();
         } catch (e) {
-            sileo.error('Action failed');
+            sileo.error({ title: 'Action failed' });
         }
     };
 

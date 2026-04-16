@@ -115,7 +115,7 @@ export default function RiderRegister() {
         }
 
         if (nameErr || phoneErr || passErr || idErr || form.password !== form.password_confirmation) {
-            sileo.error('Please fix the validation errors.');
+            sileo.error({ title: 'Please fix the validation errors.' });
             return;
         }
 
@@ -136,10 +136,10 @@ export default function RiderRegister() {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setSuccessMsg('Application submitted! Please check your email to verify your account.');
-            sileo.success('Application submitted successfully!');
+            sileo.success({ title: 'Application submitted successfully!' });
         } catch (err) {
             const errorMsg = err.response?.data?.message || 'Registration failed';
-            sileo.error(errorMsg);
+            sileo.error({ title: errorMsg });
             setError('form', errorMsg);
             if (err.response?.data?.errors) {
                 Object.keys(err.response.data.errors).forEach(key => {

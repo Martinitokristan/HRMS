@@ -103,10 +103,10 @@ export default function SupplierSettings() {
         setSaving(true);
         try {
             await api.put('/supplier/auth/profile', profile);
-            sileo.success('Profile updated successfully');
+            sileo.success({ title: 'Profile updated successfully' });
             if (refreshSettings) await refreshSettings();
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to update profile');
+            sileo.error({ title: err.response?.data?.message || 'Failed to update profile' });
         } finally {
             setSaving(false);
         }
@@ -115,16 +115,16 @@ export default function SupplierSettings() {
     const handleChangePassword = async (e) => {
         e.preventDefault();
         if (passwords.new_password !== passwords.new_password_confirmation) {
-            sileo.error('Passwords do not match');
+            sileo.error({ title: 'Passwords do not match' });
             return;
         }
         setSaving(true);
         try {
             await api.put('/supplier/auth/change-password', passwords);
-            sileo.success('Password changed successfully');
+            sileo.success({ title: 'Password changed successfully' });
             setPasswords({ current_password: '', new_password: '', new_password_confirmation: '' });
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to change password');
+            sileo.error({ title: err.response?.data?.message || 'Failed to change password' });
         } finally {
             setSaving(false);
         }
@@ -141,9 +141,9 @@ export default function SupplierSettings() {
             if (refreshSettings) await refreshSettings();
             if (refreshCategories) await refreshCategories();
             fetchCategories(true);
-            sileo.success('Category added');
+            sileo.success({ title: 'Category added' });
         } catch (err) {
-            sileo.error(err.response?.data?.message || 'Failed to add category');
+            sileo.error({ title: err.response?.data?.message || 'Failed to add category' });
         } finally {
             setSaving(false);
         }
@@ -157,9 +157,9 @@ export default function SupplierSettings() {
             if (refreshSettings) await refreshSettings();
             if (refreshCategories) await refreshCategories();
             fetchCategories(true);
-            sileo.success('Category deleted');
+            sileo.success({ title: 'Category deleted' });
         } catch (err) {
-            sileo.error('Failed to delete category');
+            sileo.error({ title: 'Failed to delete category' });
         }
     };
 

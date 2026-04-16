@@ -44,15 +44,15 @@ export default function SupplierForm({ isOpen, supplier, onSuccess, onCancel }) 
         try {
             if (supplier?.id) {
                 await api.put(`/suppliers/${supplier.id}`, form);
-                sileo.success('Supplier updated successfully');
+                sileo.success({ title: 'Supplier updated successfully' });
             } else {
                 await api.post('/suppliers', form);
-                sileo.success('Supplier added successfully');
+                sileo.success({ title: 'Supplier added successfully' });
             }
             onSuccess();
         } catch (error) {
             const msg = error.response?.data?.message || 'Error saving supplier';
-            sileo.error(msg);
+            sileo.error({ title: msg });
         } finally {
             setLoading(false);
         }

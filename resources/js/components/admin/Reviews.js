@@ -60,7 +60,7 @@ export default function Reviews() {
             const response = await api.get(`/reviews?${params.toString()}`);
             
             if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-                sileo.error('Failed to load reviews: Server returned an invalid format');
+                sileo.error({ title: 'Failed to load reviews: Server returned an invalid format' });
                 setReviews([]);
                 return;
             }
@@ -90,7 +90,7 @@ export default function Reviews() {
             }
         } catch (error) {
             console.error('Failed to fetch reviews:', error);
-            sileo.error('Failed to load reviews');
+            sileo.error({ title: 'Failed to load reviews' });
             setReviews([]);
         } finally {
             setLoading(false);
@@ -105,7 +105,7 @@ export default function Reviews() {
                 closeConfirm();
                 try {
                     await api.delete(`/reviews/${reviewId}`);
-                    sileo.success('Review deleted successfully');
+                    sileo.success({ title: 'Review deleted successfully' });
                     
                     // Trigger sync for Admin and Customer (storefront product ratings)
                     markStale(STALE_KEYS.ADMIN_REVIEWS, STALE_KEYS.CUSTOMER_SHOP);
@@ -113,7 +113,7 @@ export default function Reviews() {
                     setSelectedReview(null);
                 } catch (error) {
                     console.error('Failed to delete review:', error);
-                    sileo.error('Failed to delete review');
+                    sileo.error({ title: 'Failed to delete review' });
                 }
             },
             'destructive'

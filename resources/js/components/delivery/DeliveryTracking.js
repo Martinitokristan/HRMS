@@ -38,7 +38,7 @@ export default function DeliveryTracking({ deliveryId }) {
                 });
             }
         } catch (error) {
-            sileo.error('Failed to fetch delivery details');
+            sileo.error({ title: 'Failed to fetch delivery details' });
         } finally {
             setLoading(false);
         }
