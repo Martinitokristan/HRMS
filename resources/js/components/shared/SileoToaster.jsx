@@ -1,5 +1,11 @@
 import React from 'react';
-import { Toaster } from "sileo";
+import { Toaster, sileo } from "sileo";
+import "../../../../node_modules/sileo/dist/styles.css";
+
+// Expose globally so every component import works and console testing is possible
+if (typeof window !== 'undefined') {
+  window.sileo = sileo;
+}
 
 export default function SileoToaster() {
   return (
