@@ -1,33 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-    Plus, 
-    Search, 
-    Filter, 
-    Edit, 
-    Trash2, 
-    Package, 
-    Barcode, 
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Plus,
+    Search,
+    Filter,
+    Edit,
+    Trash2,
+    Package,
+    Barcode,
     DollarSign,
     Eye,
-    Star
-} from 'lucide-react';
-import api from '../../lib/api';
+    Star,
+} from "lucide-react";
+import api from "../../lib/api";
 
 export default function ProductCatalog() {
     const { user } = useAuth();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [search, setSearch] = useState("");
+    const [categoryFilter, setCategoryFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [stats, setStats] = useState(null);
@@ -42,14 +48,18 @@ export default function ProductCatalog() {
         setLoading(true);
         try {
             const params = new URLSearchParams();
-            if (search) params.append('search', search);
-            if (categoryFilter) params.append('category_id', categoryFilter);
-            if (statusFilter !== 'all') params.append('status', statusFilter);
+            if (search) params.append("search", search);
+            if (categoryFilter) params.append("category_id", categoryFilter);
+            if (statusFilter !== "all") params.append("status", statusFilter);
 
             const response = await api.get(`/supplier/products?${params}`);
-            setProducts(response.data.data !== undefined ? response.data.data : response.data);
+            setProducts(
+                response.data.data !== undefined
+                    ? response.data.data
+                    : response.data,
+            );
         } catch (error) {
-            toast.error('Failed to fetch products');
+            toast.error("Failed to fetch products");
         } finally {
             setLoading(false);
         }
@@ -57,56 +67,70 @@ export default function ProductCatalog() {
 
     const fetchCategories = async () => {
         try {
-            const response = await api.get('/supplier/categories');
-            setCategories(response.data.data !== undefined ? response.data.data : response.data);
+            const response = await api.get("/supplier/categories");
+            setCategories(
+                response.data.data !== undefined
+                    ? response.data.data
+                    : response.data,
+            );
         } catch (error) {
-            console.error('Failed to fetch categories:', error);
+            console.error("Failed to fetch categories:", error);
         }
     };
 
     const fetchStats = async () => {
         try {
-            const response = await api.get('/supplier/stats');
-            setStats(response.data.data !== undefined ? response.data.data : response.data);
+            const response = await api.get("/supplier/stats");
+            setStats(
+                response.data.data !== undefined
+                    ? response.data.data
+                    : response.data,
+            );
         } catch (error) {
-            console.error('Failed to fetch stats:', error);
+            console.error("Failed to fetch stats:", error);
         }
     };
 
     const deleteProduct = async (productId) => {
-        if (!confirm('Are you sure you want to delete this product?')) return;
-        
+        if (!confirm("Are you sure you want to delete this product?")) return;
+
         try {
             await api.delete(`/supplier/products/${productId}`);
-            toast.success('Product deleted successfully');
+            toast.success("Product deleted successfully");
             fetchProducts();
             fetchStats();
         } catch (error) {
-            toast.error('Failed to delete product');
+            toast.error("Failed to delete product");
         }
     };
 
     const toggleProductStatus = async (productId, currentStatus) => {
-        const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-        
+        const newStatus = currentStatus === "active" ? "inactive" : "active";
+
         try {
-            await api.put(`/supplier/products/${productId}`, { is_active: newStatus === 'active' });
-            toast.success(`Product ${newStatus === 'active' ? 'activated' : 'deactivated'}`);
+            await api.put(`/supplier/products/${productId}`, {
+                is_active: newStatus === "active",
+            });
+            toast.success(
+                `Product ${newStatus === "active" ? "activated" : "deactivated"}`,
+            );
             fetchProducts();
             fetchStats();
         } catch (error) {
-            toast.error('Failed to update product status');
+            toast.error("Failed to update product status");
         }
     };
 
     const getStatusColor = (status) => {
-        return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+        return status === "active"
+            ? "bg-green-100 text-green-800"
+            : "bg-gray-100 text-gray-800";
     };
 
     const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
+        return new Intl.NumberFormat("en-PH", {
+            style: "currency",
+            currency: "PHP",
         }).format(amount || 0);
     };
 
@@ -128,8 +152,12 @@ export default function ProductCatalog() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Total Products</p>
-                                    <p className="text-2xl font-bold">{stats.total_products}</p>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        Total Products
+                                    </p>
+                                    <p className="text-2xl font-bold">
+                                        {stats.total_products}
+                                    </p>
                                 </div>
                                 <Package className="h-8 w-8 text-muted-foreground" />
                             </div>
@@ -139,8 +167,12 @@ export default function ProductCatalog() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Active Products</p>
-                                    <p className="text-2xl font-bold">{stats.active_products}</p>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        Active Products
+                                    </p>
+                                    <p className="text-2xl font-bold">
+                                        {stats.active_products}
+                                    </p>
                                 </div>
                                 <Eye className="h-8 w-8 text-muted-foreground" />
                             </div>
@@ -150,8 +182,12 @@ export default function ProductCatalog() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
-                                    <p className="text-2xl font-bold">{stats.total_orders}</p>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        Total Orders
+                                    </p>
+                                    <p className="text-2xl font-bold">
+                                        {stats.total_orders}
+                                    </p>
                                 </div>
                                 <DollarSign className="h-8 w-8 text-muted-foreground" />
                             </div>
@@ -161,10 +197,14 @@ export default function ProductCatalog() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Avg Rating</p>
+                                    <p className="text-sm font-medium text-muted-foreground">
+                                        Avg Rating
+                                    </p>
                                     <div className="flex items-center gap-1">
                                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                        <span className="text-2xl font-bold">{stats.avg_rating || 0}</span>
+                                        <span className="text-2xl font-bold">
+                                            {stats.avg_rating || 0}
+                                        </span>
                                     </div>
                                 </div>
                                 <Star className="h-8 w-8 text-muted-foreground" />
@@ -189,27 +229,42 @@ export default function ProductCatalog() {
                                 />
                             </div>
                         </div>
-                        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <Select
+                            value={categoryFilter || "all"}
+                            onValueChange={(val) =>
+                                setCategoryFilter(val === "all" ? "" : val)
+                            }
+                        >
                             <SelectTrigger className="w-full md:w-48">
                                 <SelectValue placeholder="All Categories" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">All Categories</SelectItem>
+                                <SelectItem value="all">
+                                    All Categories
+                                </SelectItem>
                                 {categories.map((category) => (
-                                    <SelectItem key={category.id} value={category.id}>
+                                    <SelectItem
+                                        key={category.id}
+                                        value={category.id}
+                                    >
                                         {category.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <Select
+                            value={statusFilter}
+                            onValueChange={setStatusFilter}
+                        >
                             <SelectTrigger className="w-full md:w-32">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All</SelectItem>
                                 <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
+                                <SelectItem value="inactive">
+                                    Inactive
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -225,19 +280,24 @@ export default function ProductCatalog() {
                 <Card>
                     <CardContent className="p-8 text-center">
                         <Package className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No products found</h3>
+                        <h3 className="text-lg font-medium mb-2">
+                            No products found
+                        </h3>
                         <p className="text-muted-foreground mb-4">
-                            {search || categoryFilter || statusFilter !== 'all' 
-                                ? 'Try adjusting your filters' 
-                                : 'Get started by adding your first product'
-                            }
+                            {search || categoryFilter || statusFilter !== "all"
+                                ? "Try adjusting your filters"
+                                : "Get started by adding your first product"}
                         </p>
-                        {!search && !categoryFilter && statusFilter === 'all' && (
-                            <Button onClick={() => setShowCreateModal(true)}>
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add Your First Product
-                            </Button>
-                        )}
+                        {!search &&
+                            !categoryFilter &&
+                            statusFilter === "all" && (
+                                <Button
+                                    onClick={() => setShowCreateModal(true)}
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Your First Product
+                                </Button>
+                            )}
                     </CardContent>
                 </Card>
             ) : (
@@ -256,13 +316,17 @@ export default function ProductCatalog() {
                                         <Package className="w-12 h-12 text-muted-foreground" />
                                     </div>
                                 )}
-                                <Badge className={`absolute top-2 right-2 ${getStatusColor(product.is_active ? 'active' : 'inactive')}`}>
-                                    {product.is_active ? 'Active' : 'Inactive'}
+                                <Badge
+                                    className={`absolute top-2 right-2 ${getStatusColor(product.is_active ? "active" : "inactive")}`}
+                                >
+                                    {product.is_active ? "Active" : "Inactive"}
                                 </Badge>
                             </div>
                             <CardContent className="p-4">
                                 <div className="space-y-2">
-                                    <h3 className="font-semibold line-clamp-2">{product.name}</h3>
+                                    <h3 className="font-semibold line-clamp-2">
+                                        {product.name}
+                                    </h3>
                                     <p className="text-sm text-muted-foreground line-clamp-2">
                                         {product.description}
                                     </p>
@@ -272,7 +336,8 @@ export default function ProductCatalog() {
                                         </Badge>
                                         {product.variants_count > 0 && (
                                             <Badge variant="outline">
-                                                {product.variants_count} variants
+                                                {product.variants_count}{" "}
+                                                variants
                                             </Badge>
                                         )}
                                     </div>
@@ -290,7 +355,9 @@ export default function ProductCatalog() {
                                     {product.avg_rating && (
                                         <div className="flex items-center gap-1">
                                             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                            <span className="text-sm">{product.avg_rating.toFixed(1)}</span>
+                                            <span className="text-sm">
+                                                {product.avg_rating.toFixed(1)}
+                                            </span>
                                             <span className="text-xs text-muted-foreground">
                                                 ({product.reviews_count || 0})
                                             </span>
@@ -301,7 +368,9 @@ export default function ProductCatalog() {
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => setEditingProduct(product)}
+                                        onClick={() =>
+                                            setEditingProduct(product)
+                                        }
                                         className="flex-1"
                                     >
                                         <Edit className="w-3 h-3 mr-1" />
@@ -310,14 +379,25 @@ export default function ProductCatalog() {
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => toggleProductStatus(product.id, product.is_active ? 'active' : 'inactive')}
+                                        onClick={() =>
+                                            toggleProductStatus(
+                                                product.id,
+                                                product.is_active
+                                                    ? "active"
+                                                    : "inactive",
+                                            )
+                                        }
                                     >
-                                        {product.is_active ? 'Deactivate' : 'Activate'}
+                                        {product.is_active
+                                            ? "Deactivate"
+                                            : "Activate"}
                                     </Button>
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => deleteProduct(product.id)}
+                                        onClick={() =>
+                                            deleteProduct(product.id)
+                                        }
                                     >
                                         <Trash2 className="w-3 h-3" />
                                     </Button>

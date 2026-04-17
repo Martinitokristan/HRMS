@@ -20555,10 +20555,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/bike.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/philippine-peso.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-bag.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/trending-up.js");
-/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
-/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
+/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -20587,7 +20586,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 function Dashboard() {
-  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_15__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_16__.STALE_KEYS.ADMIN_DASHBOARD),
+  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_14__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_15__.STALE_KEYS.ADMIN_DASHBOARD),
     refreshTrigger = _useSilentRefresh.refreshTrigger;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       stats: null,
@@ -20598,7 +20597,7 @@ function Dashboard() {
     setDashboardData = _useState2[1];
   var stats = dashboardData.stats,
     chartDataRaw = dashboardData.chartDataRaw;
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('month'),
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("month"),
     _useState4 = _slicedToArray(_useState3, 2),
     period = _useState4[0],
     setPeriod = _useState4[1];
@@ -20615,14 +20614,14 @@ function Dashboard() {
     returnRateData = _useState0[0],
     setReturnRateData = _useState0[1];
   var periods = [{
-    value: 'week',
-    label: '7 Days'
+    value: "week",
+    label: "7 Days"
   }, {
-    value: 'month',
-    label: '30 Days'
+    value: "month",
+    label: "30 Days"
   }, {
-    value: 'year',
-    label: '1 Year'
+    value: "year",
+    label: "1 Year"
   }];
   var fetchData = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
@@ -20641,7 +20640,7 @@ function Dashboard() {
             if (!silent) setLoading(true);
             _context.p = 1;
             _context.n = 2;
-            return Promise.all([_lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/sales/summary'), _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/reports/sales', {
+            return Promise.all([_lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get("/sales/summary"), _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get("/reports/sales", {
               params: {
                 period: period
               }
@@ -20660,7 +20659,7 @@ function Dashboard() {
           case 3:
             _context.p = 3;
             _t = _context.v;
-            console.error('Failed to fetch dashboard data', _t);
+            console.error("Failed to fetch dashboard data", _t);
           case 4:
             _context.p = 4;
             if (!silent) setLoading(false);
@@ -20682,7 +20681,7 @@ function Dashboard() {
           case 0:
             _context2.p = 0;
             _context2.n = 1;
-            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/reports/yearly-category-revenue', {
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get("/reports/yearly-category-revenue", {
               params: {
                 limit: 10
               }
@@ -20695,7 +20694,7 @@ function Dashboard() {
           case 2:
             _context2.p = 2;
             _t2 = _context2.v;
-            console.error('Failed to fetch yearly category revenue', _t2);
+            console.error("Failed to fetch yearly category revenue", _t2);
           case 3:
             return _context2.a(2);
         }
@@ -20713,7 +20712,7 @@ function Dashboard() {
           case 0:
             _context3.p = 0;
             _context3.n = 1;
-            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/reports/return-rate-by-category', {
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get("/reports/return-rate-by-category", {
               params: {
                 limit: 10
               }
@@ -20726,7 +20725,7 @@ function Dashboard() {
           case 2:
             _context3.p = 2;
             _t3 = _context3.v;
-            console.error('Failed to fetch return rate by category', _t3);
+            console.error("Failed to fetch return rate by category", _t3);
           case 3:
             return _context3.a(2);
         }
@@ -20752,9 +20751,9 @@ function Dashboard() {
     fetchReturnRate();
   }, [refreshTrigger]);
   var formatCurr = function formatCurr(val) {
-    return new Intl.NumberFormat('en-PH', {
-      style: 'currency',
-      currency: 'PHP',
+    return new Intl.NumberFormat("en-PH", {
+      style: "currency",
+      currency: "PHP",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(val || 0);
@@ -20762,11 +20761,11 @@ function Dashboard() {
   var chartData = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
     return chartDataRaw.map(function (d) {
       var _d$date;
-      var label = (_d$date = d.date) === null || _d$date === void 0 ? void 0 : _d$date.split('-').pop();
-      if (period === 'year') {
+      var label = (_d$date = d.date) === null || _d$date === void 0 ? void 0 : _d$date.split("-").pop();
+      if (period === "year") {
         var date = new Date(d.date);
-        label = date.toLocaleString('default', {
-          month: 'short'
+        label = date.toLocaleString("default", {
+          month: "short"
         });
       }
       return {
@@ -20781,64 +20780,64 @@ function Dashboard() {
       return d.value;
     })).concat([5]));
   }, [chartData]);
-  if (loading && !stats) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+  if (loading && !stats) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
     className: "flex items-center justify-center py-32",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
       className: "spinner"
     })
   });
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
       className: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("h2", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("h2", {
           className: "text-xl font-bold text-foreground tracking-tight",
           children: "Dashboard Overview"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
           className: "text-sm text-muted-foreground mt-1",
           children: "Real-time insights into your business performance."
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
         className: "flex items-center gap-2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
           variant: "outline",
           asChild: true,
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
             to: "/inventory/sales",
             children: "View All Orders"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
           asChild: true,
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
             to: "/reports",
             children: "View Reports"
           })
         })]
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
       className: "grid grid-cols-2 lg:grid-cols-4 gap-5 mb-5",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Today's Revenue",
-        value: stats !== null && stats !== void 0 && stats.total_revenue ? formatCurr(stats.total_revenue) : '₱0',
+        value: stats !== null && stats !== void 0 && stats.total_revenue ? formatCurr(stats.total_revenue) : "₱0",
         trend: "Live",
         trendUp: true,
         icon: lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"],
         accentColor: "green"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Orders Today",
         value: (stats === null || stats === void 0 ? void 0 : stats.orders_today) || 0,
         trend: "New",
         trendUp: true,
         icon: lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"],
         accentColor: "blue"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Low Stock Items",
         value: (stats === null || stats === void 0 ? void 0 : stats.low_stock_count) || 0,
         trend: "Required",
         trendUp: false,
         icon: lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"],
         accentColor: "amber"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Active Riders",
         value: (stats === null || stats === void 0 ? void 0 : stats.active_riders) || 0,
         trend: "Available",
@@ -20846,17 +20845,17 @@ function Dashboard() {
         icon: lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"],
         accentColor: "accent"
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
       className: "p-0 mb-5 overflow-hidden",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
         className: "flex items-center justify-between px-5 pt-4 pb-1",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("h3", {
           className: "text-sm font-bold text-foreground",
           children: "Order Scaling"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
           className: "flex gap-1 rounded-lg bg-secondary p-1",
           children: periods.map(function (p) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
               variant: period === p.value ? "default" : "ghost",
               size: "sm",
               className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)("h-7 px-3 text-[11px] font-bold", period !== p.value && "text-muted-foreground"),
@@ -20867,12 +20866,12 @@ function Dashboard() {
             }, p.value);
           })
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
         className: "px-2 pb-2",
         style: {
           height: 280
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_shared_LineChart__WEBPACK_IMPORTED_MODULE_4__["default"], {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_LineChart__WEBPACK_IMPORTED_MODULE_4__["default"], {
           data: chartData,
           maxValue: maxOrders,
           formatValue: function formatValue(v) {
@@ -20883,28 +20882,28 @@ function Dashboard() {
           color: "#3b82f6"
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
       className: "grid grid-cols-1 lg:grid-cols-2 gap-5",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
         className: "p-5",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
           className: "mb-4",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("h3", {
             className: "text-sm font-bold text-foreground flex items-center gap-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
               className: "h-4 w-4 text-primary"
             }), "Revenue by Category"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("p", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("p", {
             className: "text-[11px] text-muted-foreground mt-0.5",
             children: ["Top 10 categories \xB7 ", new Date().getFullYear(), " (Jan \u2013 Dec)"]
           })]
-        }), yearlyCategories.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+        }), yearlyCategories.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
           className: "flex items-center justify-center h-[220px] text-muted-foreground",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
             className: "text-center",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
               className: "h-10 w-10 mx-auto mb-2 opacity-30"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
               className: "text-sm",
               children: "No category data for this year"
             })]
@@ -20913,97 +20912,90 @@ function Dashboard() {
           var maxRev = Math.max.apply(Math, _toConsumableArray(yearlyCategories.map(function (c) {
             return Number(c.revenue);
           })).concat([1]));
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
-            className: "space-y-2.5",
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+            className: "flex items-end justify-around h-[200px] mt-6",
             children: yearlyCategories.map(function (cat, idx) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
-                  className: "flex justify-between text-[11px] mb-1",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
-                    className: "font-medium text-foreground truncate mr-2",
-                    title: cat.name,
-                    children: cat.name.length > 18 ? cat.name.slice(0, 17) + '…' : cat.name
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
-                    className: "text-muted-foreground shrink-0",
-                    children: formatCurr(cat.revenue)
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
-                  className: "h-2 rounded-full bg-secondary overflow-hidden",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
-                    className: "h-full rounded-full bg-primary transition-all duration-500",
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+                className: "flex flex-col items-center gap-1.5 w-[10%] min-w-[30px] h-full justify-end group cursor-pointer",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+                  className: "text-[10px] text-muted-foreground font-medium mb-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity",
+                  children: formatCurr(cat.revenue)
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+                  className: "w-full max-w-[32px] rounded-t-md bg-secondary flex-1 flex flex-col justify-end overflow-hidden",
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+                    className: "w-full bg-primary transition-all duration-500",
                     style: {
-                      width: "".concat(Number(cat.revenue) / maxRev * 100, "%")
+                      height: "".concat(Number(cat.revenue) / maxRev * 100, "%")
                     }
+                  })
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+                  className: "mt-1 h-6 flex items-center justify-center",
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("span", {
+                    className: "text-[10px] font-medium text-muted-foreground text-center truncate w-full px-1",
+                    title: cat.name,
+                    children: [cat.name.split(" ")[0], " "]
                   })
                 })]
               }, cat.id || idx);
             })
           });
         }()]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
         className: "p-5",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
           className: "mb-4",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("h3", {
             className: "text-sm font-bold text-foreground flex items-center gap-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
               className: "h-4 w-4 text-red-500"
             }), "Return Rate by Category"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
             className: "text-[11px] text-muted-foreground mt-0.5",
             children: "Which categories are returned most often"
           })]
-        }), returnRateData.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
+        }), returnRateData.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
           className: "flex items-center justify-center h-[220px] text-muted-foreground",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
             className: "text-center",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
               className: "h-10 w-10 mx-auto mb-2 opacity-30"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("p", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
               className: "text-sm",
               children: "No return data available"
             })]
           })
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
-          className: "px-2 pb-2",
+        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+          className: "space-y-4 mt-4 h-[220px] overflow-y-auto pr-2",
           style: {
-            height: 220
+            scrollbarWidth: "thin"
           },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_shared_LineChart__WEBPACK_IMPORTED_MODULE_4__["default"], {
-            data: returnRateData.map(function (c) {
-              return {
-                label: c.name.length > 8 ? c.name.slice(0, 7) + '…' : c.name,
-                value: c.return_rate,
-                fullName: c.name
-              };
-            }),
-            maxValue: Math.max.apply(Math, _toConsumableArray(returnRateData.map(function (c) {
-              return c.return_rate;
-            })).concat([1])),
-            formatValue: function formatValue(v) {
-              return "".concat(v, "%");
-            },
-            title: "",
-            totalValueLabel: "Avg Return Rate",
-            color: "#ef4444",
-            hideHeader: true
-          })
-        }), returnRateData.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
-          className: "mt-3 space-y-1.5",
-          children: returnRateData.slice(0, 3).map(function (cat) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
-              className: "flex items-center justify-between text-[11px]",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("span", {
-                className: "text-muted-foreground truncate mr-2",
-                children: cat.name
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
-                variant: "outline",
-                className: "text-[9px] px-1.5 shrink-0 text-red-600 border-red-200 bg-red-50",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"], {
-                  className: "h-2.5 w-2.5 mr-0.5"
-                }), cat.return_rate, "%"]
+          children: returnRateData.slice(0, 10).map(function (cat, idx) {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+              className: "flex items-center gap-3",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+                className: "w-24 shrink-0 text-right",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("span", {
+                  className: "text-[11px] font-medium text-foreground block truncate",
+                  title: cat.name,
+                  children: cat.name
+                })
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+                className: "flex-1 flex items-center gap-3",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+                  className: "h-2.5 rounded-full bg-secondary w-full overflow-hidden",
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+                    className: "h-full rounded-full bg-red-500 transition-all duration-500",
+                    style: {
+                      width: "".concat(Math.min(cat.return_rate, 100), "%")
+                    }
+                  })
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                  variant: "outline",
+                  className: "text-[10px] w-12 justify-center px-1 shrink-0 text-red-600 border-red-200 bg-red-50",
+                  children: [cat.return_rate, "%"]
+                })]
               })]
-            }, cat.id);
+            }, cat.id || idx);
           })
         })]
       })]
@@ -21795,13 +21787,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _context_ToastContext__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../context/ToastContext */ "./resources/js/context/ToastContext.js");
 /* harmony import */ var _shared_Modal__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../shared/Modal */ "./resources/js/components/shared/Modal.js");
 /* harmony import */ var _shared_Badge__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../shared/Badge */ "./resources/js/components/shared/Badge.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _components_ui_table__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/components/ui/table */ "./resources/js/components/ui/table.jsx");
+/* harmony import */ var _components_ui_badge__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/components/ui/badge */ "./resources/js/components/ui/badge.jsx");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
 
 
 
@@ -21834,7 +21830,7 @@ function DeliveryViewModal(_ref) {
       }
     })["catch"](function (err) {
       if (isMounted) {
-        showToast('Failed to load delivery details', 'error');
+        showToast("Failed to load delivery details", "error");
         setLoading(false);
       }
     });
@@ -21844,181 +21840,187 @@ function DeliveryViewModal(_ref) {
   }, [isOpen, deliveryId]);
   if (!isOpen) return null;
   var formatCurrency = function formatCurrency(val) {
-    return new Intl.NumberFormat('en-PH', {
-      style: 'currency',
-      currency: 'PHP'
+    return new Intl.NumberFormat("en-PH", {
+      style: "currency",
+      currency: "PHP"
     }).format(val || 0);
   };
   var formatTime = function formatTime(date) {
-    return date ? new Date(date).toLocaleString() : '-';
+    return date ? new Date(date).toLocaleString() : "-";
   };
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_3__["default"], {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_shared_Modal__WEBPACK_IMPORTED_MODULE_3__["default"], {
     isOpen: isOpen,
     onClose: onClose,
-    title: "Delivery ".concat((delivery === null || delivery === void 0 ? void 0 : delivery.tracking_number) || ''),
-    size: "lg",
-    children: loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
+    title: "Delivery ".concat((delivery === null || delivery === void 0 ? void 0 : delivery.tracking_number) || ""),
+    size: "md",
+    children: loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
       className: "py-4 text-center",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
         className: "spinner"
       })
-    }) : delivery ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-        className: "grid grid-2 gap-4 mb-5 border-radius-lg p-3 bg-surface2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-            className: "text-xs font-bold text-muted uppercase mb-2",
-            children: "Customer Info"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h3", {
-            className: "font-bold text-xl mb-2 text-primary",
-            children: ((_delivery$sale = delivery.sale) === null || _delivery$sale === void 0 || (_delivery$sale = _delivery$sale.customer) === null || _delivery$sale === void 0 ? void 0 : _delivery$sale.name) || 'Walk-in Customer'
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "info-group mb-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("label", {
-              className: "text-xs font-bold text-muted uppercase d-block",
-              children: "Contact Phone"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-              className: "font-semi text-md",
-              children: ((_delivery$sale2 = delivery.sale) === null || _delivery$sale2 === void 0 || (_delivery$sale2 = _delivery$sale2.customer) === null || _delivery$sale2 === void 0 ? void 0 : _delivery$sale2.phone) || 'N/A'
+    }) : delivery ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+      className: "space-y-6",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+        className: "grid grid-cols-1 md:grid-cols-2 gap-4 rounded-lg p-4 bg-muted/30 border border-border",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+          className: "space-y-3",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+              className: "text-xs font-bold text-muted-foreground uppercase mb-1",
+              children: "Customer Info"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("h3", {
+              className: "font-bold text-lg text-primary",
+              children: ((_delivery$sale = delivery.sale) === null || _delivery$sale === void 0 || (_delivery$sale = _delivery$sale.customer) === null || _delivery$sale === void 0 ? void 0 : _delivery$sale.name) || "Walk-in Customer"
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "info-group",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("label", {
-              className: "text-xs font-bold text-muted uppercase d-block",
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("label", {
+              className: "text-xs font-bold text-muted-foreground uppercase block mb-1",
+              children: "Contact Phone"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+              className: "font-medium text-sm text-foreground",
+              children: ((_delivery$sale2 = delivery.sale) === null || _delivery$sale2 === void 0 || (_delivery$sale2 = _delivery$sale2.customer) === null || _delivery$sale2 === void 0 ? void 0 : _delivery$sale2.phone) || "N/A"
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("label", {
+              className: "text-xs font-bold text-muted-foreground uppercase block mb-1",
               children: "Delivery Address"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-              className: "text-sm font-semi italic",
-              children: delivery.address || 'No address provided'
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+              className: "text-sm font-medium italic text-muted-foreground",
+              children: delivery.address || "No address provided"
             })]
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-            className: "text-xs font-bold text-muted uppercase mb-2",
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+          className: "space-y-3",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+            className: "text-xs font-bold text-muted-foreground uppercase mb-1",
             children: "Delivery Status"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "d-flex align-center justify-between mb-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-              className: "text-sm font-bold",
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            className: "flex items-center justify-between",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+              className: "text-sm font-medium text-muted-foreground",
               children: "Status:"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_shared_Badge__WEBPACK_IMPORTED_MODULE_4__.StatusBadge, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_shared_Badge__WEBPACK_IMPORTED_MODULE_4__.StatusBadge, {
               status: delivery.status
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "d-flex align-center justify-between mb-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-              className: "text-sm font-bold",
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            className: "flex items-center justify-between",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+              className: "text-sm font-medium text-muted-foreground",
               children: "Assigned Rider:"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-              className: "font-bold text-primary",
-              children: delivery.rider ? delivery.rider.name : 'Unassigned'
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+              className: "font-bold text-primary text-sm",
+              children: delivery.rider ? delivery.rider.name : "Unassigned"
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "d-flex align-center justify-between mb-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-              className: "text-sm font-bold",
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            className: "flex items-center justify-between",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+              className: "text-sm font-medium text-muted-foreground",
               children: "Order Reference:"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
-              className: "font-bold",
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("span", {
+              className: "font-bold text-sm text-foreground",
               children: ["#", (_delivery$sale3 = delivery.sale) === null || _delivery$sale3 === void 0 ? void 0 : _delivery$sale3.order_number]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "d-flex align-center justify-between mt-3 pt-3 border-top",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-              className: "text-sm font-bold text-muted",
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            className: "flex items-center justify-between mt-3 pt-3 border-t",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+              className: "text-sm font-bold text-muted-foreground",
               children: "Amount Due:"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                className: "text-xl font-bold text-accent",
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+              className: "flex items-center gap-2",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+                className: "text-lg font-bold text-primary",
                 children: formatCurrency((_delivery$sale4 = delivery.sale) === null || _delivery$sale4 === void 0 ? void 0 : _delivery$sale4.total_amount)
-              }), ((_delivery$sale5 = delivery.sale) === null || _delivery$sale5 === void 0 ? void 0 : _delivery$sale5.payment_method) === 'cod' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-                className: "badge badge--amber ms-2",
+              }), ((_delivery$sale5 = delivery.sale) === null || _delivery$sale5 === void 0 ? void 0 : _delivery$sale5.payment_method) === "cod" && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_6__.Badge, {
+                variant: "outline",
+                className: "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100",
                 children: "COD"
               })]
             })]
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h4", {
-        className: "text-xs font-bold text-muted uppercase mb-3 px-1",
-        children: "Order Items"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-        className: "table-wrap mb-5 border-radius-lg",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("table", {
-          className: "data-table",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("thead", {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("tr", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                children: "Item"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "text-center",
-                children: "Qty"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("th", {
-                className: "text-right",
-                children: "Subtotal"
-              })]
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("tbody", {
-            children: !((_delivery$sale6 = delivery.sale) !== null && _delivery$sale6 !== void 0 && _delivery$sale6.items) || delivery.sale.items.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("tr", {
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                colSpan: "3",
-                className: "text-center text-muted py-4",
-                children: "No items found in this order."
-              })
-            }) : delivery.sale.items.map(function (item) {
-              var _item$product;
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("tr", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "font-bold",
-                  children: ((_item$product = item.product) === null || _item$product === void 0 ? void 0 : _item$product.name) || 'Unknown Product'
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "text-center font-semi",
-                  children: parseFloat(item.quantity).toFixed(0)
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("td", {
-                  className: "text-right font-bold",
-                  children: formatCurrency(item.subtotal)
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("h4", {
+          className: "text-xs font-bold text-muted-foreground uppercase mb-2 px-1",
+          children: "Order Items"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+          className: "rounded-lg border overflow-hidden",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.Table, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableHeader, {
+              className: "bg-muted/50",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableRow, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableHead, {
+                  children: "Item"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableHead, {
+                  className: "text-center",
+                  children: "Qty"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableHead, {
+                  className: "text-right",
+                  children: "Subtotal"
                 })]
-              }, item.id);
-            })
-          })]
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("h4", {
-        className: "text-xs font-bold text-muted uppercase mb-3 px-1",
-        children: "Delivery Timeline"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-        className: "bg-surface2 p-4 border-radius-lg border",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-          className: "grid grid-3 gap-3",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "timeline-item",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("label", {
-              className: "text-xs font-bold text-muted uppercase d-block mb-1",
-              children: "Ordered At"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-              className: "font-bold text-md",
-              children: formatTime(delivery.created_at)
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableBody, {
+              children: !((_delivery$sale6 = delivery.sale) !== null && _delivery$sale6 !== void 0 && _delivery$sale6.items) || delivery.sale.items.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableRow, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableCell, {
+                  colSpan: 3,
+                  className: "text-center text-muted-foreground py-4",
+                  children: "No items found in this order."
+                })
+              }) : delivery.sale.items.map(function (item) {
+                var _item$product;
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableRow, {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableCell, {
+                    className: "font-medium",
+                    children: ((_item$product = item.product) === null || _item$product === void 0 ? void 0 : _item$product.name) || "Unknown Product"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableCell, {
+                    className: "text-center",
+                    children: parseFloat(item.quantity).toFixed(0)
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_5__.TableCell, {
+                    className: "text-right font-medium",
+                    children: formatCurrency(item.subtotal)
+                  })]
+                }, item.id);
+              })
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "timeline-item",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("label", {
-              className: "text-xs font-bold text-muted uppercase d-block mb-1",
-              children: "Picked Up At"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-              className: "font-bold text-md text-blue",
-              children: delivery.pickup_at ? formatTime(delivery.pickup_at) : delivery.status !== 'pending' ? 'Processing...' : 'Awaiting Pickup'
+          })
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("h4", {
+          className: "text-xs font-bold text-muted-foreground uppercase mb-2 px-1",
+          children: "Delivery Timeline"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+          className: "bg-muted/30 p-4 rounded-lg border border-border",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            className: "grid grid-cols-1 sm:grid-cols-3 gap-4",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("label", {
+                className: "text-xs font-bold text-muted-foreground uppercase block mb-1",
+                children: "Ordered At"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+                className: "font-bold text-sm text-foreground",
+                children: formatTime(delivery.created_at)
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("label", {
+                className: "text-xs font-bold text-muted-foreground uppercase block mb-1",
+                children: "Picked Up At"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+                className: "font-bold text-sm text-blue-600",
+                children: delivery.pickup_at ? formatTime(delivery.pickup_at) : delivery.status !== "pending" ? "Processing..." : "Awaiting Pickup"
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("label", {
+                className: "text-xs font-bold text-muted-foreground uppercase block mb-1",
+                children: "Delivered At"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+                className: "font-bold text-sm text-green-600",
+                children: formatTime(delivery.delivered_at)
+              })]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
-            className: "timeline-item",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("label", {
-              className: "text-xs font-bold text-muted uppercase d-block mb-1",
-              children: "Delivered At"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-              className: "font-bold text-md text-green",
-              children: formatTime(delivery.delivered_at)
-            })]
-          })]
-        })
+          })
+        })]
       })]
-    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
-      className: "text-center py-4 text-muted",
+    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+      className: "text-center py-4 text-muted-foreground",
       children: "Failed to load delivery details."
     })
   });
@@ -27402,16 +27404,19 @@ function ProductForm(_ref) {
     _useState6 = _slicedToArray(_useState5, 2),
     errors = _useState6[0],
     setErrors = _useState6[1];
-  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
-      sizes: [],
-      colors: [],
-      weights: []
-    }),
-    _useState8 = _slicedToArray(_useState7, 2),
-    variantValues = _useState8[0],
-    setVariantValues = _useState8[1];
+  var sizeVariant = Array.isArray(variants) ? variants.find(function (v) {
+    var _v$name;
+    return ((_v$name = v.name) === null || _v$name === void 0 ? void 0 : _v$name.toLowerCase()) === "size";
+  }) : null;
+  var colorVariant = Array.isArray(variants) ? variants.find(function (v) {
+    var _v$name2;
+    return ((_v$name2 = v.name) === null || _v$name2 === void 0 ? void 0 : _v$name2.toLowerCase()) === "color";
+  }) : null;
+  var weightVariant = Array.isArray(variants) ? variants.find(function (v) {
+    var _v$name3, _v$name4;
+    return v.id === 3 || ((_v$name3 = v.name) === null || _v$name3 === void 0 ? void 0 : _v$name3.toLowerCase().includes("weight")) || ((_v$name4 = v.name) === null || _v$name4 === void 0 ? void 0 : _v$name4.toLowerCase().includes("gram"));
+  }) : null;
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    fetchVariantValues();
     fetchBrands();
   }, []);
   var fetchBrands = /*#__PURE__*/function () {
@@ -27422,7 +27427,7 @@ function ProductForm(_ref) {
           case 0:
             _context.p = 0;
             _context.n = 1;
-            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/brands');
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get("/brands");
           case 1:
             res = _context.v;
             data = ((_res$data = res.data) === null || _res$data === void 0 ? void 0 : _res$data.data) !== undefined ? res.data.data : res.data || [];
@@ -27442,121 +27447,64 @@ function ProductForm(_ref) {
     };
   }();
 
-  // Fetch variant values for fallback when relationships fail
-  var fetchVariantValues = /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var _res$data2, res, variantData, sizes, colors, weights, _t2;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.p = _context2.n) {
-          case 0:
-            _context2.p = 0;
-            _context2.n = 1;
-            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/supplier/variant-values');
-          case 1:
-            res = _context2.v;
-            variantData = ((_res$data2 = res.data) === null || _res$data2 === void 0 ? void 0 : _res$data2.data) !== undefined ? res.data.data : res.data || [];
-            if (Array.isArray(variantData)) {
-              // Organize by variant type: 1=Size, 2=Color, 3=Weight
-              sizes = variantData.filter(function (v) {
-                return v.variant_id === 1;
-              });
-              colors = variantData.filter(function (v) {
-                return v.variant_id === 2;
-              });
-              weights = variantData.filter(function (v) {
-                return v.variant_id === 3;
-              });
-              setVariantValues({
-                sizes: sizes,
-                colors: colors,
-                weights: weights
-              });
-            }
-            _context2.n = 3;
-            break;
-          case 2:
-            _context2.p = 2;
-            _t2 = _context2.v;
-          case 3:
-            return _context2.a(2);
-        }
-      }, _callee2, null, [[0, 2]]);
-    }));
-    return function fetchVariantValues() {
-      return _ref3.apply(this, arguments);
-    };
-  }();
-
   // Helper function to get variant label by ID
   var getVariantLabelById = function getVariantLabelById(id, type) {
-    if (!id) return 'No ' + type;
+    if (!id) return "No " + type;
     var variantList = [];
-    if (type === 'size') variantList = variantValues.sizes || [];
-    if (type === 'color') variantList = variantValues.colors || [];
-    if (type === 'weight') variantList = variantValues.weights || [];
+    if (type === "size") variantList = (sizeVariant === null || sizeVariant === void 0 ? void 0 : sizeVariant.values) || [];
+    if (type === "color") variantList = (colorVariant === null || colorVariant === void 0 ? void 0 : colorVariant.values) || [];
+    if (type === "weight") variantList = (weightVariant === null || weightVariant === void 0 ? void 0 : weightVariant.values) || [];
     var variant = Array.isArray(variantList) ? variantList.find(function (v) {
       return v.id === parseInt(id);
     }) : null;
     return variant ? variant.label : "".concat(type.charAt(0).toUpperCase() + type.slice(1), " ID: ").concat(id);
   };
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
-      name: '',
-      barcode: '',
-      category_id: '',
-      supplier_id: '',
-      unit_type_id: '',
-      brand_id: '',
-      purchase_price: '',
-      sell_price: '',
-      sale_percentage: '',
-      description: ''
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+      name: "",
+      barcode: "",
+      category_id: "",
+      supplier_id: "",
+      unit_type_id: "",
+      brand_id: "",
+      purchase_price: "",
+      sell_price: "",
+      sale_percentage: "",
+      description: ""
     }),
+    _useState8 = _slicedToArray(_useState7, 2),
+    form = _useState8[0],
+    setForm = _useState8[1];
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState0 = _slicedToArray(_useState9, 2),
-    form = _useState0[0],
-    setForm = _useState0[1];
-  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    variantEnabled = _useState0[0],
+    setVariantEnabled = _useState0[1];
+  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState10 = _slicedToArray(_useState1, 2),
-    variantEnabled = _useState10[0],
-    setVariantEnabled = _useState10[1];
-  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState12 = _slicedToArray(_useState11, 2),
-    variantRows = _useState12[0],
-    setVariantRows = _useState12[1];
-  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+    variantRows = _useState10[0],
+    setVariantRows = _useState10[1];
+  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       enableSale: false,
       applyToVariants: false,
       baseProductSale: 0,
       variantSales: {}
     }),
-    _useState14 = _slicedToArray(_useState13, 2),
-    saleSettings = _useState14[0],
-    setSaleSettings = _useState14[1];
-  var sizeVariant = Array.isArray(variants) ? variants.find(function (v) {
-    var _v$name;
-    return ((_v$name = v.name) === null || _v$name === void 0 ? void 0 : _v$name.toLowerCase()) === 'size';
-  }) : null;
-  var colorVariant = Array.isArray(variants) ? variants.find(function (v) {
-    var _v$name2;
-    return ((_v$name2 = v.name) === null || _v$name2 === void 0 ? void 0 : _v$name2.toLowerCase()) === 'color';
-  }) : null;
-  var weightVariant = Array.isArray(variants) ? variants.find(function (v) {
-    var _v$name3, _v$name4;
-    return v.id === 3 || ((_v$name3 = v.name) === null || _v$name3 === void 0 ? void 0 : _v$name3.toLowerCase().includes('weight')) || ((_v$name4 = v.name) === null || _v$name4 === void 0 ? void 0 : _v$name4.toLowerCase().includes('gram'));
-  }) : null;
+    _useState12 = _slicedToArray(_useState11, 2),
+    saleSettings = _useState12[0],
+    setSaleSettings = _useState12[1];
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     setErrors({});
     if (product) {
       setForm({
-        name: product.name || '',
-        barcode: product.barcode || '',
-        category_id: product.category_id || '',
-        supplier_id: product.supplier_id || '',
-        unit_type_id: product.unit_type_id || '',
-        brand_id: product.brand_id || '',
-        purchase_price: product.purchase_price || '',
-        sell_price: product.sell_price || '',
-        sale_percentage: product.sale_percentage || '',
-        description: product.description || ''
+        name: product.name || "",
+        barcode: product.barcode || "",
+        category_id: product.category_id || "",
+        supplier_id: product.supplier_id || "",
+        unit_type_id: product.unit_type_id || "",
+        brand_id: product.brand_id || "",
+        purchase_price: product.purchase_price || "",
+        sell_price: product.sell_price || "",
+        sale_percentage: product.sale_percentage || "",
+        description: product.description || ""
       });
       var pvs = Array.isArray(product.product_variants) ? product.product_variants : [];
       if (pvs.length > 0) {
@@ -27565,13 +27513,13 @@ function ProductForm(_ref) {
           var _pv$size_value, _pv$color_value, _pv$weight_value;
           return {
             id: pv.id || Math.random(),
-            size_value: ((_pv$size_value = pv.size_value) === null || _pv$size_value === void 0 ? void 0 : _pv$size_value.label) || getVariantLabelById(pv.size_value_id, 'size'),
-            color_value: ((_pv$color_value = pv.color_value) === null || _pv$color_value === void 0 ? void 0 : _pv$color_value.label) || getVariantLabelById(pv.color_value_id, 'color'),
-            weight_value: ((_pv$weight_value = pv.weight_value) === null || _pv$weight_value === void 0 ? void 0 : _pv$weight_value.label) || getVariantLabelById(pv.weight_value_id, 'weight'),
+            size_value: ((_pv$size_value = pv.size_value) === null || _pv$size_value === void 0 ? void 0 : _pv$size_value.label) || getVariantLabelById(pv.size_value_id, "size"),
+            color_value: ((_pv$color_value = pv.color_value) === null || _pv$color_value === void 0 ? void 0 : _pv$color_value.label) || getVariantLabelById(pv.color_value_id, "color"),
+            weight_value: ((_pv$weight_value = pv.weight_value) === null || _pv$weight_value === void 0 ? void 0 : _pv$weight_value.label) || getVariantLabelById(pv.weight_value_id, "weight"),
             stock: pv.stock || 0,
-            price_override: pv.price_override || '',
-            barcode: pv.barcode || pv.barcode_suffix || product.barcode || 'No Barcode',
-            sale_percentage: pv.sale_percentage || '',
+            price_override: pv.price_override || "",
+            barcode: pv.barcode || pv.barcode_suffix || product.barcode || "No Barcode",
+            sale_percentage: pv.sale_percentage || "",
             imageFile: null,
             imagePreview: pv.image_path ? "/storage/".concat(pv.image_path) : null,
             existing_image_path: pv.image_path || null,
@@ -27598,16 +27546,16 @@ function ProductForm(_ref) {
       }
     } else {
       setForm({
-        name: '',
-        barcode: '',
-        category_id: '',
-        supplier_id: '',
-        unit_type_id: '',
-        brand_id: '',
-        purchase_price: '',
-        sell_price: '',
-        sale_percentage: '',
-        description: ''
+        name: "",
+        barcode: "",
+        category_id: "",
+        supplier_id: "",
+        unit_type_id: "",
+        brand_id: "",
+        purchase_price: "",
+        sell_price: "",
+        sale_percentage: "",
+        description: ""
       });
       setVariantEnabled(false);
       setVariantRows([]);
@@ -27617,13 +27565,13 @@ function ProductForm(_ref) {
     setVariantRows(function (prev) {
       return [].concat(_toConsumableArray(prev), [{
         id: Date.now() + Math.random(),
-        size_value: 'No Size',
-        color_value: 'No Color',
-        weight_value: 'No Weight',
+        size_value: "No Size",
+        color_value: "No Color",
+        weight_value: "No Weight",
         stock: 0,
-        price_override: '',
-        barcode: '',
-        sale_percentage: '',
+        price_override: "",
+        barcode: "",
+        sale_percentage: "",
         imageFile: null,
         imagePreview: null,
         existing_image_path: null
@@ -27638,7 +27586,7 @@ function ProductForm(_ref) {
     });
   };
   var handleRowChange = function handleRowChange(id, field, value) {
-    if (field === 'sale_percentage') {
+    if (field === "sale_percentage") {
       setVariantRows(function (prev) {
         return (Array.isArray(prev) ? prev : []).map(function (r) {
           return r.id === id ? _objectSpread(_objectSpread({}, r), {}, _defineProperty({}, field, value)) : r;
@@ -27658,7 +27606,7 @@ function ProductForm(_ref) {
     setForm(function (prev) {
       return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, name, value));
     });
-    if (name === 'sale_percentage') {
+    if (name === "sale_percentage") {
       setSaleSettings(function (prev) {
         return _objectSpread(_objectSpread({}, prev), {}, {
           baseProductSale: parseFloat(value) || 0
@@ -27667,87 +27615,87 @@ function ProductForm(_ref) {
     }
   };
   var handleSubmit = /*#__PURE__*/function () {
-    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(e) {
-      var fd, variantList, _err$response, _err$response2, _t3;
-      return _regenerator().w(function (_context3) {
-        while (1) switch (_context3.p = _context3.n) {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(e) {
+      var fd, variantList, _err$response, _err$response2, _t2;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
           case 0:
             e === null || e === void 0 || e.preventDefault();
             setLoading(true);
             setErrors({});
             fd = new FormData();
             Object.keys(form).forEach(function (k) {
-              if (k === 'sale_percentage') {
+              if (k === "sale_percentage") {
                 fd.append(k, form[k] || 0);
-              } else if (form[k] !== '' && form[k] !== null) {
+              } else if (form[k] !== "" && form[k] !== null) {
                 fd.append(k, form[k]);
               }
             });
-            fd.append('sale_settings', JSON.stringify(saleSettings));
+            fd.append("sale_settings", JSON.stringify(saleSettings));
             variantList = variantEnabled && Array.isArray(variantRows) ? variantRows.map(function (row, index) {
               var _sizeVariant$values, _colorVariant$values, _weightVariant$values;
               if (row.imageFile) {
                 fd.append("variant_image_".concat(index), row.imageFile);
               }
               return {
-                size_value_id: row.size_value !== 'Regular' ? (sizeVariant === null || sizeVariant === void 0 || (_sizeVariant$values = sizeVariant.values) === null || _sizeVariant$values === void 0 || (_sizeVariant$values = _sizeVariant$values.find(function (v) {
+                size_value_id: row.size_value !== "Regular" ? (sizeVariant === null || sizeVariant === void 0 || (_sizeVariant$values = sizeVariant.values) === null || _sizeVariant$values === void 0 || (_sizeVariant$values = _sizeVariant$values.find(function (v) {
                   return v.label === row.size_value;
                 })) === null || _sizeVariant$values === void 0 ? void 0 : _sizeVariant$values.id) || null : null,
-                color_value_id: row.color_value !== 'Regular' ? (colorVariant === null || colorVariant === void 0 || (_colorVariant$values = colorVariant.values) === null || _colorVariant$values === void 0 || (_colorVariant$values = _colorVariant$values.find(function (v) {
+                color_value_id: row.color_value !== "Regular" ? (colorVariant === null || colorVariant === void 0 || (_colorVariant$values = colorVariant.values) === null || _colorVariant$values === void 0 || (_colorVariant$values = _colorVariant$values.find(function (v) {
                   return v.label === row.color_value;
                 })) === null || _colorVariant$values === void 0 ? void 0 : _colorVariant$values.id) || null : null,
-                weight_value_id: row.weight_value !== 'Regular' ? (weightVariant === null || weightVariant === void 0 || (_weightVariant$values = weightVariant.values) === null || _weightVariant$values === void 0 || (_weightVariant$values = _weightVariant$values.find(function (v) {
+                weight_value_id: row.weight_value !== "Regular" ? (weightVariant === null || weightVariant === void 0 || (_weightVariant$values = weightVariant.values) === null || _weightVariant$values === void 0 || (_weightVariant$values = _weightVariant$values.find(function (v) {
                   return v.label === row.weight_value;
                 })) === null || _weightVariant$values === void 0 ? void 0 : _weightVariant$values.id) || null : null,
                 stock: row.stock || 0,
-                price_override: row.price_override !== '' && row.price_override !== null && row.price_override !== undefined ? row.price_override : null,
+                price_override: row.price_override !== "" && row.price_override !== null && row.price_override !== undefined ? row.price_override : null,
                 barcode: row.barcode || null,
                 sale_percentage: row.sale_percentage || 0,
                 existing_image_path: row.existing_image_path || null
               };
             }) : [];
-            fd.append('variants', JSON.stringify(variantList));
-            _context3.p = 1;
+            fd.append("variants", JSON.stringify(variantList));
+            _context2.p = 1;
             if (!product) {
-              _context3.n = 3;
+              _context2.n = 3;
               break;
             }
-            fd.append('_method', 'PUT');
-            _context3.n = 2;
+            fd.append("_method", "PUT");
+            _context2.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/products/".concat(product.id), fd);
           case 2:
-            showToast('Product updated successfully');
-            _context3.n = 5;
+            showToast("Product updated successfully");
+            _context2.n = 5;
             break;
           case 3:
-            _context3.n = 4;
-            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/products', fd);
+            _context2.n = 4;
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/products", fd);
           case 4:
-            showToast('Product created successfully');
+            showToast("Product created successfully");
           case 5:
             onSuccess();
-            _context3.n = 7;
+            _context2.n = 7;
             break;
           case 6:
-            _context3.p = 6;
-            _t3 = _context3.v;
-            if (((_err$response = _t3.response) === null || _err$response === void 0 ? void 0 : _err$response.status) === 422) {
-              setErrors(_t3.response.data.errors || {});
-              showToast('Please check the highlighted fields.', 'error');
+            _context2.p = 6;
+            _t2 = _context2.v;
+            if (((_err$response = _t2.response) === null || _err$response === void 0 ? void 0 : _err$response.status) === 422) {
+              setErrors(_t2.response.data.errors || {});
+              showToast("Please check the highlighted fields.", "error");
             } else {
-              showToast(((_err$response2 = _t3.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Error saving product', 'error');
+              showToast(((_err$response2 = _t2.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || "Error saving product", "error");
             }
           case 7:
-            _context3.p = 7;
+            _context2.p = 7;
             setLoading(false);
-            return _context3.f(7);
+            return _context2.f(7);
           case 8:
-            return _context3.a(2);
+            return _context2.a(2);
         }
-      }, _callee3, null, [[1, 6, 7, 8]]);
+      }, _callee2, null, [[1, 6, 7, 8]]);
     }));
     return function handleSubmit(_x) {
-      return _ref4.apply(this, arguments);
+      return _ref3.apply(this, arguments);
     };
   }();
   var calculateSalePrice = function calculateSalePrice(originalPrice, percentage) {
@@ -27762,7 +27710,7 @@ function ProductForm(_ref) {
           className: "flex items-center gap-2",
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
             className: "w-5 h-5"
-          }), product ? 'Edit Product' : 'New Product']
+          }), product ? "Edit Product" : "New Product"]
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_3__.CardContent, {
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_12__.Tabs, {
@@ -27792,7 +27740,7 @@ function ProductForm(_ref) {
                   value: form.name,
                   onChange: handleInputChange,
                   placeholder: "e.g. Premium Polo Shirt",
-                  className: errors.name ? 'border-red-500' : '',
+                  className: errors.name ? "border-red-500" : "",
                   disabled: !!product
                 }), errors.name && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
                   className: "text-sm text-red-500",
@@ -27813,7 +27761,7 @@ function ProductForm(_ref) {
                     value: form.barcode,
                     onChange: handleInputChange,
                     placeholder: "e.g. 1234567890123",
-                    className: errors.barcode ? 'border-red-500' : '',
+                    className: errors.barcode ? "border-red-500" : "",
                     disabled: !!product
                   })]
                 }), errors.barcode && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
@@ -27826,7 +27774,7 @@ function ProductForm(_ref) {
                   htmlFor: "category_id",
                   children: "Category *"
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.Select, {
-                  value: ((_form$category_id = form.category_id) === null || _form$category_id === void 0 ? void 0 : _form$category_id.toString()) || '',
+                  value: ((_form$category_id = form.category_id) === null || _form$category_id === void 0 ? void 0 : _form$category_id.toString()) || "",
                   onValueChange: function onValueChange(value) {
                     return setForm(function (prev) {
                       return _objectSpread(_objectSpread({}, prev), {}, {
@@ -27836,7 +27784,7 @@ function ProductForm(_ref) {
                   },
                   disabled: !!product,
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.SelectTrigger, {
-                    className: errors.category_id ? 'border-red-500' : '',
+                    className: errors.category_id ? "border-red-500" : "",
                     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.SelectValue, {
                       placeholder: "Select Category"
                     })
@@ -27858,7 +27806,7 @@ function ProductForm(_ref) {
                   htmlFor: "supplier_id",
                   children: "Supplier"
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.Select, {
-                  value: ((_form$supplier_id = form.supplier_id) === null || _form$supplier_id === void 0 ? void 0 : _form$supplier_id.toString()) || '',
+                  value: ((_form$supplier_id = form.supplier_id) === null || _form$supplier_id === void 0 ? void 0 : _form$supplier_id.toString()) || "",
                   onValueChange: function onValueChange(value) {
                     return setForm(function (prev) {
                       return _objectSpread(_objectSpread({}, prev), {}, {
@@ -27886,11 +27834,11 @@ function ProductForm(_ref) {
                   htmlFor: "brand_id",
                   children: "Brand"
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.Select, {
-                  value: ((_form$brand_id = form.brand_id) === null || _form$brand_id === void 0 ? void 0 : _form$brand_id.toString()) || '',
+                  value: ((_form$brand_id = form.brand_id) === null || _form$brand_id === void 0 ? void 0 : _form$brand_id.toString()) || "none",
                   onValueChange: function onValueChange(value) {
                     return setForm(function (prev) {
                       return _objectSpread(_objectSpread({}, prev), {}, {
-                        brand_id: value
+                        brand_id: value === "none" ? "" : value
                       });
                     });
                   },
@@ -27900,7 +27848,7 @@ function ProductForm(_ref) {
                     })
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.SelectContent, {
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.SelectItem, {
-                      value: "",
+                      value: "none",
                       children: "No Brand"
                     }), (Array.isArray(brands) ? brands : []).map(function (b) {
                       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.SelectItem, {
@@ -27916,7 +27864,7 @@ function ProductForm(_ref) {
                   htmlFor: "unit_type_id",
                   children: "Unit Type *"
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.Select, {
-                  value: ((_form$unit_type_id = form.unit_type_id) === null || _form$unit_type_id === void 0 ? void 0 : _form$unit_type_id.toString()) || '',
+                  value: ((_form$unit_type_id = form.unit_type_id) === null || _form$unit_type_id === void 0 ? void 0 : _form$unit_type_id.toString()) || "",
                   onValueChange: function onValueChange(value) {
                     return setForm(function (prev) {
                       return _objectSpread(_objectSpread({}, prev), {}, {
@@ -27926,7 +27874,7 @@ function ProductForm(_ref) {
                   },
                   disabled: !!product,
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.SelectTrigger, {
-                    className: errors.unit_type_id ? 'border-red-500' : '',
+                    className: errors.unit_type_id ? "border-red-500" : "",
                     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.SelectValue, {
                       placeholder: "Select Unit Type"
                     })
@@ -27934,7 +27882,7 @@ function ProductForm(_ref) {
                     children: (Array.isArray(unitTypes) ? unitTypes : []).map(function (u) {
                       return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_select__WEBPACK_IMPORTED_MODULE_9__.SelectItem, {
                         value: u.id.toString(),
-                        children: [u.purchase_unit, " / ", u.sell_unit]
+                        children: [u.purchase_unit, " /", " ", u.sell_unit]
                       }, u.id);
                     })
                   })]
@@ -28222,13 +28170,13 @@ function ProductForm(_ref) {
                           })
                         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("td", {
                           className: "px-4 py-2 text-sm",
-                          children: row.size_value || 'No Size'
+                          children: row.size_value || "No Size"
                         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("td", {
                           className: "px-4 py-2 text-sm",
-                          children: row.color_value || 'No Color'
+                          children: row.color_value || "No Color"
                         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("td", {
                           className: "px-4 py-2 text-sm",
-                          children: row.weight_value || 'No Weight'
+                          children: row.weight_value || "No Weight"
                         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("td", {
                           className: "px-4 py-2 text-sm font-semibold",
                           children: row.stock || 0
@@ -28237,7 +28185,7 @@ function ProductForm(_ref) {
                           children: ["\u20B1", Number(row.price_override || form.sell_price || 0).toLocaleString()]
                         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("td", {
                           className: "px-4 py-2 text-xs font-mono text-muted-foreground",
-                          children: row.barcode || ((_row$_original = row._original) === null || _row$_original === void 0 ? void 0 : _row$_original.barcode) || ((_row$_original2 = row._original) === null || _row$_original2 === void 0 ? void 0 : _row$_original2.barcode_suffix) || 'N/A'
+                          children: row.barcode || ((_row$_original = row._original) === null || _row$_original === void 0 ? void 0 : _row$_original.barcode) || ((_row$_original2 = row._original) === null || _row$_original2 === void 0 ? void 0 : _row$_original2.barcode_suffix) || "N/A"
                         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("td", {
                           className: "px-4 py-2",
                           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
@@ -28249,7 +28197,7 @@ function ProductForm(_ref) {
                               max: "100",
                               value: row.sale_percentage,
                               onChange: function onChange(e) {
-                                return handleRowChange(row.id, 'sale_percentage', e.target.value);
+                                return handleRowChange(row.id, "sale_percentage", e.target.value);
                               },
                               placeholder: "0",
                               className: "w-20 pr-8 h-8 text-xs"
@@ -28289,7 +28237,7 @@ function ProductForm(_ref) {
       className: "flex items-center justify-between bg-card p-4 rounded-xl border border-border shadow-sm",
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
         className: "text-sm text-muted-foreground",
-        children: product ? "Editing Product: ".concat(product.name) : 'Creating New Product Master'
+        children: product ? "Editing Product: ".concat(product.name) : "Creating New Product Master"
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
         className: "flex items-center gap-2",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
@@ -28303,7 +28251,7 @@ function ProductForm(_ref) {
           disabled: loading,
           type: "button",
           className: "px-8",
-          children: loading ? 'Processing...' : product ? 'Update Product' : 'Create Product'
+          children: loading ? "Processing..." : product ? "Update Product" : "Create Product"
         })]
       })]
     })]
@@ -34708,7 +34656,7 @@ var LineChart = function LineChart(_ref) {
     _ref$totalValueLabel = _ref.totalValueLabel,
     totalValueLabel = _ref$totalValueLabel === void 0 ? "Total" : _ref$totalValueLabel,
     _ref$color = _ref.color,
-    color = _ref$color === void 0 ? '#3b82f6' : _ref$color,
+    color = _ref$color === void 0 ? "#3b82f6" : _ref$color,
     _ref$hideHeader = _ref.hideHeader,
     hideHeaderProp = _ref$hideHeader === void 0 ? false : _ref$hideHeader;
   var hideHeader = hideHeaderProp || !title;
@@ -34734,7 +34682,7 @@ var LineChart = function LineChart(_ref) {
     top: 20,
     right: 30,
     bottom: 40,
-    left: 50
+    left: 35
   };
   var chartWidth = width - padding.left - padding.right;
   var chartHeight = height - padding.top - padding.bottom;
@@ -34763,7 +34711,7 @@ var LineChart = function LineChart(_ref) {
 
   // Create smooth cubic bezier curve path
   var createSmoothPath = function createSmoothPath(pts) {
-    if (pts.length === 0) return '';
+    if (pts.length === 0) return "";
     if (pts.length === 1) return "M ".concat(pts[0].x, " ").concat(pts[0].y);
     var path = "M ".concat(pts[0].x, " ").concat(pts[0].y);
     for (var i = 0; i < pts.length - 1; i++) {
@@ -34792,14 +34740,14 @@ var LineChart = function LineChart(_ref) {
       y: y
     };
   });
-  var gradientId = "gradient-".concat(color.replace(/[^a-zA-Z0-9]/g, ''), "-").concat(Date.now());
+  var gradientId = "gradient-".concat(color.replace(/[^a-zA-Z0-9]/g, ""), "-").concat(Date.now());
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
     className: "line-chart-wrapper",
     style: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      width: '100%'
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+      width: "100%"
     },
     children: [!hideHeader && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
       className: "chart-header-row",
@@ -34820,18 +34768,18 @@ var LineChart = function LineChart(_ref) {
       className: "chart-svg-container",
       style: {
         flexGrow: 1,
-        position: 'relative',
-        width: '100%',
+        position: "relative",
+        width: "100%",
         minHeight: 0
       },
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("svg", {
         viewBox: "0 0 ".concat(width, " ").concat(height),
         className: "line-chart-svg",
-        preserveAspectRatio: "xMidYMid meet",
+        preserveAspectRatio: "none",
         style: {
-          width: '100%',
-          height: '100%',
-          overflow: 'visible'
+          width: "100%",
+          height: "100%",
+          overflow: "visible"
         },
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("defs", {
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("linearGradient", {
@@ -34898,7 +34846,8 @@ var LineChart = function LineChart(_ref) {
           strokeWidth: "2.5",
           strokeLinecap: "round",
           strokeLinejoin: "round",
-          filter: "url(#glow)"
+          filter: "url(#glow)",
+          vectorEffect: "non-scaling-stroke"
         }), points.map(function (point, idx) {
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("g", {
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("circle", {
@@ -34917,7 +34866,7 @@ var LineChart = function LineChart(_ref) {
             textAnchor: "end",
             fontSize: "11",
             fill: "#94a3b8",
-            children: label.value >= 1000 ? (label.value / 1000).toFixed(0) + 'k' : label.value
+            children: label.value >= 1000 ? (label.value / 1000).toFixed(0) + "k" : label.value
           }, "ylabel-".concat(idx));
         }), points.filter(function (_, idx) {
           return idx % Math.ceil(points.length / 6) === 0 || idx === points.length - 1;

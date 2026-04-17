@@ -1044,12 +1044,6 @@ input, select, textarea {
 .ml-auto{
   margin-left: auto;
 }
-.mr-0{
-  margin-right: 0px;
-}
-.mr-0\.5{
-  margin-right: 0.125rem;
-}
 .mr-1{
   margin-right: 0.25rem;
 }
@@ -1267,6 +1261,9 @@ input, select, textarea {
 }
 .h-\[1px\]{
   height: 1px;
+}
+.h-\[200px\]{
+  height: 200px;
 }
 .h-\[220px\]{
   height: 220px;
@@ -1497,6 +1494,9 @@ input, select, textarea {
 .w-\[--sidebar-width\]{
   width: var(--sidebar-width);
 }
+.w-\[10\%\]{
+  width: 10%;
+}
 .w-\[100px\]{
   width: 100px;
 }
@@ -1589,6 +1589,9 @@ input, select, textarea {
 .min-w-\[300px\]{
   min-width: 300px;
 }
+.min-w-\[30px\]{
+  min-width: 30px;
+}
 .min-w-\[32px\]{
   min-width: 32px;
 }
@@ -1639,6 +1642,9 @@ input, select, textarea {
 }
 .max-w-\[300px\]{
   max-width: 300px;
+}
+.max-w-\[32px\]{
+  max-width: 32px;
 }
 .max-w-\[340px\]{
   max-width: 340px;
@@ -1947,6 +1953,9 @@ input, select, textarea {
 .justify-between{
   justify-content: space-between;
 }
+.justify-around{
+  justify-content: space-around;
+}
 .gap-0{
   gap: 0px;
 }
@@ -2042,11 +2051,6 @@ input, select, textarea {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
-}
-.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){
-  --tw-space-y-reverse: 0;
-  margin-top: calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(0.625rem * var(--tw-space-y-reverse));
 }
 .space-y-3 > :not([hidden]) ~ :not([hidden]){
   --tw-space-y-reverse: 0;
@@ -2204,6 +2208,10 @@ input, select, textarea {
 .rounded-t-\[10px\]{
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+}
+.rounded-t-md{
+  border-top-left-radius: calc(var(--radius) - 2px);
+  border-top-right-radius: calc(var(--radius) - 2px);
 }
 .rounded-tl-sm{
   border-top-left-radius: calc(var(--radius) - 4px);
@@ -4925,6 +4933,11 @@ input, select, textarea {
 
 .hover\:bg-white\/\[0\.06\]:hover{
   background-color: rgb(255 255 255 / 0.06);
+}
+
+.hover\:bg-amber-100:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 243 199 / var(--tw-bg-opacity));
 }
 
 .hover\:from-secondary:hover{
