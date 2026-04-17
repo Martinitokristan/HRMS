@@ -211,9 +211,9 @@ export default function CartPage() {
                             )}
 
                             {/* Product Image */}
-                            <div className="w-24 h-24 rounded-2xl bg-secondary flex items-center justify-center text-3xl shrink-0 overflow-hidden border border-border">
+                            <div className="w-24 h-24 rounded-2xl bg-white flex items-center justify-center text-3xl shrink-0 overflow-hidden border border-border">
                                 {item.image_path ? (
-                                    <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-cover" />
+                                    <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-contain p-2" />
                                 ) : <Package className="h-8 w-8 opacity-20 text-muted-foreground" />}
                             </div>
 

@@ -342,7 +342,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                                                 : 'border-gray-100 hover:border-orange-200'
                                                 }`}
                                         >
-                                            <img src={`/storage/${img}`} className="w-full h-full object-contain rounded-lg" />
+                                            <img src={`/storage/${img}`} className="w-full h-full object-contain p-1 rounded-lg" />
                                         </button>
                                     ))}
                                 </div>

@@ -13739,11 +13739,11 @@ function CartPage() {
                 className: "h-3.5 w-3.5 text-white"
               })
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("div", {
-              className: "w-24 h-24 rounded-2xl bg-secondary flex items-center justify-center text-3xl shrink-0 overflow-hidden border border-border",
+              className: "w-24 h-24 rounded-2xl bg-white flex items-center justify-center text-3xl shrink-0 overflow-hidden border border-border",
               children: item.image_path ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)("img", {
                 src: "/storage/".concat(item.image_path),
                 alt: item.name,
-                className: "w-full h-full object-cover"
+                className: "w-full h-full object-contain p-2"
               }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_18__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
                 className: "h-8 w-8 opacity-20 text-muted-foreground"
               })
@@ -14070,12 +14070,12 @@ var ProductCard = function ProductCard(_ref) {
       return setSelectedProduct(product);
     },
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
-      className: "relative aspect-[3/2] overflow-hidden bg-gray-50/50 border-b border-gray-100/50",
+      className: "relative aspect-[3/2] overflow-hidden bg-white border-b border-gray-100/50",
       children: [imgSrc ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("img", {
         src: imgSrc,
         alt: product.name,
         loading: "lazy",
-        className: "w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out",
+        className: "w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-700 ease-out",
         onError: function onError(e) {
           e.target.style.display = 'none';
           e.target.nextSibling.style.display = 'flex';
@@ -15524,11 +15524,11 @@ function CustomerOrder() {
                   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsxs)("div", {
                     className: "flex gap-3 py-3 border-b border-border/50 items-start",
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
-                      className: "w-14 h-14 rounded-lg bg-secondary flex items-center justify-center text-xl shrink-0 overflow-hidden",
+                      className: "w-14 h-14 rounded-lg bg-white flex items-center justify-center text-xl shrink-0 overflow-hidden border border-border",
                       children: item.image_path ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("img", {
                         src: "/storage/".concat(item.image_path),
                         alt: item.name,
-                        className: "w-full h-full object-cover rounded-lg"
+                        className: "w-full h-full object-contain p-1"
                       }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_26__["default"], {
                         className: "h-6 w-6 opacity-30 text-muted-foreground"
                       })
@@ -16231,11 +16231,11 @@ function CustomerOrder() {
               return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsxs)("div", {
                 className: "flex gap-3 py-3 border-b border-border/50 items-center",
                 children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("div", {
-                  className: "w-16 h-16 rounded-xl bg-secondary flex items-center justify-center text-2xl shrink-0 overflow-hidden",
+                  className: "w-16 h-16 rounded-xl bg-white flex items-center justify-center text-2xl shrink-0 overflow-hidden border border-border",
                   children: item.image_path ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)("img", {
                     src: "/storage/".concat(item.image_path),
                     alt: item.name,
-                    className: "w-full h-full object-cover rounded-xl"
+                    className: "w-full h-full object-contain p-1"
                   }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_33__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_26__["default"], {
                     className: "h-7 w-7 opacity-20 text-muted-foreground"
                   })
@@ -19951,7 +19951,7 @@ function ProductDetailModal(_ref) {
                   className: "w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ".concat(displayImage === img ? 'border-orange-500 shadow-md ring-2 ring-orange-100' : 'border-gray-100 hover:border-orange-200'),
                   children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("img", {
                     src: "/storage/".concat(img),
-                    className: "w-full h-full object-contain rounded-lg"
+                    className: "w-full h-full object-contain p-1 rounded-lg"
                   })
                 }, i);
               })
@@ -20433,10 +20433,13 @@ function ProductReviewsPage() {
           className: "bg-white rounded-xl p-6 shadow-sm",
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
             className: "flex items-start gap-4",
-            children: [product.image_path && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("img", {
-              src: "/storage/".concat(product.image_path),
-              alt: product.name,
-              className: "w-20 h-20 object-cover rounded-lg"
+            children: [product.image_path && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("div", {
+              className: "w-20 h-20 rounded-lg bg-white border border-border flex items-center justify-center overflow-hidden shrink-0",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)("img", {
+                src: "/storage/".concat(product.image_path),
+                alt: product.name,
+                className: "w-full h-full object-contain p-2"
+              })
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {
               className: "flex-1",
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxs)("div", {

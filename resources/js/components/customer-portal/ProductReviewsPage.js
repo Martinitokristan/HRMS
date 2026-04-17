@@ -144,11 +144,13 @@ export default function ProductReviewsPage() {
                     <div className="bg-white rounded-xl p-6 shadow-sm">
                         <div className="flex items-start gap-4">
                             {product.image_path && (
-                                <img 
-                                    src={`/storage/${product.image_path}`} 
-                                    alt={product.name}
-                                    className="w-20 h-20 object-cover rounded-lg"
-                                />
+                                <div className="w-20 h-20 rounded-lg bg-white border border-border flex items-center justify-center overflow-hidden shrink-0">
+                                    <img 
+                                        src={`/storage/${product.image_path}`} 
+                                        alt={product.name}
+                                        className="w-full h-full object-contain p-2"
+                                    />
+                                </div>
                             )}
                             <div className="flex-1">
                                 <div className="mb-4">

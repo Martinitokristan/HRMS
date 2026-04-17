@@ -44,7 +44,7 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
     const transTimerRef = useRef(null);
 
     // Build slides: sale → top-rated → new, deduplicated, max 8
-    const slides = useMemo(function() {
+    const slides = useMemo(function () {
         var seen = new Set();
         var result = [];
         function push(p, type) {
@@ -52,21 +52,21 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
             seen.add(p.id);
             result.push({ product: p, type: type });
         }
-        products.forEach(function(p) {
+        products.forEach(function (p) {
             var s = getProductSaleInfo(p);
             if (s && s.isOnSale) push(p, 'sale');
         });
-        products.slice().filter(function(p) { return p.average_rating > 0; })
-            .sort(function(a, b) { return (b.average_rating || 0) - (a.average_rating || 0); })
-            .forEach(function(p) { push(p, 'top'); });
-        products.slice().sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); })
-            .forEach(function(p) { push(p, 'new'); });
+        products.slice().filter(function (p) { return p.average_rating > 0; })
+            .sort(function (a, b) { return (b.average_rating || 0) - (a.average_rating || 0); })
+            .forEach(function (p) { push(p, 'top'); });
+        products.slice().sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); })
+            .forEach(function (p) { push(p, 'new'); });
         return result.slice(0, 8);
     }, [products]);
 
     const total = slides.length;
 
-    const goTo = useCallback(function(i, dir) {
+    const goTo = useCallback(function (i, dir) {
         if (transitioning || total < 2) return;
         var next = ((i % total) + total) % total;
         if (next === index) return;
@@ -78,32 +78,32 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
         setDirection(d);
         setTransitioning(true);
         setIndex(next);
-        setAnimKey(function(k) { return k + 1; });
+        setAnimKey(function (k) { return k + 1; });
         clearTimeout(transTimerRef.current);
-        transTimerRef.current = setTimeout(function() {
+        transTimerRef.current = setTimeout(function () {
             setTransitioning(false);
             setPrevIndex(null);
         }, TRANSITION_MS);
     }, [index, total, transitioning]);
 
-    useEffect(function() {
-        return function() { clearTimeout(transTimerRef.current); };
+    useEffect(function () {
+        return function () { clearTimeout(transTimerRef.current); };
     }, []);
 
     // Auto-play: starts only when not transitioning
-    useEffect(function() {
+    useEffect(function () {
         if (paused || total < 2 || transitioning) return;
-        var t = setTimeout(function() { goTo(index + 1, 1); }, SLIDE_DURATION);
-        return function() { clearTimeout(t); };
+        var t = setTimeout(function () { goTo(index + 1, 1); }, SLIDE_DURATION);
+        return function () { clearTimeout(t); };
     }, [index, paused, total, transitioning]);
 
-    const handleAddToCart = async function(e, product) {
+    const handleAddToCart = async function (e, product) {
         e.stopPropagation();
         if (adding) return;
         setAdding(true);
         try {
             var allVariants = product.product_variants || [];
-            var av = allVariants.find(function(v) { return (v.available_stock || v.stock || 0) > 0; });
+            var av = allVariants.find(function (v) { return (v.available_stock || v.stock || 0) > 0; });
             await onAddToCart(product, av ? { variant_id: av.id } : {});
         } finally {
             setAdding(false);
@@ -113,7 +113,7 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
     if (total === 0) return null;
 
     // Helper: render one slide's content
-    var renderSlide = function(slideIndex, animClass) {
+    var renderSlide = function (slideIndex, animClass) {
         var sl = slides[slideIndex];
         if (!sl) return null;
         var p = sl.product;
@@ -122,7 +122,7 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
         var src = p.image_path ? '/storage/' + p.image_path : null;
         var price = Number(si && si.isOnSale ? si.salePrice : p.price || 0);
         var variants = p.product_variants || [];
-        var vStock = variants.reduce(function(s, v) { return s + Number(v.available_stock || v.stock || 0); }, 0);
+        var vStock = variants.reduce(function (s, v) { return s + Number(v.available_stock || v.stock || 0); }, 0);
         var bStock = Number(p.available_stock || (p.inventory && p.inventory.current_stock) || 0);
         var stock = (variants.length > 0 ? vStock : bStock) > 0;
         var TIcon = th.Icon;
@@ -161,7 +161,7 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
                     </h2>
                     {p.average_rating > 0 && (
                         <div className="flex items-center gap-1.5 mb-4">
-                            {[1,2,3,4,5].map(function(s) {
+                            {[1, 2, 3, 4, 5].map(function (s) {
                                 return (
                                     <Star key={s} className="h-3.5 w-3.5"
                                         fill={s <= Math.round(p.average_rating) ? th.accentColor : 'transparent'}
@@ -191,7 +191,7 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
                     )}
                     <div className="flex items-center gap-2.5">
                         <button
-                            onClick={function() { onBuyNow ? onBuyNow(p) : setSelectedProduct(p); }}
+                            onClick={function () { onBuyNow ? onBuyNow(p) : setSelectedProduct(p); }}
                             className="inline-flex items-center gap-2 h-10 px-5 bg-white text-gray-900 text-sm font-black rounded-xl hover:bg-gray-50 active:scale-95 transition-all shadow-xl"
                             style={{ letterSpacing: '-0.01em' }}
                         >
@@ -199,7 +199,7 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
                         </button>
                         {stock && (
                             <button
-                                onClick={function(e) { handleAddToCart(e, p); }}
+                                onClick={function (e) { handleAddToCart(e, p); }}
                                 disabled={adding}
                                 className="inline-flex items-center gap-1.5 h-10 px-4 text-white text-sm font-bold rounded-xl active:scale-95 transition-all border border-white/30 disabled:opacity-50"
                                 style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)' }}
@@ -211,7 +211,7 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
                     </div>
                 </div>
                 {/* RIGHT: Product image */}
-                {(function() {
+                {(function () {
                     // Ensure product image sits above background layers
                     var hasBanner = !!p.image_banner_path;
                     var bannerSrc = hasBanner
@@ -263,8 +263,8 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
             <div
                 className="relative w-full rounded-2xl overflow-hidden select-none"
                 style={{ height: '260px', background: currentTheme.radial, transition: 'background 0.45s cubic-bezier(0.4,0,0.2,1)' }}
-                onMouseEnter={function() { setPaused(true); }}
-                onMouseLeave={function() { setPaused(false); }}
+                onMouseEnter={function () { setPaused(true); }}
+                onMouseLeave={function () { setPaused(false); }}
             >
                 {/* Noise texture overlay */}
                 <div
@@ -277,9 +277,9 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
                 />
                 {/* Decorative glow blobs */}
                 <div className="absolute top-0 right-1/3 w-72 h-72 rounded-full pointer-events-none"
-                     style={{ background: 'rgba(255,255,255,0.07)', filter: 'blur(48px)', transform: 'translate(40%, -40%)' }} />
+                    style={{ background: 'rgba(255,255,255,0.07)', filter: 'blur(48px)', transform: 'translate(40%, -40%)' }} />
                 <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
-                     style={{ background: 'rgba(0,0,0,0.12)', filter: 'blur(40px)', transform: 'translate(-30%, 30%)' }} />
+                    style={{ background: 'rgba(0,0,0,0.12)', filter: 'blur(40px)', transform: 'translate(-30%, 30%)' }} />
 
                 {/* Slide stage — overflow:hidden clips scaleX wipe */}
                 <div className="absolute inset-0 z-10" style={{ overflow: 'hidden' }}>
@@ -291,14 +291,14 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
 
                 {/* Prev / Next */}
                 <button
-                    onClick={function(e) { e.stopPropagation(); goTo(index - 1, -1); }}
+                    onClick={function (e) { e.stopPropagation(); goTo(index - 1, -1); }}
                     className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-9 w-9 rounded-full flex items-center justify-center text-white transition-all"
                     style={{ background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}
                 >
                     <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
-                    onClick={function(e) { e.stopPropagation(); goTo(index + 1, 1); }}
+                    onClick={function (e) { e.stopPropagation(); goTo(index + 1, 1); }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-9 w-9 rounded-full flex items-center justify-center text-white transition-all"
                     style={{ background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}
                 >
@@ -307,12 +307,12 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
 
                 {/* Pill progress indicators (Apple / Sony style) */}
                 <div className="absolute bottom-5 left-10 sm:left-14 z-20 flex items-center gap-2">
-                    {slides.map(function(_, i) {
+                    {slides.map(function (_, i) {
                         var isActive = i === index;
                         return (
                             <button
                                 key={i}
-                                onClick={function(e) { e.stopPropagation(); goTo(i, i > index ? 1 : -1); }}
+                                onClick={function (e) { e.stopPropagation(); goTo(i, i > index ? 1 : -1); }}
                                 className="relative overflow-hidden rounded-full"
                                 style={{
                                     width: isActive ? '40px' : '6px',

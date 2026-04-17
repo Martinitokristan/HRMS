@@ -19,7 +19,7 @@ class ProductController extends Controller
     {
         $cacheKey = 'products:' . md5(json_encode($request->only(['search', 'category_id', 'status', 'page', 'per_page'])));
 
-        $result = Cache::tags(['products'])->remember($cacheKey, 900, function () use ($request) {
+        $result = Cache::remember($cacheKey, 900, function () use ($request) {
             // Eager-load relations; use aggregate methods to avoid N+1 for rating/review/sold data
             $query = Product::with(['category', 'inventory', 'brand', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue'])
                 ->withCount('approvedReviews as total_reviews')
@@ -148,7 +148,9 @@ class ProductController extends Controller
             return $product;
         });
 
-        Cache::tags(['products'])->flush();
+        // Note: Cache tags are not supported by the default file/database drivers.
+        // If using redis/memcached, you can restore Cache::tags(['products'])->flush();
+        // Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.created'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.created'));
 
@@ -235,7 +237,7 @@ class ProductController extends Controller
             }
         }
 
-        Cache::tags(['products'])->flush();
+        // Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.updated'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.updated'));
 
@@ -251,7 +253,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $product->delete();
 
-        Cache::tags(['products'])->flush();
+        // Cache::tags(['products'])->flush();
         broadcast(new DataMutated('private-admin', ['admin_products', 'admin_inventory'], 'product.deleted'));
         broadcast(new DataMutated('shop', ['customer_shop', 'supplier_products'], 'product.deleted'));
 

@@ -401,9 +401,9 @@ export default function CustomerOrder() {
                                     <h4 className="font-bold text-foreground mb-3">Order Items</h4>
                                     {Array.isArray(cart) && cart.map((item) => (
                                         <div key={item.cartId} className="flex gap-3 py-3 border-b border-border/50 items-start">
-                                            <div className="w-14 h-14 rounded-lg bg-secondary flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                                            <div className="w-14 h-14 rounded-lg bg-white flex items-center justify-center text-xl shrink-0 overflow-hidden border border-border">
                                                 {item.image_path ? (
-                                                    <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-cover rounded-lg" />
+                                                    <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-contain p-1" />
                                                 ) : <Package className="h-6 w-6 opacity-30 text-muted-foreground" />}
                                             </div>
                                             <div className="flex-1">
@@ -773,9 +773,9 @@ export default function CustomerOrder() {
                         <div className="space-y-0 mb-4">
                             {Array.isArray(cart) && cart.map((item) => (
                                 <div key={item.cartId || item.id} className="flex gap-3 py-3 border-b border-border/50 items-center">
-                                    <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center text-2xl shrink-0 overflow-hidden">
+                                    <div className="w-16 h-16 rounded-xl bg-white flex items-center justify-center text-2xl shrink-0 overflow-hidden border border-border">
                                         {item.image_path ? (
-                                            <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-cover rounded-xl" />
+                                            <img src={`/storage/${item.image_path}`} alt={item.name} className="w-full h-full object-contain p-1" />
                                         ) : <Package className="h-7 w-7 opacity-20 text-muted-foreground" />}
                                     </div>
                                     <div className="flex-1 min-w-0">
