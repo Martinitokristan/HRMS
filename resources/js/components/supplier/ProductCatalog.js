@@ -304,17 +304,15 @@ export default function ProductCatalog() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {products.map((product) => (
                         <Card key={product.id} className="overflow-hidden">
-                            <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center w-full">
+                            <div className="w-full h-[160px] bg-[#f5f5f5] flex items-center justify-center p-[12px] box-border overflow-hidden relative">
                                 {product.image_path ? (
                                     <img
                                         src={`/storage/${product.image_path}`}
                                         alt={product.name}
-                                        className="absolute inset-0 w-full h-full object-cover object-center"
+                                        className="max-w-full max-h-full w-auto h-auto object-contain block"
                                     />
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <Package className="w-12 h-12 text-muted-foreground" />
-                                    </div>
+                                    <Package className="w-12 h-12 text-muted-foreground" />
                                 )}
                                 <Badge
                                     className={`absolute top-2 right-2 ${getStatusColor(product.is_active ? "active" : "inactive")}`}
