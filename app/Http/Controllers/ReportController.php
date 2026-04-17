@@ -1296,4 +1296,109 @@ class ReportController extends Controller
             'status' => 'success',
         ]);
     }
+    public function recentActivity()
+    {
+        try {
+            $activities = [];
+
+            // 1. Recent Sales (latest 15)
+            $sales = Sale::with(['customer', 'items.product', 'delivery'])
+                ->latest()
+                ->limit(15)
+                ->get();
+
+            foreach ($sales as $sale) {
+                // Map status to requirements: Delivered, Alert, In Transit, Paid, Warning, Processing
+                $status = 'Processing';
+                $icon = 'ShoppingBag';
+                $badgeVariant = 'secondary'; // default
+
+                switch ($sale->status) {
+                    case 'delivered':
+                        $status = 'Delivered';
+                        $icon = 'CheckCircle';
+                        $badgeVariant = 'success';
+                        break;
+                    case 'out_for_delivery':
+                        $status = 'In Transit';
+                        $icon = 'Bike';
+                        $badgeVariant = 'blue';
+                        break;
+                    case 'confirmed':
+                        $status = 'Processing';
+                        $icon = 'Package';
+                        $badgeVariant = 'blue';
+                        break;
+                    case 'cancelled':
+                    case 'failed':
+                        $status = 'Alert';
+                        $icon = 'AlertTriangle';
+                        $badgeVariant = 'destructive';
+                        break;
+                    case 'returned':
+                        $status = 'Alert';
+                        $icon = 'RefreshCcw';
+                        $badgeVariant = 'amber';
+                        break;
+                    case 'pending_payment':
+                    case 'verifying_payment':
+                        $status = 'Warning';
+                        $icon = 'Clock';
+                        $badgeVariant = 'amber';
+                        break;
+                    case 'paid':
+                        $status = 'Paid';
+                        $icon = 'Check';
+                        $badgeVariant = 'success';
+                        break;
+                    default:
+                        $status = 'Processing';
+                        $icon = 'ShoppingBag';
+                        $badgeVariant = 'secondary';
+                }
+
+                $activities[] = [
+                    'id' => 'sale-' . $sale->id,
+                    'type' => 'sale',
+                    'status' => $status,
+                    'badgeVariant' => $badgeVariant,
+                    'icon' => $icon,
+                    'title' => "Order #{$sale->order_number}",
+                    'message' => ($sale->customer->name ?? 'A customer') . " - " . number_format($sale->total_amount, 2) . " PHP",
+                    'timestamp' => $sale->created_at->toIso8601String(),
+                ];
+            }
+
+            // 2. Low Stock Alerts (add as 'Alert' or 'Warning')
+            $lowStock = Inventory::with('product')
+                ->whereRaw('current_stock <= reorder_threshold')
+                ->limit(5)
+                ->get();
+
+            foreach ($lowStock as $inv) {
+                $activities[] = [
+                    'id' => 'stock-' . $inv->id,
+                    'type' => 'inventory',
+                    'status' => 'Warning',
+                    'badgeVariant' => 'amber',
+                    'icon' => 'AlertTriangle',
+                    'title' => 'Stock Alert',
+                    'message' => ($inv->product->name ?? 'Product') . " is low on stock ({$inv->current_stock} remaining)",
+                    'timestamp' => $inv->updated_at->toIso8601String(),
+                ];
+            }
+
+            // Sort by timestamp desc
+            usort($activities, function($a, $b) {
+                return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+            });
+
+            return response()->json([
+                'data' => array_slice($activities, 0, 15),
+                'status' => 'success'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch activity', 'message' => $e->getMessage()], 500);
+        }
+    }
 }

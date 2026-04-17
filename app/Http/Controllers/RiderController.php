@@ -14,27 +14,31 @@ class RiderController extends Controller
     {
         $query = User::where('role', 'rider')
             ->with(['riderProfile'])
-            ->withCount(['deliveries as total_deliveries_count' => function($q) {
-                $q->where('status', 'delivered');
-            }])
-            ->withCount(['deliveries as active_deliveries_count' => function($q) {
-                $q->whereIn('status', ['pending', 'in_progress']);
-            }])
-            ->when($request->search, function($q) use ($request) {
+            ->withCount([
+                'deliveries as total_deliveries_count' => function ($q) {
+                    $q->where('status', 'delivered');
+                }
+            ])
+            ->withCount([
+                'deliveries as active_deliveries_count' => function ($q) {
+                    $q->whereIn('status', ['pending', 'in_progress']);
+                }
+            ])
+            ->when($request->search, function ($q) use ($request) {
                 return $q->where('name', 'like', "%{$request->search}%");
             })
-            ->when($request->status, function($q) use ($request) {
+            ->when($request->status, function ($q) use ($request) {
                 return $q->where('status', $request->status);
             })
             ->latest();
 
         return response()->json([
-            'data'   => $query->paginate($request->get('per_page', 15)),
+            'data' => $query->paginate($request->get('per_page', 15)),
             'counts' => [
-                'total'       => User::where('role', 'rider')->count(),
-                'available'   => RiderProfile::where('availability', 'available')->count(),
+                'total' => User::where('role', 'rider')->count(),
+                'available' => RiderProfile::where('availability', 'available')->count(),
                 'on_delivery' => RiderProfile::where('availability', 'on_delivery')->count(),
-                'off_duty'    => RiderProfile::where('availability', 'off_duty')->count(),
+                'off_duty' => RiderProfile::where('availability', 'off_duty')->count(),
             ],
             'status' => 'success',
         ]);
@@ -50,11 +54,11 @@ class RiderController extends Controller
 
         return response()->json([
             'data' => [
-                'user'                  => $user,
-                'profile'               => $profile,
-                'completed_deliveries'  => $completedDeliveries,
-                'active_orders'         => $activeOrders,
-                'on_time_rate'          => $profile ? $profile->on_time_rate : 0,
+                'user' => $user,
+                'profile' => $profile,
+                'completed_deliveries' => $completedDeliveries,
+                'active_orders' => $activeOrders,
+                'on_time_rate' => $profile ? $profile->on_time_rate : 0,
             ],
             'status' => 'success',
         ]);
@@ -72,29 +76,29 @@ class RiderController extends Controller
     public function getRatingStats(Request $request)
     {
         $riderId = $request->user()->id;
-        
+
         \Log::info('Fetching rating stats for rider: ' . $riderId);
-        
+
         $ratings = Delivery::where('rider_id', $riderId)
             ->whereNotNull('rating')
             ->get(['rating', 'rating_comment', 'rated_at']);
 
         \Log::info('Found ratings count: ' . $ratings->count());
-        
+
         $averageRating = $ratings->avg('rating') ? round($ratings->avg('rating'), 2) : 0;
         $totalRatings = $ratings->count();
         $ratingDistribution = $ratings->countBy('rating');
         $recentRating = $ratings->last()->rating ?? null;
         $recentComment = $ratings->last()->rating_comment ?? null;
         $recentDate = $ratings->last()->rated_at ?? null;
-        
+
         // Calculate rating percentages
         $ratingPercentages = [];
         for ($i = 1; $i <= 5; $i++) {
             $count = $ratingDistribution[$i] ?? 0;
             $ratingPercentages[$i] = $totalRatings > 0 ? round(($count / $totalRatings) * 100, 1) : 0;
         }
-        
+
         $ratingStats = [
             'average_rating' => $averageRating,
             'total_ratings' => $totalRatings,
@@ -104,7 +108,7 @@ class RiderController extends Controller
             'recent_date' => $recentDate,
             'rating_percentages' => $ratingPercentages,
         ];
-        
+
         return response()->json([
             'data' => $ratingStats,
             'status' => 'success'
@@ -125,13 +129,15 @@ class RiderController extends Controller
         $riders = User::where('role', 'rider')
             // Remove manual off_duty check as per request ("always online if logged in")
             ->with('riderProfile')
-            ->withCount(['deliveries as active_deliveries_count' => function ($q) {
-                $q->whereIn('status', ['pending', 'in_progress']);
-            }])
+            ->withCount([
+                'deliveries as active_deliveries_count' => function ($q) {
+                    $q->whereIn('status', ['pending', 'in_progress']);
+                }
+            ])
             ->get();
-            
+
         return response()->json([
-            'data'   => $riders,
+            'data' => $riders,
             'status' => 'success'
         ]);
     }
@@ -148,9 +154,9 @@ class RiderController extends Controller
             \Log::debug("Updating rider {$riderId} location: " . $request->latitude . ", " . $request->longitude);
             $profile = RiderProfile::where('user_id', $riderId)->first();
             if ($profile) {
-                $profile->current_latitude = (float)$request->latitude;
-                $profile->current_longitude = (float)$request->longitude;
-                $profile->current_heading = (float)($request->heading ?? 0);
+                $profile->current_latitude = (float) $request->latitude;
+                $profile->current_longitude = (float) $request->longitude;
+                $profile->current_heading = (float) ($request->heading ?? 0);
                 $profile->save();
                 \Log::debug("Rider profile saved for user {$riderId}");
 
@@ -159,7 +165,7 @@ class RiderController extends Controller
                     ->whereIn('status', ['confirmed', 'in_progress'])
                     ->with('sale')
                     ->get();
-                
+
                 foreach ($activeDeliveries as $delivery) {
                     if ($delivery->sale && $delivery->sale->customer_id) {
                         broadcast(new \App\Events\RiderLocationUpdated(
@@ -176,12 +182,12 @@ class RiderController extends Controller
         }
 
         $stats = [
-            'total'     => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->count(),
-            'done'      => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->count(),
-            'active'    => Delivery::where('rider_id', $riderId)->whereIn('status', ['pending', 'confirmed', 'in_progress'])->count(),
-            'failed'    => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'failed')->count(),
-            'quota'     => 10000,
-            'collected' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->with('sale')->get()->sum(function($d) {
+            'total' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->count(),
+            'done' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->count(),
+            'active' => Delivery::where('rider_id', $riderId)->whereIn('status', ['pending', 'confirmed', 'in_progress'])->count(),
+            'failed' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'failed')->count(),
+            'quota' => 10000,
+            'collected' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->with('sale')->get()->sum(function ($d) {
                 return optional($d->sale)->payment_method === 'cod' ? $d->sale->total_amount : 0;
             }),
         ];
@@ -190,9 +196,9 @@ class RiderController extends Controller
         // If the request includes GPS coords (sent by frontend on every dashboard fetch), use and persist them
         $riderProfile = RiderProfile::where('user_id', $riderId)->first();
         if ($request->filled('latitude') && $request->filled('longitude') && $riderProfile) {
-            $riderProfile->current_latitude  = (float) $request->latitude;
+            $riderProfile->current_latitude = (float) $request->latitude;
             $riderProfile->current_longitude = (float) $request->longitude;
-            $riderProfile->current_heading   = (float) ($request->heading ?? 0);
+            $riderProfile->current_heading = (float) ($request->heading ?? 0);
             $riderProfile->save();
         }
         $riderLat = $riderProfile->current_latitude ?? null;
@@ -205,7 +211,7 @@ class RiderController extends Controller
             ->where('rider_id', $riderId)
             ->latest()
             ->get()
-            ->map(function($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
+            ->map(function ($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
                 // Retrieve customer profile
                 $profile = $d->sale->customer->customerProfile;
 
@@ -237,7 +243,7 @@ class RiderController extends Controller
             ->where('status', 'pending')
             ->latest()
             ->get()
-            ->map(function($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
+            ->map(function ($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
                 $profile = $d->sale->customer->customerProfile;
 
                 $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
@@ -269,9 +275,9 @@ class RiderController extends Controller
 
         return response()->json([
             'data' => [
-                'stats'     => $stats,
-                'nearby'    => $nearby,
-                'my_jobs'   => $deliveries->whereIn('status', ['pending', 'confirmed', 'in_progress'])->values(),
+                'stats' => $stats,
+                'nearby' => $nearby,
+                'my_jobs' => $deliveries->whereIn('status', ['pending', 'confirmed', 'in_progress'])->values(),
                 'completed' => $deliveries->whereIn('status', ['delivered', 'failed'])->take(20)->values(),
             ],
             'status' => 'success'
@@ -297,7 +303,7 @@ class RiderController extends Controller
     {
         $user = User::findOrFail($id);
         $user->update(['status' => 'active']);
-        
+
         broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'rider.approved'));
         broadcast(new DataMutated("private-rider.{$user->id}", ['rider_dashboard', 'rider_notifications'], 'rider.approved'));
 
@@ -339,7 +345,7 @@ class RiderController extends Controller
 
         $user = $request->user();
         $path = $request->file('photo')->store('profile-photos', 'public');
-        
+
         $user->update(['photo' => $path]);
 
         return response()->json([
@@ -412,7 +418,7 @@ class RiderController extends Controller
 
         $riderId = $request->user()->id;
         $profile = RiderProfile::where('user_id', $riderId)->first();
-        
+
         if ($profile) {
             $profile->current_latitude = $request->latitude;
             $profile->current_longitude = $request->longitude;

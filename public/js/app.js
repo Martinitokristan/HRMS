@@ -20554,13 +20554,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_ui_badge__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @/components/ui/badge */ "./resources/js/components/ui/badge.jsx");
 /* harmony import */ var _lib_utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @/lib/utils */ "./resources/js/lib/utils.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/chart-column.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/triangle-alert.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/bike.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/philippine-peso.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-bag.js");
-/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
-/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/circle-check-big.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/triangle-alert.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/bike.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/check.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/clock.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/philippine-peso.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/refresh-ccw.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/shopping-bag.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/trending-up.js");
+/* harmony import */ var _shared_BarChart__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../shared/BarChart */ "./resources/js/components/shared/BarChart.js");
+/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
+/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
+/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/formatDistanceToNow.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -20588,8 +20596,10 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
+
 function Dashboard() {
-  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_14__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_15__.STALE_KEYS.ADMIN_DASHBOARD),
+  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_21__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_22__.STALE_KEYS.ADMIN_DASHBOARD),
     refreshTrigger = _useSilentRefresh.refreshTrigger;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       stats: null,
@@ -20616,6 +20626,14 @@ function Dashboard() {
     _useState0 = _slicedToArray(_useState9, 2),
     returnRateData = _useState0[0],
     setReturnRateData = _useState0[1];
+  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState10 = _slicedToArray(_useState1, 2),
+    recentActivity = _useState10[0],
+    setRecentActivity = _useState10[1];
+  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState12 = _slicedToArray(_useState11, 2),
+    activityLoading = _useState12[0],
+    setActivityLoading = _useState12[1];
   var periods = [{
     value: "week",
     label: "7 Days"
@@ -20738,6 +20756,38 @@ function Dashboard() {
       return _ref3.apply(this, arguments);
     };
   }();
+  var fetchRecentActivity = /*#__PURE__*/function () {
+    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+      var _res$data3, res, _t4;
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.p = _context4.n) {
+          case 0:
+            setActivityLoading(true);
+            _context4.p = 1;
+            _context4.n = 2;
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get("/reports/recent-activity");
+          case 2:
+            res = _context4.v;
+            setRecentActivity(((_res$data3 = res.data) === null || _res$data3 === void 0 ? void 0 : _res$data3.data) || []);
+            _context4.n = 4;
+            break;
+          case 3:
+            _context4.p = 3;
+            _t4 = _context4.v;
+            console.error("Failed to fetch recent activity", _t4);
+          case 4:
+            _context4.p = 4;
+            setActivityLoading(false);
+            return _context4.f(4);
+          case 5:
+            return _context4.a(2);
+        }
+      }, _callee4, null, [[1, 3, 4, 5]]);
+    }));
+    return function fetchRecentActivity() {
+      return _ref4.apply(this, arguments);
+    };
+  }();
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var isMounted = true;
     var debounce = setTimeout(function () {
@@ -20752,6 +20802,7 @@ function Dashboard() {
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     fetchYearlyCategories();
     fetchReturnRate();
+    fetchRecentActivity();
   }, [refreshTrigger]);
   var formatCurr = function formatCurr(val) {
     return new Intl.NumberFormat("en-PH", {
@@ -20783,82 +20834,82 @@ function Dashboard() {
       return d.value;
     })).concat([5]));
   }, [chartData]);
-  if (loading && !stats) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+  if (loading && !stats) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
     className: "flex items-center justify-center py-32",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
       className: "spinner"
     })
   });
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       className: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("h2", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h2", {
           className: "text-xl font-bold text-foreground tracking-tight",
           children: "Dashboard Overview"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
           className: "text-sm text-muted-foreground mt-1",
           children: "Real-time insights into your business performance."
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
         className: "flex items-center gap-2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
           variant: "outline",
           asChild: true,
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
             to: "/inventory/sales",
             children: "View All Orders"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
           asChild: true,
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
             to: "/reports",
             children: "View Reports"
           })
         })]
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
       className: "grid grid-cols-2 lg:grid-cols-4 gap-5 mb-5",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Today's Revenue",
         value: stats !== null && stats !== void 0 && stats.total_revenue ? formatCurr(stats.total_revenue) : "₱0",
         trend: "Live",
         trendUp: true,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"],
         accentColor: "green"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Orders Today",
         value: (stats === null || stats === void 0 ? void 0 : stats.orders_today) || 0,
         trend: "New",
         trendUp: true,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"],
         accentColor: "blue"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Low Stock Items",
         value: (stats === null || stats === void 0 ? void 0 : stats.low_stock_count) || 0,
         trend: "Required",
         trendUp: false,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"],
         accentColor: "amber"
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_StatCard__WEBPACK_IMPORTED_MODULE_3__["default"], {
         label: "Active Riders",
         value: (stats === null || stats === void 0 ? void 0 : stats.active_riders) || 0,
         trend: "Available",
         trendUp: true,
-        icon: lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"],
+        icon: lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"],
         accentColor: "accent"
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
       className: "p-0 mb-5 overflow-hidden",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
         className: "flex items-center justify-between px-5 pt-4 pb-1",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h3", {
           className: "text-sm font-bold text-foreground",
           children: "Order Scaling"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
           className: "flex gap-1 rounded-lg bg-secondary p-1",
           children: periods.map(function (p) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
               variant: period === p.value ? "default" : "ghost",
               size: "sm",
               className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)("h-7 px-3 text-[11px] font-bold", period !== p.value && "text-muted-foreground"),
@@ -20869,12 +20920,12 @@ function Dashboard() {
             }, p.value);
           })
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
         className: "px-2 pb-2",
         style: {
           height: 280
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(_shared_LineChart__WEBPACK_IMPORTED_MODULE_4__["default"], {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_LineChart__WEBPACK_IMPORTED_MODULE_4__["default"], {
           data: chartData,
           maxValue: maxOrders,
           formatValue: function formatValue(v) {
@@ -20885,120 +20936,150 @@ function Dashboard() {
           color: "#3b82f6"
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-      className: "grid grid-cols-1 lg:grid-cols-2 gap-5",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
-        className: "p-5",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+      className: "grid grid-cols-1 lg:grid-cols-3 gap-6",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
+        className: "p-5 flex flex-col h-[380px]",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           className: "mb-4",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("h3", {
             className: "text-sm font-bold text-foreground flex items-center gap-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
               className: "h-4 w-4 text-primary"
             }), "Revenue by Category"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("p", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("p", {
             className: "text-[11px] text-muted-foreground mt-0.5",
             children: ["Top 10 categories \xB7 ", new Date().getFullYear(), " (Jan \u2013 Dec)"]
           })]
-        }), yearlyCategories.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-          className: "flex items-center justify-center h-[220px] text-muted-foreground",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-            className: "text-center",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
-              className: "h-10 w-10 mx-auto mb-2 opacity-30"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
-              className: "text-sm",
-              children: "No category data for this year"
-            })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+          className: "flex-grow",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_BarChart__WEBPACK_IMPORTED_MODULE_20__["default"], {
+            data: yearlyCategories.map(function (c) {
+              return {
+                label: c.name,
+                value: c.revenue
+              };
+            }),
+            formatValue: formatCurr,
+            color: "#3b82f6",
+            hideHeader: true
           })
-        }) : function () {
-          var maxRev = Math.max.apply(Math, _toConsumableArray(yearlyCategories.map(function (c) {
-            return Number(c.revenue);
-          })).concat([1]));
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-            className: "flex items-end justify-around h-[200px] mt-6",
-            children: yearlyCategories.map(function (cat, idx) {
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-                className: "flex flex-col items-center gap-1.5 w-[10%] min-w-[30px] h-full justify-end group cursor-pointer",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                  className: "text-[10px] text-muted-foreground font-medium mb-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity",
-                  children: formatCurr(cat.revenue)
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                  className: "w-full max-w-[32px] rounded-t-md bg-secondary flex-1 flex flex-col justify-end overflow-hidden",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                    className: "w-full bg-primary transition-all duration-500",
-                    style: {
-                      height: "".concat(Number(cat.revenue) / maxRev * 100, "%")
-                    }
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                  className: "mt-1 h-6 flex items-center justify-center",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("span", {
-                    className: "text-[10px] font-medium text-muted-foreground text-center truncate w-full px-1",
-                    title: cat.name,
-                    children: [cat.name.split(" ")[0], " "]
-                  })
-                })]
-              }, cat.id || idx);
-            })
-          });
-        }()]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
-        className: "p-5",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
+        className: "p-5 flex flex-col h-[380px]",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           className: "mb-4",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("h3", {
             className: "text-sm font-bold text-foreground flex items-center gap-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
-              className: "h-4 w-4 text-red-500"
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+              className: "h-4 w-4 text-rose-500"
             }), "Return Rate by Category"]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
             className: "text-[11px] text-muted-foreground mt-0.5",
-            children: "Which categories are returned most often"
+            children: "Frequency of returns per category (%)"
           })]
-        }), returnRateData.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-          className: "flex items-center justify-center h-[220px] text-muted-foreground",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-            className: "text-center",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
-              className: "h-10 w-10 mx-auto mb-2 opacity-30"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("p", {
-              className: "text-sm",
-              children: "No return data available"
-            })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+          className: "flex-grow",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_BarChart__WEBPACK_IMPORTED_MODULE_20__["default"], {
+            data: returnRateData.map(function (c) {
+              return {
+                label: c.name,
+                value: c.return_rate
+              };
+            }),
+            formatValue: function formatValue(v) {
+              return "".concat(Number(v).toFixed(1), "%");
+            },
+            color: "#f43f5e",
+            hideHeader: true
           })
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-          className: "space-y-4 mt-4 h-[220px] overflow-y-auto pr-2",
-          style: {
-            scrollbarWidth: "thin"
-          },
-          children: returnRateData.slice(0, 10).map(function (cat, idx) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-              className: "flex items-center gap-3",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                className: "w-24 shrink-0 text-right",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("span", {
-                  className: "text-[11px] font-medium text-foreground block truncate",
-                  title: cat.name,
-                  children: cat.name
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_6__.Card, {
+        className: "p-5 flex flex-col h-[380px]",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+          className: "flex items-center justify-between mb-4",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("h3", {
+            className: "text-sm font-bold text-foreground flex items-center gap-2",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_19__["default"], {
+              className: "h-4 w-4 text-indigo-500"
+            }), "Recent Activity"]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+            variant: "outline",
+            className: "text-[10px] font-bold text-indigo-600 border-indigo-100 bg-indigo-50/50",
+            children: "Live Feed"
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+          className: "flex-grow overflow-y-auto pr-2 -mr-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-200",
+          children: activityLoading && recentActivity.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+            className: "flex flex-col items-center justify-center h-full opacity-50",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+              className: "spinner h-5 w-5 mb-2"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
+              className: "text-xs",
+              children: "Updating feed..."
+            })]
+          }) : recentActivity.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+            className: "flex flex-col items-center justify-center h-full opacity-50 border border-dashed rounded-xl p-4",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"], {
+              className: "h-8 w-8 mb-2 opacity-20"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
+              className: "text-xs font-medium",
+              children: "No recent activity"
+            })]
+          }) : recentActivity.map(function (activity, idx) {
+            // Dynamic icon selection
+            var IconComponent = {
+              ShoppingBag: lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"],
+              CheckCircle: lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"],
+              Package: lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"],
+              AlertTriangle: lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"],
+              RefreshCcw: lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"],
+              Clock: lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"],
+              Check: lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"],
+              Bike: lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"]
+            }[activity.icon] || lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"];
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+              className: "flex gap-3 items-start group",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+                className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all", activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-100 text-green-600" : activity.status === 'Alert' ? "bg-rose-100 text-rose-600" : activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600"),
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(IconComponent, {
+                  className: "h-4 w-4"
                 })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)("div", {
-                className: "flex-1 flex items-center gap-3",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                  className: "h-2.5 rounded-full bg-secondary w-full overflow-hidden",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsx)("div", {
-                    className: "h-full rounded-full bg-red-500 transition-all duration-500",
-                    style: {
-                      width: "".concat(Math.min(cat.return_rate, 100), "%")
-                    }
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_16__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+                className: "flex-1 min-w-0 border-b border-slate-50 pb-3 group-last:border-0",
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+                  className: "flex items-center justify-between gap-2 mb-0.5",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h4", {
+                    className: "text-[11px] font-bold text-slate-700 truncate",
+                    children: activity.title
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
+                    className: "text-[9px] font-medium text-slate-400 shrink-0 capitalize",
+                    children: (0,date_fns__WEBPACK_IMPORTED_MODULE_23__.formatDistanceToNow)(new Date(activity.timestamp), {
+                      addSuffix: true
+                    })
+                  })]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
+                  className: "text-[10px] text-slate-500 line-clamp-1 mb-2",
+                  children: activity.message
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_7__.Badge, {
+                  className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_8__.cn)("text-[8px] h-4 px-1.5 font-bold uppercase tracking-wider", activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-50 text-green-700 border-green-100" : activity.status === 'Alert' ? "bg-rose-50 text-rose-700 border-rose-100" : activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-50 text-blue-700 border-blue-100" : "bg-amber-50 text-amber-700 border-amber-100"),
                   variant: "outline",
-                  className: "text-[10px] w-12 justify-center px-1 shrink-0 text-red-600 border-red-200 bg-red-50",
-                  children: [cat.return_rate, "%"]
+                  children: activity.status
                 })]
               })]
-            }, cat.id || idx);
+            }, activity.id || idx);
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+          className: "mt-4 pt-3 border-t border-slate-50 text-center",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
+            variant: "ghost",
+            size: "sm",
+            className: "h-7 text-[10px] font-bold text-slate-400 hover:text-primary transition-colors",
+            asChild: true,
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
+              to: "/inventory/sales",
+              children: "View Detailed History"
+            })
           })
         })]
       })]
@@ -34492,6 +34573,237 @@ function RoleBadge(_ref3) {
     variant: role
   });
 }
+
+/***/ },
+
+/***/ "./resources/js/components/shared/BarChart.js"
+/*!****************************************************!*\
+  !*** ./resources/js/components/shared/BarChart.js ***!
+  \****************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/chart-column.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+
+/**
+ * A premium SVG-based Bar Chart component.
+ * 
+ * @param {Object} props
+ * @param {Array} props.data - Array of { label: string, value: number }
+ * @param {number} props.maxValue - Optional manual max value for Y-axis
+ * @param {Function} props.formatValue - Formatter for tooltips and axes
+ * @param {string} props.title - Chart title
+ * @param {string} props.color - Bar color (HEX/HSL)
+ * @param {boolean} props.hideHeader - Whether to hide the title/total header
+ * @param {string} props.totalValueLabel - Label for the total sum
+ */
+
+var BarChart = function BarChart(_ref) {
+  var data = _ref.data,
+    maxValue = _ref.maxValue,
+    _ref$formatValue = _ref.formatValue,
+    formatValue = _ref$formatValue === void 0 ? function (v) {
+      return v;
+    } : _ref$formatValue,
+    _ref$title = _ref.title,
+    title = _ref$title === void 0 ? "Analysis" : _ref$title,
+    _ref$totalValueLabel = _ref.totalValueLabel,
+    totalValueLabel = _ref$totalValueLabel === void 0 ? "Total" : _ref$totalValueLabel,
+    _ref$color = _ref.color,
+    color = _ref$color === void 0 ? "#3b82f6" : _ref$color,
+    _ref$hideHeader = _ref.hideHeader,
+    hideHeaderProp = _ref$hideHeader === void 0 ? false : _ref$hideHeader;
+  var hideHeader = hideHeaderProp || !title;
+  if (!data || data.length === 0) {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      className: "flex items-center justify-center h-full text-muted-foreground bg-slate-50/50 rounded-xl border border-dashed",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+        className: "text-center",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_1__["default"], {
+          className: "h-10 w-10 mx-auto mb-2 opacity-20"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
+          className: "text-sm font-medium",
+          children: "No data available"
+        })]
+      })
+    });
+  }
+  var width = 800;
+  var height = 240;
+  var padding = {
+    top: 30,
+    right: 30,
+    bottom: 45,
+    left: 50
+  };
+  var chartWidth = width - padding.left - padding.right;
+  var chartHeight = height - padding.top - padding.bottom;
+  var dataMax = Math.max.apply(Math, _toConsumableArray(data.map(function (d) {
+    return Number(d.value) || 0;
+  })).concat([0]));
+  var safeMaxValue = Math.max(maxValue > 0 ? maxValue : dataMax * 1.1, dataMax * 1.1) || 10;
+  var totalValue = data.reduce(function (sum, d) {
+    return sum + Number(d.value);
+  }, 0);
+  var barCount = data.length;
+  var barGapRatio = 0.3; // Space between bars as fraction of bar width
+  var totalGapWidth = chartWidth * barGapRatio;
+  var availableBarWidth = chartWidth - totalGapWidth;
+  var barWidth = availableBarWidth / barCount;
+  var gapWidth = totalGapWidth / (barCount + 1);
+  var bars = data.map(function (item, idx) {
+    var h = Number(item.value) / safeMaxValue * chartHeight;
+    var x = padding.left + gapWidth + idx * (barWidth + gapWidth);
+    var y = padding.top + chartHeight - h;
+    return {
+      x: x,
+      y: y,
+      w: barWidth,
+      h: Math.max(h, 2),
+      // Min 2px height for visibility
+      value: item.value,
+      label: item.label
+    };
+  });
+  var ySteps = 5;
+  var yLabels = Array.from({
+    length: ySteps
+  }, function (_, i) {
+    var pct = i / (ySteps - 1);
+    var value = safeMaxValue * (1 - pct);
+    var y = padding.top + chartHeight * pct;
+    return {
+      value: value,
+      y: y
+    };
+  });
+  var gradientId = "bar-gradient-".concat(color.replace(/[^a-zA-Z0-9]/g, ""), "-").concat(Date.now());
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+    className: "bar-chart-container w-full h-full flex flex-col",
+    children: [!hideHeader && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+      className: "flex items-end justify-between mb-4",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h4", {
+          className: "text-sm font-semibold text-slate-700",
+          children: title
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+        className: "text-right",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+          className: "text-lg font-bold text-slate-900 leading-none",
+          children: formatValue(totalValue)
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+          className: "text-[10px] uppercase tracking-wider text-slate-400 font-medium",
+          children: totalValueLabel
+        })]
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      className: "relative flex-grow min-h-0",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("svg", {
+        viewBox: "0 0 ".concat(width, " ").concat(height),
+        className: "w-full h-full",
+        preserveAspectRatio: "none",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("defs", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("linearGradient", {
+            id: gradientId,
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("stop", {
+              offset: "0%",
+              stopColor: color,
+              stopOpacity: "1"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("stop", {
+              offset: "100%",
+              stopColor: color,
+              stopOpacity: "0.7"
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("filter", {
+            id: "bar-shadow",
+            x: "-10%",
+            y: "-10%",
+            width: "120%",
+            height: "120%",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("feDropShadow", {
+              dx: "0",
+              dy: "2",
+              stdDeviation: "2",
+              floodOpacity: "0.1"
+            })
+          })]
+        }), yLabels.map(function (label, idx) {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("g", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("line", {
+              x1: padding.left,
+              y1: label.y,
+              x2: padding.left + chartWidth,
+              y2: label.y,
+              stroke: "#f1f5f9",
+              strokeWidth: "1"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("text", {
+              x: padding.left - 10,
+              y: label.y + 4,
+              textAnchor: "end",
+              fontSize: "11",
+              fill: "#94a3b8",
+              className: "font-medium",
+              children: label.value >= 1000 ? (label.value / 1000).toFixed(1) + "k" : Math.round(label.value)
+            })]
+          }, idx);
+        }), bars.map(function (bar, idx) {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("g", {
+            className: "group",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("rect", {
+              x: bar.x,
+              y: bar.y,
+              width: bar.w,
+              height: bar.h,
+              fill: "url(#".concat(gradientId, ")"),
+              rx: Math.min(bar.w / 4, 4),
+              className: "transition-all duration-300 hover:opacity-80",
+              filter: "url(#bar-shadow)",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("title", {
+                children: "".concat(bar.label, ": ").concat(formatValue(bar.value))
+              })
+            }), idx % Math.ceil(bars.length / 10) === 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("text", {
+              x: bar.x + bar.w / 2,
+              y: padding.top + chartHeight + 20,
+              textAnchor: "middle",
+              fontSize: "11",
+              fill: "#64748b",
+              className: "font-medium",
+              children: bar.label.length > 12 ? bar.label.substring(0, 10) + '...' : bar.label
+            })]
+          }, idx);
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("line", {
+          x1: padding.left,
+          y1: padding.top + chartHeight,
+          x2: padding.left + chartWidth,
+          y2: padding.top + chartHeight,
+          stroke: "#e2e8f0",
+          strokeWidth: "1"
+        })]
+      })
+    })]
+  });
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (BarChart);
 
 /***/ },
 
@@ -70306,6 +70618,42 @@ const QrCode = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])(
 
 
 //# sourceMappingURL=qr-code.js.map
+
+
+/***/ },
+
+/***/ "./node_modules/lucide-react/dist/esm/icons/refresh-ccw.js"
+/*!*****************************************************************!*\
+  !*** ./node_modules/lucide-react/dist/esm/icons/refresh-ccw.js ***!
+  \*****************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   __iconNode: () => (/* binding */ __iconNode),
+/* harmony export */   "default": () => (/* binding */ RefreshCcw)
+/* harmony export */ });
+/* harmony import */ var _createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../createLucideIcon.js */ "./node_modules/lucide-react/dist/esm/createLucideIcon.js");
+/**
+ * @license lucide-react v0.577.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+
+const __iconNode = [
+  ["path", { d: "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "14sxne" }],
+  ["path", { d: "M3 3v5h5", key: "1xhq8a" }],
+  ["path", { d: "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16", key: "1hlbsb" }],
+  ["path", { d: "M16 16h5v5", key: "ccwih5" }]
+];
+const RefreshCcw = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("refresh-ccw", __iconNode);
+
+
+//# sourceMappingURL=refresh-ccw.js.map
 
 
 /***/ },
@@ -126374,6 +126722,29 @@ const longFormatters = {
 
 /***/ },
 
+/***/ "./node_modules/date-fns/_lib/getRoundingMethod.js"
+/*!*********************************************************!*\
+  !*** ./node_modules/date-fns/_lib/getRoundingMethod.js ***!
+  \*********************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getRoundingMethod: () => (/* binding */ getRoundingMethod)
+/* harmony export */ });
+function getRoundingMethod(method) {
+  return (number) => {
+    const round = method ? Math[method] : Math.trunc;
+    const result = round(number);
+    // Prevent negative zero
+    return result === 0 ? 0 : result;
+  };
+}
+
+
+/***/ },
+
 /***/ "./node_modules/date-fns/_lib/getTimezoneOffsetInMilliseconds.js"
 /*!***********************************************************************!*\
   !*** ./node_modules/date-fns/_lib/getTimezoneOffsetInMilliseconds.js ***!
@@ -126480,6 +126851,69 @@ function message(token, format, input) {
   const subject = token[0] === "Y" ? "years" : "days of the month";
   return `Use \`${token.toLowerCase()}\` instead of \`${token}\` (in \`${format}\`) for formatting ${subject} to the input \`${input}\`; see: https://github.com/date-fns/date-fns/blob/master/docs/unicodeTokens.md`;
 }
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/compareAsc.js"
+/*!*********************************************!*\
+  !*** ./node_modules/date-fns/compareAsc.js ***!
+  \*********************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   compareAsc: () => (/* binding */ compareAsc),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _toDate_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./toDate.js */ "./node_modules/date-fns/toDate.js");
+
+
+/**
+ * @name compareAsc
+ * @category Common Helpers
+ * @summary Compare the two dates and return -1, 0 or 1.
+ *
+ * @description
+ * Compare the two dates and return 1 if the first date is after the second,
+ * -1 if the first date is before the second or 0 if dates are equal.
+ *
+ * @param dateLeft - The first date to compare
+ * @param dateRight - The second date to compare
+ *
+ * @returns The result of the comparison
+ *
+ * @example
+ * // Compare 11 February 1987 and 10 July 1989:
+ * const result = compareAsc(new Date(1987, 1, 11), new Date(1989, 6, 10))
+ * //=> -1
+ *
+ * @example
+ * // Sort the array of dates:
+ * const result = [
+ *   new Date(1995, 6, 2),
+ *   new Date(1987, 1, 11),
+ *   new Date(1989, 6, 10)
+ * ].sort(compareAsc)
+ * //=> [
+ * //   Wed Feb 11 1987 00:00:00,
+ * //   Mon Jul 10 1989 00:00:00,
+ * //   Sun Jul 02 1995 00:00:00
+ * // ]
+ */
+function compareAsc(dateLeft, dateRight) {
+  const diff = +(0,_toDate_js__WEBPACK_IMPORTED_MODULE_0__.toDate)(dateLeft) - +(0,_toDate_js__WEBPACK_IMPORTED_MODULE_0__.toDate)(dateRight);
+
+  if (diff < 0) return -1;
+  else if (diff > 0) return 1;
+
+  // Return 0 if diff is 0; return NaN if diff is NaN
+  return diff;
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (compareAsc);
 
 
 /***/ },
@@ -126805,6 +127239,59 @@ function constructFrom(date, value) {
 
 /***/ },
 
+/***/ "./node_modules/date-fns/constructNow.js"
+/*!***********************************************!*\
+  !*** ./node_modules/date-fns/constructNow.js ***!
+  \***********************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   constructNow: () => (/* binding */ constructNow),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _constructFrom_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constructFrom.js */ "./node_modules/date-fns/constructFrom.js");
+
+
+/**
+ * @name constructNow
+ * @category Generic Helpers
+ * @summary Constructs a new current date using the passed value constructor.
+ * @pure false
+ *
+ * @description
+ * The function constructs a new current date using the constructor from
+ * the reference date. It helps to build generic functions that accept date
+ * extensions and use the current date.
+ *
+ * It defaults to `Date` if the passed reference date is a number or a string.
+ *
+ * @param date - The reference date to take constructor from
+ *
+ * @returns Current date initialized using the given date constructor
+ *
+ * @example
+ * import { constructNow, isSameDay } from 'date-fns'
+ *
+ * function isToday<DateType extends Date>(
+ *   date: DateArg<DateType>,
+ * ): boolean {
+ *   // If we were to use `new Date()` directly, the function would  behave
+ *   // differently in different timezones and return false for the same date.
+ *   return isSameDay(date, constructNow(date));
+ * }
+ */
+function constructNow(date) {
+  return (0,_constructFrom_js__WEBPACK_IMPORTED_MODULE_0__.constructFrom)(date, Date.now());
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (constructNow);
+
+
+/***/ },
+
 /***/ "./node_modules/date-fns/differenceInCalendarDays.js"
 /*!***********************************************************!*\
   !*** ./node_modules/date-fns/differenceInCalendarDays.js ***!
@@ -126884,6 +127371,357 @@ function differenceInCalendarDays(laterDate, earlierDate, options) {
 
 // Fallback for modularized imports:
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (differenceInCalendarDays);
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/differenceInCalendarMonths.js"
+/*!*************************************************************!*\
+  !*** ./node_modules/date-fns/differenceInCalendarMonths.js ***!
+  \*************************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   differenceInCalendarMonths: () => (/* binding */ differenceInCalendarMonths)
+/* harmony export */ });
+/* harmony import */ var _lib_normalizeDates_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./_lib/normalizeDates.js */ "./node_modules/date-fns/_lib/normalizeDates.js");
+
+
+/**
+ * The {@link differenceInCalendarMonths} function options.
+ */
+
+/**
+ * @name differenceInCalendarMonths
+ * @category Month Helpers
+ * @summary Get the number of calendar months between the given dates.
+ *
+ * @description
+ * Get the number of calendar months between the given dates.
+ *
+ * @param laterDate - The later date
+ * @param earlierDate - The earlier date
+ * @param options - An object with options
+ *
+ * @returns The number of calendar months
+ *
+ * @example
+ * // How many calendar months are between 31 January 2014 and 1 September 2014?
+ * const result = differenceInCalendarMonths(
+ *   new Date(2014, 8, 1),
+ *   new Date(2014, 0, 31)
+ * )
+ * //=> 8
+ */
+function differenceInCalendarMonths(laterDate, earlierDate, options) {
+  const [laterDate_, earlierDate_] = (0,_lib_normalizeDates_js__WEBPACK_IMPORTED_MODULE_0__.normalizeDates)(
+    options?.in,
+    laterDate,
+    earlierDate,
+  );
+
+  const yearsDiff = laterDate_.getFullYear() - earlierDate_.getFullYear();
+  const monthsDiff = laterDate_.getMonth() - earlierDate_.getMonth();
+
+  return yearsDiff * 12 + monthsDiff;
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (differenceInCalendarMonths);
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/differenceInMilliseconds.js"
+/*!***********************************************************!*\
+  !*** ./node_modules/date-fns/differenceInMilliseconds.js ***!
+  \***********************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   differenceInMilliseconds: () => (/* binding */ differenceInMilliseconds)
+/* harmony export */ });
+/* harmony import */ var _toDate_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./toDate.js */ "./node_modules/date-fns/toDate.js");
+
+
+/**
+ * @name differenceInMilliseconds
+ * @category Millisecond Helpers
+ * @summary Get the number of milliseconds between the given dates.
+ *
+ * @description
+ * Get the number of milliseconds between the given dates.
+ *
+ * @param laterDate - The later date
+ * @param earlierDate - The earlier date
+ *
+ * @returns The number of milliseconds
+ *
+ * @example
+ * // How many milliseconds are between
+ * // 2 July 2014 12:30:20.600 and 2 July 2014 12:30:21.700?
+ * const result = differenceInMilliseconds(
+ *   new Date(2014, 6, 2, 12, 30, 21, 700),
+ *   new Date(2014, 6, 2, 12, 30, 20, 600)
+ * )
+ * //=> 1100
+ */
+function differenceInMilliseconds(laterDate, earlierDate) {
+  return +(0,_toDate_js__WEBPACK_IMPORTED_MODULE_0__.toDate)(laterDate) - +(0,_toDate_js__WEBPACK_IMPORTED_MODULE_0__.toDate)(earlierDate);
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (differenceInMilliseconds);
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/differenceInMonths.js"
+/*!*****************************************************!*\
+  !*** ./node_modules/date-fns/differenceInMonths.js ***!
+  \*****************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   differenceInMonths: () => (/* binding */ differenceInMonths)
+/* harmony export */ });
+/* harmony import */ var _lib_normalizeDates_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./_lib/normalizeDates.js */ "./node_modules/date-fns/_lib/normalizeDates.js");
+/* harmony import */ var _compareAsc_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./compareAsc.js */ "./node_modules/date-fns/compareAsc.js");
+/* harmony import */ var _differenceInCalendarMonths_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./differenceInCalendarMonths.js */ "./node_modules/date-fns/differenceInCalendarMonths.js");
+/* harmony import */ var _isLastDayOfMonth_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./isLastDayOfMonth.js */ "./node_modules/date-fns/isLastDayOfMonth.js");
+
+
+
+
+
+/**
+ * The {@link differenceInMonths} function options.
+ */
+
+/**
+ * @name differenceInMonths
+ * @category Month Helpers
+ * @summary Get the number of full months between the given dates.
+ *
+ * @param laterDate - The later date
+ * @param earlierDate - The earlier date
+ * @param options - An object with options
+ *
+ * @returns The number of full months
+ *
+ * @example
+ * // How many full months are between 31 January 2014 and 1 September 2014?
+ * const result = differenceInMonths(new Date(2014, 8, 1), new Date(2014, 0, 31))
+ * //=> 7
+ */
+function differenceInMonths(laterDate, earlierDate, options) {
+  const [laterDate_, workingLaterDate, earlierDate_] = (0,_lib_normalizeDates_js__WEBPACK_IMPORTED_MODULE_0__.normalizeDates)(
+    options?.in,
+    laterDate,
+    laterDate,
+    earlierDate,
+  );
+
+  const sign = (0,_compareAsc_js__WEBPACK_IMPORTED_MODULE_1__.compareAsc)(workingLaterDate, earlierDate_);
+  const difference = Math.abs(
+    (0,_differenceInCalendarMonths_js__WEBPACK_IMPORTED_MODULE_2__.differenceInCalendarMonths)(workingLaterDate, earlierDate_),
+  );
+
+  if (difference < 1) return 0;
+
+  if (workingLaterDate.getMonth() === 1 && workingLaterDate.getDate() > 27)
+    workingLaterDate.setDate(30);
+
+  workingLaterDate.setMonth(workingLaterDate.getMonth() - sign * difference);
+
+  let isLastMonthNotFull = (0,_compareAsc_js__WEBPACK_IMPORTED_MODULE_1__.compareAsc)(workingLaterDate, earlierDate_) === -sign;
+
+  if (
+    (0,_isLastDayOfMonth_js__WEBPACK_IMPORTED_MODULE_3__.isLastDayOfMonth)(laterDate_) &&
+    difference === 1 &&
+    (0,_compareAsc_js__WEBPACK_IMPORTED_MODULE_1__.compareAsc)(laterDate_, earlierDate_) === 1
+  ) {
+    isLastMonthNotFull = false;
+  }
+
+  const result = sign * (difference - +isLastMonthNotFull);
+  return result === 0 ? 0 : result;
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (differenceInMonths);
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/differenceInSeconds.js"
+/*!******************************************************!*\
+  !*** ./node_modules/date-fns/differenceInSeconds.js ***!
+  \******************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   differenceInSeconds: () => (/* binding */ differenceInSeconds)
+/* harmony export */ });
+/* harmony import */ var _lib_getRoundingMethod_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./_lib/getRoundingMethod.js */ "./node_modules/date-fns/_lib/getRoundingMethod.js");
+/* harmony import */ var _differenceInMilliseconds_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./differenceInMilliseconds.js */ "./node_modules/date-fns/differenceInMilliseconds.js");
+
+
+
+/**
+ * The {@link differenceInSeconds} function options.
+ */
+
+/**
+ * @name differenceInSeconds
+ * @category Second Helpers
+ * @summary Get the number of seconds between the given dates.
+ *
+ * @description
+ * Get the number of seconds between the given dates.
+ *
+ * @param laterDate - The later date
+ * @param earlierDate - The earlier date
+ * @param options - An object with options.
+ *
+ * @returns The number of seconds
+ *
+ * @example
+ * // How many seconds are between
+ * // 2 July 2014 12:30:07.999 and 2 July 2014 12:30:20.000?
+ * const result = differenceInSeconds(
+ *   new Date(2014, 6, 2, 12, 30, 20, 0),
+ *   new Date(2014, 6, 2, 12, 30, 7, 999)
+ * )
+ * //=> 12
+ */
+function differenceInSeconds(laterDate, earlierDate, options) {
+  const diff = (0,_differenceInMilliseconds_js__WEBPACK_IMPORTED_MODULE_1__.differenceInMilliseconds)(laterDate, earlierDate) / 1000;
+  return (0,_lib_getRoundingMethod_js__WEBPACK_IMPORTED_MODULE_0__.getRoundingMethod)(options?.roundingMethod)(diff);
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (differenceInSeconds);
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/endOfDay.js"
+/*!*******************************************!*\
+  !*** ./node_modules/date-fns/endOfDay.js ***!
+  \*******************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   endOfDay: () => (/* binding */ endOfDay)
+/* harmony export */ });
+/* harmony import */ var _toDate_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./toDate.js */ "./node_modules/date-fns/toDate.js");
+
+
+/**
+ * The {@link endOfDay} function options.
+ */
+
+/**
+ * @name endOfDay
+ * @category Day Helpers
+ * @summary Return the end of a day for the given date.
+ *
+ * @description
+ * Return the end of a day for the given date.
+ * The result will be in the local timezone.
+ *
+ * @typeParam DateType - The `Date` type, the function operates on. Gets inferred from passed arguments. Allows to use extensions like [`UTCDate`](https://github.com/date-fns/utc).
+ * @typeParam ResultDate - The result `Date` type, it is the type returned from the context function if it is passed, or inferred from the arguments.
+ *
+ * @param date - The original date
+ * @param options - An object with options
+ *
+ * @returns The end of a day
+ *
+ * @example
+ * // The end of a day for 2 September 2014 11:55:00:
+ * const result = endOfDay(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Tue Sep 02 2014 23:59:59.999
+ */
+function endOfDay(date, options) {
+  const _date = (0,_toDate_js__WEBPACK_IMPORTED_MODULE_0__.toDate)(date, options?.in);
+  _date.setHours(23, 59, 59, 999);
+  return _date;
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (endOfDay);
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/endOfMonth.js"
+/*!*********************************************!*\
+  !*** ./node_modules/date-fns/endOfMonth.js ***!
+  \*********************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   endOfMonth: () => (/* binding */ endOfMonth)
+/* harmony export */ });
+/* harmony import */ var _toDate_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./toDate.js */ "./node_modules/date-fns/toDate.js");
+
+
+/**
+ * The {@link endOfMonth} function options.
+ */
+
+/**
+ * @name endOfMonth
+ * @category Month Helpers
+ * @summary Return the end of a month for the given date.
+ *
+ * @description
+ * Return the end of a month for the given date.
+ * The result will be in the local timezone.
+ *
+ * @typeParam DateType - The `Date` type, the function operates on. Gets inferred from passed arguments. Allows to use extensions like [`UTCDate`](https://github.com/date-fns/utc).
+ * @typeParam ResultDate - The result `Date` type, it is the type returned from the context function if it is passed, or inferred from the arguments.
+ *
+ * @param date - The original date
+ * @param options - An object with options
+ *
+ * @returns The end of a month
+ *
+ * @example
+ * // The end of a month for 2 September 2014 11:55:00:
+ * const result = endOfMonth(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Tue Sep 30 2014 23:59:59.999
+ */
+function endOfMonth(date, options) {
+  const _date = (0,_toDate_js__WEBPACK_IMPORTED_MODULE_0__.toDate)(date, options?.in);
+  const month = _date.getMonth();
+  _date.setFullYear(_date.getFullYear(), month + 1, 0);
+  _date.setHours(23, 59, 59, 999);
+  return _date;
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (endOfMonth);
 
 
 /***/ },
@@ -127344,6 +128182,342 @@ function cleanEscapedString(input) {
 
 /***/ },
 
+/***/ "./node_modules/date-fns/formatDistance.js"
+/*!*************************************************!*\
+  !*** ./node_modules/date-fns/formatDistance.js ***!
+  \*************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   formatDistance: () => (/* binding */ formatDistance)
+/* harmony export */ });
+/* harmony import */ var _lib_defaultLocale_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./_lib/defaultLocale.js */ "./node_modules/date-fns/locale/en-US.js");
+/* harmony import */ var _lib_defaultOptions_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./_lib/defaultOptions.js */ "./node_modules/date-fns/_lib/defaultOptions.js");
+/* harmony import */ var _lib_getTimezoneOffsetInMilliseconds_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./_lib/getTimezoneOffsetInMilliseconds.js */ "./node_modules/date-fns/_lib/getTimezoneOffsetInMilliseconds.js");
+/* harmony import */ var _lib_normalizeDates_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./_lib/normalizeDates.js */ "./node_modules/date-fns/_lib/normalizeDates.js");
+/* harmony import */ var _compareAsc_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./compareAsc.js */ "./node_modules/date-fns/compareAsc.js");
+/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./constants.js */ "./node_modules/date-fns/constants.js");
+/* harmony import */ var _differenceInMonths_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./differenceInMonths.js */ "./node_modules/date-fns/differenceInMonths.js");
+/* harmony import */ var _differenceInSeconds_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./differenceInSeconds.js */ "./node_modules/date-fns/differenceInSeconds.js");
+
+
+
+
+
+
+
+
+
+/**
+ * The {@link formatDistance} function options.
+ */
+
+/**
+ * @name formatDistance
+ * @category Common Helpers
+ * @summary Return the distance between the given dates in words.
+ *
+ * @description
+ * Return the distance between the given dates in words.
+ *
+ * | Distance between dates                                            | Result              |
+ * |-------------------------------------------------------------------|---------------------|
+ * | 0 ... 30 secs                                                     | less than a minute  |
+ * | 30 secs ... 1 min 30 secs                                         | 1 minute            |
+ * | 1 min 30 secs ... 44 mins 30 secs                                 | [2..44] minutes     |
+ * | 44 mins ... 30 secs ... 89 mins 30 secs                           | about 1 hour        |
+ * | 89 mins 30 secs ... 23 hrs 59 mins 30 secs                        | about [2..24] hours |
+ * | 23 hrs 59 mins 30 secs ... 41 hrs 59 mins 30 secs                 | 1 day               |
+ * | 41 hrs 59 mins 30 secs ... 29 days 23 hrs 59 mins 30 secs         | [2..30] days        |
+ * | 29 days 23 hrs 59 mins 30 secs ... 44 days 23 hrs 59 mins 30 secs | about 1 month       |
+ * | 44 days 23 hrs 59 mins 30 secs ... 59 days 23 hrs 59 mins 30 secs | about 2 months      |
+ * | 59 days 23 hrs 59 mins 30 secs ... 1 yr                           | [2..12] months      |
+ * | 1 yr ... 1 yr 3 months                                            | about 1 year        |
+ * | 1 yr 3 months ... 1 yr 9 month s                                  | over 1 year         |
+ * | 1 yr 9 months ... 2 yrs                                           | almost 2 years      |
+ * | N yrs ... N yrs 3 months                                          | about N years       |
+ * | N yrs 3 months ... N yrs 9 months                                 | over N years        |
+ * | N yrs 9 months ... N+1 yrs                                        | almost N+1 years    |
+ *
+ * With `options.includeSeconds == true`:
+ * | Distance between dates | Result               |
+ * |------------------------|----------------------|
+ * | 0 secs ... 5 secs      | less than 5 seconds  |
+ * | 5 secs ... 10 secs     | less than 10 seconds |
+ * | 10 secs ... 20 secs    | less than 20 seconds |
+ * | 20 secs ... 40 secs    | half a minute        |
+ * | 40 secs ... 60 secs    | less than a minute   |
+ * | 60 secs ... 90 secs    | 1 minute             |
+ *
+ * @param laterDate - The date
+ * @param earlierDate - The date to compare with
+ * @param options - An object with options
+ *
+ * @returns The distance in words
+ *
+ * @throws `date` must not be Invalid Date
+ * @throws `baseDate` must not be Invalid Date
+ * @throws `options.locale` must contain `formatDistance` property
+ *
+ * @example
+ * // What is the distance between 2 July 2014 and 1 January 2015?
+ * const result = formatDistance(new Date(2014, 6, 2), new Date(2015, 0, 1))
+ * //=> '6 months'
+ *
+ * @example
+ * // What is the distance between 1 January 2015 00:00:15
+ * // and 1 January 2015 00:00:00, including seconds?
+ * const result = formatDistance(
+ *   new Date(2015, 0, 1, 0, 0, 15),
+ *   new Date(2015, 0, 1, 0, 0, 0),
+ *   { includeSeconds: true }
+ * )
+ * //=> 'less than 20 seconds'
+ *
+ * @example
+ * // What is the distance from 1 January 2016
+ * // to 1 January 2015, with a suffix?
+ * const result = formatDistance(new Date(2015, 0, 1), new Date(2016, 0, 1), {
+ *   addSuffix: true
+ * })
+ * //=> 'about 1 year ago'
+ *
+ * @example
+ * // What is the distance between 1 August 2016 and 1 January 2015 in Esperanto?
+ * import { eoLocale } from 'date-fns/locale/eo'
+ * const result = formatDistance(new Date(2016, 7, 1), new Date(2015, 0, 1), {
+ *   locale: eoLocale
+ * })
+ * //=> 'pli ol 1 jaro'
+ */
+function formatDistance(laterDate, earlierDate, options) {
+  const defaultOptions = (0,_lib_defaultOptions_js__WEBPACK_IMPORTED_MODULE_1__.getDefaultOptions)();
+  const locale = options?.locale ?? defaultOptions.locale ?? _lib_defaultLocale_js__WEBPACK_IMPORTED_MODULE_0__.enUS;
+  const minutesInAlmostTwoDays = 2520;
+
+  const comparison = (0,_compareAsc_js__WEBPACK_IMPORTED_MODULE_4__.compareAsc)(laterDate, earlierDate);
+
+  if (isNaN(comparison)) throw new RangeError("Invalid time value");
+
+  const localizeOptions = Object.assign({}, options, {
+    addSuffix: options?.addSuffix,
+    comparison: comparison,
+  });
+
+  const [laterDate_, earlierDate_] = (0,_lib_normalizeDates_js__WEBPACK_IMPORTED_MODULE_3__.normalizeDates)(
+    options?.in,
+    ...(comparison > 0 ? [earlierDate, laterDate] : [laterDate, earlierDate]),
+  );
+
+  const seconds = (0,_differenceInSeconds_js__WEBPACK_IMPORTED_MODULE_7__.differenceInSeconds)(earlierDate_, laterDate_);
+  const offsetInSeconds =
+    ((0,_lib_getTimezoneOffsetInMilliseconds_js__WEBPACK_IMPORTED_MODULE_2__.getTimezoneOffsetInMilliseconds)(earlierDate_) -
+      (0,_lib_getTimezoneOffsetInMilliseconds_js__WEBPACK_IMPORTED_MODULE_2__.getTimezoneOffsetInMilliseconds)(laterDate_)) /
+    1000;
+  const minutes = Math.round((seconds - offsetInSeconds) / 60);
+  let months;
+
+  // 0 up to 2 mins
+  if (minutes < 2) {
+    if (options?.includeSeconds) {
+      if (seconds < 5) {
+        return locale.formatDistance("lessThanXSeconds", 5, localizeOptions);
+      } else if (seconds < 10) {
+        return locale.formatDistance("lessThanXSeconds", 10, localizeOptions);
+      } else if (seconds < 20) {
+        return locale.formatDistance("lessThanXSeconds", 20, localizeOptions);
+      } else if (seconds < 40) {
+        return locale.formatDistance("halfAMinute", 0, localizeOptions);
+      } else if (seconds < 60) {
+        return locale.formatDistance("lessThanXMinutes", 1, localizeOptions);
+      } else {
+        return locale.formatDistance("xMinutes", 1, localizeOptions);
+      }
+    } else {
+      if (minutes === 0) {
+        return locale.formatDistance("lessThanXMinutes", 1, localizeOptions);
+      } else {
+        return locale.formatDistance("xMinutes", minutes, localizeOptions);
+      }
+    }
+
+    // 2 mins up to 0.75 hrs
+  } else if (minutes < 45) {
+    return locale.formatDistance("xMinutes", minutes, localizeOptions);
+
+    // 0.75 hrs up to 1.5 hrs
+  } else if (minutes < 90) {
+    return locale.formatDistance("aboutXHours", 1, localizeOptions);
+
+    // 1.5 hrs up to 24 hrs
+  } else if (minutes < _constants_js__WEBPACK_IMPORTED_MODULE_5__.minutesInDay) {
+    const hours = Math.round(minutes / 60);
+    return locale.formatDistance("aboutXHours", hours, localizeOptions);
+
+    // 1 day up to 1.75 days
+  } else if (minutes < minutesInAlmostTwoDays) {
+    return locale.formatDistance("xDays", 1, localizeOptions);
+
+    // 1.75 days up to 30 days
+  } else if (minutes < _constants_js__WEBPACK_IMPORTED_MODULE_5__.minutesInMonth) {
+    const days = Math.round(minutes / _constants_js__WEBPACK_IMPORTED_MODULE_5__.minutesInDay);
+    return locale.formatDistance("xDays", days, localizeOptions);
+
+    // 1 month up to 2 months
+  } else if (minutes < _constants_js__WEBPACK_IMPORTED_MODULE_5__.minutesInMonth * 2) {
+    months = Math.round(minutes / _constants_js__WEBPACK_IMPORTED_MODULE_5__.minutesInMonth);
+    return locale.formatDistance("aboutXMonths", months, localizeOptions);
+  }
+
+  months = (0,_differenceInMonths_js__WEBPACK_IMPORTED_MODULE_6__.differenceInMonths)(earlierDate_, laterDate_);
+
+  // 2 months up to 12 months
+  if (months < 12) {
+    const nearestMonth = Math.round(minutes / _constants_js__WEBPACK_IMPORTED_MODULE_5__.minutesInMonth);
+    return locale.formatDistance("xMonths", nearestMonth, localizeOptions);
+
+    // 1 year up to max Date
+  } else {
+    const monthsSinceStartOfYear = months % 12;
+    const years = Math.trunc(months / 12);
+
+    // N years up to 1 years 3 months
+    if (monthsSinceStartOfYear < 3) {
+      return locale.formatDistance("aboutXYears", years, localizeOptions);
+
+      // N years 3 months up to N years 9 months
+    } else if (monthsSinceStartOfYear < 9) {
+      return locale.formatDistance("overXYears", years, localizeOptions);
+
+      // N years 9 months up to N year 12 months
+    } else {
+      return locale.formatDistance("almostXYears", years + 1, localizeOptions);
+    }
+  }
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (formatDistance);
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/formatDistanceToNow.js"
+/*!******************************************************!*\
+  !*** ./node_modules/date-fns/formatDistanceToNow.js ***!
+  \******************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   formatDistanceToNow: () => (/* binding */ formatDistanceToNow)
+/* harmony export */ });
+/* harmony import */ var _constructNow_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constructNow.js */ "./node_modules/date-fns/constructNow.js");
+/* harmony import */ var _formatDistance_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./formatDistance.js */ "./node_modules/date-fns/formatDistance.js");
+
+
+
+
+/**
+ * The {@link formatDistanceToNow} function options.
+ */
+
+/**
+ * @name formatDistanceToNow
+ * @category Common Helpers
+ * @summary Return the distance between the given date and now in words.
+ * @pure false
+ *
+ * @description
+ * Return the distance between the given date and now in words.
+ *
+ * | Distance to now                                                   | Result              |
+ * |-------------------------------------------------------------------|---------------------|
+ * | 0 ... 30 secs                                                     | less than a minute  |
+ * | 30 secs ... 1 min 30 secs                                         | 1 minute            |
+ * | 1 min 30 secs ... 44 mins 30 secs                                 | [2..44] minutes     |
+ * | 44 mins ... 30 secs ... 89 mins 30 secs                           | about 1 hour        |
+ * | 89 mins 30 secs ... 23 hrs 59 mins 30 secs                        | about [2..24] hours |
+ * | 23 hrs 59 mins 30 secs ... 41 hrs 59 mins 30 secs                 | 1 day               |
+ * | 41 hrs 59 mins 30 secs ... 29 days 23 hrs 59 mins 30 secs         | [2..30] days        |
+ * | 29 days 23 hrs 59 mins 30 secs ... 44 days 23 hrs 59 mins 30 secs | about 1 month       |
+ * | 44 days 23 hrs 59 mins 30 secs ... 59 days 23 hrs 59 mins 30 secs | about 2 months      |
+ * | 59 days 23 hrs 59 mins 30 secs ... 1 yr                           | [2..12] months      |
+ * | 1 yr ... 1 yr 3 months                                            | about 1 year        |
+ * | 1 yr 3 months ... 1 yr 9 month s                                  | over 1 year         |
+ * | 1 yr 9 months ... 2 yrs                                           | almost 2 years      |
+ * | N yrs ... N yrs 3 months                                          | about N years       |
+ * | N yrs 3 months ... N yrs 9 months                                 | over N years        |
+ * | N yrs 9 months ... N+1 yrs                                        | almost N+1 years    |
+ *
+ * With `options.includeSeconds == true`:
+ * | Distance to now     | Result               |
+ * |---------------------|----------------------|
+ * | 0 secs ... 5 secs   | less than 5 seconds  |
+ * | 5 secs ... 10 secs  | less than 10 seconds |
+ * | 10 secs ... 20 secs | less than 20 seconds |
+ * | 20 secs ... 40 secs | half a minute        |
+ * | 40 secs ... 60 secs | less than a minute   |
+ * | 60 secs ... 90 secs | 1 minute             |
+ *
+ * @param date - The given date
+ * @param options - The object with options
+ *
+ * @returns The distance in words
+ *
+ * @throws `date` must not be Invalid Date
+ * @throws `options.locale` must contain `formatDistance` property
+ *
+ * @example
+ * // If today is 1 January 2015, what is the distance to 2 July 2014?
+ * const result = formatDistanceToNow(
+ *   new Date(2014, 6, 2)
+ * )
+ * //=> '6 months'
+ *
+ * @example
+ * // If now is 1 January 2015 00:00:00,
+ * // what is the distance to 1 January 2015 00:00:15, including seconds?
+ * const result = formatDistanceToNow(
+ *   new Date(2015, 0, 1, 0, 0, 15),
+ *   {includeSeconds: true}
+ * )
+ * //=> 'less than 20 seconds'
+ *
+ * @example
+ * // If today is 1 January 2015,
+ * // what is the distance to 1 January 2016, with a suffix?
+ * const result = formatDistanceToNow(
+ *   new Date(2016, 0, 1),
+ *   {addSuffix: true}
+ * )
+ * //=> 'in about 1 year'
+ *
+ * @example
+ * // If today is 1 January 2015,
+ * // what is the distance to 1 August 2016 in Esperanto?
+ * const eoLocale = require('date-fns/locale/eo')
+ * const result = formatDistanceToNow(
+ *   new Date(2016, 7, 1),
+ *   {locale: eoLocale}
+ * )
+ * //=> 'pli ol 1 jaro'
+ */
+function formatDistanceToNow(date, options) {
+  return (0,_formatDistance_js__WEBPACK_IMPORTED_MODULE_1__.formatDistance)(date, (0,_constructNow_js__WEBPACK_IMPORTED_MODULE_0__.constructNow)(date), options);
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (formatDistanceToNow);
+
+
+/***/ },
+
 /***/ "./node_modules/date-fns/getDayOfYear.js"
 /*!***********************************************!*\
   !*** ./node_modules/date-fns/getDayOfYear.js ***!
@@ -127756,6 +128930,54 @@ function isDate(value) {
 
 // Fallback for modularized imports:
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (isDate);
+
+
+/***/ },
+
+/***/ "./node_modules/date-fns/isLastDayOfMonth.js"
+/*!***************************************************!*\
+  !*** ./node_modules/date-fns/isLastDayOfMonth.js ***!
+  \***************************************************/
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   isLastDayOfMonth: () => (/* binding */ isLastDayOfMonth)
+/* harmony export */ });
+/* harmony import */ var _endOfDay_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./endOfDay.js */ "./node_modules/date-fns/endOfDay.js");
+/* harmony import */ var _endOfMonth_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./endOfMonth.js */ "./node_modules/date-fns/endOfMonth.js");
+/* harmony import */ var _toDate_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./toDate.js */ "./node_modules/date-fns/toDate.js");
+
+
+
+
+/**
+ * @name isLastDayOfMonth
+ * @category Month Helpers
+ * @summary Is the given date the last day of a month?
+ *
+ * @description
+ * Is the given date the last day of a month?
+ *
+ * @param date - The date to check
+ * @param options - An object with options
+ *
+ * @returns The date is the last day of a month
+ *
+ * @example
+ * // Is 28 February 2014 the last day of a month?
+ * const result = isLastDayOfMonth(new Date(2014, 1, 28))
+ * //=> true
+ */
+function isLastDayOfMonth(date, options) {
+  const _date = (0,_toDate_js__WEBPACK_IMPORTED_MODULE_2__.toDate)(date, options?.in);
+  return +(0,_endOfDay_js__WEBPACK_IMPORTED_MODULE_0__.endOfDay)(_date, options) === +(0,_endOfMonth_js__WEBPACK_IMPORTED_MODULE_1__.endOfMonth)(_date, options);
+}
+
+// Fallback for modularized imports:
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (isLastDayOfMonth);
 
 
 /***/ },

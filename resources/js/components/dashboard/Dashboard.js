@@ -14,9 +14,16 @@ import {
     Bike,
     TrendingUp,
     BarChart3,
+    CheckCircle,
+    Package,
+    RefreshCcw,
+    Clock,
+    Check,
 } from "lucide-react";
+import BarChart from "../shared/BarChart";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { STALE_KEYS } from "../../store/dataStore";
+import { formatDistanceToNow } from "date-fns";
 
 export default function Dashboard() {
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_DASHBOARD);
@@ -32,6 +39,8 @@ export default function Dashboard() {
 
     const [yearlyCategories, setYearlyCategories] = useState([]);
     const [returnRateData, setReturnRateData] = useState([]);
+    const [recentActivity, setRecentActivity] = useState([]);
+    const [activityLoading, setActivityLoading] = useState(false);
 
     const periods = [
         { value: "week", label: "7 Days" },
@@ -79,6 +88,18 @@ export default function Dashboard() {
         }
     };
 
+    const fetchRecentActivity = async () => {
+        setActivityLoading(true);
+        try {
+            const res = await api.get("/reports/recent-activity");
+            setRecentActivity(res.data?.data || []);
+        } catch (err) {
+            console.error("Failed to fetch recent activity", err);
+        } finally {
+            setActivityLoading(false);
+        }
+    };
+
     useEffect(() => {
         let isMounted = true;
         const debounce = setTimeout(() => {
@@ -94,6 +115,7 @@ export default function Dashboard() {
     useEffect(() => {
         fetchYearlyCategories();
         fetchReturnRate();
+        fetchRecentActivity();
     }, [refreshTrigger]);
 
     const formatCurr = (val) =>
@@ -228,9 +250,9 @@ export default function Dashboard() {
                 </div>
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                {/* Revenue by Category — Full Year */}
-                <Card className="p-5">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Revenue by Category — Bar Chart */}
+                <Card className="p-5 flex flex-col h-[380px]">
                     <div className="mb-4">
                         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                             <BarChart3 className="h-4 w-4 text-primary" />
@@ -241,116 +263,114 @@ export default function Dashboard() {
                             – Dec)
                         </p>
                     </div>
-                    {yearlyCategories.length === 0 ? (
-                        <div className="flex items-center justify-center h-[220px] text-muted-foreground">
-                            <div className="text-center">
-                                <BarChart3 className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                                <p className="text-sm">
-                                    No category data for this year
-                                </p>
-                            </div>
-                        </div>
-                    ) : (
-                        (() => {
-                            const maxRev = Math.max(
-                                ...yearlyCategories.map((c) =>
-                                    Number(c.revenue),
-                                ),
-                                1,
-                            );
-                            return (
-                                <div className="flex items-end justify-around h-[200px] mt-6">
-                                    {yearlyCategories.map((cat, idx) => (
-                                        <div
-                                            key={cat.id || idx}
-                                            className="flex flex-col items-center gap-1.5 w-[10%] min-w-[30px] h-full justify-end group cursor-pointer"
-                                        >
-                                            <div className="text-[10px] text-muted-foreground font-medium mb-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {formatCurr(cat.revenue)}
-                                            </div>
-                                            <div className="w-full max-w-[32px] rounded-t-md bg-secondary flex-1 flex flex-col justify-end overflow-hidden">
-                                                <div
-                                                    className="w-full bg-primary transition-all duration-500"
-                                                    style={{
-                                                        height: `${(Number(cat.revenue) / maxRev) * 100}%`,
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="mt-1 h-6 flex items-center justify-center">
-                                                <span
-                                                    className="text-[10px] font-medium text-muted-foreground text-center truncate w-full px-1"
-                                                    title={cat.name}
-                                                >
-                                                    {cat.name.split(" ")[0]}{" "}
-                                                    {/* Keep it clean */}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        })()
-                    )}
+                    <div className="flex-grow">
+                        <BarChart
+                            data={yearlyCategories.map(c => ({ label: c.name, value: c.revenue }))}
+                            formatValue={formatCurr}
+                            color="#3b82f6"
+                            hideHeader
+                        />
+                    </div>
                 </Card>
 
-                {/* Return Rate by Category — Line Chart */}
-                <Card className="p-5">
+                {/* Return Rate by Category — Bar Chart */}
+                <Card className="p-5 flex flex-col h-[380px]">
                     <div className="mb-4">
                         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                            <BarChart3 className="h-4 w-4 text-red-500" />
+                            <BarChart3 className="h-4 w-4 text-rose-500" />
                             Return Rate by Category
                         </h3>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                            Which categories are returned most often
+                            Frequency of returns per category (%)
                         </p>
                     </div>
-                    {returnRateData.length === 0 ? (
-                        <div className="flex items-center justify-center h-[220px] text-muted-foreground">
-                            <div className="text-center">
-                                <BarChart3 className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                                <p className="text-sm">
-                                    No return data available
-                                </p>
+                    <div className="flex-grow">
+                        <BarChart
+                            data={returnRateData.map(c => ({ label: c.name, value: c.return_rate }))}
+                            formatValue={(v) => `${Number(v).toFixed(1)}%`}
+                            color="#f43f5e"
+                            hideHeader
+                        />
+                    </div>
+                </Card>
+
+                {/* Recent Activity — Live Feed */}
+                <Card className="p-5 flex flex-col h-[380px]">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4 text-indigo-500" />
+                            Recent Activity
+                        </h3>
+                        <Badge variant="outline" className="text-[10px] font-bold text-indigo-600 border-indigo-100 bg-indigo-50/50">
+                            Live Feed
+                        </Badge>
+                    </div>
+                    
+                    <div className="flex-grow overflow-y-auto pr-2 -mr-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-200">
+                        {activityLoading && recentActivity.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full opacity-50">
+                                <div className="spinner h-5 w-5 mb-2" />
+                                <p className="text-xs">Updating feed...</p>
                             </div>
-                        </div>
-                    ) : (
-                        <div
-                            className="space-y-4 mt-4 h-[220px] overflow-y-auto pr-2"
-                            style={{ scrollbarWidth: "thin" }}
-                        >
-                            {returnRateData.slice(0, 10).map((cat, idx) => (
-                                <div
-                                    key={cat.id || idx}
-                                    className="flex items-center gap-3"
-                                >
-                                    <div className="w-24 shrink-0 text-right">
-                                        <span
-                                            className="text-[11px] font-medium text-foreground block truncate"
-                                            title={cat.name}
-                                        >
-                                            {cat.name}
-                                        </span>
-                                    </div>
-                                    <div className="flex-1 flex items-center gap-3">
-                                        <div className="h-2.5 rounded-full bg-secondary w-full overflow-hidden">
-                                            <div
-                                                className="h-full rounded-full bg-red-500 transition-all duration-500"
-                                                style={{
-                                                    width: `${Math.min(cat.return_rate, 100)}%`,
-                                                }}
-                                            />
+                        ) : recentActivity.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full opacity-50 border border-dashed rounded-xl p-4">
+                                <ShoppingBag className="h-8 w-8 mb-2 opacity-20" />
+                                <p className="text-xs font-medium">No recent activity</p>
+                            </div>
+                        ) : (
+                            recentActivity.map((activity, idx) => {
+                                // Dynamic icon selection
+                                const IconComponent = {
+                                    ShoppingBag, CheckCircle, Package, AlertTriangle, RefreshCcw, Clock, Check, Bike
+                                }[activity.icon] || ShoppingBag;
+
+                                return (
+                                    <div key={activity.id || idx} className="flex gap-3 items-start group">
+                                        <div className={cn(
+                                            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all",
+                                            activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-100 text-green-600" :
+                                            activity.status === 'Alert' ? "bg-rose-100 text-rose-600" :
+                                            activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-100 text-blue-600" :
+                                            "bg-amber-100 text-amber-600"
+                                        )}>
+                                            <IconComponent className="h-4 w-4" />
                                         </div>
-                                        <Badge
-                                            variant="outline"
-                                            className="text-[10px] w-12 justify-center px-1 shrink-0 text-red-600 border-red-200 bg-red-50"
-                                        >
-                                            {cat.return_rate}%
-                                        </Badge>
+                                        <div className="flex-1 min-w-0 border-b border-slate-50 pb-3 group-last:border-0">
+                                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                                                <h4 className="text-[11px] font-bold text-slate-700 truncate">
+                                                    {activity.title}
+                                                </h4>
+                                                <span className="text-[9px] font-medium text-slate-400 shrink-0 capitalize">
+                                                    {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                                                </span>
+                                            </div>
+                                            <p className="text-[10px] text-slate-500 line-clamp-1 mb-2">
+                                                {activity.message}
+                                            </p>
+                                            <Badge 
+                                                className={cn(
+                                                    "text-[8px] h-4 px-1.5 font-bold uppercase tracking-wider",
+                                                    activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-50 text-green-700 border-green-100" :
+                                                    activity.status === 'Alert' ? "bg-rose-50 text-rose-700 border-rose-100" :
+                                                    activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-50 text-blue-700 border-blue-100" :
+                                                    "bg-amber-50 text-amber-700 border-amber-100"
+                                                )}
+                                                variant="outline"
+                                            >
+                                                {activity.status}
+                                            </Badge>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                                );
+                            })
+                        )}
+                    </div>
+                    
+                    <div className="mt-4 pt-3 border-t border-slate-50 text-center">
+                        <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold text-slate-400 hover:text-primary transition-colors" asChild>
+                            <Link to="/inventory/sales">View Detailed History</Link>
+                        </Button>
+                    </div>
                 </Card>
             </div>
         </div>

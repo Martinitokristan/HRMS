@@ -128,6 +128,7 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     Route::get('/reports/category-sales', [ReportController::class , 'categorySales']);
     Route::get('/reports/yearly-category-revenue', [ReportController::class , 'yearlyCategoryRevenue']);
     Route::get('/reports/return-rate-by-category', [ReportController::class , 'returnRateByCategory']);
+    Route::get('/reports/recent-activity', [ReportController::class , 'recentActivity']);
     Route::get('/reports/export', [ReportController::class , 'export']);
     Route::get('/reports/rating-analytics', [ReportController::class , 'ratingAnalytics']);
     Route::get('/reports/rating-analytics/rankings', [ReportController::class , 'ratingAnalyticsRankings']);
