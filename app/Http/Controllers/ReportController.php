@@ -1365,7 +1365,7 @@ class ReportController extends Controller
                     'icon' => $icon,
                     'title' => "Order #{$sale->order_number}",
                     'message' => ($sale->customer->name ?? 'A customer') . " - " . number_format($sale->total_amount, 2) . " PHP",
-                    'timestamp' => $sale->created_at->toIso8601String(),
+                    'timestamp' => ($sale->created_at ?? $sale->updated_at ?? now())->toIso8601String(),
                 ];
             }
 
@@ -1384,7 +1384,7 @@ class ReportController extends Controller
                     'icon' => 'AlertTriangle',
                     'title' => 'Stock Alert',
                     'message' => ($inv->product->name ?? 'Product') . " is low on stock ({$inv->current_stock} remaining)",
-                    'timestamp' => $inv->updated_at->toIso8601String(),
+                    'timestamp' => ($inv->updated_at ?? $inv->last_adjusted_at ?? $inv->created_at ?? now())->toIso8601String(),
                 ];
             }
 

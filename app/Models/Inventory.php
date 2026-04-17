@@ -18,7 +18,11 @@ class Inventory extends Model
         'reorder_threshold',
         'last_adjusted_at',
     ];
-    protected $casts = ['last_adjusted_at' => 'datetime'];
+    protected $casts = [
+        'last_adjusted_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
     protected $attributes = ['warehouse_stock' => 0];
 
     public function product()
