@@ -43577,7 +43577,7 @@ function SupplierCatalog() {
             children: [p.image_path ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("img", {
               src: "/storage/".concat(p.image_path),
               alt: p.name,
-              className: "w-full h-full object-cover"
+              className: "w-full h-full object-contain p-6"
             }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
               className: "h-12 w-12 opacity-20 text-muted-foreground"
             }), p.is_promoted && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("div", {
@@ -43683,7 +43683,7 @@ function SupplierCatalog() {
               children: displayImage ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)("img", {
                 src: "/storage/".concat(displayImage),
                 alt: viewProduct.name,
-                className: "w-full h-full object-contain p-3"
+                className: "w-full h-full object-contain p-8"
               }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_21__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
                 className: "h-24 w-24 opacity-10 text-muted-foreground"
               })

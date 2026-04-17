@@ -186,7 +186,7 @@ export default function SupplierCatalog() {
                         >
                             <div className="h-[180px] bg-secondary flex items-center justify-center relative overflow-hidden">
                                 {p.image_path ? (
-                                    <img src={`/storage/${p.image_path}`} alt={p.name} className="w-full h-full object-cover" />
+                                    <img src={`/storage/${p.image_path}`} alt={p.name} className="w-full h-full object-contain p-6" />
                                 ) : (
                                     <Package className="h-12 w-12 opacity-20 text-muted-foreground" />
                                 )}
@@ -273,7 +273,7 @@ export default function SupplierCatalog() {
                                         <img
                                             src={`/storage/${displayImage}`}
                                             alt={viewProduct.name}
-                                            className="w-full h-full object-contain p-3"
+                                            className="w-full h-full object-contain p-8"
                                         />
                                     ) : (
                                         <Package className="h-24 w-24 opacity-10 text-muted-foreground" />
