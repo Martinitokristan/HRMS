@@ -304,15 +304,15 @@ export default function ProductCatalog() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {products.map((product) => (
                         <Card key={product.id} className="overflow-hidden">
-                            <div className="aspect-square bg-muted relative">
+                            <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center w-full">
                                 {product.image_path ? (
                                     <img
                                         src={`/storage/${product.image_path}`}
                                         alt={product.name}
-                                        className="w-full h-full object-cover"
+                                        className="absolute inset-0 w-full h-full object-cover object-center"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
+                                    <div className="absolute inset-0 flex items-center justify-center">
                                         <Package className="w-12 h-12 text-muted-foreground" />
                                     </div>
                                 )}
