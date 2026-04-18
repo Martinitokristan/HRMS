@@ -14,25 +14,42 @@ class ReportController extends Controller
 {
     public function sales(Request $request)
     {
-        $period = $request->get('period', 'month');
+        $period = $request->get('period', 'year');
+        $yearParam = $request->get('year');
+        $monthParam = $request->get('month'); // 1-12
         $from = now();
         $to = now();
 
-        if ($period === 'week') {
-            $from = now()->subDays(7);
-        }
-        elseif ($period === 'year') {
-            $from = now()->subYear();
-        }
-        else { // month
-            $from = now()->subDays(30);
+        $isYearlyView = ($period === 'year' || ($yearParam && !$monthParam));
+        
+        if ($yearParam && $monthParam) {
+            $from = \Carbon\Carbon::createFromDate($yearParam, $monthParam, 1)->startOfMonth();
+            $to = \Carbon\Carbon::createFromDate($yearParam, $monthParam, 1)->endOfMonth();
+        } elseif ($yearParam) {
+            $from = \Carbon\Carbon::createFromDate($yearParam, 1, 1)->startOfDay();
+            $to = \Carbon\Carbon::createFromDate($yearParam, 12, 31)->endOfDay();
+        } else { 
+            // Default to current year if no params
+            $from = now()->startOfYear();
+            $to = now()->endOfYear();
         }
 
-        $sales = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as revenue')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        $query = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+            ->whereIn('status', ['delivered', 'paid', 'confirmed', 'out_for_delivery', 'pending', 'in_progress']);
+
+        if ($isYearlyView) {
+            // For yearly views, group by month
+            $sales = $query->selectRaw('DATE_FORMAT(created_at, "%Y-%m-01") as date, SUM(total_amount) as revenue, COUNT(*) as orders')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+        } else {
+            // For monthly/weekly views, group by day
+            $sales = $query->selectRaw('DATE(created_at) as date, SUM(total_amount) as revenue, COUNT(*) as orders')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+        }
 
         $summaryData = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
             ->selectRaw('
@@ -370,7 +387,7 @@ class ReportController extends Controller
             $result = array_map(function ($cat) use ($soldData) {
                 $sold    = $soldData->get($cat['id']);
                 $soldQty = $sold ? (int) $sold->sold_units : 0;
-                $rate    = $soldQty > 0 ? round(($cat['returned_units'] / $soldQty) * 100, 1) : 0;
+                $rate    = $soldQty > 0 ? floatval(number_format(($cat['returned_units'] / $soldQty) * 100, 2, '.', '')) : 0;
                 return [
                     'id'             => $cat['id'],
                     'name'           => $cat['name'],
@@ -1376,6 +1393,8 @@ class ReportController extends Controller
                 ->get();
 
             foreach ($lowStock as $inv) {
+                $stockVal = (int) round($inv->current_stock);
+                $stockSuffix = $stockVal === 1 ? 'pc' : 'pcs';
                 $activities[] = [
                     'id' => 'stock-' . $inv->id,
                     'type' => 'inventory',
@@ -1383,7 +1402,7 @@ class ReportController extends Controller
                     'badgeVariant' => 'amber',
                     'icon' => 'AlertTriangle',
                     'title' => 'Stock Alert',
-                    'message' => ($inv->product->name ?? 'Product') . " is low on stock ({$inv->current_stock} remaining)",
+                    'message' => ($inv->product->name ?? 'Product') . " is low on stock ({$stockVal}{$stockSuffix} remaining)",
                     'timestamp' => ($inv->updated_at ?? $inv->last_adjusted_at ?? $inv->created_at ?? now())->toIso8601String(),
                 ];
             }

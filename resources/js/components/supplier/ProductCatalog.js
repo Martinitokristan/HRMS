@@ -363,42 +363,50 @@ export default function ProductCatalog() {
                                     )}
                                 </div>
                                 <div className="flex gap-2 mt-4">
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() =>
-                                            setEditingProduct(product)
-                                        }
-                                        className="flex-1"
-                                    >
-                                        <Edit className="w-3 h-3 mr-1" />
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() =>
-                                            toggleProductStatus(
-                                                product.id,
-                                                product.is_active
-                                                    ? "active"
-                                                    : "inactive",
-                                            )
-                                        }
-                                    >
-                                        {product.is_active
-                                            ? "Deactivate"
-                                            : "Activate"}
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() =>
-                                            deleteProduct(product.id)
-                                        }
-                                    >
-                                        <Trash2 className="w-3 h-3" />
-                                    </Button>
+                                    <Tooltip label="Edit Product" position="top">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() =>
+                                                setEditingProduct(product)
+                                            }
+                                            className="flex-1 transition-all hover:scale-105 active:scale-95"
+                                        >
+                                            <Edit className="w-3 h-3 mr-1" />
+                                            Edit
+                                        </Button>
+                                    </Tooltip>
+                                    <Tooltip label="Toggle Product Status" position="top">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() =>
+                                                toggleProductStatus(
+                                                    product.id,
+                                                    product.is_active
+                                                        ? "active"
+                                                        : "inactive",
+                                                )
+                                            }
+                                            className="transition-all hover:scale-105 active:scale-95 px-3"
+                                        >
+                                            {product.is_active
+                                                ? "Deactivate"
+                                                : "Activate"}
+                                        </Button>
+                                    </Tooltip>
+                                    <Tooltip label="Delete Product" position="top">
+                                        <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={() =>
+                                                deleteProduct(product.id)
+                                            }
+                                            className="shadow-sm shadow-red-200"
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                    </Tooltip>
                                 </div>
                             </CardContent>
                         </Card>

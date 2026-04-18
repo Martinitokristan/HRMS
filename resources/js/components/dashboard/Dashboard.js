@@ -19,8 +19,16 @@ import {
     RefreshCcw,
     Clock,
     Check,
+    ChevronDown,
 } from "lucide-react";
 import BarChart from "../shared/BarChart";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { STALE_KEYS } from "../../store/dataStore";
 import { formatDistanceToNow } from "date-fns";
@@ -34,7 +42,7 @@ export default function Dashboard() {
     });
     const { stats, chartDataRaw } = dashboardData;
 
-    const [period, setPeriod] = useState("month");
+    const [period, setPeriod] = useState("year");
     const [loading, setLoading] = useState(!stats);
 
     const [yearlyCategories, setYearlyCategories] = useState([]);
@@ -42,18 +50,48 @@ export default function Dashboard() {
     const [recentActivity, setRecentActivity] = useState([]);
     const [activityLoading, setActivityLoading] = useState(false);
 
-    const periods = [
-        { value: "week", label: "7 Days" },
-        { value: "month", label: "30 Days" },
-        { value: "year", label: "1 Year" },
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+    
+    const years = useMemo(() => {
+        let y = [];
+        for (let i = currentYear; i >= 2000; i--) {
+            y.push(i);
+        }
+        return y;
+    }, [currentYear]);
+
+    const months = [
+        { value: 1, label: "January" },
+        { value: 2, label: "February" },
+        { value: 3, label: "March" },
+        { value: 4, label: "April" },
+        { value: 5, label: "May" },
+        { value: 6, label: "June" },
+        { value: 7, label: "July" },
+        { value: 8, label: "August" },
+        { value: 9, label: "September" },
+        { value: 10, label: "October" },
+        { value: 11, label: "November" },
+        { value: 12, label: "December" },
     ];
+
+
 
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
             const [summaryRes, chartRes] = await Promise.all([
                 api.get("/sales/summary"),
-                api.get("/reports/sales", { params: { period } }),
+                api.get("/reports/sales", { 
+                    params: { 
+                        period: period,
+                        year: (period === 'year' || period === 'month') ? selectedYear : undefined,
+                        month: period === 'month' ? selectedMonth : undefined
+                    } 
+                }),
             ]);
             setDashboardData({
                 stats: summaryRes.data.data,
@@ -110,7 +148,7 @@ export default function Dashboard() {
             clearTimeout(debounce);
             isMounted = false;
         };
-    }, [period, refreshTrigger]);
+    }, [period, selectedYear, selectedMonth, refreshTrigger]);
 
     useEffect(() => {
         fetchYearlyCategories();
@@ -129,6 +167,8 @@ export default function Dashboard() {
     const chartData = useMemo(() => {
         return chartDataRaw.map((d) => {
             let label = d.date?.split("-").pop();
+            // If it's a monthly view, we want the day number (01, 02...)
+            // If it's a yearly view, we want the month name (Jan, Feb...)
             if (period === "year") {
                 const date = new Date(d.date);
                 label = date.toLocaleString("default", { month: "short" });
@@ -144,6 +184,11 @@ export default function Dashboard() {
     const maxOrders = useMemo(
         () => Math.max(...chartData.map((d) => d.value), 5),
         [chartData],
+    );
+
+    const totalOrdersInPeriod = useMemo(
+        () => chartData.reduce((sum, d) => sum + d.value, 0),
+        [chartData]
     );
 
     if (loading && !stats)
@@ -213,44 +258,173 @@ export default function Dashboard() {
                 />
             </div>
 
-            <Card className="p-0 mb-5 overflow-hidden">
-                <div className="flex items-center justify-between px-5 pt-4 pb-1">
-                    <h3 className="text-sm font-bold text-foreground">
-                        Order Scaling
-                    </h3>
-                    <div className="flex gap-1 rounded-lg bg-secondary p-1">
-                        {periods.map((p) => (
-                            <Button
-                                key={p.value}
-                                variant={
-                                    period === p.value ? "default" : "ghost"
-                                }
-                                size="sm"
-                                className={cn(
-                                    "h-7 px-3 text-[11px] font-bold",
-                                    period !== p.value &&
-                                        "text-muted-foreground",
-                                )}
-                                onClick={() => setPeriod(p.value)}
-                            >
-                                {p.label}
-                            </Button>
-                        ))}
-                    </div>
-                </div>
-                <div className="px-2 pb-2" style={{ height: 280 }}>
-                    <LineChart
-                        data={chartData}
-                        maxValue={maxOrders}
-                        formatValue={(v) => `${v} Orders`}
-                        title=""
-                        totalValueLabel="Total Success Orders"
-                        color="#3b82f6"
-                    />
-                </div>
-            </Card>
+            {/* Top Grid: Order Scaling + Recent Alerts */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <Card className="p-0 overflow-hidden lg:col-span-2 flex flex-col h-[380px] border-0 shadow-sm shadow-blue-100/20">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 pt-6 pb-2 gap-4">
+                        <div>
+                            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <TrendingUp className="h-5 w-5 text-primary" />
+                                Order Scaling
+                            </h3>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">Performance tracking for successful order volume</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="hidden md:block text-right pr-4 border-r border-border/50">
+                                <div className="text-lg font-black text-slate-900 leading-none">{totalOrdersInPeriod}</div>
+                                <div className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mt-1">Orders in Period</div>
+                            </div>
+                            <div className="flex gap-1 rounded-xl bg-secondary/30 p-1 border border-border/40 backdrop-blur-sm">
+                                <div className="flex gap-2 items-center">
+                                    <Select
+                                        value={period === 'month' ? String(selectedMonth) : "all"}
+                                        onValueChange={(val) => {
+                                            if (val === "all") {
+                                                setPeriod('year');
+                                            } else {
+                                                setSelectedMonth(Number(val));
+                                                setPeriod('month');
+                                            }
+                                        }}
+                                    >
+                                        <SelectTrigger
+                                            className={cn(
+                                                "h-8 w-auto min-w-[100px] text-[10px] font-bold rounded-lg transition-all border-none bg-secondary/50 text-slate-700 hover:bg-secondary shadow-none px-3"
+                                            )}
+                                        >
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper" side="bottom" sideOffset={10} align="end" className="rounded-xl border-border/50 z-[101]">
+                                            <SelectItem value="all" className="text-[10px] font-bold text-slate-900">
+                                                All Months
+                                            </SelectItem>
+                                            {months.map(m => (
+                                                <SelectItem key={m.value} value={String(m.value)} className="text-[10px] font-bold">
+                                                    {m.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <Select
+                                        value={String(selectedYear)}
+                                        onValueChange={(val) => {
+                                            setSelectedYear(Number(val));
+                                        }}
+                                    >
+                                        <SelectTrigger
+                                            className={cn(
+                                                "h-8 w-auto min-w-[70px] text-[10px] font-bold rounded-lg transition-all border-none bg-secondary/50 text-slate-700 hover:bg-secondary shadow-none px-3"
+                                            )}
+                                        >
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper" side="bottom" sideOffset={10} align="end" className="rounded-xl border-border/50 z-[101]">
+                                            {years.map(y => (
+                                                <SelectItem key={y} value={String(y)} className="text-[10px] font-bold">
+                                                    {y}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="px-4 pb-4 flex-grow min-h-0 mt-2">
+                        <LineChart
+                            data={chartData}
+                            maxValue={maxOrders}
+                            formatValue={(v) => `${v} Orders`}
+                            title=""
+                            hideHeader={true}
+                            color="#3b82f6" // Professional Blue
+                        />
+                    </div>
+                </Card>
+
+                {/* Recent Alerts — Live Feed */}
+                <Card className="p-5 flex flex-col h-[380px]">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4 text-indigo-500" />
+                            Recent Alerts
+                        </h3>
+                        <Badge variant="outline" className="text-[10px] font-bold text-indigo-600 border-indigo-100 bg-indigo-50/50">
+                            Live Feed
+                        </Badge>
+                    </div>
+
+                    <div className="flex-grow overflow-y-auto pr-2 -mr-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-200">
+                        {activityLoading && recentActivity.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full opacity-50">
+                                <div className="spinner h-5 w-5 mb-2" />
+                                <p className="text-xs">Updating feed...</p>
+                            </div>
+                        ) : recentActivity.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full opacity-50 border border-dashed rounded-xl p-4">
+                                <ShoppingBag className="h-8 w-8 mb-2 opacity-20" />
+                                <p className="text-xs font-medium">No recent alerts</p>
+                            </div>
+                        ) : (
+                            recentActivity.map((activity, idx) => {
+                                // Dynamic icon selection
+                                const IconComponent = {
+                                    ShoppingBag, CheckCircle, Package, AlertTriangle, RefreshCcw, Clock, Check, Bike
+                                }[activity.icon] || ShoppingBag;
+
+                                return (
+                                    <div key={activity.id || idx} className="flex gap-3 items-start group">
+                                        <div className={cn(
+                                            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all",
+                                            activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-100 text-green-600" :
+                                                activity.status === 'Alert' ? "bg-rose-100 text-rose-600" :
+                                                    activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-100 text-blue-600" :
+                                                        "bg-amber-100 text-amber-600"
+                                        )}>
+                                            <IconComponent className="h-4 w-4" />
+                                        </div>
+                                        <div className="flex-1 min-w-0 border-b border-slate-50 pb-3 group-last:border-0">
+                                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                                                <h4 className="text-[11px] font-bold text-slate-700 truncate">
+                                                    {activity.title}
+                                                </h4>
+                                                <span className="text-[9px] font-medium text-slate-400 shrink-0 capitalize">
+                                                    {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                                                </span>
+                                            </div>
+                                            <p className="text-[10px] text-slate-500 line-clamp-1 mb-2">
+                                                {activity.message}
+                                            </p>
+                                            <Badge
+                                                className={cn(
+                                                    "text-[8px] h-4 px-1.5 font-bold uppercase tracking-wider",
+                                                    activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-50 text-green-700 border-green-100" :
+                                                        activity.status === 'Alert' ? "bg-rose-50 text-rose-700 border-rose-100" :
+                                                            activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-50 text-blue-700 border-blue-100" :
+                                                                "bg-amber-50 text-amber-700 border-amber-100"
+                                                )}
+                                                variant="outline"
+                                            >
+                                                {activity.status}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-50 text-center">
+                        <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold text-slate-400 hover:text-primary transition-colors" asChild>
+                            <Link to="/inventory">View Stock Level</Link>
+                        </Button>
+                    </div>
+                </Card>
+            </div>
+
+            {/* Bottom Grid: Remaining Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Revenue by Category — Bar Chart */}
                 <Card className="p-5 flex flex-col h-[380px]">
                     <div className="mb-4">
@@ -273,103 +447,27 @@ export default function Dashboard() {
                     </div>
                 </Card>
 
-                {/* Return Rate by Category — Bar Chart */}
+                {/* Returns by Category — Bar Chart */}
                 <Card className="p-5 flex flex-col h-[380px]">
                     <div className="mb-4">
                         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                             <BarChart3 className="h-4 w-4 text-rose-500" />
-                            Return Rate by Category
+                            Returns by Category
                         </h3>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                            Frequency of returns per category (%)
+                            Return rate per category (%)
                         </p>
                     </div>
                     <div className="flex-grow">
                         <BarChart
-                            data={returnRateData.map(c => ({ label: c.name, value: c.return_rate }))}
-                            formatValue={(v) => `${Number(v).toFixed(1)}%`}
+                            data={returnRateData.map(c => ({ label: c.name, value: c.return_rate ?? c.return_count ?? 0 }))}
+                            formatValue={(v) => {
+                                const num = parseFloat(Number(v).toFixed(2));
+                                return Number.isInteger(num) ? `${num}%` : `${num}%`;
+                            }}
                             color="#f43f5e"
                             hideHeader
                         />
-                    </div>
-                </Card>
-
-                {/* Recent Activity — Live Feed */}
-                <Card className="p-5 flex flex-col h-[380px]">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                            <TrendingUp className="h-4 w-4 text-indigo-500" />
-                            Recent Activity
-                        </h3>
-                        <Badge variant="outline" className="text-[10px] font-bold text-indigo-600 border-indigo-100 bg-indigo-50/50">
-                            Live Feed
-                        </Badge>
-                    </div>
-                    
-                    <div className="flex-grow overflow-y-auto pr-2 -mr-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-200">
-                        {activityLoading && recentActivity.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full opacity-50">
-                                <div className="spinner h-5 w-5 mb-2" />
-                                <p className="text-xs">Updating feed...</p>
-                            </div>
-                        ) : recentActivity.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full opacity-50 border border-dashed rounded-xl p-4">
-                                <ShoppingBag className="h-8 w-8 mb-2 opacity-20" />
-                                <p className="text-xs font-medium">No recent activity</p>
-                            </div>
-                        ) : (
-                            recentActivity.map((activity, idx) => {
-                                // Dynamic icon selection
-                                const IconComponent = {
-                                    ShoppingBag, CheckCircle, Package, AlertTriangle, RefreshCcw, Clock, Check, Bike
-                                }[activity.icon] || ShoppingBag;
-
-                                return (
-                                    <div key={activity.id || idx} className="flex gap-3 items-start group">
-                                        <div className={cn(
-                                            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all",
-                                            activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-100 text-green-600" :
-                                            activity.status === 'Alert' ? "bg-rose-100 text-rose-600" :
-                                            activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-100 text-blue-600" :
-                                            "bg-amber-100 text-amber-600"
-                                        )}>
-                                            <IconComponent className="h-4 w-4" />
-                                        </div>
-                                        <div className="flex-1 min-w-0 border-b border-slate-50 pb-3 group-last:border-0">
-                                            <div className="flex items-center justify-between gap-2 mb-0.5">
-                                                <h4 className="text-[11px] font-bold text-slate-700 truncate">
-                                                    {activity.title}
-                                                </h4>
-                                                <span className="text-[9px] font-medium text-slate-400 shrink-0 capitalize">
-                                                    {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
-                                                </span>
-                                            </div>
-                                            <p className="text-[10px] text-slate-500 line-clamp-1 mb-2">
-                                                {activity.message}
-                                            </p>
-                                            <Badge 
-                                                className={cn(
-                                                    "text-[8px] h-4 px-1.5 font-bold uppercase tracking-wider",
-                                                    activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-50 text-green-700 border-green-100" :
-                                                    activity.status === 'Alert' ? "bg-rose-50 text-rose-700 border-rose-100" :
-                                                    activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-50 text-blue-700 border-blue-100" :
-                                                    "bg-amber-50 text-amber-700 border-amber-100"
-                                                )}
-                                                variant="outline"
-                                            >
-                                                {activity.status}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                    
-                    <div className="mt-4 pt-3 border-t border-slate-50 text-center">
-                        <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold text-slate-400 hover:text-primary transition-colors" asChild>
-                            <Link to="/inventory/sales">View Detailed History</Link>
-                        </Button>
                     </div>
                 </Card>
             </div>

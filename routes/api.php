@@ -276,6 +276,7 @@ Route::middleware(['auth.token', 'role:supplier'])->group(function () {
     Route::post('/supplier/purchase-orders/{id}/accept', [PurchaseOrderController::class , 'accept']);
     Route::post('/supplier/purchase-orders/{id}/reject', [PurchaseOrderController::class , 'reject']);
     Route::post('/supplier/purchase-orders/{id}/deliver', [PurchaseOrderController::class , 'deliver']);
+    Route::get('/supplier/reports/revenue', [PurchaseOrderController::class , 'revenueReport']);
     Route::get('/supplier/products', [SupplierProductController::class , 'index']);
     Route::post('/supplier/products', [SupplierProductController::class , 'store']);
     Route::put('/supplier/products/{id}', [SupplierProductController::class , 'update']);

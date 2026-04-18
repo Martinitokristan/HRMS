@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Building2, Eye, Trash2, Package, ShoppingCart, Handshake, CheckCircle, Star } from 'lucide-react';
+import Tooltip from '../shared/Tooltip';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 
@@ -265,12 +266,16 @@ export default function Suppliers() {
                                     </TableCell>
                                     <TableCell className="px-4 py-3">
                                         <div className="flex items-center gap-1">
-                                            <Button variant="ghost" size="sm" onClick={() => setViewSupplierId(supplier.id)} className="h-7 px-2 gap-1">
-                                                <Eye className="h-3.5 w-3.5" /> View
-                                            </Button>
-                                            <Button variant="destructive" size="sm" onClick={() => handleDelete(supplier.id)} className="h-7 px-2">
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                            </Button>
+                                            <Tooltip label="View Supplier" position="top">
+                                                <Button variant="ghost" size="sm" onClick={() => setViewSupplierId(supplier.id)} className="h-7 px-2 gap-1">
+                                                    <Eye className="h-3.5 w-3.5" /> View
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip label="Delete Supplier" position="top">
+                                                <Button variant="destructive" size="sm" onClick={() => handleDelete(supplier.id)} className="h-7 px-2">
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </Button>
+                                            </Tooltip>
                                         </div>
                                     </TableCell>
                                 </TableRow>

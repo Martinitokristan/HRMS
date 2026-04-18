@@ -22,6 +22,7 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import NotificationPanel from '../shared/NotificationPanel';
+import Tooltip from '../shared/Tooltip';
 
 // Haversine distance in km between two GPS points
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -578,6 +579,9 @@ export default function RiderDashboardV3() {
                     )}
                     <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="group"
+                        aria-label={sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
+                        title={sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
                         style={{
                             background: 'none',
                             border: 'none',
@@ -587,10 +591,26 @@ export default function RiderDashboardV3() {
                             borderRadius: '8px',
                             transition: 'background 0.2s'
                         }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#374151'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#374151';
+                            document.getElementById('toggle-icon').dataset.hover = 'true';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'transparent';
+                            document.getElementById('toggle-icon').dataset.hover = 'false';
+                        }}
                     >
-                        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                        <div id="toggle-icon-container" className="relative h-5 w-5 menu-toggle-wrapper">
+                            {/* We can use CSS hover directly on the button to toggle child visibility */}
+                            {sidebarOpen ? (
+                                <>
+                                    <Menu size={20} className="absolute inset-0 transition-opacity duration-200 group-hover:opacity-0" />
+                                    <X size={20} className="absolute inset-0 transition-opacity duration-200 opacity-0 group-hover:opacity-100" />
+                                </>
+                            ) : (
+                                <Menu size={20} />
+                            )}
+                        </div>
                     </button>
                 </div>
 
@@ -598,7 +618,7 @@ export default function RiderDashboardV3() {
                 <nav style={{ padding: '1rem 0' }}>
                     {menuItems.map(item => {
                         const Icon = item.icon;
-                        return (
+                        const btn = (
                             <button
                                 key={item.id}
                                 onClick={() => setView(item.id)}
@@ -606,8 +626,9 @@ export default function RiderDashboardV3() {
                                     width: '100%',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '0.75rem',
-                                    padding: '0.875rem 1.5rem',
+                                    justifyContent: sidebarOpen ? 'flex-start' : 'center',
+                                    gap: sidebarOpen ? '0.75rem' : '0',
+                                    padding: sidebarOpen ? '0.875rem 1.5rem' : '0.875rem 0',
                                     backgroundColor: view === item.id ? '#374151' : 'transparent',
                                     color: '#fff',
                                     border: 'none',
@@ -626,21 +647,29 @@ export default function RiderDashboardV3() {
                                 {sidebarOpen && <span>{item.label}</span>}
                             </button>
                         );
+                        return !sidebarOpen ? (
+                            <Tooltip key={item.id} label={item.label} position="right" delay={200}>
+                                {btn}
+                            </Tooltip>
+                        ) : (
+                            <React.Fragment key={item.id}>{btn}</React.Fragment>
+                        );
                     })}
                 </nav>
 
-                {/* Removed Global Map Button */}
-
                 {/* Logout */}
-                <div style={{ padding: '1rem 1.5rem', marginTop: 'auto' }}>
+                <div style={{ padding: sidebarOpen ? '1rem 1.5rem' : '1rem 12px', marginTop: 'auto' }}>
                     <button
                         onClick={logout}
+                        title={!sidebarOpen ? 'Sign Out' : undefined}
+                        aria-label="Sign Out"
                         style={{
                             width: '100%',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '0.75rem',
-                            padding: '0.875rem',
+                            justifyContent: sidebarOpen ? 'flex-start' : 'center',
+                            gap: sidebarOpen ? '0.75rem' : '0',
+                            padding: sidebarOpen ? '0.875rem' : '0.875rem 0',
                             backgroundColor: '#ef4444',
                             color: '#fff',
                             border: 'none',
@@ -652,13 +681,11 @@ export default function RiderDashboardV3() {
                         onMouseEnter={(e) => e.target.style.backgroundColor = '#dc2626'}
                         onMouseLeave={(e) => e.target.style.backgroundColor = '#ef4444'}
                     >
-                        <LogOut size={20} />
+                        <LogOut size={20} style={{ flexShrink: 0 }} />
                         {sidebarOpen && <span>Sign Out</span>}
                     </button>
                 </div>
             </div>
-
-            {/* Main Content */}
             <div style={{
                 flex: 1,
                 marginLeft: sidebarOpen ? '260px' : '60px',
@@ -669,47 +696,50 @@ export default function RiderDashboardV3() {
                 {/* Global Rider Notifications Bell */}
                 <div style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 50 }}>
                     <div style={{ position: 'relative' }}>
-                        <button
-                            onClick={() => setShowNotifications(!showNotifications)}
-                            style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '12px',
-                                backgroundColor: '#fff',
-                                border: '1px solid #e5e7eb',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                position: 'relative',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                                transition: 'background-color 0.2s'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
-                        >
-                            <Bell size={20} color="#4b5563" />
-                            {unreadCount > 0 && (
-                                <span style={{
-                                    position: 'absolute',
-                                    top: '-4px',
-                                    right: '-4px',
-                                    backgroundColor: '#ef4444',
-                                    color: '#fff',
-                                    fontSize: '10px',
-                                    fontWeight: 'bold',
+                        <Tooltip label="Notifications" position="bottom">
+                            <button
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                aria-label="Notifications"
+                                style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '12px',
+                                    backgroundColor: '#fff',
+                                    border: '1px solid #e5e7eb',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    borderRadius: '50%',
-                                    minWidth: '18px',
-                                    height: '18px',
-                                    border: '2px solid #fff'
-                                }}>
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </span>
-                            )}
-                        </button>
+                                    cursor: 'pointer',
+                                    position: 'relative',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                                    transition: 'background-color 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+                            >
+                                <Bell size={20} color="#4b5563" />
+                                {unreadCount > 0 && (
+                                    <span style={{
+                                        position: 'absolute',
+                                        top: '-4px',
+                                        right: '-4px',
+                                        backgroundColor: '#ef4444',
+                                        color: '#fff',
+                                        fontSize: '10px',
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '50%',
+                                        minWidth: '18px',
+                                        height: '18px',
+                                        border: '2px solid #fff'
+                                    }}>
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
+                            </button>
+                        </Tooltip>
 
                         <NotificationPanel
                             notifications={notifications}

@@ -8,6 +8,7 @@ import Modal from '../shared/Modal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft, Trash2, ShoppingCart, Minus, Plus, Check, X, Package, ArrowRight } from 'lucide-react';
+import Tooltip from '../shared/Tooltip';
 
 export default function CartPage() {
     const navigate = useNavigate();
@@ -187,9 +188,11 @@ export default function CartPage() {
                     <ArrowLeft className="h-4 w-4" /> Back to Shop
                 </Link>
                 <h1 className="text-lg font-bold text-foreground">My Cart ({cartCount})</h1>
-                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setShowClearConfirm(true)}>
-                    <Trash2 className="h-4 w-4 mr-1" /> Clear
-                </Button>
+                <Tooltip label="Clear Cart" position="bottom">
+                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setShowClearConfirm(true)}>
+                        <Trash2 className="h-4 w-4 mr-1" /> Clear
+                    </Button>
+                </Tooltip>
             </header>
 
             <div className="max-w-2xl mx-auto px-4 mt-6">

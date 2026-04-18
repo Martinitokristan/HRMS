@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RefreshCw, Truck, Eye, Rocket, CheckCircle2, XCircle, Trash2, Package, Clock, CheckCheck } from 'lucide-react';
+import Tooltip from '../shared/Tooltip';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 
@@ -340,13 +341,17 @@ export default function Delivery() {
                                         </TableCell>
                                         <TableCell className="px-4 py-3">
                                             <div className="flex flex-wrap gap-1">
-                                                <Button variant="ghost" size="sm" onClick={() => setViewDeliveryId(d.id)} className="h-7 px-2 gap-1">
-                                                    <Eye className="h-3.5 w-3.5" /> View
-                                                </Button>
-                                                {d.status === 'pending' && (
-                                                    <Button variant="destructive" size="sm" onClick={() => showConfirm('Delete Delivery', 'Are you sure you want to delete this delivery? Only pending deliveries can be deleted.', () => handleDeleteDelivery(d.id), 'destructive')} className="h-7 px-2">
-                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                <Tooltip label="View Delivery" position="top">
+                                                    <Button variant="ghost" size="sm" onClick={() => setViewDeliveryId(d.id)} className="h-7 px-2 gap-1">
+                                                        <Eye className="h-3.5 w-3.5" /> View
                                                     </Button>
+                                                </Tooltip>
+                                                {d.status === 'pending' && (
+                                                    <Tooltip label="Delete Delivery" position="top">
+                                                        <Button variant="destructive" size="sm" onClick={() => showConfirm('Delete Delivery', 'Are you sure you want to delete this delivery? Only pending deliveries can be deleted.', () => handleDeleteDelivery(d.id), 'destructive')} className="h-7 px-2">
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </Tooltip>
                                                 )}
                                             </div>
                                         </TableCell>

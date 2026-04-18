@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Package } from 'lucide-react';
+import Tooltip from '../shared/Tooltip';
 import { useAuth } from '../../context/AuthContext';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale, STALE_KEYS } from '../../store/dataStore';
@@ -250,8 +251,12 @@ export default function Products() {
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
                                         <div className="flex items-center justify-center gap-2">
-                                            <Button variant="outline" size="sm" className="font-semibold" onClick={() => openEdit(p)}>Edit</Button>
-                                            <Button variant="destructive" size="sm" className="font-semibold" onClick={() => handleDelete(p.id)}>Delete</Button>
+                                            <Tooltip label="Edit Product" position="top">
+                                                <Button variant="outline" size="sm" className="font-semibold" onClick={() => openEdit(p)}>Edit</Button>
+                                            </Tooltip>
+                                            <Tooltip label="Delete Product" position="top">
+                                                <Button variant="destructive" size="sm" className="font-semibold" onClick={() => handleDelete(p.id)}>Delete</Button>
+                                            </Tooltip>
                                         </div>
                                     </TableCell>
                                 </TableRow>

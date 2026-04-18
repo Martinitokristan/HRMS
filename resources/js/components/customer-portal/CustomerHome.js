@@ -12,6 +12,7 @@ import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import NotificationPanel from '../shared/NotificationPanel';
 import ProductCarousel from './ProductCarousel';
+import Tooltip from '../shared/Tooltip';
 
 // Product card component (removed memo to allow stock updates)
 const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
@@ -494,27 +495,32 @@ export default function CustomerHome() {
                     {/* Right Actions */}
                     <div className="flex items-center gap-2">
                         {/* Cart */}
-                        <Link to="/shop/cart" id="cart-icon-btn" className="relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl">
-                            <ShoppingCart className="h-5 w-5" />
-                            {cartCount > 0 && (
-                                <span id="cart-count-badge" className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-orange-500 text-white text-xs font-black rounded-full px-1.5 shadow-lg shadow-orange-500/20 ring-2 ring-white">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </Link>
+                        <Tooltip label="My Cart" position="bottom">
+                            <Link to="/shop/cart" id="cart-icon-btn" className="relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl" aria-label="My Cart">
+                                <ShoppingCart className="h-5 w-5" />
+                                {cartCount > 0 && (
+                                    <span id="cart-count-badge" className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-orange-500 text-white text-xs font-black rounded-full px-1.5 shadow-lg shadow-orange-500/20 ring-2 ring-white">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </Link>
+                        </Tooltip>
 
                         {/* Notifications */}
                         <div className="relative" ref={notifRef}>
-                            <button
-                                type="button"
-                                className={`relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 rounded-xl transition-all ${notifOpen ? 'bg-gray-50 text-orange-500' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); setNotifOpen(prev => !prev); }}
-                            >
-                                <Bell className="h-5 w-5" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-                                )}
-                            </button>
+                            <Tooltip label="Notifications" position="bottom">
+                                <button
+                                    type="button"
+                                    className={`relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 rounded-xl transition-all ${notifOpen ? 'bg-gray-50 text-orange-500' : ''}`}
+                                    onClick={(e) => { e.stopPropagation(); setNotifOpen(prev => !prev); }}
+                                    aria-label="Notifications"
+                                >
+                                    <Bell className="h-5 w-5" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+                                    )}
+                                </button>
+                            </Tooltip>
                             <NotificationPanel
                                 notifications={notifications}
                                 setNotifications={setNotifications}
@@ -549,25 +555,30 @@ export default function CustomerHome() {
                         </div>
 
                         {/* My Orders */}
-                        <Link to="/shop/history" className="hidden sm:flex items-center gap-1.5 h-10 px-3 text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl text-sm font-semibold">
-                            <ClipboardList className="h-4 w-4" />
-                            <span>My Orders</span>
-                        </Link>
+                        <Tooltip label="My Orders" position="bottom">
+                            <Link to="/shop/history" className="hidden sm:flex items-center gap-1.5 h-10 px-3 text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl text-sm font-semibold" aria-label="My Orders">
+                                <ClipboardList className="h-4 w-4" />
+                                <span>My Orders</span>
+                            </Link>
+                        </Tooltip>
 
                         {/* User Profile */}
                         <div className="relative ml-1" ref={profileRef}>
-                            <button 
-                                onClick={() => setProfileOpen(!profileOpen)}
-                                className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
-                            >
-                                <div className="h-8 w-8 rounded-lg bg-orange-500 overflow-hidden flex items-center justify-center text-white font-black text-xs shadow-lg shadow-orange-500/10 group-hover:scale-105 transition-transform">
-                                    {user?.photo
-                                        ? <img src={user.photo} alt={user.name} className="h-full w-full object-cover" />
-                                        : user?.name?.charAt(0).toUpperCase()
-                                    }
-                                </div>
-                                <span className="text-sm font-bold text-gray-700 hidden lg:block">{user?.name?.split(' ')[0]}</span>
-                            </button>
+                            <Tooltip label="My Profile" position="bottom">
+                                <button 
+                                    onClick={() => setProfileOpen(!profileOpen)}
+                                    className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
+                                    aria-label="My Profile"
+                                >
+                                    <div className="h-8 w-8 rounded-lg bg-orange-500 overflow-hidden flex items-center justify-center text-white font-black text-xs shadow-lg shadow-orange-500/10 group-hover:scale-105 transition-transform">
+                                        {user?.photo
+                                            ? <img src={user.photo} alt={user.name} className="h-full w-full object-cover" />
+                                            : user?.name?.charAt(0).toUpperCase()
+                                        }
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-700 hidden lg:block">{user?.name?.split(' ')[0]}</span>
+                                </button>
+                            </Tooltip>
 
                             {profileOpen && (
                                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-gray-100 shadow-2xl overflow-hidden py-1.5 p-1 animate-in fade-in slide-in-from-top-2 duration-300">

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Bike, Eye, CalendarCheck, UserCheck } from 'lucide-react';
+import Tooltip from '../shared/Tooltip';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
@@ -201,21 +202,27 @@ export default function Riders() {
                                 <TableCell className="px-4 py-3">
                                     <div className="flex items-center gap-1">
                                         {r.status === 'pending' && (
-                                            <Button variant="outline" size="sm" onClick={() => handleScheduleInterview(r.id)} className="h-7 px-2 gap-1">
-                                                <CalendarCheck className="h-3.5 w-3.5" /> Schedule
-                                            </Button>
+                                            <Tooltip label="Schedule Interview" position="top">
+                                                <Button variant="outline" size="sm" onClick={() => handleScheduleInterview(r.id)} className="h-7 px-2 gap-1">
+                                                    <CalendarCheck className="h-3.5 w-3.5" /> Schedule
+                                                </Button>
+                                            </Tooltip>
                                         )}
                                         {r.status === 'interview_set' && (
-                                            <Button size="sm" onClick={() => handleHire(r.id)} className="h-7 px-2 gap-1">
-                                                <UserCheck className="h-3.5 w-3.5" /> Hire
-                                            </Button>
+                                            <Tooltip label="Hire Rider" position="top">
+                                                <Button size="sm" onClick={() => handleHire(r.id)} className="h-7 px-2 gap-1">
+                                                    <UserCheck className="h-3.5 w-3.5" /> Hire
+                                                </Button>
+                                            </Tooltip>
                                         )}
                                         {r.status === 'active' && (
                                             <Badge variant="outline" className="border-success/30 bg-success-light text-success-foreground text-[11px]">On Duty</Badge>
                                         )}
-                                        <Button variant="ghost" size="sm" onClick={() => { setSelectedRider(r); setIsModalOpen(true); }} className="h-7 px-2 gap-1">
-                                            <Eye className="h-3.5 w-3.5" /> View
-                                        </Button>
+                                        <Tooltip label="View Details" position="top">
+                                            <Button variant="ghost" size="sm" onClick={() => { setSelectedRider(r); setIsModalOpen(true); }} className="h-7 px-2 gap-1">
+                                                <Eye className="h-3.5 w-3.5" /> View
+                                            </Button>
+                                        </Tooltip>
                                     </div>
                                 </TableCell>
                             </TableRow>

@@ -5,8 +5,9 @@ import api, { silentApi } from '../../lib/api';
 import { Bell, Settings, LogOut, Menu } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import NotificationPanel from '../shared/NotificationPanel';
+import Tooltip from '../shared/Tooltip';
 
-export default function Topbar({ toggleSidebar }) {
+export default function Topbar({ toggleSidebar, isCollapsed }) {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -60,28 +61,36 @@ export default function Topbar({ toggleSidebar }) {
     );
 
     return (
-        <header className="fixed top-0 left-0 right-0 lg:left-[260px] z-[90] flex h-16 items-center justify-between border-b border-border bg-white px-5 shadow-sm">
+        <header className={cn(
+            "fixed top-0 left-0 right-0 z-[90] flex h-16 items-center justify-between border-b border-border bg-white px-5 shadow-sm transition-all duration-300",
+            isCollapsed ? "lg:left-[80px]" : "lg:left-[260px]"
+        )}>
             <div className="flex items-center gap-3">
-                <button className={cn(topbarBtn, 'lg:hidden')} onClick={toggleSidebar}>
-                    <Menu className="h-4.5 w-4.5" />
-                </button>
+                <Tooltip label="Menu" position="bottom">
+                    <button className={cn(topbarBtn, 'lg:hidden')} onClick={toggleSidebar} aria-label="Menu">
+                        <Menu className="h-4.5 w-4.5" />
+                    </button>
+                </Tooltip>
                 <h1 className="text-[17px] font-bold tracking-tight text-foreground">{getPageTitle()}</h1>
             </div>
 
             <div className="flex items-center gap-2">
                 {/* Notification Bell */}
                 <div className="relative" ref={notiRef}>
-                    <button
-                        className={topbarBtn}
-                        onClick={() => { setNotiOpen(!notiOpen); setProfileOpen(false); }}
-                    >
-                        <Bell className="h-[18px] w-[18px]" />
-                        {unreadCount > 0 && (
-                            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-white border-2 border-white">
-                                {unreadCount > 9 ? '9+' : unreadCount}
-                            </span>
-                        )}
-                    </button>
+                    <Tooltip label="Notifications" position="bottom">
+                        <button
+                            className={topbarBtn}
+                            onClick={() => { setNotiOpen(!notiOpen); setProfileOpen(false); }}
+                            aria-label="Notifications"
+                        >
+                            <Bell className="h-[18px] w-[18px]" />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#EF4444] text-[10px] font-bold text-white border-2 border-white">
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
+                    </Tooltip>
 
                     <NotificationPanel
                         notifications={notifications}
@@ -110,16 +119,19 @@ export default function Topbar({ toggleSidebar }) {
 
                 {/* Profile */}
                 <div className="relative">
-                    <button
-                        onClick={() => { setProfileOpen(!profileOpen); setNotiOpen(false); }}
-                        className={cn(
-                            'flex h-9 w-9 items-center justify-center rounded-[10px]',
-                            'bg-[#FFF1EB] text-[#FF6B35] font-bold text-sm',
-                            'transition-all duration-200 hover:bg-[#FF6B35] hover:text-white'
-                        )}
-                    >
-                        {user?.name?.charAt(0)?.toUpperCase() || 'A'}
-                    </button>
+                    <Tooltip label="My Profile" position="bottom">
+                        <button
+                            onClick={() => { setProfileOpen(!profileOpen); setNotiOpen(false); }}
+                            aria-label="My Profile"
+                            className={cn(
+                                'flex h-9 w-9 items-center justify-center rounded-[10px]',
+                                'bg-[#FFF1EB] text-[#FF6B35] font-bold text-sm',
+                                'transition-all duration-200 hover:bg-[#FF6B35] hover:text-white'
+                            )}
+                        >
+                            {user?.name?.charAt(0)?.toUpperCase() || 'A'}
+                        </button>
+                    </Tooltip>
 
                     {profileOpen && (
                         <>

@@ -383,7 +383,7 @@ class InventoryController extends Controller
                         // 1. Create Product from Supplier Product / Admin Input
                         $product = Product::create([
                             'name' => !empty($pd['name']) ? $pd['name'] : $sp->name,
-                            'barcode' => !empty($pd['barcode']) ? $pd['barcode'] : ($sp->barcode ?? $generateUniqueBarcode()),
+                            'barcode' => !empty($pd['barcode']) ? $pd['barcode'] : ($sp->barcode ?? $this->generateUniqueBarcode()),
                             'description' => !empty($pd['description']) ? $pd['description'] : $sp->description,
                             'category_id' => !empty($pd['category_id']) ? $pd['category_id'] : $sp->category_id,
                             'supplier_id' => $sp->supplier_id,
@@ -428,7 +428,7 @@ class InventoryController extends Controller
                             } else {
                                 // Create new variant only if it doesn't exist
                                 // Generate unique barcode for variant (different from parent product)
-                                $variantBarcode = $generateUniqueBarcode('VAR-'); // Use VAR- prefix for variants
+                                $variantBarcode = $this->generateUniqueBarcode('VAR-'); // Use VAR- prefix for variants
 
                                 $newVariant = \App\Models\ProductVariant::create([
                                     'product_id' => $productId,
@@ -498,7 +498,7 @@ class InventoryController extends Controller
                                 $inv->product_variant_id = $existingVariant->id;
                             } else {
                                 // Create new variant only if it doesn't exist
-                                $variantBarcode = $generateUniqueBarcode('VAR-');
+                                $variantBarcode = $this->generateUniqueBarcode('VAR-');
 
                                 $newVariant = \App\Models\ProductVariant::create([
                                     'product_id' => $productId,

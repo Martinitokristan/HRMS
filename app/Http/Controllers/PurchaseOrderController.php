@@ -774,4 +774,68 @@ class PurchaseOrderController extends Controller
             'status' => 'success',
         ]);
     }
+
+    public function revenueReport(Request $request)
+    {
+        $supplierId = $this->resolveSupplierID($request);
+        $period = $request->get('period', 'year');
+        $yearParam = $request->get('year', now()->year);
+        $monthParam = $request->get('month'); // 1-12
+
+        $query = PurchaseOrder::where('supplier_id', $supplierId)
+            ->whereIn('status', ['accepted', 'supplier_delivered', 'received']);
+
+        $isYearlyView = ($period === 'year' || empty($monthParam));
+
+        if ($isYearlyView) {
+            $from = now()->setYear($yearParam)->startOfYear();
+            $to = now()->setYear($yearParam)->endOfYear();
+
+            $data = $query->whereBetween('created_at', [$from, $to])
+                ->select(
+                    DB::raw('MONTH(created_at) as label_num'),
+                    DB::raw('SUM(total_cost) as value')
+                )
+                ->groupBy('label_num')
+                ->orderBy('label_num')
+                ->get();
+
+            $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            $formatted = [];
+            for ($i = 1; $i <= 12; $i++) {
+                $found = $data->firstWhere('label_num', $i);
+                $formatted[] = [
+                    'label' => $months[$i - 1],
+                    'value' => $found ? (float)$found->value : 0
+                ];
+            }
+        } else {
+            $from = now()->setYear($yearParam)->setMonth($monthParam)->startOfMonth();
+            $to = (clone $from)->endOfMonth();
+
+            $data = $query->whereBetween('created_at', [$from, $to])
+                ->select(
+                    DB::raw('DAY(created_at) as label_num'),
+                    DB::raw('SUM(total_cost) as value')
+                )
+                ->groupBy('label_num')
+                ->orderBy('label_num')
+                ->get();
+
+            $formatted = [];
+            $daysInMonth = $from->daysInMonth;
+            for ($i = 1; $i <= $daysInMonth; $i++) {
+                $found = $data->firstWhere('label_num', $i);
+                $formatted[] = [
+                    'label' => (string)$i,
+                    'value' => $found ? (float)$found->value : 0
+                ];
+            }
+        }
+
+        return response()->json([
+            'data' => $formatted,
+            'status' => 'success'
+        ]);
+    }
 }

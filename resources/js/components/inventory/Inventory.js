@@ -15,11 +15,11 @@ const tabItems = [
 
 export default function Inventory({ tab }) {
     const navigate = useNavigate();
-    
+
     return (
         <div className="relative">
             <h2 className="text-xl font-bold text-foreground tracking-tight mb-5 relative z-0">Inventory Management</h2>
-            
+
             <Tabs value={tab} className="mb-6 relative z-0">
                 <TabsList>
                     {tabItems.map(t => {

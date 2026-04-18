@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BarChart3 } from "lucide-react";
 
 const LineChart = ({
@@ -10,7 +10,9 @@ const LineChart = ({
     color = "#3b82f6",
     hideHeader: hideHeaderProp = false,
 }) => {
+    const [hoveredPoint, setHoveredPoint] = useState(null);
     const hideHeader = hideHeaderProp || !title;
+
     if (!data || data.length === 0) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -25,7 +27,7 @@ const LineChart = ({
     // Use an internal aspect ratio box that scales based on the parent
     const width = 800;
     const height = 240;
-    const padding = { top: 20, right: 30, bottom: 40, left: 35 };
+    const padding = { top: 20, right: 30, bottom: 50, left: 60 };
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
 
@@ -49,6 +51,7 @@ const LineChart = ({
             value: item.value,
             label: item.label,
             orders: item.orders,
+            idx,
         };
     });
 
@@ -90,6 +93,10 @@ const LineChart = ({
 
     const gradientId = `gradient-${color.replace(/[^a-zA-Z0-9]/g, "")}-${Date.now()}`;
 
+    const isDaily = points.length > 20 && points.length <= 31;
+    const xAxisLabelText = isDaily ? "DAY" : "MONTH";
+    const yAxisLabelText = "REVENUE";
+
     return (
         <div
             className="line-chart-wrapper"
@@ -98,10 +105,11 @@ const LineChart = ({
                 flexDirection: "column",
                 height: "100%",
                 width: "100%",
+                position: "relative"
             }}
         >
             {!hideHeader && (
-                <div className="chart-header-row">
+                <div className="chart-header-row" style={{ marginBottom: '10px' }}>
                     <span className="chart-title">{title}</span>
                     <div className="chart-total">
                         <span className="chart-total-value">
@@ -113,6 +121,7 @@ const LineChart = ({
                     </div>
                 </div>
             )}
+            
             <div
                 className="chart-svg-container"
                 style={{
@@ -122,6 +131,38 @@ const LineChart = ({
                     minHeight: 0,
                 }}
             >
+                {/* TOOLTIP */}
+                {hoveredPoint && (
+                    <div
+                        className="chart-tooltip"
+                        style={{
+                            position: "absolute",
+                            left: `${(hoveredPoint.x / width) * 100}%`,
+                            top: `${(hoveredPoint.y / height) * 100}%`,
+                            transform: "translate(-50%, -130%)",
+                            backgroundColor: "#1e293b",
+                            color: "white",
+                            padding: "6px 10px",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            fontWeight: "600",
+                            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                            zIndex: 10,
+                            pointerEvents: "none",
+                            whiteSpace: "nowrap",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "2px",
+                            minWidth: "80px"
+                        }}
+                    >
+                        <span style={{ color: "#94a3b8", fontSize: "9px", textTransform: "uppercase" }}>
+                            {isDaily ? `Day ${hoveredPoint.label}` : hoveredPoint.label}
+                        </span>
+                        <span>{formatValue(hoveredPoint.value)}</span>
+                    </div>
+                )}
+
                 <svg
                     viewBox={`0 0 ${width} ${height}`}
                     className="line-chart-svg"
@@ -143,12 +184,12 @@ const LineChart = ({
                             <stop
                                 offset="0%"
                                 stopColor={color}
-                                stopOpacity="0.25"
+                                stopOpacity="0.15"
                             />
                             <stop
                                 offset="100%"
                                 stopColor={color}
-                                stopOpacity="0.02"
+                                stopOpacity="0.01"
                             />
                         </linearGradient>
                         <filter
@@ -168,6 +209,21 @@ const LineChart = ({
                             </feMerge>
                         </filter>
                     </defs>
+
+                    {/* Y-Axis Label */}
+                    <text
+                        transform={`rotate(-90, ${padding.left - 45}, ${padding.top + chartHeight / 2})`}
+                        x={padding.left - 50}
+                        y={padding.top + chartHeight / 2}
+                        textAnchor="middle"
+                        fontSize="9"
+                        fontWeight="bold"
+                        letterSpacing="1px"
+                        fill="#94a3b8"
+                        style={{ textTransform: 'uppercase' }}
+                    >
+                        {yAxisLabelText}
+                    </text>
 
                     {yLabels.map((label, idx) => (
                         <g key={idx}>
@@ -214,13 +270,24 @@ const LineChart = ({
 
                     {points.map((point, idx) => (
                         <g key={idx}>
+                            {/* Larger invisible hover area */}
                             <circle
                                 cx={point.x}
                                 cy={point.y}
-                                r="4"
+                                r="12"
+                                fill="transparent"
+                                style={{ cursor: 'pointer' }}
+                                onMouseEnter={() => setHoveredPoint(point)}
+                                onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                            <circle
+                                cx={point.x}
+                                cy={point.y}
+                                r={hoveredPoint?.idx === idx ? "5" : "4"}
                                 fill="#ffffff"
                                 stroke={color}
-                                strokeWidth="2"
+                                strokeWidth={hoveredPoint?.idx === idx ? "3" : "2"}
+                                style={{ pointerEvents: 'none', transition: 'all 0.2s' }}
                             />
                         </g>
                     ))}
@@ -241,23 +308,45 @@ const LineChart = ({
                     ))}
 
                     {points
-                        .filter(
-                            (_, idx) =>
-                                idx % Math.ceil(points.length / 6) === 0 ||
-                                idx === points.length - 1,
-                        )
+                        .filter((point, idx) => {
+                            // SHOW ALL MONTHS (12 points)
+                            if (points.length === 12) return true;
+                            
+                            // If labels are days (1-31), show every 5th day: 5, 10, 15, 20, 25, 30
+                            const isNumeric = !isNaN(point.label) && point.label !== "";
+                            if (isNumeric && points.length > 20 && points.length <= 31) {
+                                const day = parseInt(point.label);
+                                return day % 5 === 0;
+                            }
+                            // Default heuristic for other data
+                            return idx % Math.ceil(points.length / 6) === 0 || idx === points.length - 1;
+                        })
                         .map((point, idx) => (
                             <text
                                 key={`xlabel-${idx}`}
                                 x={point.x}
                                 y={padding.top + chartHeight + 25}
                                 textAnchor="middle"
-                                fontSize="11"
+                                fontSize="10"
                                 fill="#64748b"
                             >
                                 {point.label}
                             </text>
                         ))}
+
+                    {/* X-Axis Label */}
+                    <text
+                        x={padding.left + chartWidth / 2}
+                        y={padding.top + chartHeight + 45}
+                        textAnchor="middle"
+                        fontSize="9"
+                        fontWeight="bold"
+                        letterSpacing="1px"
+                        fill="#94a3b8"
+                        style={{ textTransform: 'uppercase' }}
+                    >
+                        {xAxisLabelText}
+                    </text>
                 </svg>
             </div>
         </div>

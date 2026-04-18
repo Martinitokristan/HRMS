@@ -7,6 +7,7 @@ import { Star, MessageSquare, ThumbsUp, ThumbsDown, Search, ArrowLeft, ArrowRigh
 import { useToast } from '../../context/ToastContext';
 import ConfirmModal from '../shared/ConfirmModal';
 import StatCard from '../shared/StatCard';
+import Tooltip from '../shared/Tooltip';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 
@@ -260,13 +261,15 @@ export default function Reviews() {
                                             {new Date(review.created_at).toLocaleDateString()}
                                         </td>
                                         <td className="p-4 text-right">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => setSelectedReview(review)}
-                                            >
-                                                View
-                                            </Button>
+                                            <Tooltip label="View Review Details" position="top">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => setSelectedReview(review)}
+                                                >
+                                                    View
+                                                </Button>
+                                            </Tooltip>
                                         </td>
                                     </tr>
                                 ))

@@ -101,6 +101,7 @@ export default function CustomerSettings() {
         name: '', phone: '', age: '', sex: '',
         address: '', landmark: '', province: '', municipality: '', barangay: '', zip_code: '',
     });
+    const [originalProfile, setOriginalProfile] = useState(null);
     const [profileLoading, setProfileLoading] = useState(true);
     const [profileSaving, setProfileSaving] = useState(false);
     const [profileErrors, setProfileErrors] = useState({});
@@ -118,7 +119,7 @@ export default function CustomerSettings() {
             api.get('/customer/profile'),
         ]).then(([profileRes]) => {
             const p = profileRes.data?.data;
-            setProfile({
+            const newProfile = {
                 name: user?.name || '',
                 phone: user?.phone || '',
                 age: p?.age || '',
@@ -129,9 +130,13 @@ export default function CustomerSettings() {
                 municipality: p?.municipality || '',
                 barangay: p?.barangay || '',
                 zip_code: p?.zip_code || '',
-            });
+            };
+            setProfile(newProfile);
+            setOriginalProfile(newProfile);
         }).catch(() => {
-            setProfile(prev => ({ ...prev, name: user?.name || '', phone: user?.phone || '' }));
+            const fallback = { name: user?.name || '', phone: user?.phone || '', age: '', sex: '', address: '', landmark: '', province: '', municipality: '', barangay: '', zip_code: '' };
+            setProfile(fallback);
+            setOriginalProfile(fallback);
         }).finally(() => setProfileLoading(false));
     }, [user]);
 
@@ -157,6 +162,7 @@ export default function CustomerSettings() {
         try {
             const res = await api.put('/customer/profile', profile);
             setProfileSuccess(true);
+            setOriginalProfile({ ...profile });
             if (res?.data?.data?.name) setUser(prev => ({ ...prev, name: res.data.data.name, phone: res.data.data.phone }));
             setTimeout(() => setProfileSuccess(false), 4000);
         } catch (err) {
@@ -456,7 +462,7 @@ export default function CustomerSettings() {
                         <div className="mt-5 flex justify-end">
                             <button
                                 type="submit"
-                                disabled={profileSaving || profileLoading}
+                                disabled={profileSaving || profileLoading || !originalProfile || JSON.stringify(profile) === JSON.stringify(originalProfile)}
                                 className="inline-flex items-center gap-2 h-10 px-6 bg-[#FF5A1F] hover:bg-orange-600 active:scale-95 text-white text-sm font-black rounded-xl transition-all shadow-lg shadow-orange-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
                             >
                                 {profileSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

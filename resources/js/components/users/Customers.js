@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Users as UsersIcon, Eye } from 'lucide-react';
+import Tooltip from '../shared/Tooltip';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
@@ -110,9 +111,11 @@ export default function Customers() {
                                 <TableCell className="px-4 py-3 text-muted-foreground">{u.last_order_date ? new Date(u.last_order_date).toLocaleDateString() : 'Never'}</TableCell>
                                 <TableCell className="px-4 py-3"><StatusBadge status={u.status} /></TableCell>
                                 <TableCell className="px-4 py-3">
-                                    <Button variant="ghost" size="sm" onClick={() => alert('Customer detail view coming soon')} className="h-7 px-2 gap-1">
-                                        <Eye className="h-3.5 w-3.5" /> View Orders
-                                    </Button>
+                                    <Tooltip label="View Orders" position="top">
+                                        <Button variant="ghost" size="sm" onClick={() => alert('Customer detail view coming soon')} className="h-7 px-2 gap-1">
+                                            <Eye className="h-3.5 w-3.5" /> View Orders
+                                        </Button>
+                                    </Tooltip>
                                 </TableCell>
                             </TableRow>
                         ))}

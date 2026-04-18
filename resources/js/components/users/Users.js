@@ -11,6 +11,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Users as UsersIcon, Plus, Pencil, ShieldOff, ShieldCheck } from 'lucide-react';
+import Tooltip from '../shared/Tooltip';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
@@ -183,17 +184,21 @@ export default function Users() {
                                 <TableCell className="px-4 py-3 text-muted-foreground">{u.created_at ? new Date(u.created_at).toLocaleDateString() : '-'}</TableCell>
                                 <TableCell className="px-4 py-3">
                                     <div className="flex items-center gap-1">
-                                        <Button variant="ghost" size="sm" onClick={() => openEdit(u)} className="h-7 px-2 gap-1">
-                                            <Pencil className="h-3.5 w-3.5" /> Edit
-                                        </Button>
-                                        <Button
-                                            variant={u.status === 'active' ? 'destructive' : 'outline'}
-                                            size="sm"
-                                            onClick={() => handleToggleStatus(u.id, u.status)}
-                                            className="h-7 px-2 gap-1"
-                                        >
-                                            {u.status === 'active' ? <><ShieldOff className="h-3.5 w-3.5" /> Suspend</> : <><ShieldCheck className="h-3.5 w-3.5" /> Restore</>}
-                                        </Button>
+                                        <Tooltip label="Edit User" position="top">
+                                            <Button variant="ghost" size="sm" onClick={() => openEdit(u)} className="h-7 px-2 gap-1">
+                                                <Pencil className="h-3.5 w-3.5" /> Edit
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip label={u.status === 'active' ? 'Suspend User' : 'Restore User'} position="top">
+                                            <Button
+                                                variant={u.status === 'active' ? 'destructive' : 'outline'}
+                                                size="sm"
+                                                onClick={() => handleToggleStatus(u.id, u.status)}
+                                                className="h-7 px-2 gap-1"
+                                            >
+                                                {u.status === 'active' ? <><ShieldOff className="h-3.5 w-3.5" /> Suspend</> : <><ShieldCheck className="h-3.5 w-3.5" /> Restore</>}
+                                            </Button>
+                                        </Tooltip>
                                     </div>
                                 </TableCell>
                             </TableRow>
