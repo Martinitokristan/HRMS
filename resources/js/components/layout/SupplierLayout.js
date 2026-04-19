@@ -9,6 +9,8 @@ import {
 import { cn } from '../../lib/utils';
 import NotificationPanel from '../shared/NotificationPanel';
 import Tooltip from '../shared/Tooltip';
+import SidebarToggle from '../shared/SidebarToggle';
+import SidebarSection from '../shared/SidebarSection';
 
 export default function SupplierLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -58,7 +60,7 @@ export default function SupplierLayout() {
             <NavLink
                 to={to}
                 className={({ isActive }) => cn(
-                    'flex items-center gap-2.5 py-2.5 text-sm font-medium rounded-none transition-all duration-200',
+                    'flex w-full items-center gap-2.5 py-2 text-sm font-medium rounded-none transition-all duration-200',
                     isCollapsed ? 'justify-center px-0' : 'px-5',
                     'border-l-[3px] border-transparent',
                     isActive
@@ -73,7 +75,7 @@ export default function SupplierLayout() {
         );
         if (isCollapsed) {
             return (
-                <Tooltip label={label} position="right" delay={200} key={to}>
+                <Tooltip label={label} position="right" delay={200} className="w-full">
                     {link}
                 </Tooltip>
             );
@@ -81,14 +83,7 @@ export default function SupplierLayout() {
         return link;
     };
 
-    const SectionLabel = ({ children }) => {
-        if (isCollapsed) return <div className="h-px bg-white/10 my-3 mx-4" />;
-        return (
-            <p className="px-5 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30 truncate">
-                {children}
-            </p>
-        );
-    };
+
 
     return (
         <div className="flex min-h-screen bg-background">
@@ -106,55 +101,41 @@ export default function SupplierLayout() {
                 isCollapsed ? 'w-[80px]' : 'w-[260px]',
                 sidebarOpen ? 'translate-x-0 shadow-[8px_0_30px_rgba(0,0,0,0.2)]' : '-translate-x-full lg:translate-x-0'
             )}>
-                {/* Logo wrapper */}
+                {/* Sidebar Header */}
                 <div className={cn(
-                    "flex flex-col gap-2 border-b border-white/[0.08] px-5 py-4",
-                    isCollapsed && "px-0 items-center"
+                    "relative flex items-center border-b border-white/10 transition-all duration-300",
+                    isCollapsed ? "h-16 justify-center" : "h-16 px-5 justify-between"
                 )}>
-                    <div className={cn(
-                        "flex items-center",
-                        isCollapsed ? "justify-center" : "justify-between"
-                    )}>
+                    <div className="flex items-center gap-2">
+                        <div className="flex shrink-0 h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B35]">
+                            <span className="text-[13px] font-black text-white">H</span>
+                        </div>
                         {!isCollapsed && (
-                            <div className="flex items-center gap-2">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B35]">
-                                    <span className="text-[13px] font-black text-white">H</span>
-                                </div>
-                                <span className="text-[17px] font-bold tracking-tight text-white line-clamp-1">
-                                    HRMS <span className="text-[#FF6B35]">Supplier</span>
-                                </span>
-                            </div>
+                            <span className="text-[17px] font-bold tracking-tight text-white line-clamp-1">
+                                HRMS <span className="text-[#FF6B35]">Supplier</span>
+                            </span>
                         )}
-                        
-                        <Tooltip label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'} position="right" delay={200}>
-                            <button
-                                onClick={() => setIsCollapsed(!isCollapsed)}
-                                aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-                                className="hidden lg:flex group items-center justify-center h-8 w-8 rounded-lg text-white hover:bg-[#374151] transition-colors relative"
-                            >
-                                {!isCollapsed ? (
-                                    <>
-                                        <Menu size={18} className="absolute inset-0 m-auto transition-opacity duration-200 group-hover:opacity-0" />
-                                        <X size={18} className="absolute inset-0 m-auto transition-opacity duration-200 opacity-0 group-hover:opacity-100" />
-                                    </>
-                                ) : (
-                                    <Menu size={18} />
-                                )}
-                            </button>
-                        </Tooltip>
-                        
+                    </div>
+                    
+                    {!isCollapsed && (
                         <button
-                            className="lg:hidden flex h-7 w-7 items-center justify-center rounded-md text-white/60 hover:text-white"
+                            className="lg:hidden flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-white/60 hover:text-white"
                             onClick={() => setSidebarOpen(false)}
                         >
                             <X className="h-4 w-4" />
                         </button>
-                    </div>
+                    )}
                 </div>
 
                 {/* Nav */}
-                <nav className="flex-1 overflow-y-auto py-3 scrollbar-none">
-                    <SectionLabel>Main</SectionLabel>
+                <nav className="flex-1 flex flex-col overflow-y-auto py-2">
+                    <SidebarSection label="Main" isCollapsed={isCollapsed} className="pt-0" />
+                    <div className={cn("flex items-center", isCollapsed ? "justify-center pb-2" : "justify-end px-5 pb-2 -mt-7 mb-1")}>
+                        <SidebarToggle 
+                            isCollapsed={isCollapsed} 
+                            onToggle={() => setIsCollapsed(!isCollapsed)} 
+                        />
+                    </div>
                     {navItem('/supplier/dashboard', LayoutDashboard, 'Dashboard')}
                     {navItem('/supplier/products', Package, 'My Products')}
                     {navItem('/supplier/inventory', Database, 'Product Inventory')}
@@ -212,7 +193,7 @@ export default function SupplierLayout() {
                         </>
                     )}
 
-                    <SectionLabel>System</SectionLabel>
+                    <SidebarSection label="System" isCollapsed={isCollapsed} />
                     {navItem('/supplier/settings', Settings, 'Settings')}
                 </nav>
 

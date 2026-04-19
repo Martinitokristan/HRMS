@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, Package, Warehouse, Truck, Handshake,
-    Store, BarChart3, Users, Settings, ChevronDown,
-    ShoppingBag, UserCheck, Bike, ExternalLink, Star, RotateCcw,
-    MessageSquare, Smartphone, Menu, X
+    Store, BarChart3, Users, Settings, ChevronDown, 
+    Star, RotateCcw, MessageSquare, Smartphone, UserCheck, Bike
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import Tooltip from '../shared/Tooltip';
+import SidebarToggle from '../shared/SidebarToggle';
+import SidebarSection from '../shared/SidebarSection';
 
 function NavItem({ to, icon: Icon, children, end = false, isActive: isActiveProp, isCollapsed }) {
     const link = (
@@ -15,7 +16,7 @@ function NavItem({ to, icon: Icon, children, end = false, isActive: isActiveProp
             to={to}
             end={end}
             className={({ isActive }) => cn(
-                'flex items-center gap-2.5 py-2.5 text-sm font-medium rounded-none transition-all duration-200',
+                'flex w-full items-center gap-2.5 py-1.5 text-sm font-medium rounded-none transition-all duration-200',
                 isCollapsed ? 'justify-center px-0' : 'px-5',
                 'border-l-[3px] border-transparent',
                 (isActive || isActiveProp)
@@ -30,7 +31,7 @@ function NavItem({ to, icon: Icon, children, end = false, isActive: isActiveProp
 
     if (isCollapsed) {
         return (
-            <Tooltip label={children} position="right" delay={200}>
+            <Tooltip label={children} position="right" delay={200} className="w-full">
                 {link}
             </Tooltip>
         );
@@ -39,14 +40,7 @@ function NavItem({ to, icon: Icon, children, end = false, isActive: isActiveProp
     return link;
 }
 
-function SectionLabel({ children, isCollapsed }) {
-    if (isCollapsed) return <div className="h-px bg-white/10 my-3 mx-4" />;
-    return (
-        <p className="px-5 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/30 truncate">
-            {children}
-        </p>
-    );
-}
+
 
 export default function Sidebar({ isOpen, onClose, isCollapsed, toggleCollapse }) {
     const [usersOpen, setUsersOpen] = useState(false);
@@ -72,48 +66,32 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, toggleCollapse }
                 isCollapsed ? 'w-[80px]' : 'w-[260px]',
                 isOpen ? 'translate-x-0 shadow-[8px_0_30px_rgba(0,0,0,0.2)]' : '-translate-x-full lg:translate-x-0'
             )}>
-                {/* Logo wrapper */}
+                {/* Sidebar Header */}
                 <div className={cn(
-                    "flex flex-col gap-2 border-b border-white/[0.08] px-5 py-4",
-                    isCollapsed && "px-0 items-center"
+                    "relative flex items-center border-b border-white/10 transition-all duration-300",
+                    isCollapsed ? "h-14 justify-center" : "h-14 px-5"
                 )}>
-                    <div className={cn(
-                        "flex items-center",
-                        isCollapsed ? "justify-center" : "justify-between"
-                    )}>
+                    <div className="flex items-center gap-2">
+                        <div className="flex shrink-0 h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B35]">
+                            <span className="text-[13px] font-black text-white">H</span>
+                        </div>
                         {!isCollapsed && (
-                            <div className="flex items-center gap-2">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B35]">
-                                    <span className="text-[13px] font-black text-white">H</span>
-                                </div>
-                                <span className="text-[17px] font-bold tracking-tight text-white line-clamp-1">
-                                    HRMS
-                                </span>
-                            </div>
+                            <span className="text-[17px] font-bold tracking-tight text-white line-clamp-1">
+                                HRMS
+                            </span>
                         )}
-                        
-                        <Tooltip label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'} position="right" delay={200}>
-                            <button
-                                onClick={toggleCollapse}
-                                aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-                                className="hidden lg:flex group items-center justify-center h-8 w-8 rounded-lg text-white hover:bg-[#374151] transition-colors relative"
-                            >
-                                {!isCollapsed ? (
-                                    <>
-                                        <Menu size={18} className="absolute inset-0 m-auto transition-opacity duration-200 group-hover:opacity-0" />
-                                        <X size={18} className="absolute inset-0 m-auto transition-opacity duration-200 opacity-0 group-hover:opacity-100" />
-                                    </>
-                                ) : (
-                                    <Menu size={18} />
-                                )}
-                            </button>
-                        </Tooltip>
                     </div>
                 </div>
 
                 {/* Nav */}
-                <nav className="flex-1 overflow-y-auto py-3 scrollbar-none">
-                    <SectionLabel isCollapsed={isCollapsed}>Main</SectionLabel>
+                <nav className="flex-1 flex flex-col overflow-y-auto py-2">
+                    <SidebarSection label="Main" isCollapsed={isCollapsed} className="pt-0" />
+                    <div className={cn("flex items-center", isCollapsed ? "justify-center pb-2" : "justify-end px-5 pb-2 -mt-7 mb-1")}>
+                        <SidebarToggle 
+                            isCollapsed={isCollapsed} 
+                            onToggle={toggleCollapse} 
+                        />
+                    </div>
                     <NavItem to="/dashboard" icon={LayoutDashboard} isCollapsed={isCollapsed}>Dashboard</NavItem>
                     <NavItem to="/products" icon={Package} isCollapsed={isCollapsed}>Products</NavItem>
                     <NavItem to="/inventory" icon={Warehouse} isActiveProp={location.pathname.startsWith('/inventory')} isCollapsed={isCollapsed}>
@@ -125,12 +103,12 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, toggleCollapse }
                     <NavItem to="/returns" icon={RotateCcw} isCollapsed={isCollapsed}>Returns</NavItem>
                     <NavItem to="/gcash-logs" icon={Smartphone} isCollapsed={isCollapsed}>GCash Payments</NavItem>
 
-                    <SectionLabel isCollapsed={isCollapsed}>Analytics</SectionLabel>
+                    <SidebarSection label="Analytics" isCollapsed={isCollapsed} />
                     <NavItem to="/reports" icon={BarChart3} end isCollapsed={isCollapsed}>Reports</NavItem>
                     <NavItem to="/reports/rating-analytics" icon={Star} isCollapsed={isCollapsed}>Rating Analytics</NavItem>
                     <NavItem to="/reviews" icon={MessageSquare} isCollapsed={isCollapsed}>Reviews</NavItem>
 
-                    <SectionLabel isCollapsed={isCollapsed}>System</SectionLabel>
+                    <SidebarSection label="System" isCollapsed={isCollapsed} />
 
                     {/* Users Accordion or Icon if collapsed */}
                     {isCollapsed ? (
@@ -140,7 +118,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, toggleCollapse }
                             <button
                                 onClick={() => setUsersOpen(!usersOpen)}
                                 className={cn(
-                                    'flex w-full items-center justify-between px-5 py-2.5 text-sm font-medium transition-all duration-200',
+                                    'flex w-full items-center justify-between px-5 py-1.5 text-sm font-medium transition-all duration-200',
                                     'border-l-[3px]',
                                     usersActive
                                         ? 'text-white bg-white/10 border-l-[#FF6B35]'
@@ -158,8 +136,8 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, toggleCollapse }
                             </button>
 
                             <div className={cn(
-                                'overflow-hidden transition-all duration-250',
-                                usersOpen ? 'max-h-40' : 'max-h-0'
+                                'overflow-hidden transition-all duration-300',
+                                usersOpen ? 'max-h-60' : 'max-h-0'
                             )}>
                                 {[{ to: '/users', label: 'All Users', end: true, Icon: Users },
                                   { to: '/users/customers', label: 'Customers', Icon: UserCheck },
@@ -170,7 +148,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, toggleCollapse }
                                         to={to}
                                         end={end}
                                         className={({ isActive }) => cn(
-                                            'flex items-center gap-2 py-2 pl-[3.25rem] pr-5 text-[13px] transition-colors duration-200',
+                                            'flex items-center gap-2 py-1.5 pl-[3.25rem] pr-5 text-[13px] transition-colors duration-200',
                                             isActive ? 'text-[#FF6B35] font-semibold' : 'text-white/55 hover:text-white'
                                         )}
                                     >

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Inventory;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Dompdf\Dompdf;
@@ -1386,7 +1387,7 @@ class ReportController extends Controller
                 ];
             }
 
-            // 2. Low Stock Alerts (add as 'Alert' or 'Warning')
+            // 2. Low Stock Alerts (always shown in dashboard live feed)
             $lowStock = Inventory::with('product')
                 ->whereRaw('current_stock <= reorder_threshold')
                 ->limit(5)
@@ -1395,14 +1396,17 @@ class ReportController extends Controller
             foreach ($lowStock as $inv) {
                 $stockVal = (int) round($inv->current_stock);
                 $stockSuffix = $stockVal === 1 ? 'pc' : 'pcs';
+                $isOutOfStock = $stockVal <= 0;
                 $activities[] = [
                     'id' => 'stock-' . $inv->id,
                     'type' => 'inventory',
-                    'status' => 'Warning',
-                    'badgeVariant' => 'amber',
+                    'status' => $isOutOfStock ? 'Alert' : 'Warning',
+                    'badgeVariant' => $isOutOfStock ? 'red' : 'amber',
                     'icon' => 'AlertTriangle',
-                    'title' => 'Stock Alert',
-                    'message' => ($inv->product->name ?? 'Product') . " is low on stock ({$stockVal}{$stockSuffix} remaining)",
+                    'title' => $isOutOfStock ? 'Out of Stock' : 'Stock Alert',
+                    'message' => ($inv->product->name ?? 'Product') . ($isOutOfStock
+                        ? ' is out of stock!'
+                        : " is low on stock ({$stockVal}{$stockSuffix} remaining)"),
                     'timestamp' => ($inv->updated_at ?? $inv->last_adjusted_at ?? $inv->created_at ?? now())->toIso8601String(),
                 ];
             }

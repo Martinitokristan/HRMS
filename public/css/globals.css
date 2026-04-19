@@ -655,11 +655,11 @@ input, select, textarea {
 .pointer-events-auto{
   pointer-events: auto;
 }
-.visible{
-  visibility: visible;
-}
 .\!visible{
   visibility: visible !important;
+}
+.visible{
+  visibility: visible;
 }
 .invisible{
   visibility: hidden;
@@ -740,9 +740,6 @@ input, select, textarea {
 }
 .bottom-0{
   bottom: 0px;
-}
-.bottom-2{
-  bottom: 0.5rem;
 }
 .bottom-5{
   bottom: 1.25rem;
@@ -849,6 +846,15 @@ input, select, textarea {
 .top-full{
   top: 100%;
 }
+.-bottom-\[1px\]{
+  bottom: -1px;
+}
+.-left-4{
+  left: -1rem;
+}
+.-right-4{
+  right: -1rem;
+}
 .z-0{
   z-index: 0;
 }
@@ -869,6 +875,9 @@ input, select, textarea {
 }
 .z-\[100\]{
   z-index: 100;
+}
+.z-\[101\]{
+  z-index: 101;
 }
 .z-\[1\]{
   z-index: 1;
@@ -900,9 +909,6 @@ input, select, textarea {
 .z-\[99\]{
   z-index: 99;
 }
-.z-\[101\]{
-  z-index: 101;
-}
 .order-1{
   order: 1;
 }
@@ -914,9 +920,6 @@ input, select, textarea {
 }
 .col-span-2{
   grid-column: span 2 / span 2;
-}
-.m-0{
-  margin: 0px;
 }
 .m-3{
   margin: 0.75rem;
@@ -940,6 +943,10 @@ input, select, textarea {
   margin-left: 0.875rem;
   margin-right: 0.875rem;
 }
+.mx-4{
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
 .mx-auto{
   margin-left: auto;
   margin-right: auto;
@@ -956,17 +963,17 @@ input, select, textarea {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
+.my-3{
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
 .my-4{
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
-.mx-4{
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
-.my-3{
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
+.mx-1{
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
 }
 .-ml-2{
   margin-left: -0.5rem;
@@ -1121,8 +1128,11 @@ input, select, textarea {
 .mt-auto{
   margin-top: auto;
 }
-.ml-5{
-  margin-left: 1.25rem;
+.-mt-7{
+  margin-top: -1.75rem;
+}
+.-mt-\[1px\]{
+  margin-top: -1px;
 }
 .box-border{
   box-sizing: border-box;
@@ -1264,20 +1274,11 @@ input, select, textarea {
 .h-\[--cell-size\]{
   height: var(--cell-size);
 }
-.h-\[10px\]{
-  height: 10px;
-}
-.h-\[11px\]{
-  height: 11px;
-}
 .h-\[120px\]{
   height: 120px;
 }
 .h-\[160px\]{
   height: 160px;
-}
-.h-\[16px\]{
-  height: 16px;
 }
 .h-\[180px\]{
   height: 180px;
@@ -1334,8 +1335,8 @@ input, select, textarea {
 .h-svh{
   height: 100svh;
 }
-.h-\[280px\]{
-  height: 280px;
+.h-\[72px\]{
+  height: 72px;
 }
 .max-h-0{
   max-height: 0px;
@@ -1367,6 +1368,9 @@ input, select, textarea {
 .max-h-\[140px\]{
   max-height: 140px;
 }
+.max-h-\[250px\]{
+  max-height: 250px;
+}
 .max-h-\[300px\]{
   max-height: 300px;
 }
@@ -1394,8 +1398,8 @@ input, select, textarea {
 .max-h-screen{
   max-height: 100vh;
 }
-.max-h-\[250px\]{
-  max-height: 250px;
+.max-h-\[500px\]{
+  max-height: 500px;
 }
 .min-h-0{
   min-height: 0px;
@@ -1526,17 +1530,11 @@ input, select, textarea {
 .w-\[100px\]{
   width: 100px;
 }
-.w-\[10px\]{
-  width: 10px;
-}
-.w-\[11px\]{
-  width: 11px;
+.w-\[120px\]{
+  width: 120px;
 }
 .w-\[130px\]{
   width: 130px;
-}
-.w-\[16px\]{
-  width: 16px;
 }
 .w-\[18px\]{
   width: 18px;
@@ -1565,6 +1563,9 @@ input, select, textarea {
 .w-\[60px\]{
   width: 60px;
 }
+.w-\[80px\]{
+  width: 80px;
+}
 .w-auto{
   width: auto;
 }
@@ -1581,12 +1582,6 @@ input, select, textarea {
 }
 .w-px{
   width: 1px;
-}
-.w-\[80px\]{
-  width: 80px;
-}
-.w-\[120px\]{
-  width: 120px;
 }
 .min-w-0{
   min-width: 0px;
@@ -1606,6 +1601,9 @@ input, select, textarea {
 .min-w-\[--cell-size\]{
   min-width: var(--cell-size);
 }
+.min-w-\[100px\]{
+  min-width: 100px;
+}
 .min-w-\[12rem\]{
   min-width: 12rem;
 }
@@ -1624,6 +1622,9 @@ input, select, textarea {
 .min-w-\[32px\]{
   min-width: 32px;
 }
+.min-w-\[70px\]{
+  min-width: 70px;
+}
 .min-w-\[8rem\]{
   min-width: 8rem;
 }
@@ -1633,17 +1634,8 @@ input, select, textarea {
 .min-w-full{
   min-width: 100%;
 }
-.min-w-\[80px\]{
-  min-width: 80px;
-}
-.min-w-\[70px\]{
-  min-width: 70px;
-}
-.min-w-\[90px\]{
-  min-width: 90px;
-}
-.min-w-\[100px\]{
-  min-width: 100px;
+.min-w-\[360px\]{
+  min-width: 360px;
 }
 .max-w-2xl{
   max-width: 42rem;
@@ -1854,14 +1846,14 @@ input, select, textarea {
   --tw-scale-y: 1.25;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
-.scale-90{
-  --tw-scale-x: .9;
-  --tw-scale-y: .9;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
 .scale-\[1\.01\]{
   --tw-scale-x: 1.01;
   --tw-scale-y: 1.01;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.scale-95{
+  --tw-scale-x: .95;
+  --tw-scale-y: .95;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 .transform{
@@ -1936,11 +1928,6 @@ input, select, textarea {
 }
 .list-none{
   list-style-type: none;
-}
-.appearance-none{
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
 }
 .grid-cols-1{
   grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -2249,8 +2236,18 @@ input, select, textarea {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 }
+.rounded-t-\[1\.5rem\]{
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+}
 .rounded-tl-sm{
   border-top-left-radius: calc(var(--radius) - 4px);
+}
+.rounded-bl-\[1\.25rem\]{
+  border-bottom-left-radius: 1.25rem;
+}
+.rounded-br-\[1\.25rem\]{
+  border-bottom-right-radius: 1.25rem;
 }
 .border{
   border-width: 1px;
@@ -2388,6 +2385,9 @@ input, select, textarea {
 }
 .border-border{
   border-color: hsl(var(--border));
+}
+.border-border\/40{
+  border-color: hsl(var(--border) / 0.4);
 }
 .border-border\/50{
   border-color: hsl(var(--border) / 0.5);
@@ -2559,6 +2559,9 @@ input, select, textarea {
 .border-white\/30{
   border-color: rgb(255 255 255 / 0.3);
 }
+.border-white\/40{
+  border-color: rgb(255 255 255 / 0.4);
+}
 .border-white\/5{
   border-color: rgb(255 255 255 / 0.05);
 }
@@ -2568,12 +2571,6 @@ input, select, textarea {
 .border-yellow-200{
   --tw-border-opacity: 1;
   border-color: rgb(254 240 138 / var(--tw-border-opacity));
-}
-.border-white\/40{
-  border-color: rgb(255 255 255 / 0.4);
-}
-.border-border\/40{
-  border-color: hsl(var(--border) / 0.4);
 }
 .border-l-\[\#FF6B35\]{
   --tw-border-opacity: 1;
@@ -2736,6 +2733,9 @@ input, select, textarea {
 .bg-amber-50\/30{
   background-color: rgb(255 251 235 / 0.3);
 }
+.bg-amber-50\/50{
+  background-color: rgb(255 251 235 / 0.5);
+}
 .bg-amber-500{
   --tw-bg-opacity: 1;
   background-color: rgb(245 158 11 / var(--tw-bg-opacity));
@@ -2745,9 +2745,6 @@ input, select, textarea {
 }
 .bg-background\/60{
   background-color: hsl(var(--background) / 0.6);
-}
-.bg-black\/0{
-  background-color: rgb(0 0 0 / 0);
 }
 .bg-black\/40{
   background-color: rgb(0 0 0 / 0.4);
@@ -2987,9 +2984,6 @@ input, select, textarea {
 .bg-secondary\/30{
   background-color: hsl(var(--secondary) / 0.3);
 }
-.bg-secondary\/40{
-  background-color: hsl(var(--secondary) / 0.4);
-}
 .bg-secondary\/5{
   background-color: hsl(var(--secondary) / 0.05);
 }
@@ -3075,16 +3069,19 @@ input, select, textarea {
   --tw-bg-opacity: 1;
   background-color: rgb(254 252 232 / var(--tw-bg-opacity));
 }
-.bg-amber-50\/50{
-  background-color: rgb(255 251 235 / 0.5);
-}
-.bg-indigo-600{
+.bg-\[\#0a0a0b\]{
   --tw-bg-opacity: 1;
-  background-color: rgb(79 70 229 / var(--tw-bg-opacity));
+  background-color: rgb(10 10 11 / var(--tw-bg-opacity));
 }
-.bg-indigo-50{
+.bg-\[\#121417\]{
   --tw-bg-opacity: 1;
-  background-color: rgb(238 242 255 / var(--tw-bg-opacity));
+  background-color: rgb(18 20 23 / var(--tw-bg-opacity));
+}
+.bg-green-500\/10{
+  background-color: rgb(34 197 94 / 0.1);
+}
+.bg-white\/5{
+  background-color: rgb(255 255 255 / 0.05);
 }
 .bg-\[url\(\'data\:image\/svg\+xml\;base64\2c PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI\+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8\+PC9nPjwvZz48L3N2Zz4\=\'\)\]{
   background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=');
@@ -3133,18 +3130,8 @@ input, select, textarea {
   --tw-gradient-to: hsl(var(--primary) / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
-.from-primary\/5{
-  --tw-gradient-from: hsl(var(--primary) / 0.05) var(--tw-gradient-from-position);
-  --tw-gradient-to: hsl(var(--primary) / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
 .from-secondary{
   --tw-gradient-from: hsl(var(--secondary)) var(--tw-gradient-from-position);
-  --tw-gradient-to: hsl(var(--secondary) / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
-.from-secondary\/60{
-  --tw-gradient-from: hsl(var(--secondary) / 0.6) var(--tw-gradient-from-position);
   --tw-gradient-to: hsl(var(--secondary) / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
@@ -3183,9 +3170,6 @@ input, select, textarea {
 }
 .to-red-700{
   --tw-gradient-to: #b91c1c var(--tw-gradient-to-position);
-}
-.to-secondary\/40{
-  --tw-gradient-to: hsl(var(--secondary) / 0.4) var(--tw-gradient-to-position);
 }
 .to-secondary\/50{
   --tw-gradient-to: hsl(var(--secondary) / 0.5) var(--tw-gradient-to-position);
@@ -3273,6 +3257,13 @@ input, select, textarea {
 }
 .p-\[1px\]{
   padding: 1px;
+}
+.p-1\.5{
+  padding: 0.375rem;
+}
+.px-0{
+  padding-left: 0px;
+  padding-right: 0px;
 }
 .px-1{
   padding-left: 0.25rem;
@@ -3434,10 +3425,6 @@ input, select, textarea {
   padding-top: 7px;
   padding-bottom: 7px;
 }
-.px-0{
-  padding-left: 0px;
-  padding-right: 0px;
-}
 .pb-0{
   padding-bottom: 0px;
 }
@@ -3587,9 +3574,6 @@ input, select, textarea {
 }
 .pt-\[calc\(64px\+1\.5rem\)\]{
   padding-top: calc(64px + 1.5rem);
-}
-.pl-3{
-  padding-left: 0.75rem;
 }
 .text-left{
   text-align: left;
@@ -3808,6 +3792,10 @@ input, select, textarea {
   --tw-text-opacity: 1;
   color: rgb(22 163 74 / var(--tw-text-opacity));
 }
+.text-\[\#1F2937\]{
+  --tw-text-opacity: 1;
+  color: rgb(31 41 55 / var(--tw-text-opacity));
+}
 .text-\[\#22C55E\]{
   --tw-text-opacity: 1;
   color: rgb(34 197 94 / var(--tw-text-opacity));
@@ -3819,6 +3807,10 @@ input, select, textarea {
 .text-\[\#3B82F6\]{
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity));
+}
+.text-\[\#6B7280\]{
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity));
 }
 .text-\[\#6b7280\]{
   --tw-text-opacity: 1;
@@ -4010,9 +4002,6 @@ input, select, textarea {
 .text-info{
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity));
-}
-.text-inherit{
-  color: inherit;
 }
 .text-muted-foreground{
   color: hsl(var(--muted-foreground));
@@ -4212,13 +4201,8 @@ input, select, textarea {
   --tw-text-opacity: 1;
   color: rgb(133 77 14 / var(--tw-text-opacity));
 }
-.text-\[\#1F2937\]{
-  --tw-text-opacity: 1;
-  color: rgb(31 41 55 / var(--tw-text-opacity));
-}
-.text-\[\#6B7280\]{
-  --tw-text-opacity: 1;
-  color: rgb(107 114 128 / var(--tw-text-opacity));
+.text-white\/25{
+  color: rgb(255 255 255 / 0.25);
 }
 .underline{
   text-decoration-line: underline;
@@ -4367,6 +4351,10 @@ input, select, textarea {
   --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
+.shadow-blue-100\/20{
+  --tw-shadow-color: rgb(219 234 254 / 0.2);
+  --tw-shadow: var(--tw-shadow-colored);
+}
 .shadow-gray-200{
   --tw-shadow-color: #e5e7eb;
   --tw-shadow: var(--tw-shadow-colored);
@@ -4419,20 +4407,16 @@ input, select, textarea {
   --tw-shadow-color: hsl(var(--primary) / 0.3);
   --tw-shadow: var(--tw-shadow-colored);
 }
+.shadow-red-200{
+  --tw-shadow-color: #fecaca;
+  --tw-shadow: var(--tw-shadow-colored);
+}
 .shadow-red-500\/20{
   --tw-shadow-color: rgb(239 68 68 / 0.2);
   --tw-shadow: var(--tw-shadow-colored);
 }
-.shadow-indigo-100\/20{
-  --tw-shadow-color: rgb(224 231 255 / 0.2);
-  --tw-shadow: var(--tw-shadow-colored);
-}
-.shadow-blue-100\/20{
-  --tw-shadow-color: rgb(219 234 254 / 0.2);
-  --tw-shadow: var(--tw-shadow-colored);
-}
-.shadow-red-200{
-  --tw-shadow-color: #fecaca;
+.shadow-white\/5{
+  --tw-shadow-color: rgb(255 255 255 / 0.05);
   --tw-shadow: var(--tw-shadow-colored);
 }
 .outline-none{
@@ -4523,6 +4507,10 @@ input, select, textarea {
   --tw-drop-shadow: drop-shadow(0 16px 40px rgba(0,0,0,0.35));
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
+.drop-shadow-2xl{
+  --tw-drop-shadow: drop-shadow(0 25px 25px rgb(0 0 0 / 0.15));
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
 .grayscale-\[0\.3\]{
   --tw-grayscale: grayscale(0.3);
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
@@ -4610,9 +4598,6 @@ input, select, textarea {
 }
 .duration-700{
   transition-duration: 700ms;
-}
-.duration-150{
-  transition-duration: 150ms;
 }
 .ease-in-out{
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -4873,6 +4858,11 @@ input, select, textarea {
   background-color: rgb(16 185 129 / 0.2);
 }
 
+.hover\:bg-\[\#374151\]:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(55 65 81 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-\[\#EF4444\]\/20:hover{
   background-color: rgb(239 68 68 / 0.2);
 }
@@ -4919,6 +4909,10 @@ input, select, textarea {
 .hover\:bg-amber-600:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(217 119 6 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-black\/70:hover{
+  background-color: rgb(0 0 0 / 0.7);
 }
 
 .hover\:bg-blue-100:hover{
@@ -4983,6 +4977,10 @@ input, select, textarea {
   background-color: hsl(var(--muted));
 }
 
+.hover\:bg-muted\/30:hover{
+  background-color: hsl(var(--muted) / 0.3);
+}
+
 .hover\:bg-muted\/50:hover{
   background-color: hsl(var(--muted) / 0.5);
 }
@@ -5024,10 +5022,6 @@ input, select, textarea {
 
 .hover\:bg-secondary\/30:hover{
   background-color: hsl(var(--secondary) / 0.3);
-}
-
-.hover\:bg-secondary\/40:hover{
-  background-color: hsl(var(--secondary) / 0.4);
 }
 
 .hover\:bg-secondary\/5:hover{
@@ -5073,58 +5067,16 @@ input, select, textarea {
   background-color: rgb(255 255 255 / 0.1);
 }
 
+.hover\:bg-white\/20:hover{
+  background-color: rgb(255 255 255 / 0.2);
+}
+
 .hover\:bg-white\/90:hover{
   background-color: rgb(255 255 255 / 0.9);
 }
 
 .hover\:bg-white\/\[0\.06\]:hover{
   background-color: rgb(255 255 255 / 0.06);
-}
-
-.hover\:bg-\[\#374151\]:hover{
-  --tw-bg-opacity: 1;
-  background-color: rgb(55 65 81 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-white\/20:hover{
-  background-color: rgb(255 255 255 / 0.2);
-}
-
-.hover\:bg-muted\/30:hover{
-  background-color: hsl(var(--muted) / 0.3);
-}
-
-.hover\:bg-primary\/10:hover{
-  background-color: hsl(var(--primary) / 0.1);
-}
-
-.hover\:bg-black\/70:hover{
-  background-color: rgb(0 0 0 / 0.7);
-}
-
-.hover\:bg-indigo-50:hover{
-  --tw-bg-opacity: 1;
-  background-color: rgb(238 242 255 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-indigo-700:hover{
-  --tw-bg-opacity: 1;
-  background-color: rgb(67 56 202 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-indigo-100:hover{
-  --tw-bg-opacity: 1;
-  background-color: rgb(224 231 255 / var(--tw-bg-opacity));
-}
-
-.hover\:from-secondary:hover{
-  --tw-gradient-from: hsl(var(--secondary)) var(--tw-gradient-from-position);
-  --tw-gradient-to: hsl(var(--secondary) / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
-
-.hover\:to-secondary\/60:hover{
-  --tw-gradient-to: hsl(var(--secondary) / 0.6) var(--tw-gradient-to-position);
 }
 
 .hover\:text-\[\#111827\]:hover{
@@ -5214,16 +5166,6 @@ input, select, textarea {
 .hover\:text-yellow-400:hover{
   --tw-text-opacity: 1;
   color: rgb(250 204 21 / var(--tw-text-opacity));
-}
-
-.hover\:text-red-500:hover{
-  --tw-text-opacity: 1;
-  color: rgb(239 68 68 / var(--tw-text-opacity));
-}
-
-.hover\:text-indigo-600:hover{
-  --tw-text-opacity: 1;
-  color: rgb(79 70 229 / var(--tw-text-opacity));
 }
 
 .hover\:underline:hover{
@@ -5328,13 +5270,13 @@ input, select, textarea {
   background-color: rgb(191 219 254 / var(--tw-bg-opacity));
 }
 
+.focus\:bg-primary\/10:focus{
+  background-color: hsl(var(--primary) / 0.1);
+}
+
 .focus\:bg-white:focus{
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.focus\:bg-primary\/10:focus{
-  background-color: hsl(var(--primary) / 0.1);
 }
 
 .focus\:text-accent-foreground:focus{
@@ -5567,12 +5509,6 @@ input, select, textarea {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
-.group:hover .group-hover\:scale-100{
-  --tw-scale-x: 1;
-  --tw-scale-y: 1;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
 .group:hover .group-hover\:scale-105{
   --tw-scale-x: 1.05;
   --tw-scale-y: 1.05;
@@ -5585,27 +5521,18 @@ input, select, textarea {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
-.group:hover .group-hover\:bg-black\/20{
-  background-color: rgb(0 0 0 / 0.2);
-}
-
-.group:hover .group-hover\:bg-white{
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
 .group\/bar:hover .group-hover\/bar\:text-orange-500{
   --tw-text-opacity: 1;
   color: rgb(249 115 22 / var(--tw-text-opacity));
 }
 
-.group:hover .group-hover\:text-foreground{
-  color: hsl(var(--foreground));
-}
-
 .group:hover .group-hover\:text-orange-500{
   --tw-text-opacity: 1;
   color: rgb(249 115 22 / var(--tw-text-opacity));
+}
+
+.group:hover .group-hover\:text-primary{
+  color: hsl(var(--primary));
 }
 
 .group:hover .group-hover\:text-red-500{
@@ -5617,12 +5544,12 @@ input, select, textarea {
   color: rgb(255 255 255 / 0.3);
 }
 
-.group:hover .group-hover\:text-primary{
-  color: hsl(var(--primary));
-}
-
 .group\/menu-item:hover .group-hover\/menu-item\:opacity-100{
   opacity: 1;
+}
+
+.group:hover .group-hover\:opacity-0{
+  opacity: 0;
 }
 
 .group:hover .group-hover\:opacity-100{
@@ -5631,10 +5558,6 @@ input, select, textarea {
 
 .group:hover .group-hover\:opacity-65{
   opacity: 0.65;
-}
-
-.group:hover .group-hover\:opacity-0{
-  opacity: 0;
 }
 
 .group.destructive .group-\[\.destructive\]\:border-muted\/40{
@@ -6681,10 +6604,6 @@ input, select, textarea {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
-  .lg\:grid-cols-\[1fr_320px\]{
-    grid-template-columns: 1fr 320px;
-  }
-
   .lg\:grid-cols-\[1fr_360px\]{
     grid-template-columns: 1fr 360px;
   }
@@ -6720,12 +6639,12 @@ input, select, textarea {
     padding-left: 260px;
   }
 
-  .lg\:pr-12{
-    padding-right: 3rem;
-  }
-
   .lg\:pl-\[80px\]{
     padding-left: 80px;
+  }
+
+  .lg\:pr-12{
+    padding-right: 3rem;
   }
 }
 
@@ -6743,20 +6662,16 @@ input, select, textarea {
     width: 560px;
   }
 
+  .xl\:grid-cols-2{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .xl\:grid-cols-4{
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .xl\:grid-cols-5{
     grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
-  .xl\:grid-cols-\[1fr_360px\]{
-    grid-template-columns: 1fr 360px;
-  }
-
-  .xl\:grid-cols-2{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .xl\:flex-row{

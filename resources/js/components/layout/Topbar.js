@@ -6,6 +6,7 @@ import { Bell, Settings, LogOut, Menu } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import NotificationPanel from '../shared/NotificationPanel';
 import Tooltip from '../shared/Tooltip';
+import PaymentToastContainer from '../shared/PaymentToast';
 
 export default function Topbar({ toggleSidebar, isCollapsed }) {
     const { user, logout } = useAuth();
@@ -17,6 +18,18 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const notiRef = useRef(null);
+    const seenGcashIds = useRef(new Set());
+    const initialFetchDone = useRef(false);
+    const toastEnabledRef = useRef(true);
+
+    // Fetch toast setting on mount
+    useEffect(() => {
+        silentApi.get('/settings').then(res => {
+            const data = res.data?.data !== undefined ? res.data.data : res.data;
+            const val = data?.settings?.notifications?.gcash_payment_toast;
+            toastEnabledRef.current = val === '1' || val === undefined || val === null;
+        }).catch(() => {});
+    }, []);
 
     const getPageTitle = () => {
         const path = location.pathname;
@@ -41,6 +54,32 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
             const notis = Array.isArray(data) ? data : [];
             setNotifications(notis.slice(0, 30));
             setUnreadCount(notis.filter(n => !n.read_at).length);
+
+            // Detect new GCash payment notifications and fire toast (if enabled)
+            const gcashNotis = notis.filter(n => n.data?.type === 'gcash_payment');
+            
+            if (!initialFetchDone.current) {
+                // First fetch — just record existing IDs, don't toast
+                gcashNotis.forEach(n => seenGcashIds.current.add(n.id));
+                initialFetchDone.current = true;
+            } else if (toastEnabledRef.current) {
+                // Subsequent fetches — toast for any new ones (only if enabled)
+                gcashNotis.forEach(n => {
+                    if (!seenGcashIds.current.has(n.id)) {
+                        seenGcashIds.current.add(n.id);
+                        PaymentToastContainer.show({
+                            customerName: n.data.customer_name,
+                            amount: n.data.amount,
+                            phone: n.data.phone,
+                            items: n.data.items || [],
+                            orderNumber: n.data.order_number,
+                        });
+                    }
+                });
+            } else {
+                // Toast disabled — still track IDs to avoid backlog when re-enabled
+                gcashNotis.forEach(n => seenGcashIds.current.add(n.id));
+            }
         } catch (e) { }
     };
 

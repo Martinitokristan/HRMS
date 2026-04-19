@@ -337,6 +337,7 @@ export default function SupplierDashboard() {
                             formatValue={(v) => `₱${Number(v).toLocaleString()}`}
                             title=""
                             hideHeader={true}
+                            monthLabel={selectedMonth !== "all" ? months.find(m => m.value === selectedMonth)?.label : ""}
                         />
                     </div>
                 </Card>

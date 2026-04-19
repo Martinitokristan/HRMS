@@ -171,6 +171,8 @@ export default function AppRouter() {
 
 import { createRoot } from 'react-dom/client';
 
+import PaymentToastContainer from './components/shared/PaymentToast';
+
 // ... (imports remain same)
 
 if (document.getElementById('app')) {
@@ -180,6 +182,7 @@ if (document.getElementById('app')) {
             <AuthProvider>
                 <ToastProvider>
                     <RealTimeSyncBridge />
+                    <PaymentToastContainer />
                     <AppRouter />
                 </ToastProvider>
             </AuthProvider>

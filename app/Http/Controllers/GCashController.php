@@ -190,8 +190,9 @@ class GCashController extends Controller
 
             // Send SMS to customer if enabled in settings
             try {
-                $smsEnabled = Setting::get('gcash_confirmed_sms', '0');
-                if ($smsEnabled === '1') {
+                $smsEnabled = Setting::get('sms_enabled', '0');
+                $gcashSmsEnabled = Setting::get('gcash_confirmed_sms', '0');
+                if ($smsEnabled === '1' && $gcashSmsEnabled === '1') {
                     $customer = $sale->customer;
                     $customerPhone = $sale->payment_phone_number ?? $customer->phone ?? null;
                     if ($customerPhone) {

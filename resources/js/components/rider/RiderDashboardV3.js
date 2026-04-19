@@ -23,6 +23,8 @@ import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import NotificationPanel from '../shared/NotificationPanel';
 import Tooltip from '../shared/Tooltip';
+import SidebarToggle from '../shared/SidebarToggle';
+import SidebarSection from '../shared/SidebarSection';
 
 // Haversine distance in km between two GPS points
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -547,7 +549,7 @@ export default function RiderDashboardV3() {
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f3f4f6' }}>
             {/* Sidebar */}
             <div style={{
-                width: sidebarOpen ? '260px' : '60px',
+                width: sidebarOpen ? '260px' : '80px',
                 backgroundColor: '#1f2937',
                 color: '#fff',
                 transition: 'width 0.3s ease',
@@ -562,60 +564,41 @@ export default function RiderDashboardV3() {
                     borderBottom: '1px solid #374151',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: sidebarOpen ? 'space-between' : 'center'
+                    justifyContent: sidebarOpen ? 'flex-start' : 'center',
+                    height: '88px'
                 }}>
-                    {sidebarOpen && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <img
-                                src={getPhotoUrl()}
-                                alt=""
-                                style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }}
-                            />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <img
+                            src={getPhotoUrl()}
+                            alt=""
+                            style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }}
+                        />
+                        {sidebarOpen && (
                             <div>
-                                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{user?.name || 'Rider'}</div>
+                                <div style={{ fontWeight: 700, fontSize: '0.95rem', whiteSpace: 'nowrap' }}>{user?.name || 'Rider'}</div>
                                 <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Rider</div>
                             </div>
-                        </div>
-                    )}
-                    <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="group"
-                        aria-label={sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
-                        title={sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            padding: '0.5rem',
-                            borderRadius: '8px',
-                            transition: 'background 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#374151';
-                            document.getElementById('toggle-icon').dataset.hover = 'true';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = 'transparent';
-                            document.getElementById('toggle-icon').dataset.hover = 'false';
-                        }}
-                    >
-                        <div id="toggle-icon-container" className="relative h-5 w-5 menu-toggle-wrapper">
-                            {/* We can use CSS hover directly on the button to toggle child visibility */}
-                            {sidebarOpen ? (
-                                <>
-                                    <Menu size={20} className="absolute inset-0 transition-opacity duration-200 group-hover:opacity-0" />
-                                    <X size={20} className="absolute inset-0 transition-opacity duration-200 opacity-0 group-hover:opacity-100" />
-                                </>
-                            ) : (
-                                <Menu size={20} />
-                            )}
-                        </div>
-                    </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Navigation */}
-                <nav style={{ padding: '1rem 0' }}>
+                <nav style={{ padding: '1rem 0', display: 'flex', flexDirection: 'column' }}>
+                    <SidebarSection label="Main" isCollapsed={!sidebarOpen} className="pt-0" />
+                    <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: !sidebarOpen ? 'center' : 'flex-end',
+                        padding: !sidebarOpen ? '0.5rem 0' : '0.5rem 1.5rem',
+                        marginBottom: '0.5rem',
+                        marginTop: !sidebarOpen ? '-4px' : '-34px'
+                    }}>
+                        <SidebarToggle 
+                            isCollapsed={!sidebarOpen} 
+                            onToggle={() => setSidebarOpen(!sidebarOpen)} 
+                            size={20}
+                        />
+                    </div>
                     {menuItems.map(item => {
                         const Icon = item.icon;
                         const btn = (
@@ -648,7 +631,7 @@ export default function RiderDashboardV3() {
                             </button>
                         );
                         return !sidebarOpen ? (
-                            <Tooltip key={item.id} label={item.label} position="right" delay={200}>
+                            <Tooltip key={item.id} label={item.label} position="right" delay={200} className="w-full">
                                 {btn}
                             </Tooltip>
                         ) : (
@@ -688,7 +671,7 @@ export default function RiderDashboardV3() {
             </div>
             <div style={{
                 flex: 1,
-                marginLeft: sidebarOpen ? '260px' : '60px',
+                marginLeft: sidebarOpen ? '260px' : '80px',
                 transition: 'margin-left 0.3s ease',
                 padding: '2rem',
                 position: 'relative'

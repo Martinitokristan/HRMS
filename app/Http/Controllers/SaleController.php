@@ -123,7 +123,12 @@ class SaleController extends Controller
                         }
                         
                         \Log::info('Stock deducted for variant', ['variant_id' => $item['product_variant_id'], 'old_stock' => $oldStock, 'quantity' => $item['quantity'], 'new_stock' => $oldStock - $item['quantity']]);
-                        // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
+
+                        // Stock alert checks for variant
+                        $newStock = $oldStock - $item['quantity'];
+                        $threshold = $variantInventory->reorder_threshold ?? 5;
+                        $productName = $product->name . ' (variant)';
+                        static::checkStockAlerts($productName, $newStock, $threshold);
                     }
                 } else {
                     $inv = Inventory::where('product_id', $item['product_id'])->first();
@@ -131,6 +136,10 @@ class SaleController extends Controller
                         $oldStock = $inv->current_stock;
                         $inv->decrement('current_stock', $item['quantity']);
                         \Log::info('Stock deducted for product', ['product_id' => $item['product_id'], 'old_stock' => $oldStock, 'quantity' => $item['quantity'], 'new_stock' => $oldStock - $item['quantity']]);
+
+                        // Stock alert checks for base product
+                        $newStock = $oldStock - $item['quantity'];
+                        static::checkStockAlerts($product->name, $newStock, $inv->reorder_threshold ?? 5);
                     }
                 }
             }
@@ -507,5 +516,28 @@ class SaleController extends Controller
             ],
             'status' => 'success',
         ]);
+    }
+
+    /**
+     * Check stock levels after a sale and notify admins if thresholds are hit.
+     * Respects the low_stock_alerts and out_of_stock_alerts settings.
+     */
+    protected static function checkStockAlerts(string $productName, int $newStock, int $reorderThreshold): void
+    {
+        try {
+            if ($newStock <= 0 && Setting::get('out_of_stock_alerts', '0') === '1') {
+                $admins = \App\Models\User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new \App\Notifications\StockAlert('out_of_stock', $productName, max(0, $newStock), $reorderThreshold));
+                }
+            } elseif ($newStock > 0 && $newStock <= $reorderThreshold && Setting::get('low_stock_alerts', '0') === '1') {
+                $admins = \App\Models\User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new \App\Notifications\StockAlert('low_stock', $productName, $newStock, $reorderThreshold));
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Stock alert notification failed: ' . $e->getMessage());
+        }
     }
 }

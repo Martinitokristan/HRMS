@@ -37,6 +37,13 @@ class GCashPaymentReceived extends Notification
             $cleanBody = substr($cleanBody, $pos);
         }
 
+        // Load items for the toast display
+        $this->sale->loadMissing('items.product');
+        $items = $this->sale->items->map(fn($i) => [
+            'name'     => $i->product->name ?? 'Item',
+            'quantity' => $i->quantity,
+        ])->values()->toArray();
+
         return [
             'type' => 'gcash_payment',
             'title' => '💰 GCash Payment Received!',
@@ -46,6 +53,7 @@ class GCashPaymentReceived extends Notification
             'order_number' => $this->sale->order_number,
             'sale_id' => $this->sale->id,
             'customer_name' => $this->sale->customer->name ?? 'Unknown',
+            'items' => $items,
         ];
     }
 }

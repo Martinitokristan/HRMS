@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Mail, Smartphone, QrCode, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { Plus, Trash2, Smartphone, QrCode, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
 const TABS = [
@@ -200,23 +200,13 @@ export default function Settings() {
                     <div>
                         <div className="mb-6">
                             <h2 className="text-lg font-bold text-foreground">Notification Settings</h2>
-                            <p className="text-sm text-muted-foreground">Control how and when the system sends alerts to admins, customers, and riders</p>
+                            <p className="text-sm text-muted-foreground">Control how and when the system sends alerts to admins and customers</p>
                         </div>
                         <div className="space-y-1 mb-6">
                             <div className="text-[10px] font-bold uppercase tracking-wider text-primary mb-3">Inventory Alerts</div>
                             {[
                                 { k: 'low_stock_alerts', t: 'Low Stock Reorder Alerts', d: 'Notify admin when product stock falls below reorder threshold' },
-                                { k: 'out_of_stock_alerts', t: 'Out of Stock Alerts', d: 'Immediate alert when any product reaches zero stock' }
-                            ].map(item => (
-                                <Card key={item.k} className="p-4 flex items-center justify-between gap-4">
-                                    <div><h5 className="text-sm font-semibold text-foreground">{item.t}</h5><p className="text-[12px] text-muted-foreground">{item.d}</p></div>
-                                    <Switch checked={settings.notifications?.[item.k] === '1'} onCheckedChange={checked => handleChange(item.k, checked ? '1' : '0')} />
-                                </Card>
-                            ))}
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-primary mt-5 mb-3">Delivery Alerts</div>
-                            {[
-                                { k: 'delivery_failed', t: 'Failed Delivery Alert (Admin)', d: 'Notify admin when a delivery attempt fails' },
-                                { k: 'rider_assignment', t: 'New Order Assignment (Rider)', d: 'Push notification to rider when assigned a new delivery' }
+                                { k: 'out_of_stock_alerts', t: 'Out of Stock Alerts', d: 'Immediate alert when any product reaches zero stock after a sale' }
                             ].map(item => (
                                 <Card key={item.k} className="p-4 flex items-center justify-between gap-4">
                                     <div><h5 className="text-sm font-semibold text-foreground">{item.t}</h5><p className="text-[12px] text-muted-foreground">{item.d}</p></div>
@@ -226,7 +216,8 @@ export default function Settings() {
                             <div className="text-[10px] font-bold uppercase tracking-wider text-primary mt-5 mb-3">Order & Return Alerts</div>
                             {[
                                 { k: 'return_approved_notify', t: 'Return Approved Notification (Customer)', d: 'Notify customer via in-app notification when their return request is approved' },
-                                { k: 'gcash_confirmed_sms', t: 'GCash Payment Confirmed SMS (Customer)', d: 'Send SMS to customer when their GCash payment is verified and order is confirmed' }
+                                { k: 'gcash_confirmed_sms', t: 'GCash Payment Confirmed SMS (Customer)', d: 'Send SMS to customer when their GCash payment is verified and order is confirmed' },
+                                { k: 'gcash_payment_toast', t: 'GCash Payment Received Toast (Admin)', d: 'Show a pop-up toast notification on the admin dashboard when a GCash payment is received' }
                             ].map(item => (
                                 <Card key={item.k} className="p-4 flex items-center justify-between gap-4">
                                     <div><h5 className="text-sm font-semibold text-foreground">{item.t}</h5><p className="text-[12px] text-muted-foreground">{item.d}</p></div>
@@ -234,29 +225,16 @@ export default function Settings() {
                                 </Card>
                             ))}
                         </div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Notification Channels</div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Card className="p-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h5 className="text-sm font-semibold text-foreground flex items-center gap-2"><Mail className="h-4 w-4" /> Email</h5>
-                                    <Switch checked={settings.notifications?.email_enabled === '1'} onCheckedChange={checked => handleChange('email_enabled', checked ? '1' : '0')} />
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">SMS Channel</div>
+                        <Card className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h5 className="text-sm font-semibold text-foreground flex items-center gap-2"><Smartphone className="h-4 w-4" /> SMS Notifications</h5>
+                                    <p className="text-[12px] text-muted-foreground mt-0.5">Master toggle — when disabled, no SMS messages will be sent by the system (GCash confirmation, expiry reminders, etc.)</p>
                                 </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[12px]">Admin Email</Label>
-                                    <Input type="email" placeholder="admin@hrms.com" value={settings.notifications?.admin_email || ''} onChange={e => handleChange('admin_email', e.target.value)} />
-                                </div>
-                            </Card>
-                            <Card className="p-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h5 className="text-sm font-semibold text-foreground flex items-center gap-2"><Smartphone className="h-4 w-4" /> SMS</h5>
-                                    <Switch checked={settings.notifications?.sms_enabled === '1'} onCheckedChange={checked => handleChange('sms_enabled', checked ? '1' : '0')} />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-[12px]">Admin Mobile</Label>
-                                    <Input type="text" placeholder="+63 917 123 4567" value={settings.notifications?.admin_mobile || ''} onChange={e => handleChange('admin_mobile', e.target.value)} />
-                                </div>
-                            </Card>
-                        </div>
+                                <Switch checked={settings.notifications?.sms_enabled === '1'} onCheckedChange={checked => handleChange('sms_enabled', checked ? '1' : '0')} />
+                            </div>
+                        </Card>
                         <div className="flex justify-end pt-4 border-t border-border mt-6">
                             <Button onClick={handleSaveSettings} disabled={saving}>Save Preferences</Button>
                         </div>
@@ -392,9 +370,7 @@ export default function Settings() {
                         </div>
                         <div className="space-y-1 mb-6">
                             {[
-                                { k: 'suspicious_login', t: 'Flag Suspicious Logins', d: 'Notify admin when login from new device occur' },
-                                { k: 'two_factor', t: 'Enforce Two-Factor Authentication', d: 'Require 2FA for all administrative accounts' },
-                                { k: 'auto_logout', t: 'Auto Logout on Inactivity', d: 'Automatically sign out users after timeout period' }
+                                { k: 'two_factor', t: 'Enforce Two-Factor Authentication', d: 'Require 2FA for all administrative accounts' }
                             ].map(item => (
                                 <Card key={item.k} className="p-4 flex items-center justify-between gap-4">
                                     <div><h5 className="text-sm font-semibold text-foreground">{item.t}</h5><p className="text-[12px] text-muted-foreground">{item.d}</p></div>

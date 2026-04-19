@@ -19,7 +19,6 @@ import {
     RefreshCcw,
     Clock,
     Check,
-    ChevronDown,
 } from "lucide-react";
 import BarChart from "../shared/BarChart";
 import {
@@ -42,7 +41,6 @@ export default function Dashboard() {
     });
     const { stats, chartDataRaw } = dashboardData;
 
-    const [period, setPeriod] = useState("year");
     const [loading, setLoading] = useState(!stats);
 
     const [yearlyCategories, setYearlyCategories] = useState([]);
@@ -51,9 +49,9 @@ export default function Dashboard() {
     const [activityLoading, setActivityLoading] = useState(false);
 
     const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1;
     const [selectedYear, setSelectedYear] = useState(currentYear);
-    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+    const [selectedMonth, setSelectedMonth] = useState("all");
+    const derivedPeriod = selectedMonth === "all" ? "year" : "month";
     
     const years = useMemo(() => {
         let y = [];
@@ -64,18 +62,19 @@ export default function Dashboard() {
     }, [currentYear]);
 
     const months = [
-        { value: 1, label: "January" },
-        { value: 2, label: "February" },
-        { value: 3, label: "March" },
-        { value: 4, label: "April" },
-        { value: 5, label: "May" },
-        { value: 6, label: "June" },
-        { value: 7, label: "July" },
-        { value: 8, label: "August" },
-        { value: 9, label: "September" },
-        { value: 10, label: "October" },
-        { value: 11, label: "November" },
-        { value: 12, label: "December" },
+        { value: "all", label: "All Months" },
+        { value: "1", label: "January" },
+        { value: "2", label: "February" },
+        { value: "3", label: "March" },
+        { value: "4", label: "April" },
+        { value: "5", label: "May" },
+        { value: "6", label: "June" },
+        { value: "7", label: "July" },
+        { value: "8", label: "August" },
+        { value: "9", label: "September" },
+        { value: "10", label: "October" },
+        { value: "11", label: "November" },
+        { value: "12", label: "December" },
     ];
 
 
@@ -87,9 +86,9 @@ export default function Dashboard() {
                 api.get("/sales/summary"),
                 api.get("/reports/sales", { 
                     params: { 
-                        period: period,
-                        year: (period === 'year' || period === 'month') ? selectedYear : undefined,
-                        month: period === 'month' ? selectedMonth : undefined
+                        period: derivedPeriod,
+                        year: selectedYear,
+                        month: selectedMonth !== "all" ? selectedMonth : undefined
                     } 
                 }),
             ]);
@@ -148,7 +147,7 @@ export default function Dashboard() {
             clearTimeout(debounce);
             isMounted = false;
         };
-    }, [period, selectedYear, selectedMonth, refreshTrigger]);
+    }, [selectedYear, selectedMonth, refreshTrigger]);
 
     useEffect(() => {
         fetchYearlyCategories();
@@ -169,7 +168,7 @@ export default function Dashboard() {
             let label = d.date?.split("-").pop();
             // If it's a monthly view, we want the day number (01, 02...)
             // If it's a yearly view, we want the month name (Jan, Feb...)
-            if (period === "year") {
+            if (derivedPeriod === "year") {
                 const date = new Date(d.date);
                 label = date.toLocaleString("default", { month: "short" });
             }
@@ -179,7 +178,7 @@ export default function Dashboard() {
                 fullDate: d.date,
             };
         });
-    }, [chartDataRaw, period]);
+    }, [chartDataRaw, derivedPeriod]);
 
     const maxOrders = useMemo(
         () => Math.max(...chartData.map((d) => d.value), 5),
@@ -277,14 +276,9 @@ export default function Dashboard() {
                             <div className="flex gap-1 rounded-xl bg-secondary/30 p-1 border border-border/40 backdrop-blur-sm">
                                 <div className="flex gap-2 items-center">
                                     <Select
-                                        value={period === 'month' ? String(selectedMonth) : "all"}
+                                        value={selectedMonth}
                                         onValueChange={(val) => {
-                                            if (val === "all") {
-                                                setPeriod('year');
-                                            } else {
-                                                setSelectedMonth(Number(val));
-                                                setPeriod('month');
-                                            }
+                                            setSelectedMonth(val);
                                         }}
                                     >
                                         <SelectTrigger
@@ -294,12 +288,9 @@ export default function Dashboard() {
                                         >
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent position="popper" side="bottom" sideOffset={10} align="end" className="rounded-xl border-border/50 z-[101]">
-                                            <SelectItem value="all" className="text-[10px] font-bold text-slate-900">
-                                                All Months
-                                            </SelectItem>
+                                        <SelectContent position="popper" side="bottom" sideOffset={10} align="end" className="rounded-xl border-border/50 z-[101] max-h-[250px] overflow-y-auto">
                                             {months.map(m => (
-                                                <SelectItem key={m.value} value={String(m.value)} className="text-[10px] font-bold">
+                                                <SelectItem key={m.value} value={m.value} className="text-[10px] font-bold">
                                                     {m.label}
                                                 </SelectItem>
                                             ))}
@@ -338,7 +329,8 @@ export default function Dashboard() {
                             formatValue={(v) => `${v} Orders`}
                             title=""
                             hideHeader={true}
-                            color="#3b82f6" // Professional Blue
+                            color="#3b82f6"
+                            monthLabel={selectedMonth !== "all" ? months.find(m => m.value === selectedMonth)?.label : ""}
                         />
                     </div>
                 </Card>

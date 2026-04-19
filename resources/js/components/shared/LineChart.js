@@ -9,6 +9,7 @@ const LineChart = ({
     totalValueLabel = "Total",
     color = "#3b82f6",
     hideHeader: hideHeaderProp = false,
+    monthLabel = "",
 }) => {
     const [hoveredPoint, setHoveredPoint] = useState(null);
     const hideHeader = hideHeaderProp || !title;
@@ -94,7 +95,7 @@ const LineChart = ({
     const gradientId = `gradient-${color.replace(/[^a-zA-Z0-9]/g, "")}-${Date.now()}`;
 
     const isDaily = points.length > 20 && points.length <= 31;
-    const xAxisLabelText = isDaily ? "DAY" : "MONTH";
+    const xAxisLabelText = isDaily ? (monthLabel || "DAY") : "MONTH";
     const yAxisLabelText = "REVENUE";
 
     return (
@@ -157,7 +158,7 @@ const LineChart = ({
                         }}
                     >
                         <span style={{ color: "#94a3b8", fontSize: "9px", textTransform: "uppercase" }}>
-                            {isDaily ? `Day ${hoveredPoint.label}` : hoveredPoint.label}
+                            {isDaily ? `${monthLabel || 'Day'} ${hoveredPoint.label}` : hoveredPoint.label}
                         </span>
                         <span>{formatValue(hoveredPoint.value)}</span>
                     </div>

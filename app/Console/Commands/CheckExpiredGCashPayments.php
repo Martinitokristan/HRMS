@@ -15,6 +15,11 @@ class CheckExpiredGCashPayments extends Command
 
     public function handle(): void
     {
+        // Respect the SMS master toggle
+        if (\App\Models\Setting::get('sms_enabled', '0') !== '1') {
+            return;
+        }
+
         $expiredOrders = Sale::where('status', 'pending_payment')
             ->where('payment_method', 'gcash')
             ->whereNull('payment_expiry_sms_sent_at')

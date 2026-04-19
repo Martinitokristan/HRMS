@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * Tooltip — A lightweight, accessible tooltip component.
@@ -22,7 +23,7 @@ export default function Tooltip({
     offset = 6,
 }) {
     const [visible, setVisible] = useState(false);
-    const [adjustedPos, setAdjustedPos] = useState(position);
+    const [coords, setCoords] = useState(null);
     const timerRef = useRef(null);
     const triggerRef = useRef(null);
     const tooltipRef = useRef(null);
@@ -34,10 +35,10 @@ export default function Tooltip({
     const hide = useCallback(() => {
         clearTimeout(timerRef.current);
         setVisible(false);
+        setCoords(null);
     }, []);
 
-    // Adjust position if tooltip would clip viewport
-    useEffect(() => {
+    const updatePosition = useCallback(() => {
         if (!visible || !triggerRef.current || !tooltipRef.current) return;
 
         const triggerRect = triggerRef.current.getBoundingClientRect();
@@ -47,50 +48,63 @@ export default function Tooltip({
 
         let best = position;
 
-        if (position === 'top' && triggerRect.top - tipRect.height - offset < 0) {
+        if (best === 'top' && triggerRect.top - tipRect.height - offset < 0) {
             best = 'bottom';
-        } else if (position === 'bottom' && triggerRect.bottom + tipRect.height + offset > vh) {
+        } else if (best === 'bottom' && triggerRect.bottom + tipRect.height + offset > vh) {
             best = 'top';
-        } else if (position === 'left' && triggerRect.left - tipRect.width - offset < 0) {
+        } else if (best === 'left' && triggerRect.left - tipRect.width - offset < 0) {
             best = 'right';
-        } else if (position === 'right' && triggerRect.right + tipRect.width + offset > vw) {
+        } else if (best === 'right' && triggerRect.right + tipRect.width + offset > vw) {
             best = 'left';
         }
 
-        setAdjustedPos(best);
-    }, [visible, position, offset]);
+        let top = 0;
+        let left = 0;
+
+        switch (best) {
+            case 'top':
+                top = triggerRect.top - tipRect.height - offset;
+                left = triggerRect.left + (triggerRect.width / 2) - (tipRect.width / 2);
+                break;
+            case 'bottom':
+                top = triggerRect.bottom + offset;
+                left = triggerRect.left + (triggerRect.width / 2) - (tipRect.width / 2);
+                break;
+            case 'left':
+                top = triggerRect.top + (triggerRect.height / 2) - (tipRect.height / 2);
+                left = triggerRect.left - tipRect.width - offset;
+                break;
+            case 'right':
+                top = triggerRect.top + (triggerRect.height / 2) - (tipRect.height / 2);
+                left = triggerRect.right + offset;
+                break;
+        }
+
+        // Bounds checks
+        if (left < offset) left = offset;
+        if (left + tipRect.width + offset > vw) left = vw - tipRect.width - offset;
+        if (top < offset) top = offset;
+        if (top + tipRect.height + offset > vh) top = vh - tipRect.height - offset;
+
+        setCoords({ top, left });
+    }, [position, offset, visible]);
+
+    useEffect(() => {
+        if (visible) {
+            updatePosition();
+            window.addEventListener('scroll', updatePosition, true);
+            window.addEventListener('resize', updatePosition);
+            return () => {
+                window.removeEventListener('scroll', updatePosition, true);
+                window.removeEventListener('resize', updatePosition);
+            };
+        }
+    }, [visible, updatePosition]);
 
     // Clean up timer on unmount
     useEffect(() => () => clearTimeout(timerRef.current), []);
 
     if (disabled || !label) return <>{children}</>;
-
-    const positionStyles = {
-        top: {
-            bottom: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginBottom: `${offset}px`,
-        },
-        bottom: {
-            top: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginTop: `${offset}px`,
-        },
-        left: {
-            right: '100%',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            marginRight: `${offset}px`,
-        },
-        right: {
-            left: '100%',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            marginLeft: `${offset}px`,
-        },
-    };
 
     return (
         <div
@@ -102,14 +116,15 @@ export default function Tooltip({
             onBlur={hide}
         >
             {children}
-            {visible && (
+            {visible && createPortal(
                 <div
                     ref={tooltipRef}
                     role="tooltip"
                     style={{
-                        position: 'absolute',
-                        ...positionStyles[adjustedPos],
-                        zIndex: 9999,
+                        position: 'fixed',
+                        top: coords ? `${coords.top}px` : '-9999px',
+                        left: coords ? `${coords.left}px` : '-9999px',
+                        zIndex: 999999,
                         pointerEvents: 'none',
                         whiteSpace: 'nowrap',
                         backgroundColor: '#1a1a1a',
@@ -121,10 +136,13 @@ export default function Tooltip({
                         lineHeight: 1.3,
                         boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
                         letterSpacing: '0.01em',
+                        opacity: coords ? 1 : 0,
+                        transition: 'opacity 0.15s ease-in-out'
                     }}
                 >
                     {label}
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
