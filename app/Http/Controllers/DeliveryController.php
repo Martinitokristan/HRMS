@@ -42,7 +42,7 @@ class DeliveryController extends Controller
             });
         }
 
-        $deliveries = $query->latest()->paginate($request->get('per_page', 15));
+        $deliveries = $query->latest()->paginate($request->get('per_page', 20));
 
         $today = now()->toDateString();
         $stats = [

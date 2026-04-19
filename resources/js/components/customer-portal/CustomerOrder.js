@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, AlertTriangle, Navigation, Loader2, Download, Smartphone } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, Navigation, Loader2, Download, Smartphone } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
 import { STALE_KEYS, markStale } from "../../store/dataStore";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
@@ -101,6 +101,7 @@ export default function CustomerOrder() {
     const [orderSuccess, setOrderSuccess] = useState(false);
     const [checkoutPosition, setCheckoutPosition] = useState([7.0707, 125.608]);
     const [gpsLoading, setGpsLoading] = useState(false);
+    const [editingAddress, setEditingAddress] = useState(false);
 
     // GCash State
     const [gcashModal, setGcashModal] = useState(false);
@@ -343,24 +344,37 @@ export default function CustomerOrder() {
 
     // Invoice/Confirmation Step
     if (step === 2) {
-        const hasLocation =
-            customerProfile?.latitude && customerProfile?.longitude;
 
         return (
             <div className="min-h-screen bg-secondary/30 py-8 px-4">
                 <div className="max-w-4xl mx-auto">
                     <Card className="p-6 sm:p-8">
-                        <h2 className="text-2xl font-bold text-foreground mb-4">📄 Order Invoice & Confirmation</h2>
-                        {/* Progress */}
-                        <div className="flex items-center justify-center gap-4 mb-8">
-                            <div className="flex items-center gap-2 opacity-60">
-                                <div className="h-8 w-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">✓</div>
-                                <span className="text-sm">Review Items</span>
-                            </div>
-                            <div className="h-px w-12 bg-border" />
-                            <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">2</div>
-                                <span className="text-sm font-bold">Confirm & Pay</span>
+                        <h2 className="text-2xl font-bold text-foreground mb-6">📄 Order Invoice & Confirmation</h2>
+                        {/* Progress Stepper */}
+                        <div className="mb-10">
+                            <div className="flex items-center justify-between relative">
+                                {/* Connecting line (background) */}
+                                <div className="absolute top-5 left-[16%] right-[16%] h-[3px] bg-gray-200 rounded-full z-0" />
+                                {/* Connecting line (active fill) */}
+                                <div className="absolute top-5 left-[16%] h-[3px] bg-green-500 rounded-full z-[1] transition-all duration-700" style={{ width: '34%' }} />
+
+                                {/* Step 1: Review Items - COMPLETED */}
+                                <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                    <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-green-500/30">✓</div>
+                                    <span className="text-xs font-bold text-green-700 mt-2">Review Items</span>
+                                </div>
+
+                                {/* Step 2: Confirm & Pay - ACTIVE */}
+                                <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-black ring-4 ring-primary/20 shadow-lg shadow-primary/30 animate-pulse">2</div>
+                                    <span className="text-xs font-black text-primary mt-2">Confirm & Pay</span>
+                                </div>
+
+                                {/* Step 3: Done - INACTIVE */}
+                                <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                    <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold">3</div>
+                                    <span className="text-xs font-medium text-muted-foreground mt-2">Done</span>
+                                </div>
                             </div>
                         </div>
 
@@ -369,8 +383,8 @@ export default function CustomerOrder() {
                             <Card className="p-6">
                                 <div className="flex justify-between items-start mb-6 pb-4 border-b border-border">
                                     <div>
-                                        <h3 className="text-2xl font-bold text-foreground mb-1">INVOICE</h3>
-                                        <div className="text-sm text-muted-foreground">HRMS Hardware Store</div>
+                                        <h3 className="text-3xl font-black text-foreground mb-1 tracking-tight">INVOICE</h3>
+                                        <div className="text-base text-muted-foreground">HRMS Hardware Store</div>
                                     </div>
                                     <div className="text-right">
                                         <div className="text-sm text-muted-foreground">Date</div>
@@ -379,10 +393,10 @@ export default function CustomerOrder() {
                                 </div>
 
                                 <div className="mb-4">
-                                    <div className="text-sm text-muted-foreground mb-1">Bill To:</div>
-                                    <div className="font-semibold">{user?.name}</div>
-                                    <div className="text-sm text-muted-foreground">{user?.email}</div>
-                                    <div className="text-sm text-muted-foreground">{user?.phone}</div>
+                                    <div className="text-base text-muted-foreground mb-1">Bill To:</div>
+                                    <div className="text-lg font-bold">{user?.name}</div>
+                                    <div className="text-base text-muted-foreground">{user?.email}</div>
+                                    <div className="text-base text-muted-foreground">{user?.phone}</div>
                                 </div>
 
                                 <div className="mb-4">
@@ -407,30 +421,28 @@ export default function CustomerOrder() {
                                                 ) : <Package className="h-6 w-6 opacity-30 text-muted-foreground" />}
                                             </div>
                                             <div className="flex-1">
-                                                <span className="font-semibold">{item.qty}x</span> {item.name}
-                                                {item.brand?.name && <div className="text-xs font-semibold text-orange-500 mt-0.5">{item.brand.name}</div>}
-                                                {item.variantString && <div className="text-sm text-muted-foreground mt-0.5">[{item.variantString}]</div>}
+                                                <span className="font-extrabold text-base">{item.qty}x</span> <span className="text-base font-semibold">{item.name}</span>
+                                                {item.brand?.name && <div className="text-sm font-bold text-orange-600 mt-0.5">{item.brand.name}</div>}
+                                                {item.variantString && <div className="text-sm text-muted-foreground mt-0.5 font-medium">[{item.variantString}]</div>}
                                             </div>
-                                            <div className="font-semibold text-right whitespace-nowrap">₱{(item.sell_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                            <div className="font-bold text-base text-right whitespace-nowrap">₱{(item.sell_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                         </div>
                                     ))}
                                 </div>
 
                                 <div className="border-t border-border pt-4 mt-4 space-y-2">
-                                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span>₱{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
-                                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">VAT (12%)</span><span>₱{(total * 0.12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
-                                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Shipping</span><span className="text-green-600 font-semibold">FREE</span></div>
-                                    <div className="flex justify-between font-bold text-xl pt-3 mt-2 border-t-2 border-border">
-                                        <span>Total Amount</span>
+                                    <div className="flex justify-between text-base font-medium py-1"><span className="text-muted-foreground">Subtotal</span><span>₱{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+                                    <div className="flex justify-between text-base font-black text-xl pt-4 mt-3 border-t-2 border-border">
+                                        <span>Total</span>
                                         <span className="text-primary">₱{(total * 1.12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                 </div>
                             </Card>
 
-                            {/* LOCATION CONFIRMATION */}
+                            {/* LOCATION & ADDRESS CONFIRMATION */}
                             <div className="space-y-4">
                                 <div className="flex justify-between items-end mb-2">
-                                    <h3 className="font-bold text-foreground flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Delivery Location</h3>
+                                    <h3 className="font-bold text-base text-foreground flex items-center gap-2"><MapPin className="h-5 w-5 text-primary" /> Delivery Location</h3>
                                     <Button
                                         variant="outline"
                                         size="sm"
@@ -446,12 +458,6 @@ export default function CustomerOrder() {
                                 <p className="text-xs text-muted-foreground italic -mt-2">
                                     The pin below is your default home. If you want this delivered elsewhere today (like work), click "Use Current GPS" or drag the pin.
                                 </p>
-
-                                {!hasLocation && (
-                                    <Card className="bg-amber-50 border-amber-200 p-3">
-                                        <p className="text-sm text-amber-800 flex items-start gap-2"><AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" /><span><strong>No saved location:</strong> Pin is set to a default position. Use "Use Current GPS" or drag the pin to set your delivery location.</span></p>
-                                    </Card>
-                                )}
 
                                 <div className="h-[240px] rounded-xl overflow-hidden border-2 border-primary/20 cursor-crosshair relative shadow-inner">
                                     <MapContainer center={checkoutPosition} zoom={16} maxZoom={20} style={{ height: "100%", width: "100%" }}>
@@ -469,35 +475,25 @@ export default function CustomerOrder() {
                                     </MapContainer>
                                 </div>
 
-                                <Card className="bg-amber-50 border-amber-200 p-3">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <MapPin className="h-4 w-4 text-amber-600" />
-                                        <span className="font-semibold text-sm text-amber-800">Your Checkout Location</span>
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                        {checkoutPosition[0].toFixed(6)}, {checkoutPosition[1].toFixed(6)}
-                                    </div>
-                                </Card>
-
                                 <Card className="bg-blue-50 border-blue-200 p-3">
-                                    <p className="text-sm text-blue-800 flex items-start gap-2"><MapPin className="h-4 w-4 shrink-0 mt-0.5 text-blue-600" /><span><strong>Delivery Confirmation:</strong><br />Your order will be delivered to the location shown above. Please ensure this is correct before placing your order.</span></p>
+                                    <p className="text-base text-blue-800 flex items-start gap-2"><MapPin className="h-5 w-5 shrink-0 mt-0.5 text-blue-600" /><span><strong>Delivery Confirmation:</strong><br />Your order will be delivered to the location shown above. Please ensure this is correct before placing your order.</span></p>
                                 </Card>
 
                                 {/* PAYMENT METHOD */}
                                 <div className="space-y-3 mb-6">
-                                    <Label className="text-sm font-semibold">Payment Method:</Label>
+                                    <Label className="text-base font-bold">Payment Method:</Label>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div
                                             className={`border rounded-lg p-3 cursor-pointer transition-all ${payment === "cod" ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-1" : "border-border hover:bg-secondary/50"}`}
                                             onClick={() => setPayment("cod")}
                                         >
-                                            <div className="flex items-center gap-2 font-semibold">
+                                            <div className="flex items-center gap-2 font-bold text-base">
                                                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${payment === "cod" ? "border-primary" : "border-muted-foreground"}`}>
                                                     {payment === "cod" && <div className="w-2 h-2 rounded-full bg-primary" />}
                                                 </div>
                                                 💵 Cash on Delivery
                                             </div>
-                                            <div className="text-xs text-muted-foreground mt-1 ml-6">Pay when your order arrives</div>
+                                            <div className="text-sm text-muted-foreground mt-1 ml-6">Pay when your order arrives</div>
                                         </div>
 
                                         {gcashEnabled ? (
@@ -505,17 +501,17 @@ export default function CustomerOrder() {
                                             className={`border rounded-lg p-3 cursor-pointer transition-all ${payment === "gcash" ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500 ring-offset-1" : "border-border hover:bg-secondary/50"}`}
                                             onClick={() => setPayment("gcash")}
                                         >
-                                            <div className="flex items-center gap-2 font-semibold text-blue-700 dark:text-blue-400">
+                                            <div className="flex items-center gap-2 font-semibold text-sm text-blue-700 dark:text-blue-400">
                                                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${payment === "gcash" ? "border-blue-500" : "border-muted-foreground"}`}>
                                                     {payment === "gcash" && <div className="w-2 h-2 rounded-full bg-blue-500" />}
                                                 </div>
                                                 📱 GCash
                                             </div>
-                                            <div className="text-xs text-muted-foreground mt-1 ml-6">Pay via QR code with reference verification</div>
+                                            <div className="text-sm text-muted-foreground mt-1 ml-6">Pay via QR code with reference verification</div>
                                         </div>
                                         ) : (
                                         <div className="border rounded-lg p-3 opacity-40 cursor-not-allowed border-border bg-secondary/30">
-                                            <div className="flex items-center gap-2 font-semibold text-muted-foreground">
+                                            <div className="flex items-center gap-2 font-semibold text-sm text-muted-foreground">
                                                 📱 GCash
                                             </div>
                                             <div className="text-xs text-muted-foreground mt-1">GCash not available at the moment</div>
@@ -525,10 +521,10 @@ export default function CustomerOrder() {
 
                                     {payment === "gcash" && (
                                         <div className="mt-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
-                                            <Label className="text-sm font-semibold text-blue-900 mb-1.5 block flex items-center gap-2">
-                                                <Smartphone className="h-4 w-4" /> GCash Number Used to Pay
+                                            <Label className="text-base font-bold text-blue-900 mb-1.5 block flex items-center gap-2">
+                                                <Smartphone className="h-5 w-5" /> GCash Number Used to Pay
                                             </Label>
-                                            <p className="text-xs text-blue-700/80 mb-3 italic">
+                                            <p className="text-sm text-blue-700/80 mb-3 italic">
                                                 Please confirm the exact GCash number you will use to send the payment. This is required to verify your transaction automatically.
                                             </p>
                                             <Input
@@ -541,78 +537,102 @@ export default function CustomerOrder() {
                                     )}
                                 </div>
 
+                                {/* DELIVERY ADDRESS - Show registered address with Edit button */}
                                 <div className="space-y-3">
-                                    <Label className="text-sm font-semibold">Confirm or Edit Delivery Address:</Label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs font-medium text-muted-foreground">Province *</Label>
-                                            <Select
-                                                value={deliveryProvinceCode}
-                                                onValueChange={code => {
-                                                    const found = dpProvinces.find(p => p.code === code);
-                                                    setDeliveryProvinceCode(code);
-                                                    setDeliveryProvince(found ? found.name : '');
-                                                    setDeliveryCityCode('');
-                                                    setDeliveryMunicipality('');
-                                                    setDeliveryBarangay('');
-                                                }}
-                                                disabled={dpLoadingProvinces}
-                                            >
-                                                <SelectTrigger className="h-10">
-                                                    <SelectValue placeholder={dpLoadingProvinces ? 'Loading…' : 'Select Province'} />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
-                                                    {dpProvinces.map(p => <SelectItem key={p.code} value={p.code}>{p.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs font-medium text-muted-foreground">Municipality / City *</Label>
-                                            <Select
-                                                value={deliveryCityCode}
-                                                onValueChange={code => {
-                                                    const found = dpCities.find(c => c.code === code);
-                                                    setDeliveryCityCode(code);
-                                                    setDeliveryMunicipality(found ? found.name : '');
-                                                    setDeliveryBarangay('');
-                                                }}
-                                                disabled={!deliveryProvinceCode || dpLoadingCities}
-                                            >
-                                                <SelectTrigger className="h-10">
-                                                    <SelectValue placeholder={!deliveryProvinceCode ? 'Select Province first' : dpLoadingCities ? 'Loading…' : 'Select Municipality / City'} />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
-                                                    {dpCities.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-1.5 sm:col-span-2">
-                                            <Label className="text-xs font-medium text-muted-foreground">Barangay</Label>
-                                            <Select
-                                                value={deliveryBarangay}
-                                                onValueChange={setDeliveryBarangay}
-                                                disabled={!deliveryCityCode || dpLoadingBarangays}
-                                            >
-                                                <SelectTrigger className="h-10">
-                                                    <SelectValue placeholder={!deliveryCityCode ? 'Select Municipality first' : dpLoadingBarangays ? 'Loading…' : 'Select Barangay'} />
-                                                </SelectTrigger>
-                                                <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
-                                                    {dpBarangays.map(b => <SelectItem key={b.code} value={b.name}>{b.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-base font-bold">Delivery Address:</Label>
+                                        {!editingAddress && (
+                                            <Button variant="outline" size="sm" className="h-7 text-xs gap-1 px-2.5" onClick={() => setEditingAddress(true)}>
+                                                <Pencil className="h-3 w-3" /> Edit Address
+                                            </Button>
+                                        )}
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs font-medium text-muted-foreground">House No. / Street / Purok *</Label>
-                                        <Input value={deliveryStreet} onChange={e => setDeliveryStreet(e.target.value)} placeholder="e.g. 123 Rizal St., Purok 4" required />
-                                    </div>
+
+                                    {!editingAddress ? (
+                                        <Card className="p-4 bg-secondary/30 border-border">
+                                            <div className="text-base text-foreground leading-relaxed font-medium">
+                                                {[deliveryStreet, deliveryBarangay, deliveryMunicipality, deliveryProvince].filter(Boolean).join(', ') || (
+                                                    <span className="text-muted-foreground italic">No address set — click "Edit Address" to add one</span>
+                                                )}
+                                            </div>
+                                        </Card>
+                                    ) : (
+                                        <>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-base font-bold text-foreground">Province</Label>
+                                                    <Select
+                                                        value={deliveryProvinceCode}
+                                                        onValueChange={code => {
+                                                            const found = dpProvinces.find(p => p.code === code);
+                                                            setDeliveryProvinceCode(code);
+                                                            setDeliveryProvince(found ? found.name : '');
+                                                            setDeliveryCityCode('');
+                                                            setDeliveryMunicipality('');
+                                                            setDeliveryBarangay('');
+                                                        }}
+                                                        disabled={dpLoadingProvinces}
+                                                    >
+                                                        <SelectTrigger className="h-10">
+                                                            <SelectValue placeholder={dpLoadingProvinces ? 'Loading…' : 'Select Province'} />
+                                                        </SelectTrigger>
+                                                        <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
+                                                            {dpProvinces.map(p => <SelectItem key={p.code} value={p.code}>{p.name}</SelectItem>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <Label className="text-base font-bold text-foreground">Municipality / City *</Label>
+                                                    <Select
+                                                        value={deliveryCityCode}
+                                                        onValueChange={code => {
+                                                            const found = dpCities.find(c => c.code === code);
+                                                            setDeliveryCityCode(code);
+                                                            setDeliveryMunicipality(found ? found.name : '');
+                                                            setDeliveryBarangay('');
+                                                        }}
+                                                        disabled={!deliveryProvinceCode || dpLoadingCities}
+                                                    >
+                                                        <SelectTrigger className="h-10">
+                                                            <SelectValue placeholder={!deliveryProvinceCode ? 'Select Province first' : dpLoadingCities ? 'Loading…' : 'Select Municipality / City'} />
+                                                        </SelectTrigger>
+                                                        <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
+                                                            {dpCities.map(c => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-1.5 sm:col-span-2">
+                                                    <Label className="text-base font-bold text-foreground">Barangay</Label>
+                                                    <Select
+                                                        value={deliveryBarangay}
+                                                        onValueChange={setDeliveryBarangay}
+                                                        disabled={!deliveryCityCode || dpLoadingBarangays}
+                                                    >
+                                                        <SelectTrigger className="h-10">
+                                                            <SelectValue placeholder={!deliveryCityCode ? 'Select Municipality first' : dpLoadingBarangays ? 'Loading…' : 'Select Barangay'} />
+                                                        </SelectTrigger>
+                                                        <SelectContent position="popper" side="bottom" sideOffset={4} avoidCollisions={false} className="max-h-64 overflow-y-auto">
+                                                            {dpBarangays.map(b => <SelectItem key={b.code} value={b.name}>{b.name}</SelectItem>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <Label className="text-base font-bold text-foreground">House No. / Purok / Street</Label>
+                                                <Input value={deliveryStreet} onChange={e => setDeliveryStreet(e.target.value)} placeholder="e.g. 123 Rizal St., Purok 4" required />
+                                            </div>
+                                            <Button variant="secondary" size="sm" className="mt-2 text-xs" onClick={() => setEditingAddress(false)}>
+                                                Done Editing
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
 
                                 <div className="flex gap-3">
                                     <Button variant="outline" className="flex-1 gap-1" onClick={() => setStep(1)} disabled={loading}>
                                         <ArrowLeft className="h-4 w-4" /> Back
                                     </Button>
-                                    <Button className="flex-1 gap-1" onClick={handleCheckout} disabled={loading}>
+                                    <Button className="flex-1 h-12 text-lg font-black gap-1" onClick={handleCheckout} disabled={loading}>
                                         {loading ? "Processing..." : "Place Order"}
                                     </Button>
                                 </div>
@@ -637,6 +657,25 @@ export default function CustomerOrder() {
                     hideFooter
                 >
                     <div className="py-10 px-4 text-center">
+                        {/* Completed Progress Stepper */}
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between relative">
+                                <div className="absolute top-5 left-[16%] right-[16%] h-[3px] bg-green-500 rounded-full z-0" />
+                                <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                    <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-green-500/30">✓</div>
+                                    <span className="text-xs font-bold text-green-700 mt-2">Review Items</span>
+                                </div>
+                                <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                    <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-green-500/30">✓</div>
+                                    <span className="text-xs font-bold text-green-700 mt-2">Confirm & Pay</span>
+                                </div>
+                                <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                    <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-green-500/30">✓</div>
+                                    <span className="text-xs font-bold text-green-700 mt-2">Done</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="w-24 h-24 bg-green-50 rounded-[35%] flex items-center justify-center mx-auto mb-6 rotate-[10deg] shadow-lg shadow-green-500/15">
                             <CheckCircle2 className="h-12 w-12 text-green-500" />
                         </div>
@@ -749,25 +788,40 @@ export default function CustomerOrder() {
         <div className="min-h-screen bg-secondary/30 py-8 px-4">
             <div className="max-w-xl mx-auto">
                 <Card className="p-6 sm:p-8">
-                    <h2 className="text-2xl font-bold text-foreground mb-4">Checkout</h2>
-                    {/* Progress */}
-                    <div className="flex items-center justify-center gap-4 mb-8">
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">1</div>
-                            <span className="text-sm font-semibold">Review Items</span>
-                        </div>
-                        <div className="h-px w-12 bg-border" />
-                        <div className="flex items-center gap-2 opacity-50">
-                            <div className="h-8 w-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center text-sm font-bold border border-border">2</div>
-                            <span className="text-sm">Confirm & Pay</span>
+                    <h2 className="text-3xl font-black text-foreground mb-4 tracking-tight">Checkout</h2>
+                    {/* Progress Stepper */}
+                    <div className="mb-10">
+                        <div className="flex items-center justify-between relative">
+                            {/* Connecting line (background) */}
+                            <div className="absolute top-5 left-[16%] right-[16%] h-[3px] bg-gray-200 rounded-full z-0" />
+                            {/* Connecting line (active fill) */}
+                            <div className="absolute top-5 left-[16%] h-[3px] bg-green-500 rounded-full z-[1] transition-all duration-700" style={{ width: '0%' }} />
+
+                            {/* Step 1: Review Items - ACTIVE */}
+                            <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-black ring-4 ring-primary/20 shadow-lg shadow-primary/30">1</div>
+                                <span className="text-xs font-black text-primary mt-2">Review Items</span>
+                            </div>
+
+                            {/* Step 2: Confirm & Pay - INACTIVE */}
+                            <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold">2</div>
+                                <span className="text-xs font-medium text-muted-foreground mt-2">Confirm & Pay</span>
+                            </div>
+
+                            {/* Step 3: Done - INACTIVE */}
+                            <div className="relative z-[2] flex flex-col items-center w-1/3">
+                                <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold">3</div>
+                                <span className="text-xs font-medium text-muted-foreground mt-2">Done</span>
+                            </div>
                         </div>
                     </div>
 
                     {/* ORDER SUMMARY */}
                     <Card className="p-5 mb-6">
                         <div className="mb-4">
-                            <h3 className="text-xl font-extrabold text-foreground">Order Summary</h3>
-                            <p className="text-sm text-muted-foreground mt-0.5">Review the items you've selected from your cart.</p>
+                            <h3 className="text-xl font-black text-foreground mb-1 shadow-sm pb-1">Order Summary</h3>
+                            <p className="text-sm font-medium text-muted-foreground mt-0.5">Review items before proceeding to payment.</p>
                         </div>
 
                         <div className="space-y-0 mb-4">
@@ -779,10 +833,12 @@ export default function CustomerOrder() {
                                         ) : <Package className="h-7 w-7 opacity-20 text-muted-foreground" />}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="font-semibold text-foreground text-sm truncate">{item.name}</div>
-                                        {item.brand?.name && <div className="text-xs font-semibold text-orange-500">{item.brand.name}</div>}
-                                        {item.variantString && <div className="text-xs text-muted-foreground">{item.variantString}</div>}
-                                        <div className="text-xs text-muted-foreground">Qty: {item.qty} × ₱{(item.sell_price || 0).toLocaleString()}</div>
+                                        <div className="text-lg font-black text-foreground truncate leading-tight mb-0.5">{item.name}</div>
+                                        {item.brand?.name && <div className="text-sm font-bold text-orange-600 mb-0.5">{item.brand.name}</div>}
+                                        {item.variantString && <div className="text-sm font-medium text-primary mb-1">[{item.variantString}]</div>}
+                                        <div className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                                            Qty: <span className="font-bold text-foreground">{item.qty}</span> × <span className="font-bold text-foreground">₱{(item.sell_price || 0).toLocaleString()}</span>
+                                        </div>
                                         <div className="flex gap-3 mt-1">
                                             {item.product_variants?.length > 0 && (
                                                 <button type="button" className="text-[11px] text-primary font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline" onClick={() => setSelectedProduct(item)}>Edit</button>
@@ -790,24 +846,24 @@ export default function CustomerOrder() {
                                             <button type="button" className="text-[11px] text-destructive font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline" onClick={() => removeFromCart(item.cartId)}>Remove</button>
                                         </div>
                                     </div>
-                                    <div className="font-bold text-foreground text-sm whitespace-nowrap">
+                                    <div className="font-black text-foreground text-base whitespace-nowrap bg-secondary/50 px-2 py-1 rounded">
                                         ₱{((item.sell_price || 0) * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </div>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="flex justify-between items-center pt-4 border-t-2 border-border">
-                            <span className="text-lg font-bold text-foreground">Total</span>
-                            <span className="text-lg font-bold text-primary">₱{(total * 1.12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <div className="flex justify-between items-center pt-6 border-t-2 border-border">
+                            <span className="text-xl font-black text-foreground">Total</span>
+                            <span className="text-2xl font-black text-primary">₱{(total * 1.12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
-                        <div className="text-right text-xs text-muted-foreground mt-1">Includes VAT (12%)</div>
+                        <div className="text-right text-sm font-bold text-muted-foreground/60 mt-1 uppercase tracking-tighter">Includes VAT (12%)</div>
                     </Card>
 
                     {/* BUTTONS */}
                     <div className="flex flex-col gap-3">
-                        <Button className="w-full h-12 text-base font-bold gap-2" onClick={() => setStep(2)}>
-                            Review Invoice & Location <ArrowRight className="h-4 w-4" />
+                        <Button className="w-full mt-4 h-14 text-xl font-black gap-2 shadow-lg shadow-primary/20" onClick={() => setStep(2)}>
+                            Next Step <ArrowRight className="h-6 w-6" />
                         </Button>
                         <Button variant="outline" className="w-full h-11 text-base font-semibold gap-2" onClick={() => navigate("/shop")}>
                             <ArrowLeft className="h-4 w-4" /> Back to Shop

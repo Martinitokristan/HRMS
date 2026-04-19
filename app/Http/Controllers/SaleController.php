@@ -35,7 +35,7 @@ class SaleController extends Controller
             ->latest();
 
         return response()->json([
-            'data'   => $query->paginate($request->get('per_page', 15)),
+            'data'   => $query->paginate($request->get('per_page', 20)),
             'status' => 'success',
         ]);
     }

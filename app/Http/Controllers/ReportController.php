@@ -22,14 +22,14 @@ class ReportController extends Controller
         $to = now();
 
         $isYearlyView = ($period === 'year' || ($yearParam && !$monthParam));
-        
+
         if ($yearParam && $monthParam) {
             $from = \Carbon\Carbon::createFromDate($yearParam, $monthParam, 1)->startOfMonth();
             $to = \Carbon\Carbon::createFromDate($yearParam, $monthParam, 1)->endOfMonth();
         } elseif ($yearParam) {
             $from = \Carbon\Carbon::createFromDate($yearParam, 1, 1)->startOfDay();
             $to = \Carbon\Carbon::createFromDate($yearParam, 12, 31)->endOfDay();
-        } else { 
+        } else {
             // Default to current year if no params
             $from = now()->startOfYear();
             $to = now()->endOfYear();
@@ -98,14 +98,11 @@ class ReportController extends Controller
 
             if ($period === 'week') {
                 $from = now()->subDays(7);
-            }
-            elseif ($period === 'year') {
+            } elseif ($period === 'year') {
                 $from = now()->subYear();
-            }
-            elseif ($period === 'quarter') {
+            } elseif ($period === 'quarter') {
                 $from = now()->subDays(90);
-            }
-            else { // month
+            } else { // month
                 $from = now()->subDays(30);
             }
 
@@ -115,12 +112,12 @@ class ReportController extends Controller
                 ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from->toDateString(), $to->toDateString()])
                 ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'returned'])
                 ->select(
-                'products.id',
-                'products.name',
-                'products.barcode',
-                DB::raw('SUM(sale_items.quantity) as total_sold'),
-                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue')
-            )
+                    'products.id',
+                    'products.name',
+                    'products.barcode',
+                    DB::raw('SUM(sale_items.quantity) as total_sold'),
+                    DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue')
+                )
                 ->groupBy('products.id', 'products.name', 'products.barcode')
                 ->orderByDesc('total_sold')
                 ->limit(10)
@@ -130,8 +127,7 @@ class ReportController extends Controller
                 'data' => $topProducts,
                 'status' => 'success'
             ]);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error('Top Products Query Error', ['message' => $e->getMessage()]);
             return response()->json([
                 'error' => 'Failed to fetch top products',
@@ -285,11 +281,11 @@ class ReportController extends Controller
     public function yearlyCategoryRevenue(Request $request)
     {
         try {
-            $year  = (int) $request->get('year', now()->year);
+            $year = (int) $request->get('year', now()->year);
             $limit = min((int) $request->get('limit', 10), 50);
 
             $from = "{$year}-01-01";
-            $to   = "{$year}-12-31";
+            $to = "{$year}-12-31";
 
             $categories = DB::table('sale_items')
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
@@ -310,7 +306,7 @@ class ReportController extends Controller
                 ->get();
 
             return response()->json([
-                'data'   => ['categories' => $categories, 'year' => $year],
+                'data' => ['categories' => $categories, 'year' => $year],
                 'status' => 'success',
             ]);
         } catch (\Exception $e) {
@@ -348,7 +344,7 @@ class ReportController extends Controller
 
             // Map product_ids to categories
             $productIds = array_keys($returnedByProduct);
-            $products   = DB::table('products')
+            $products = DB::table('products')
                 ->join('categories', 'products.category_id', '=', 'categories.id')
                 ->whereIn('products.id', $productIds)
                 ->whereNotNull('products.category_id')
@@ -360,7 +356,8 @@ class ReportController extends Controller
             $returnedByCategory = [];
             foreach ($returnedByProduct as $pid => $qty) {
                 $product = $products->get($pid);
-                if (!$product) continue;
+                if (!$product)
+                    continue;
                 $cid = $product->category_id;
                 if (!isset($returnedByCategory[$cid])) {
                     $returnedByCategory[$cid] = ['id' => $cid, 'name' => $product->category_name, 'returned_units' => 0];
@@ -369,9 +366,9 @@ class ReportController extends Controller
             }
 
             // Sort by returned_units desc and slice top N
-            usort($returnedByCategory, fn ($a, $b) => $b['returned_units'] - $a['returned_units']);
-            $topCategories   = array_slice($returnedByCategory, 0, $limit);
-            $topCategoryIds  = array_column($topCategories, 'id');
+            usort($returnedByCategory, fn($a, $b) => $b['returned_units'] - $a['returned_units']);
+            $topCategories = array_slice($returnedByCategory, 0, $limit);
+            $topCategoryIds = array_column($topCategories, 'id');
 
             // Fetch sold units for these categories
             $soldData = DB::table('sale_items')
@@ -386,19 +383,19 @@ class ReportController extends Controller
                 ->keyBy('category_id');
 
             $result = array_map(function ($cat) use ($soldData) {
-                $sold    = $soldData->get($cat['id']);
+                $sold = $soldData->get($cat['id']);
                 $soldQty = $sold ? (int) $sold->sold_units : 0;
-                $rate    = $soldQty > 0 ? floatval(number_format(($cat['returned_units'] / $soldQty) * 100, 2, '.', '')) : 0;
+                $rate = $soldQty > 0 ? floatval(number_format(($cat['returned_units'] / $soldQty) * 100, 2, '.', '')) : 0;
                 return [
-                    'id'             => $cat['id'],
-                    'name'           => $cat['name'],
+                    'id' => $cat['id'],
+                    'name' => $cat['name'],
                     'returned_units' => $cat['returned_units'],
-                    'sold_units'     => $soldQty,
-                    'return_rate'    => $rate,
+                    'sold_units' => $soldQty,
+                    'return_rate' => $rate,
                 ];
             }, $topCategories);
 
-            usort($result, fn ($a, $b) => $b['return_rate'] <=> $a['return_rate']);
+            usort($result, fn($a, $b) => $b['return_rate'] <=> $a['return_rate']);
 
             return response()->json(['data' => array_values($result), 'status' => 'success']);
         } catch (\Exception $e) {
@@ -425,11 +422,9 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        }
-        elseif ($period === 'year') {
+        } elseif ($period === 'year') {
             $from = now()->subYear();
-        }
-        else { // month
+        } else { // month
             $from = now()->subDays(30);
         }
 
@@ -513,8 +508,7 @@ class ReportController extends Controller
                     'Content-Disposition' => 'attachment; filename="' . $filename . '"',
                 ]);
 
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 // Log the error for debugging
                 \Log::error('PDF Generation Error', ['message' => $e->getMessage()]);
                 \Log::error('PDF Error Stack', ['trace' => $e->getTraceAsString()]);
@@ -887,31 +881,29 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        }
-        elseif ($period === 'year') {
+        } elseif ($period === 'year') {
             $from = now()->subYear();
-        }
-        else { // month
+        } else { // month
             $from = now()->subDays(30);
         }
 
         // Overall rating statistics
         $overallStats = [
             'total_ratings' => DB::table('deliveries')
-            ->whereNotNull('rating')
-            ->whereBetween('rated_at', [$from, $to])
-            ->count(),
+                ->whereNotNull('rating')
+                ->whereBetween('rated_at', [$from, $to])
+                ->count(),
             'average_rating' => DB::table('deliveries')
-            ->whereNotNull('rating')
-            ->whereBetween('rated_at', [$from, $to])
-            ->avg('rating'),
+                ->whereNotNull('rating')
+                ->whereBetween('rated_at', [$from, $to])
+                ->avg('rating'),
             'rating_distribution' => DB::table('deliveries')
-            ->whereNotNull('rating')
-            ->whereBetween('rated_at', [$from, $to])
-            ->selectRaw('rating, COUNT(*) as count')
-            ->groupBy('rating')
-            ->pluck('count', 'rating')
-            ->toArray(),
+                ->whereNotNull('rating')
+                ->whereBetween('rated_at', [$from, $to])
+                ->selectRaw('rating, COUNT(*) as count')
+                ->groupBy('rating')
+                ->pluck('count', 'rating')
+                ->toArray(),
         ];
 
         // Round average rating
@@ -943,12 +935,12 @@ class ReportController extends Controller
             ->orderBy('total_ratings', 'desc')
             ->get()
             ->map(function ($rider) {
-            $rider->average_rating = round($rider->average_rating, 2);
-            $rider->positive_rate = $rider->total_ratings > 0
-                ? round(($rider->positive_ratings / $rider->total_ratings) * 100, 1)
-                : 0;
-            return $rider;
-        });
+                $rider->average_rating = round($rider->average_rating, 2);
+                $rider->positive_rate = $rider->total_ratings > 0
+                    ? round(($rider->positive_ratings / $rider->total_ratings) * 100, 1)
+                    : 0;
+                return $rider;
+            });
 
         // Top performers (5+ ratings, 4.0+ average)
         $topPerformers = $riderRankings->filter(function ($rider) {
@@ -969,9 +961,9 @@ class ReportController extends Controller
             ->orderBy('date')
             ->get()
             ->map(function ($trend) {
-            $trend->average_rating = round($trend->average_rating, 2);
-            return $trend;
-        });
+                $trend->average_rating = round($trend->average_rating, 2);
+                return $trend;
+            });
 
         // Recent feedback
         $recentFeedback = DB::table('deliveries')
@@ -1019,11 +1011,9 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        }
-        elseif ($period === 'year') {
+        } elseif ($period === 'year') {
             $from = now()->subYear();
-        }
-        else { // month
+        } else { // month
             $from = now()->subDays(30);
         }
 
@@ -1048,7 +1038,7 @@ class ReportController extends Controller
             $query->where('users.name', 'like', "%{$request->search}%");
         }
 
-        $rankings = $query->paginate($request->get('per_page', 15));
+        $rankings = $query->paginate($request->get('per_page', 20));
 
         // Calculate positive rate for each rider
         $rankings->getCollection()->transform(function ($rider) {
@@ -1070,11 +1060,9 @@ class ReportController extends Controller
 
         if ($period === 'week') {
             $from = now()->subDays(7);
-        }
-        elseif ($period === 'year') {
+        } elseif ($period === 'year') {
             $from = now()->subYear();
-        }
-        else { // month
+        } else { // month
             $from = now()->subDays(30);
         }
 
@@ -1104,7 +1092,7 @@ class ReportController extends Controller
             });
         }
 
-        $feedback = $query->paginate($request->get('per_page', 15));
+        $feedback = $query->paginate($request->get('per_page', 20));
 
         return response()->json($feedback);
     }
@@ -1170,11 +1158,11 @@ class ReportController extends Controller
             ->whereBetween('sales.created_at', [now()->subDays(30), now()])
             ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
             ->select(
-            'products.id',
-            'products.name',
-            DB::raw('SUM(sale_items.quantity) as units_sold_30d'),
-            DB::raw('SUM(sale_items.quantity) / 30 as daily_velocity')
-        )
+                'products.id',
+                'products.name',
+                DB::raw('SUM(sale_items.quantity) as units_sold_30d'),
+                DB::raw('SUM(sale_items.quantity) / 30 as daily_velocity')
+            )
             ->groupBy('products.id', 'products.name')
             ->get();
 
@@ -1247,25 +1235,25 @@ class ReportController extends Controller
             ->whereBetween('sales.created_at', [$from, now()])
             ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
             ->select(
-            'products.id',
-            'products.name',
-            DB::raw('SUM(sale_items.quantity) as units_sold'),
-            DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
-            DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
-            DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
-            DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
-        )
+                'products.id',
+                'products.name',
+                DB::raw('SUM(sale_items.quantity) as units_sold'),
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
+                DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
+                DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
+            )
             ->groupBy('products.id', 'products.name')
             ->orderBy('profit', 'desc')
             ->limit(20)
             ->get()
             ->map(function ($item) {
-            $item->profit_margin = round($item->profit_margin, 2);
-            $item->profit = round($item->profit, 2);
-            $item->revenue = round($item->revenue, 2);
-            $item->cogs = round($item->cogs, 2);
-            return $item;
-        });
+                $item->profit_margin = round($item->profit_margin, 2);
+                $item->profit = round($item->profit, 2);
+                $item->revenue = round($item->revenue, 2);
+                $item->cogs = round($item->cogs, 2);
+                return $item;
+            });
 
         // Profit by Category
         $categoryProfit = DB::table('sale_items')
@@ -1275,23 +1263,23 @@ class ReportController extends Controller
             ->whereBetween('sales.created_at', [$from, now()])
             ->whereIn('sales.status', ['delivered', 'pending', 'confirmed'])
             ->select(
-            'categories.id',
-            'categories.name',
-            DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
-            DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
-            DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
-            DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
-        )
+                'categories.id',
+                'categories.name',
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as revenue'),
+                DB::raw('SUM(sale_items.quantity * products.purchase_price) as cogs'),
+                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price) as profit'),
+                DB::raw('((SUM(sale_items.quantity * sale_items.unit_price) - SUM(sale_items.quantity * products.purchase_price)) / SUM(sale_items.quantity * sale_items.unit_price)) * 100 as profit_margin')
+            )
             ->groupBy('categories.id', 'categories.name')
             ->orderBy('profit', 'desc')
             ->get()
             ->map(function ($item) {
-            $item->profit_margin = round($item->profit_margin, 2);
-            $item->profit = round($item->profit, 2);
-            $item->revenue = round($item->revenue, 2);
-            $item->cogs = round($item->cogs, 2);
-            return $item;
-        });
+                $item->profit_margin = round($item->profit_margin, 2);
+                $item->profit = round($item->profit, 2);
+                $item->revenue = round($item->revenue, 2);
+                $item->cogs = round($item->cogs, 2);
+                return $item;
+            });
 
         // Overall Summary
         $totalRevenue = $productProfit->sum('revenue');
@@ -1412,7 +1400,7 @@ class ReportController extends Controller
             }
 
             // Sort by timestamp desc
-            usort($activities, function($a, $b) {
+            usort($activities, function ($a, $b) {
                 return strtotime($b['timestamp']) - strtotime($a['timestamp']);
             });
 

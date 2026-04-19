@@ -43,7 +43,7 @@ class ProductController extends Controller
                     return $q->where('is_active', $request->status === 'active');
                 });
 
-            $perPage = $request->get('per_page', 15);
+            $perPage = $request->get('per_page', 20);
             $products = $query->paginate($perPage);
 
             // Cast average_rating to float (withAvg returns string from DB)

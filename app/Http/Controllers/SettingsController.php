@@ -32,19 +32,19 @@ class SettingsController extends Controller
 
         // Only load masterlist data if needed (check for cache headers or specific params)
         $includeMasterlist = $request->get('include_masterlist', false);
-        
+
         $response = [
             'data' => [
                 'settings' => $settings,
             ],
             'status' => 'success',
         ];
-        
+
         if ($includeMasterlist) {
             // Optimized: Load only essential masterlist data
             $response['data']['categories'] = Category::all(['id', 'name']);
             $response['data']['unitTypes'] = UnitType::all(['id', 'purchase_unit', 'sell_unit']);
-            
+
             // Only load variants if specifically requested
             if ($request->get('include_variants', false)) {
                 $response['data']['variants'] = Variant::with('values')->get();
@@ -58,7 +58,7 @@ class SettingsController extends Controller
     {
         if ($request->has('settings')) {
             $request->validate([
-                'group'    => 'required|string',
+                'group' => 'required|string',
                 'settings' => 'required|array',
             ]);
 
@@ -76,7 +76,7 @@ class SettingsController extends Controller
 
         return response()->json([
             'message' => 'Settings saved successfully',
-            'status'  => 'success',
+            'status' => 'success',
         ]);
     }
 
@@ -85,7 +85,7 @@ class SettingsController extends Controller
     {
         $request->validate([
             'variant_id' => 'required|exists:variants,id',
-            'label'      => 'required|string',
+            'label' => 'required|string',
         ]);
 
         $value = VariantValue::updateOrCreate(
@@ -129,8 +129,8 @@ class SettingsController extends Controller
     public function saveUnitConversion(Request $request)
     {
         $request->validate([
-            'purchase_unit'     => 'required|string',
-            'sell_unit'         => 'required|string',
+            'purchase_unit' => 'required|string',
+            'sell_unit' => 'required|string',
             'conversion_factor' => 'required|numeric',
         ]);
 
@@ -152,8 +152,8 @@ class SettingsController extends Controller
     {
         $request->validate([
             'purchase_unit' => 'required|string',
-            'sell_unit'     => 'required|string',
-            'multiplier'    => 'required|numeric|min:0.01',
+            'sell_unit' => 'required|string',
+            'multiplier' => 'required|numeric|min:0.01',
         ]);
 
         $unit = UnitType::updateOrCreate(
@@ -252,7 +252,7 @@ class SettingsController extends Controller
     {
         $request->validate([
             'variant_id' => 'required|exists:variants,id',
-            'label'      => 'required|string',
+            'label' => 'required|string',
         ]);
 
         $value = VariantValue::create($request->only(['variant_id', 'label', 'hex_code', 'description', 'category']));
@@ -275,8 +275,8 @@ class SettingsController extends Controller
     {
         $request->validate([
             'purchase_unit' => 'required|string',
-            'sell_unit'     => 'required|string',
-            'multiplier'    => 'required|numeric|min:0.01',
+            'sell_unit' => 'required|string',
+            'multiplier' => 'required|numeric|min:0.01',
         ]);
 
         $unit = UnitType::create($request->only(['purchase_unit', 'sell_unit', 'multiplier']));

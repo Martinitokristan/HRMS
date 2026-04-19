@@ -40,7 +40,7 @@ class PurchaseOrderController extends Controller
             ->latest();
 
         return response()->json([
-            'data' => $query->paginate($request->get('per_page', 15)),
+            'data' => $query->paginate($request->get('per_page', 20)),
             'status' => 'success',
         ]);
     }
@@ -715,7 +715,7 @@ class PurchaseOrderController extends Controller
                 ->latest();
 
             \Log::info('SupplierIndex: Executing query', []);
-            $result = $query->paginate($request->get('per_page', 15));
+            $result = $query->paginate($request->get('per_page', 20));
             \Log::info('SupplierIndex: Query successful', ['count' => $result->count()]);
 
             return response()->json([

@@ -33,7 +33,7 @@ class RiderController extends Controller
             ->latest();
 
         return response()->json([
-            'data' => $query->paginate($request->get('per_page', 15)),
+            'data' => $query->paginate($request->get('per_page', 20)),
             'counts' => [
                 'total' => User::where('role', 'rider')->count(),
                 'available' => RiderProfile::where('availability', 'available')->count(),

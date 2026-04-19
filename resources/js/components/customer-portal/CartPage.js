@@ -224,9 +224,9 @@ export default function CartPage() {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2 mb-1">
                                     <div className="min-w-0">
-                                        <h3 className="text-base font-bold text-foreground truncate">{item.name}</h3>
+                                        <h3 className="text-xl font-black text-foreground truncate">{item.name}</h3>
                                         {item.brand?.name && (
-                                            <p className="text-xs font-semibold text-orange-500 leading-none mt-0.5">{item.brand.name}</p>
+                                            <p className="text-sm font-bold text-orange-600 leading-none mt-1">{item.brand.name}</p>
                                         )}
                                     </div>
                                     <Button
@@ -241,7 +241,7 @@ export default function CartPage() {
                                 </div>
 
                                 {item.variantString && (
-                                    <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{item.variantString}</div>
+                                    <div className="text-sm font-bold text-primary uppercase tracking-wider mb-2">[{item.variantString}]</div>
                                 )}
 
                                 <div className="flex items-end justify-between mt-2">
@@ -255,8 +255,8 @@ export default function CartPage() {
                                         </Button>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-xs text-muted-foreground">₱{Number(item.sell_price).toFixed(2)}</div>
-                                        <div className="text-lg font-black text-foreground">₱{(item.sell_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                        <div className="text-sm font-medium text-muted-foreground">₱{Number(item.sell_price).toFixed(2)}</div>
+                                        <div className="text-xl font-black text-foreground">₱{(item.sell_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                                     </div>
                                 </div>
                             </div>
@@ -265,13 +265,12 @@ export default function CartPage() {
                 </div>
 
                 {/* Checkout Button */}
-                <Button className="w-full h-12 text-base font-bold gap-2 mb-3" onClick={handleCheckout}>
-                    Proceed to Checkout <ArrowRight className="h-4 w-4" />
+                <Button className="w-full h-14 text-xl font-black gap-2 mb-3 shadow-lg shadow-primary/20" onClick={handleCheckout}>
+                    Proceed to Checkout <ArrowRight className="h-5 w-5" />
                 </Button>
 
-                {/* Continue Shopping */}
-                <Button variant="outline" className="w-full h-11 text-base font-semibold gap-2" onClick={() => navigate('/shop')}>
-                    <ArrowLeft className="h-4 w-4" /> Continue Shopping
+                <Button variant="outline" className="w-full h-12 text-lg font-bold gap-2" onClick={() => navigate('/shop')}>
+                    <ArrowLeft className="h-5 w-5" /> Continue Shopping
                 </Button>
             </div>
 

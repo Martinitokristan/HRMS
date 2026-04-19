@@ -25,7 +25,7 @@ class UserController extends Controller
             ->latest();
 
         return response()->json([
-            'data'   => $query->paginate($request->get('per_page', 15)),
+            'data'   => $query->paginate($request->get('per_page', 20)),
             'counts' => [
                 'admins'    => User::where('role', 'admin')->count(),
                 'customers' => User::where('role', 'customer')->count(),

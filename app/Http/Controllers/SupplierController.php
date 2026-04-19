@@ -32,7 +32,7 @@ class SupplierController extends Controller
             ]);
         }
 
-        $suppliers = $query->withCount(['products', 'purchaseOrders'])->paginate($request->get('per_page', 15));
+        $suppliers = $query->withCount(['products', 'purchaseOrders'])->paginate($request->get('per_page', 20));
 
         return response()->json([
             'data'   => $suppliers,

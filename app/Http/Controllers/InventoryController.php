@@ -60,7 +60,7 @@ class InventoryController extends Controller
             $wQuery->whereHas('supplierProduct', fn($q) => $q->where('supplier_id', $request->supplier_id));
         }
 
-        $perPage = $request->get('per_page', 15);
+        $perPage = $request->get('per_page', 20);
         $products = $pQuery->paginate($perPage);
         $orphans = $wQuery->get();
 

@@ -1,14 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, ShoppingCart, ClipboardList, FileCheck } from 'lucide-react';
+import { Package, ShoppingCart, ClipboardList, FileCheck, XCircle } from 'lucide-react';
 import StockTab from './StockTab';
 import SalesTab from './SalesTab';
 import PurchaseTab from './PurchaseTab';
+import CancelOrdersTab from './CancelOrdersTab';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const tabItems = [
     { key: 'stock', label: 'Stock Levels', icon: Package, path: '/inventory' },
     { key: 'sales', label: 'Sales Orders', icon: ShoppingCart, path: '/inventory/sales' },
+    { key: 'cancellations', label: 'Cancel Orders', icon: XCircle, path: '/inventory/cancellations' },
     { key: 'requests', label: 'Request Orders', icon: ClipboardList, path: '/inventory/requests' },
     { key: 'purchase', label: 'Purchase Orders', icon: FileCheck, path: '/inventory/purchase' },
 ];
@@ -42,6 +44,7 @@ export default function Inventory({ tab }) {
             <div className="relative z-0">
                 {tab === 'stock' && <StockTab />}
                 {tab === 'sales' && <SalesTab />}
+                {tab === 'cancellations' && <CancelOrdersTab />}
                 {tab === 'requests' && <PurchaseTab mode="requests" />}
                 {tab === 'purchase' && <PurchaseTab mode="completed" />}
             </div>

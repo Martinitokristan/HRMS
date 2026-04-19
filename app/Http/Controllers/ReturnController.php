@@ -30,7 +30,7 @@ class ReturnController extends Controller
             })
             ->latest();
 
-        $returns = $query->paginate($request->get('per_page', 15));
+        $returns = $query->paginate($request->get('per_page', 20));
 
         $stats = [
             'total'     => ReturnOrder::count(),

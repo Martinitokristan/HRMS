@@ -10,7 +10,7 @@ class Sale extends Model
         'order_number', 'customer_id', 'processed_by', 'discount_pct',
         'total_amount', 'payment_method', 'payment_phone_number', 'payment_reference', 'payment_proof_path', 'status', 'notes',
         'payment_confirmed_at', 'payment_expiry_sms_sent_at', 'payment_proof_token',
-        'cancellation_reason', 'cancellation_notes', 'cancelled_by', 'cancelled_at',
+        'cancellation_reason', 'cancellation_notes', 'cancellation_status', 'cancelled_by', 'cancelled_at',
     ];
 
     protected $casts = [

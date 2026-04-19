@@ -39,7 +39,7 @@ export default function SupplierProducts() {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const params = { page, per_page: 12 };
+            const params = { page, per_page: 20 };
             if (search) params.search = search;
             if (categoryFilter) params.category_id = categoryFilter;
             const res = await api.get('/supplier/products', { params });

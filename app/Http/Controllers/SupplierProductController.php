@@ -42,14 +42,14 @@ class SupplierProductController extends Controller
             ->where('supplier_id', $supplierId)
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('barcode', 'like', "%{$request->search}%");
+                    ->orWhere('barcode', 'like', "%{$request->search}%");
             })
             ->when($request->category_id, function ($q) use ($request) {
                 $q->where('category_id', $request->category_id);
             })
             ->orderBy('created_at', 'desc');
 
-        $products = $query->paginate($request->get('per_page', 15));
+        $products = $query->paginate($request->get('per_page', 20));
 
         return response()->json([
             'data' => $products,
@@ -68,17 +68,17 @@ class SupplierProductController extends Controller
         $supplier = $request->user();
 
         $data = $request->validate([
-            'name'           => 'required|string|max:150',
-            'barcode'        => 'required|string|max:50|unique:supplier_products',
-            'description'    => 'nullable|string',
-            'category_id'    => 'nullable|exists:categories,id',
-            'price'          => 'required|numeric|min:0',
-            'min_order_qty'  => 'nullable|integer|min:1',
-            'total_stock'    => 'nullable|integer|min:0',
-            'base_size'      => 'nullable|string|max:50',
-            'is_promoted'    => 'nullable|boolean',
-            'variants'       => 'nullable|string',
-            'brand_id'       => 'nullable|exists:brands,id',
+            'name' => 'required|string|max:150',
+            'barcode' => 'required|string|max:50|unique:supplier_products',
+            'description' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'price' => 'required|numeric|min:0',
+            'min_order_qty' => 'nullable|integer|min:1',
+            'total_stock' => 'nullable|integer|min:0',
+            'base_size' => 'nullable|string|max:50',
+            'is_promoted' => 'nullable|boolean',
+            'variants' => 'nullable|string',
+            'brand_id' => 'nullable|exists:brands,id',
         ]);
 
         $product = DB::transaction(function () use ($data, $request, $supplierId) {
@@ -95,20 +95,20 @@ class SupplierProductController extends Controller
             }
 
             $product = SupplierProduct::create([
-                'supplier_id'       => $supplierId,
-                'name'              => $data['name'],
-                'barcode'           => $data['barcode'],
-                'description'       => $data['description'] ?? null,
-                'category_id'       => $data['category_id'] ?? null,
-                'brand_id'          => $data['brand_id'] ?? null,
-                'price'             => $data['price'],
-                'min_order_qty'     => $data['min_order_qty'] ?? 1,
-                'total_stock'       => $data['total_stock'] ?? 0,
-                'base_size'         => $data['base_size'] ?? null,
-                'image_path'        => $imagePath,
+                'supplier_id' => $supplierId,
+                'name' => $data['name'],
+                'barcode' => $data['barcode'],
+                'description' => $data['description'] ?? null,
+                'category_id' => $data['category_id'] ?? null,
+                'brand_id' => $data['brand_id'] ?? null,
+                'price' => $data['price'],
+                'min_order_qty' => $data['min_order_qty'] ?? 1,
+                'total_stock' => $data['total_stock'] ?? 0,
+                'base_size' => $data['base_size'] ?? null,
+                'image_path' => $imagePath,
                 'additional_images' => $additionalImages,
-                'is_promoted'       => $data['is_promoted'] ?? false,
-                'status'            => 'active',
+                'is_promoted' => $data['is_promoted'] ?? false,
+                'status' => 'active',
             ]);
 
             if ($request->has('variants')) {
@@ -130,13 +130,13 @@ class SupplierProductController extends Controller
                         }
 
                         $product->variants()->create([
-                            'size'              => $v['size'] ?? null,
-                            'color'             => $v['color'] ?? null,
-                            'weight'            => $v['weight'] ?? null,
-                            'stock'             => $v['stock'] ?? 0,
-                            'price_override'    => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
-                            'barcode_suffix'    => $v['barcode_suffix'] ?? null,
-                            'image_path'        => $variantImage,
+                            'size' => $v['size'] ?? null,
+                            'color' => $v['color'] ?? null,
+                            'weight' => $v['weight'] ?? null,
+                            'stock' => $v['stock'] ?? 0,
+                            'price_override' => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
+                            'barcode_suffix' => $v['barcode_suffix'] ?? null,
+                            'image_path' => $variantImage,
                             'additional_images' => $variantExtras,
                         ]);
                     }
@@ -151,9 +151,9 @@ class SupplierProductController extends Controller
         broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.created'));
 
         return response()->json([
-            'data'    => $product->load(['category', 'variants']),
+            'data' => $product->load(['category', 'variants']),
             'message' => 'Product created successfully',
-            'status'  => 'success',
+            'status' => 'success',
         ], 201);
     }
 
@@ -168,17 +168,17 @@ class SupplierProductController extends Controller
         $product = SupplierProduct::where('supplier_id', $supplierId)->findOrFail($id);
 
         $data = $request->validate([
-            'name'           => 'required|string|max:150',
-            'barcode'        => 'required|string|max:50|unique:supplier_products,barcode,'.$id,
-            'description'    => 'nullable|string',
-            'category_id'    => 'nullable|exists:categories,id',
-            'price'          => 'required|numeric|min:0',
-            'min_order_qty'  => 'nullable|integer|min:1',
-            'total_stock'    => 'nullable|integer|min:0',
-            'base_size'      => 'nullable|string|max:50',
-            'is_promoted'    => 'nullable|boolean',
-            'variants'       => 'nullable|string',
-            'brand_id'       => 'nullable|exists:brands,id',
+            'name' => 'required|string|max:150',
+            'barcode' => 'required|string|max:50|unique:supplier_products,barcode,' . $id,
+            'description' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id',
+            'price' => 'required|numeric|min:0',
+            'min_order_qty' => 'nullable|integer|min:1',
+            'total_stock' => 'nullable|integer|min:0',
+            'base_size' => 'nullable|string|max:50',
+            'is_promoted' => 'nullable|boolean',
+            'variants' => 'nullable|string',
+            'brand_id' => 'nullable|exists:brands,id',
         ]);
 
         DB::transaction(function () use ($product, $data, $request) {
@@ -223,15 +223,15 @@ class SupplierProductController extends Controller
                                 $variantExtras[] = $file->store('supplier-product-variants', 'public');
                             }
                         }
-                        
+
                         $product->variants()->create([
-                            'size'              => $v['size'] ?? null,
-                            'color'             => $v['color'] ?? null,
-                            'weight'            => $v['weight'] ?? null,
-                            'stock'             => $v['stock'] ?? 0,
-                            'price_override'    => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
-                            'barcode_suffix'    => $v['barcode_suffix'] ?? null,
-                            'image_path'        => $variantImage,
+                            'size' => $v['size'] ?? null,
+                            'color' => $v['color'] ?? null,
+                            'weight' => $v['weight'] ?? null,
+                            'stock' => $v['stock'] ?? 0,
+                            'price_override' => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
+                            'barcode_suffix' => $v['barcode_suffix'] ?? null,
+                            'image_path' => $variantImage,
                             'additional_images' => $variantExtras,
                         ]);
                     }
@@ -244,9 +244,9 @@ class SupplierProductController extends Controller
         broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.updated'));
 
         return response()->json([
-            'data'    => $product->load(['category', 'variants']),
+            'data' => $product->load(['category', 'variants']),
             'message' => 'Product updated successfully',
-            'status'  => 'success',
+            'status' => 'success',
         ]);
     }
 
@@ -262,7 +262,7 @@ class SupplierProductController extends Controller
 
         return response()->json([
             'message' => 'Product deleted',
-            'status'  => 'success',
+            'status' => 'success',
         ]);
     }
 
@@ -273,7 +273,7 @@ class SupplierProductController extends Controller
             ->where('status', 'active')
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('barcode', 'like', "%{$request->search}%");
+                    ->orWhere('barcode', 'like', "%{$request->search}%");
             })
             ->when($request->category_id, function ($q) use ($request) {
                 $q->where('category_id', $request->category_id);

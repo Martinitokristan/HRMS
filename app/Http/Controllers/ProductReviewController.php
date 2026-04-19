@@ -35,7 +35,7 @@ class ProductReviewController extends Controller
             })
             ->latest();
 
-        $reviews = $query->paginate($request->get('per_page', 10)); // Changed to 10 per page limit
+        $reviews = $query->paginate($request->get('per_page', 20)); // Changed to 10 per page limit
 
         // Get global review stats
         $stats = [
@@ -165,7 +165,7 @@ class ProductReviewController extends Controller
             })
             ->latest();
 
-        $reviews = $query->paginate($request->get('per_page', 10));
+        $reviews = $query->paginate($request->get('per_page', 20));
 
         return response()->json([
             'data' => $reviews,
@@ -228,7 +228,7 @@ class ProductReviewController extends Controller
             break;
     }
 
-    $reviews = $query->paginate(10);
+    $reviews = $query->paginate(20);
 
     // Calculate rating distribution for all approved reviews of this product
     $ratingDistribution = ProductReview::where('product_id', $productId)

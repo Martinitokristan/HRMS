@@ -102,6 +102,9 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     Route::get('/unit-types', [\App\Http\Controllers\UnitTypeController::class , 'index']);
     // Sales (admin operations)
     Route::get('/sales/summary', [SaleController::class , 'summary']);
+    Route::get('/sales/cancellations', [SaleController::class , 'getCancellationRequests']);
+    Route::post('/sales/{id}/cancellation/approve', [SaleController::class , 'approveCancellation']);
+    Route::post('/sales/{id}/cancellation/reject', [SaleController::class , 'rejectCancellation']);
     Route::get('/sales', [SaleController::class , 'index']);
     Route::put('/sales/{id}/status', [SaleController::class , 'updateStatus']);
     Route::post('/sales/{id}/return', [SaleController::class , 'processReturn']);

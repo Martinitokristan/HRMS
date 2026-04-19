@@ -74,7 +74,7 @@ export default function SupplierOrders({ mode = 'completed' }) {
     const fetchOrders = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const params = { page, per_page: 15, tab: mode };
+            const params = { page, per_page: 20, tab: mode };
             if (statusFilter) params.status = statusFilter;
 
             const res = await api.get('/supplier/purchase-orders', { params });

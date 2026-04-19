@@ -34,7 +34,7 @@ const RETURN_REASONS = [
 
 export default function OrderHistory() {
     const navigate = useNavigate();
-    const { toast } = useToast();
+    const { showToast } = useToast();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [ratingOrder, setRatingOrder] = useState(null);
@@ -136,12 +136,12 @@ export default function OrderHistory() {
                 reason: cancelReason,
                 notes: cancelNotes || null,
             });
-            toast.success("Order cancelled successfully");
+            showToast("Order cancelled successfully", "success");
             markStale(STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_INVENTORY);
             fetchData(true);
             closeCancelModal();
         } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to cancel order");
+            showToast(err.response?.data?.message || "Failed to cancel order", "error");
         } finally {
             setCancellingId(null);
         }
@@ -170,7 +170,7 @@ export default function OrderHistory() {
     const handleSubmitReturn = async () => {
         if (!returnModal.order || !returnReason) return;
         const selectedItems = returnItems.filter(i => i.selected && i.quantity > 0);
-        if (selectedItems.length === 0) { toast.error('Please select at least one item to return'); return; }
+        if (selectedItems.length === 0) { showToast('Please select at least one item to return', 'error'); return; }
 
         setSubmittingReturn(true);
         try {
@@ -180,7 +180,7 @@ export default function OrderHistory() {
                 reason_details: returnDetails || null,
                 items: selectedItems.map(i => ({ sale_item_id: i.sale_item_id, quantity: parseInt(i.quantity) })),
             });
-            toast.success('Return request submitted successfully! You will be notified when it is reviewed.');
+            showToast('Return request submitted successfully! You will be notified when it is reviewed.', 'success');
             markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.ADMIN_RETURNS);
             fetchData(true);
             closeReturnModal();
@@ -190,10 +190,10 @@ export default function OrderHistory() {
             
             if (errors) {
                 const errorDetails = Object.values(errors).flat().join(', ');
-                toast.error(`${errorMsg}: ${errorDetails}`);
+                showToast(`${errorMsg}: ${errorDetails}`, 'error');
                 console.error('Return validation errors:', errors);
             } else {
-                toast.error(errorMsg);
+                showToast(errorMsg, 'error');
             }
         } finally {
             setSubmittingReturn(false);
@@ -223,12 +223,12 @@ export default function OrderHistory() {
             await api.post(`/customer/orders/${proofModal.order.id}/upload-proof`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            toast.success("Payment proof uploaded! Please wait for verification.");
+            showToast("Payment proof uploaded! Please wait for verification.", "success");
             markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_DASHBOARD);
             fetchData(true);
             closeProofModal();
         } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to upload proof");
+            showToast(err.response?.data?.message || "Failed to upload proof", "error");
         } finally {
             setSubmittingProof(false);
         }
@@ -242,14 +242,14 @@ export default function OrderHistory() {
                 rating: ratingValue,
                 comment: ratingComment,
             });
-            toast.success("Rating submitted successfully");
+            showToast("Rating submitted successfully", "success");
             markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_REVIEWS);
             fetchData(true);
             setRatingOrder(null);
             setRatingValue(0);
             setRatingComment("");
         } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to submit rating");
+            showToast(err.response?.data?.message || "Failed to submit rating", "error");
         } finally {
             setSubmittingRating(false);
         }
