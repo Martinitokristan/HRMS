@@ -18,38 +18,106 @@ class ReportController extends Controller
         $period = $request->get('period', 'year');
         $yearParam = $request->get('year');
         $monthParam = $request->get('month'); // 1-12
-        $from = now();
-        $to = now();
+        $from = now()->startOfYear();
+        $to = now()->endOfYear();
+        $chartData = collect();
+        $allowedStatuses = ['delivered', 'paid', 'confirmed', 'out_for_delivery', 'pending', 'in_progress'];
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $isDashboardCalendarFilter = $request->filled('year') || $request->filled('month');
 
-        $isYearlyView = ($period === 'year' || ($yearParam && !$monthParam));
+        if ($isDashboardCalendarFilter) {
+            $year = (int) ($yearParam ?: now()->year);
+            $month = empty($monthParam) ? null : (int) $monthParam;
+            $isYearlyView = ($period === 'year' || empty($month));
 
-        if ($yearParam && $monthParam) {
-            $from = \Carbon\Carbon::createFromDate($yearParam, $monthParam, 1)->startOfMonth();
-            $to = \Carbon\Carbon::createFromDate($yearParam, $monthParam, 1)->endOfMonth();
-        } elseif ($yearParam) {
-            $from = \Carbon\Carbon::createFromDate($yearParam, 1, 1)->startOfDay();
-            $to = \Carbon\Carbon::createFromDate($yearParam, 12, 31)->endOfDay();
+            if ($isYearlyView) {
+                $from = now()->setYear($year)->startOfYear();
+                $to = now()->setYear($year)->endOfYear();
+
+                $rows = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+                    ->whereIn('status', $allowedStatuses)
+                    ->selectRaw('MONTH(created_at) as bucket, SUM(total_amount) as revenue, COUNT(*) as orders')
+                    ->groupBy('bucket')
+                    ->orderBy('bucket')
+                    ->get();
+
+                $chartData = collect(range(1, 12))->map(function ($i) use ($rows, $months) {
+                    $found = $rows->firstWhere('bucket', $i);
+                    return [
+                        'label' => $months[$i - 1],
+                        'orders' => $found ? (int) $found->orders : 0,
+                        'revenue' => $found ? round((float) $found->revenue, 2) : 0,
+                    ];
+                });
+            } else {
+                $month = max(1, min(12, $month));
+                $from = now()->setYear($year)->setMonth($month)->startOfMonth();
+                $to = (clone $from)->endOfMonth();
+
+                $rows = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+                    ->whereIn('status', $allowedStatuses)
+                    ->selectRaw('DAY(created_at) as bucket, SUM(total_amount) as revenue, COUNT(*) as orders')
+                    ->groupBy('bucket')
+                    ->orderBy('bucket')
+                    ->get();
+
+                $chartData = collect(range(1, $from->daysInMonth))->map(function ($i) use ($rows) {
+                    $found = $rows->firstWhere('bucket', $i);
+                    return [
+                        'label' => (string) $i,
+                        'orders' => $found ? (int) $found->orders : 0,
+                        'revenue' => $found ? round((float) $found->revenue, 2) : 0,
+                    ];
+                });
+            }
         } else {
-            // Default to current year if no params
-            $from = now()->startOfYear();
-            $to = now()->endOfYear();
-        }
+            if ($period === 'year') {
+                $from = now()->startOfYear();
+                $to = now()->endOfYear();
 
-        $query = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
-            ->whereIn('status', ['delivered', 'paid', 'confirmed', 'out_for_delivery', 'pending', 'in_progress']);
+                $rows = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+                    ->whereIn('status', $allowedStatuses)
+                    ->selectRaw('MONTH(created_at) as bucket, SUM(total_amount) as revenue, COUNT(*) as orders')
+                    ->groupBy('bucket')
+                    ->orderBy('bucket')
+                    ->get();
 
-        if ($isYearlyView) {
-            // For yearly views, group by month
-            $sales = $query->selectRaw('DATE_FORMAT(created_at, "%Y-%m-01") as date, SUM(total_amount) as revenue, COUNT(*) as orders')
-                ->groupBy('date')
-                ->orderBy('date')
-                ->get();
-        } else {
-            // For monthly/weekly views, group by day
-            $sales = $query->selectRaw('DATE(created_at) as date, SUM(total_amount) as revenue, COUNT(*) as orders')
-                ->groupBy('date')
-                ->orderBy('date')
-                ->get();
+                $chartData = collect(range(1, 12))->map(function ($i) use ($rows, $months) {
+                    $found = $rows->firstWhere('bucket', $i);
+                    return [
+                        'label' => $months[$i - 1],
+                        'orders' => $found ? (int) $found->orders : 0,
+                        'revenue' => $found ? round((float) $found->revenue, 2) : 0,
+                    ];
+                });
+            } else {
+                if ($period === 'week') {
+                    $from = now()->subDays(6)->startOfDay();
+                    $to = now()->endOfDay();
+                } elseif ($period === 'quarter') {
+                    $from = now()->subDays(89)->startOfDay();
+                    $to = now()->endOfDay();
+                } else {
+                    $from = now()->startOfMonth();
+                    $to = now()->endOfMonth();
+                }
+
+                $rows = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+                    ->whereIn('status', $allowedStatuses)
+                    ->selectRaw('DATE(created_at) as date, SUM(total_amount) as revenue, COUNT(*) as orders')
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get();
+
+                $chartData = $rows->map(function ($row) {
+                    return [
+                        'label' => \Carbon\Carbon::parse($row->date)->format('j'),
+                        'date' => $row->date,
+                        'orders' => (int) $row->orders,
+                        'revenue' => round((float) $row->revenue, 2),
+                    ];
+                });
+            }
         }
 
         $summaryData = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
@@ -71,7 +139,7 @@ class ReportController extends Controller
 
         return response()->json([
             'data' => [
-                'chart_data' => $sales,
+                'chart_data' => $chartData->values(),
                 'summary' => [
                     'total_revenue' => round($totalRevenue, 2),
                     'total_orders' => $totalOrders,

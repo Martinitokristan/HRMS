@@ -52,7 +52,7 @@ export default function Dashboard() {
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState("all");
     const derivedPeriod = selectedMonth === "all" ? "year" : "month";
-    
+
     const years = useMemo(() => {
         let y = [];
         for (let i = currentYear; i >= 2000; i--) {
@@ -77,19 +77,18 @@ export default function Dashboard() {
         { value: "12", label: "December" },
     ];
 
-
-
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
             const [summaryRes, chartRes] = await Promise.all([
                 api.get("/sales/summary"),
-                api.get("/reports/sales", { 
-                    params: { 
+                api.get("/reports/sales", {
+                    params: {
                         period: derivedPeriod,
                         year: selectedYear,
-                        month: selectedMonth !== "all" ? selectedMonth : undefined
-                    } 
+                        month:
+                            selectedMonth !== "all" ? selectedMonth : undefined,
+                    },
                 }),
             ]);
             setDashboardData({
@@ -165,20 +164,13 @@ export default function Dashboard() {
 
     const chartData = useMemo(() => {
         return chartDataRaw.map((d) => {
-            let label = d.date?.split("-").pop();
-            // If it's a monthly view, we want the day number (01, 02...)
-            // If it's a yearly view, we want the month name (Jan, Feb...)
-            if (derivedPeriod === "year") {
-                const date = new Date(d.date);
-                label = date.toLocaleString("default", { month: "short" });
-            }
             return {
-                label,
+                label: d.label ?? d.date?.split("-").pop() ?? "",
                 value: Number(d.orders) || 0,
-                fullDate: d.date,
+                fullDate: d.date ?? null,
             };
         });
-    }, [chartDataRaw, derivedPeriod]);
+    }, [chartDataRaw]);
 
     const maxOrders = useMemo(
         () => Math.max(...chartData.map((d) => d.value), 5),
@@ -187,7 +179,7 @@ export default function Dashboard() {
 
     const totalOrdersInPeriod = useMemo(
         () => chartData.reduce((sum, d) => sum + d.value, 0),
-        [chartData]
+        [chartData],
     );
 
     if (loading && !stats)
@@ -266,12 +258,18 @@ export default function Dashboard() {
                                 <TrendingUp className="h-5 w-5 text-primary" />
                                 Order Scaling
                             </h3>
-                            <p className="text-[11px] text-muted-foreground mt-0.5">Performance tracking for successful order volume</p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                                Performance tracking for successful order volume
+                            </p>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="hidden md:block text-right pr-4 border-r border-border/50">
-                                <div className="text-lg font-black text-slate-900 leading-none">{totalOrdersInPeriod}</div>
-                                <div className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mt-1">Orders in Period</div>
+                                <div className="text-lg font-black text-slate-900 leading-none">
+                                    {totalOrdersInPeriod}
+                                </div>
+                                <div className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mt-1">
+                                    Orders in Period
+                                </div>
                             </div>
                             <div className="flex gap-1 rounded-xl bg-secondary/30 p-1 border border-border/40 backdrop-blur-sm">
                                 <div className="flex gap-2 items-center">
@@ -283,14 +281,24 @@ export default function Dashboard() {
                                     >
                                         <SelectTrigger
                                             className={cn(
-                                                "h-8 w-auto min-w-[100px] text-[10px] font-bold rounded-lg transition-all border-none bg-secondary/50 text-slate-700 hover:bg-secondary shadow-none px-3"
+                                                "h-8 w-auto min-w-[100px] text-[10px] font-bold rounded-lg transition-all border-none bg-secondary/50 text-slate-700 hover:bg-secondary shadow-none px-3",
                                             )}
                                         >
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent position="popper" side="bottom" sideOffset={10} align="end" className="rounded-xl border-border/50 z-[101] max-h-[250px] overflow-y-auto">
-                                            {months.map(m => (
-                                                <SelectItem key={m.value} value={m.value} className="text-[10px] font-bold">
+                                        <SelectContent
+                                            position="popper"
+                                            side="bottom"
+                                            sideOffset={10}
+                                            align="end"
+                                            className="rounded-xl border-border/50 z-[101] max-h-[250px] overflow-y-auto"
+                                        >
+                                            {months.map((m) => (
+                                                <SelectItem
+                                                    key={m.value}
+                                                    value={m.value}
+                                                    className="text-[10px] font-bold"
+                                                >
                                                     {m.label}
                                                 </SelectItem>
                                             ))}
@@ -305,14 +313,24 @@ export default function Dashboard() {
                                     >
                                         <SelectTrigger
                                             className={cn(
-                                                "h-8 w-auto min-w-[70px] text-[10px] font-bold rounded-lg transition-all border-none bg-secondary/50 text-slate-700 hover:bg-secondary shadow-none px-3"
+                                                "h-8 w-auto min-w-[70px] text-[10px] font-bold rounded-lg transition-all border-none bg-secondary/50 text-slate-700 hover:bg-secondary shadow-none px-3",
                                             )}
                                         >
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent position="popper" side="bottom" sideOffset={10} align="end" className="rounded-xl border-border/50 z-[101]">
-                                            {years.map(y => (
-                                                <SelectItem key={y} value={String(y)} className="text-[10px] font-bold">
+                                        <SelectContent
+                                            position="popper"
+                                            side="bottom"
+                                            sideOffset={10}
+                                            align="end"
+                                            className="rounded-xl border-border/50 z-[101]"
+                                        >
+                                            {years.map((y) => (
+                                                <SelectItem
+                                                    key={y}
+                                                    value={String(y)}
+                                                    className="text-[10px] font-bold"
+                                                >
                                                     {y}
                                                 </SelectItem>
                                             ))}
@@ -330,7 +348,13 @@ export default function Dashboard() {
                             title=""
                             hideHeader={true}
                             color="#3b82f6"
-                            monthLabel={selectedMonth !== "all" ? months.find(m => m.value === selectedMonth)?.label : ""}
+                            monthLabel={
+                                selectedMonth !== "all"
+                                    ? months.find(
+                                          (m) => m.value === selectedMonth,
+                                      )?.label
+                                    : ""
+                            }
                         />
                     </div>
                 </Card>
@@ -342,7 +366,10 @@ export default function Dashboard() {
                             <TrendingUp className="h-4 w-4 text-indigo-500" />
                             Recent Alerts
                         </h3>
-                        <Badge variant="outline" className="text-[10px] font-bold text-indigo-600 border-indigo-100 bg-indigo-50/50">
+                        <Badge
+                            variant="outline"
+                            className="text-[10px] font-bold text-indigo-600 border-indigo-100 bg-indigo-50/50"
+                        >
                             Live Feed
                         </Badge>
                     </div>
@@ -356,24 +383,48 @@ export default function Dashboard() {
                         ) : recentActivity.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full opacity-50 border border-dashed rounded-xl p-4">
                                 <ShoppingBag className="h-8 w-8 mb-2 opacity-20" />
-                                <p className="text-xs font-medium">No recent alerts</p>
+                                <p className="text-xs font-medium">
+                                    No recent alerts
+                                </p>
                             </div>
                         ) : (
                             recentActivity.map((activity, idx) => {
                                 // Dynamic icon selection
-                                const IconComponent = {
-                                    ShoppingBag, CheckCircle, Package, AlertTriangle, RefreshCcw, Clock, Check, Bike
-                                }[activity.icon] || ShoppingBag;
+                                const IconComponent =
+                                    {
+                                        ShoppingBag,
+                                        CheckCircle,
+                                        Package,
+                                        AlertTriangle,
+                                        RefreshCcw,
+                                        Clock,
+                                        Check,
+                                        Bike,
+                                    }[activity.icon] || ShoppingBag;
 
                                 return (
-                                    <div key={activity.id || idx} className="flex gap-3 items-start group">
-                                        <div className={cn(
-                                            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all",
-                                            activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-100 text-green-600" :
-                                                activity.status === 'Alert' ? "bg-rose-100 text-rose-600" :
-                                                    activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-100 text-blue-600" :
-                                                        "bg-amber-100 text-amber-600"
-                                        )}>
+                                    <div
+                                        key={activity.id || idx}
+                                        className="flex gap-3 items-start group"
+                                    >
+                                        <div
+                                            className={cn(
+                                                "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all",
+                                                activity.status ===
+                                                    "Delivered" ||
+                                                    activity.status === "Paid"
+                                                    ? "bg-green-100 text-green-600"
+                                                    : activity.status ===
+                                                        "Alert"
+                                                      ? "bg-rose-100 text-rose-600"
+                                                      : activity.status ===
+                                                              "In Transit" ||
+                                                          activity.status ===
+                                                              "Processing"
+                                                        ? "bg-blue-100 text-blue-600"
+                                                        : "bg-amber-100 text-amber-600",
+                                            )}
+                                        >
                                             <IconComponent className="h-4 w-4" />
                                         </div>
                                         <div className="flex-1 min-w-0 border-b border-slate-50 pb-3 group-last:border-0">
@@ -382,7 +433,12 @@ export default function Dashboard() {
                                                     {activity.title}
                                                 </h4>
                                                 <span className="text-[9px] font-medium text-slate-400 shrink-0 capitalize">
-                                                    {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                                                    {formatDistanceToNow(
+                                                        new Date(
+                                                            activity.timestamp,
+                                                        ),
+                                                        { addSuffix: true },
+                                                    )}
                                                 </span>
                                             </div>
                                             <p className="text-[10px] text-slate-500 line-clamp-1 mb-2">
@@ -391,10 +447,20 @@ export default function Dashboard() {
                                             <Badge
                                                 className={cn(
                                                     "text-[8px] h-4 px-1.5 font-bold uppercase tracking-wider",
-                                                    activity.status === 'Delivered' || activity.status === 'Paid' ? "bg-green-50 text-green-700 border-green-100" :
-                                                        activity.status === 'Alert' ? "bg-rose-50 text-rose-700 border-rose-100" :
-                                                            activity.status === 'In Transit' || activity.status === 'Processing' ? "bg-blue-50 text-blue-700 border-blue-100" :
-                                                                "bg-amber-50 text-amber-700 border-amber-100"
+                                                    activity.status ===
+                                                        "Delivered" ||
+                                                        activity.status ===
+                                                            "Paid"
+                                                        ? "bg-green-50 text-green-700 border-green-100"
+                                                        : activity.status ===
+                                                            "Alert"
+                                                          ? "bg-rose-50 text-rose-700 border-rose-100"
+                                                          : activity.status ===
+                                                                  "In Transit" ||
+                                                              activity.status ===
+                                                                  "Processing"
+                                                            ? "bg-blue-50 text-blue-700 border-blue-100"
+                                                            : "bg-amber-50 text-amber-700 border-amber-100",
                                                 )}
                                                 variant="outline"
                                             >
@@ -408,7 +474,12 @@ export default function Dashboard() {
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-slate-50 text-center">
-                        <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold text-slate-400 hover:text-primary transition-colors" asChild>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-[10px] font-bold text-slate-400 hover:text-primary transition-colors"
+                            asChild
+                        >
                             <Link to="/inventory">View Stock Level</Link>
                         </Button>
                     </div>
@@ -431,7 +502,10 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-grow">
                         <BarChart
-                            data={yearlyCategories.map(c => ({ label: c.name, value: c.revenue }))}
+                            data={yearlyCategories.map((c) => ({
+                                label: c.name,
+                                value: c.revenue,
+                            }))}
                             formatValue={formatCurr}
                             color="#3b82f6"
                             hideHeader
@@ -452,10 +526,15 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-grow">
                         <BarChart
-                            data={returnRateData.map(c => ({ label: c.name, value: c.return_rate ?? c.return_count ?? 0 }))}
+                            data={returnRateData.map((c) => ({
+                                label: c.name,
+                                value: c.return_rate ?? c.return_count ?? 0,
+                            }))}
                             formatValue={(v) => {
                                 const num = parseFloat(Number(v).toFixed(2));
-                                return Number.isInteger(num) ? `${num}%` : `${num}%`;
+                                return Number.isInteger(num)
+                                    ? `${num}%`
+                                    : `${num}%`;
                             }}
                             color="#f43f5e"
                             hideHeader

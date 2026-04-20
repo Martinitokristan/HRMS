@@ -3,7 +3,6 @@ import api from '../../lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   Pagination,
   PaginationContent,
@@ -131,7 +130,7 @@ export default function PaginatedTable({
           </PaginationItem>
         );
         items.push(
-          <PaginationItem key={last}>
+          <PaginationItem key="last-page">
             <PaginationLink
               onClick={() => handlePageChange(totalPages)}
               isActive={totalPages === currentPage}
@@ -338,6 +337,20 @@ export default function PaginatedTable({
           </div>
         ) : (
           <>
+            {pagination && (
+              <div className="mb-4 flex items-center justify-end gap-3">
+                <div className="mr-auto hidden text-sm text-gray-600 md:block">
+                  Showing {pagination.from} to {pagination.to} of {pagination.total} entries
+                </div>
+
+                <Pagination>
+                  <PaginationContent>
+                    {renderPaginationItems()}
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -362,23 +375,6 @@ export default function PaginatedTable({
                 </tbody>
               </table>
             </div>
-            
-            {pagination && (
-              <>
-                <Separator className="my-4" />
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Showing {pagination.from} to {pagination.to} of {pagination.total} entries
-                  </div>
-                  
-                  <Pagination>
-                    <PaginationContent>
-                      {renderPaginationItems()}
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              </>
-            )}
           </>
         )}
       </CardContent>

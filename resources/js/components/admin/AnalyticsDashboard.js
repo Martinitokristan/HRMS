@@ -1,34 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-    TrendingUp, 
-    TrendingDown, 
-    DollarSign, 
-    ShoppingCart, 
-    Users, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    TrendingUp,
+    TrendingDown,
+    DollarSign,
+    ShoppingCart,
+    Users,
     Package,
     Star,
     ArrowUp,
     ArrowDown,
     Calendar,
-    Download
-} from 'lucide-react';
-import api from '../../lib/api';
-import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+    Download,
+} from "lucide-react";
+import api from "../../lib/api";
+import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 
 export default function AnalyticsDashboard() {
-    const { refreshTrigger } = useSilentRefresh('admin_dashboard');
-    const [period, setPeriod] = useState('month');
+    const { refreshTrigger } = useSilentRefresh("admin_dashboard");
+    const [period, setPeriod] = useState("month");
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({
         sales: null,
         topProducts: null,
         customerBehavior: null,
         inventoryForecast: null,
-        profitMargins: null
+        profitMargins: null,
     });
 
     useEffect(() => {
@@ -38,23 +44,32 @@ export default function AnalyticsDashboard() {
     const fetchAnalytics = async () => {
         setLoading(true);
         try {
-            const [salesRes, topProductsRes, customerBehaviorRes, inventoryRes, profitRes] = await Promise.all([
+            const [
+                salesRes,
+                topProductsRes,
+                customerBehaviorRes,
+                inventoryRes,
+                profitRes,
+            ] = await Promise.all([
                 api.get(`/reports/sales?period=${period}`),
                 api.get(`/reports/top-products?period=${period}`),
-                api.get('/analytics/customer-behavior'),
-                api.get('/analytics/inventory-forecast'),
-                api.get('/analytics/profit-margins')
+                api.get("/analytics/customer-behavior"),
+                api.get("/analytics/inventory-forecast"),
+                api.get("/analytics/profit-margins"),
             ]);
 
+            const salesPayload = salesRes.data?.data || {};
+            const salesSummary = salesPayload.summary || {};
+
             setData({
-                sales: salesRes.data.data,
+                sales: salesSummary,
                 topProducts: topProductsRes.data.data,
                 customerBehavior: customerBehaviorRes.data.data,
                 inventoryForecast: inventoryRes.data.data,
-                profitMargins: profitRes.data.data
+                profitMargins: profitRes.data.data,
             });
         } catch (error) {
-            console.error('Failed to fetch analytics:', error);
+            console.error("Failed to fetch analytics:", error);
         } finally {
             setLoading(false);
         }
@@ -62,31 +77,34 @@ export default function AnalyticsDashboard() {
 
     const exportReport = async (type) => {
         try {
-            const response = await api.get(`/reports/export?type=${type}&period=${period}`, {
-                responseType: 'blob'
-            });
-            
+            const response = await api.get(
+                `/reports/export?type=${type}&period=${period}`,
+                {
+                    responseType: "blob",
+                },
+            );
+
             const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
+            const link = document.createElement("a");
             link.href = url;
-            link.setAttribute('download', `${type}-report-${period}.pdf`);
+            link.setAttribute("download", `${type}-report-${period}.pdf`);
             document.body.appendChild(link);
             link.click();
             link.remove();
         } catch (error) {
-            console.error('Failed to export report:', error);
+            console.error("Failed to export report:", error);
         }
     };
 
     const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
+        return new Intl.NumberFormat("en-PH", {
+            style: "currency",
+            currency: "PHP",
         }).format(amount);
     };
 
     const formatNumber = (num) => {
-        return new Intl.NumberFormat('en-PH').format(num);
+        return new Intl.NumberFormat("en-PH").format(num);
     };
 
     const getChangeIcon = (value) => {
@@ -94,7 +112,7 @@ export default function AnalyticsDashboard() {
     };
 
     const getChangeColor = (value) => {
-        return value >= 0 ? 'text-green-600' : 'text-red-600';
+        return value >= 0 ? "text-green-600" : "text-red-600";
     };
 
     if (loading) {
@@ -121,7 +139,10 @@ export default function AnalyticsDashboard() {
                             <SelectItem value="year">Last Year</SelectItem>
                         </SelectContent>
                     </Select>
-                    <Button variant="outline" onClick={() => exportReport('sales')}>
+                    <Button
+                        variant="outline"
+                        onClick={() => exportReport("sales")}
+                    >
                         <Download className="w-4 h-4 mr-2" />
                         Export
                     </Button>
@@ -134,13 +155,26 @@ export default function AnalyticsDashboard() {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Total Revenue
+                                </p>
                                 <p className="text-2xl font-bold">
-                                    {data.sales ? formatCurrency(data.sales.total_revenue) : '₱0'}
+                                    {data.sales
+                                        ? formatCurrency(
+                                              data.sales.total_revenue,
+                                          )
+                                        : "₱0"}
                                 </p>
                                 {data.sales?.revenue_change && (
-                                    <div className={`flex items-center text-sm ${getChangeColor(data.sales.revenue_change)}`}>
-                                        {React.createElement(getChangeIcon(data.sales.revenue_change), { className: "w-3 h-3 mr-1" })}
+                                    <div
+                                        className={`flex items-center text-sm ${getChangeColor(data.sales.revenue_change)}`}
+                                    >
+                                        {React.createElement(
+                                            getChangeIcon(
+                                                data.sales.revenue_change,
+                                            ),
+                                            { className: "w-3 h-3 mr-1" },
+                                        )}
                                         {Math.abs(data.sales.revenue_change)}%
                                     </div>
                                 )}
@@ -154,13 +188,24 @@ export default function AnalyticsDashboard() {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Total Orders
+                                </p>
                                 <p className="text-2xl font-bold">
-                                    {data.sales ? formatNumber(data.sales.total_orders) : '0'}
+                                    {data.sales
+                                        ? formatNumber(data.sales.total_orders)
+                                        : "0"}
                                 </p>
                                 {data.sales?.orders_change && (
-                                    <div className={`flex items-center text-sm ${getChangeColor(data.sales.orders_change)}`}>
-                                        {React.createElement(getChangeIcon(data.sales.orders_change), { className: "w-3 h-3 mr-1" })}
+                                    <div
+                                        className={`flex items-center text-sm ${getChangeColor(data.sales.orders_change)}`}
+                                    >
+                                        {React.createElement(
+                                            getChangeIcon(
+                                                data.sales.orders_change,
+                                            ),
+                                            { className: "w-3 h-3 mr-1" },
+                                        )}
                                         {Math.abs(data.sales.orders_change)}%
                                     </div>
                                 )}
@@ -174,9 +219,16 @@ export default function AnalyticsDashboard() {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Active Customers</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Active Customers
+                                </p>
                                 <p className="text-2xl font-bold">
-                                    {data.customerBehavior ? formatNumber(data.customerBehavior.active_customers) : '0'}
+                                    {data.customerBehavior
+                                        ? formatNumber(
+                                              data.customerBehavior
+                                                  .active_customers,
+                                          )
+                                        : "0"}
                                 </p>
                                 <div className="flex items-center text-sm text-green-600">
                                     <ArrowUp className="w-3 h-3 mr-1" />
@@ -192,9 +244,15 @@ export default function AnalyticsDashboard() {
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Avg. Order Value</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Avg. Order Value
+                                </p>
                                 <p className="text-2xl font-bold">
-                                    {data.sales ? formatCurrency(data.sales.average_order_value) : '₱0'}
+                                    {data.sales
+                                        ? formatCurrency(
+                                              data.sales.average_order_value,
+                                          )
+                                        : "₱0"}
                                 </p>
                                 <div className="flex items-center text-sm text-green-600">
                                     <ArrowUp className="w-3 h-3 mr-1" />
@@ -218,29 +276,38 @@ export default function AnalyticsDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {data.topProducts?.slice(0, 5).map((product, index) => (
-                                <div key={product.id} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium">
-                                            {index + 1}
+                            {data.topProducts
+                                ?.slice(0, 5)
+                                .map((product, index) => (
+                                    <div
+                                        key={product.id}
+                                        className="flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium">
+                                                {index + 1}
+                                            </div>
+                                            <div>
+                                                <div className="font-medium">
+                                                    {product.name}
+                                                </div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    {product.total_sold} sold
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="font-medium">{product.name}</div>
+                                        <div className="text-right">
+                                            <div className="font-medium">
+                                                {formatCurrency(
+                                                    product.total_revenue,
+                                                )}
+                                            </div>
                                             <div className="text-sm text-muted-foreground">
-                                                {product.total_sold} sold
+                                                Revenue
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="font-medium">
-                                            {formatCurrency(product.total_revenue)}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground">
-                                            Revenue
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </CardContent>
                 </Card>
@@ -258,26 +325,41 @@ export default function AnalyticsDashboard() {
                             <div className="flex justify-between items-center">
                                 <span>Repeat Purchase Rate</span>
                                 <Badge variant="secondary">
-                                    {data.customerBehavior?.repeat_purchase_rate || 0}%
+                                    {data.customerBehavior
+                                        ?.repeat_purchase_rate || 0}
+                                    %
                                 </Badge>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span>Avg. Items per Order</span>
                                 <Badge variant="secondary">
-                                    {data.customerBehavior?.avg_items_per_order || 0}
+                                    {data.customerBehavior
+                                        ?.avg_items_per_order || 0}
                                 </Badge>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span>Cart Abandonment Rate</span>
-                                <Badge variant={data.customerBehavior?.cart_abandonment_rate > 30 ? 'destructive' : 'secondary'}>
-                                    {data.customerBehavior?.cart_abandonment_rate || 0}%
+                                <Badge
+                                    variant={
+                                        data.customerBehavior
+                                            ?.cart_abandonment_rate > 30
+                                            ? "destructive"
+                                            : "secondary"
+                                    }
+                                >
+                                    {data.customerBehavior
+                                        ?.cart_abandonment_rate || 0}
+                                    %
                                 </Badge>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span>Customer Satisfaction</span>
                                 <div className="flex items-center gap-1">
                                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                    <span>{data.customerBehavior?.avg_satisfaction || 0}</span>
+                                    <span>
+                                        {data.customerBehavior
+                                            ?.avg_satisfaction || 0}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -299,19 +381,26 @@ export default function AnalyticsDashboard() {
                             <div className="text-2xl font-bold text-red-600">
                                 {data.inventoryForecast?.low_stock_items || 0}
                             </div>
-                            <div className="text-sm text-muted-foreground">Low Stock Items</div>
+                            <div className="text-sm text-muted-foreground">
+                                Low Stock Items
+                            </div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl font-bold text-yellow-600">
-                                {data.inventoryForecast?.out_of_stock_items || 0}
+                                {data.inventoryForecast?.out_of_stock_items ||
+                                    0}
                             </div>
-                            <div className="text-sm text-muted-foreground">Out of Stock</div>
+                            <div className="text-sm text-muted-foreground">
+                                Out of Stock
+                            </div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl font-bold text-green-600">
                                 {data.inventoryForecast?.overstock_items || 0}
                             </div>
-                            <div className="text-sm text-muted-foreground">Overstock Items</div>
+                            <div className="text-sm text-muted-foreground">
+                                Overstock Items
+                            </div>
                         </div>
                     </div>
                 </CardContent>
@@ -328,27 +417,43 @@ export default function AnalyticsDashboard() {
                 <CardContent>
                     <div className="grid gap-4 md:grid-cols-2">
                         <div>
-                            <div className="text-sm text-muted-foreground">Gross Profit Margin</div>
+                            <div className="text-sm text-muted-foreground">
+                                Gross Profit Margin
+                            </div>
                             <div className="text-2xl font-bold text-green-600">
                                 {data.profitMargins?.gross_profit_margin || 0}%
                             </div>
                         </div>
                         <div>
-                            <div className="text-sm text-muted-foreground">Net Profit Margin</div>
+                            <div className="text-sm text-muted-foreground">
+                                Net Profit Margin
+                            </div>
                             <div className="text-2xl font-bold text-blue-600">
                                 {data.profitMargins?.net_profit_margin || 0}%
                             </div>
                         </div>
                         <div>
-                            <div className="text-sm text-muted-foreground">Total Profit</div>
+                            <div className="text-sm text-muted-foreground">
+                                Total Profit
+                            </div>
                             <div className="text-2xl font-bold">
-                                {data.profitMargins ? formatCurrency(data.profitMargins.total_profit) : '₱0'}
+                                {data.profitMargins
+                                    ? formatCurrency(
+                                          data.profitMargins.total_profit,
+                                      )
+                                    : "₱0"}
                             </div>
                         </div>
                         <div>
-                            <div className="text-sm text-muted-foreground">Operating Expenses</div>
+                            <div className="text-sm text-muted-foreground">
+                                Operating Expenses
+                            </div>
                             <div className="text-2xl font-bold text-red-600">
-                                {data.profitMargins ? formatCurrency(data.profitMargins.operating_expenses) : '₱0'}
+                                {data.profitMargins
+                                    ? formatCurrency(
+                                          data.profitMargins.operating_expenses,
+                                      )
+                                    : "₱0"}
                             </div>
                         </div>
                     </div>

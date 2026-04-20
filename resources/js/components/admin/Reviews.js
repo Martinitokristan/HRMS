@@ -1,41 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, MessageSquare, ThumbsUp, ThumbsDown, Search, ArrowLeft, ArrowRight, Table } from 'lucide-react';
-import { useToast } from '../../context/ToastContext';
-import ConfirmModal from '../shared/ConfirmModal';
-import StatCard from '../shared/StatCard';
-import Tooltip from '../shared/Tooltip';
-import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { STALE_KEYS, markStale } from '../../store/dataStore';
+import React, { useState, useEffect } from "react";
+import api from "../../lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Star,
+    MessageSquare,
+    ThumbsUp,
+    ThumbsDown,
+    Search,
+    ArrowLeft,
+    ArrowRight,
+    Table,
+} from "lucide-react";
+import { useToast } from "../../context/ToastContext";
+import ConfirmModal from "../shared/ConfirmModal";
+import StatCard from "../shared/StatCard";
+import Tooltip from "../shared/Tooltip";
+import { useSilentRefresh } from "../../hooks/useSilentRefresh";
+import { STALE_KEYS, markStale } from "../../store/dataStore";
 
 export default function Reviews() {
     const [reviews, setReviews] = useState([]);
-    const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
-    const [stats, setStats] = useState({ total: 0, good: 0, low: 0, average: 0 });
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        total: 0,
+    });
+    const [stats, setStats] = useState({
+        total: 0,
+        good: 0,
+        low: 0,
+        average: 0,
+    });
     const [loading, setLoading] = useState(true);
     const [selectedReview, setSelectedReview] = useState(null);
-    const [ratingFilter, setRatingFilter] = useState('all');
-    const [searchTerm, setSearchTerm] = useState('');
+    const [ratingFilter, setRatingFilter] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
     const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_REVIEWS);
 
     const [confirmModal, setConfirmModal] = useState({
         show: false,
-        title: '',
-        message: '',
+        title: "",
+        message: "",
         onConfirm: null,
-        variant: 'default'
+        variant: "default",
     });
 
-    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+    const showConfirm = (title, message, onConfirm, variant = "default") => {
         setConfirmModal({ show: true, title, message, onConfirm, variant });
     };
 
     const closeConfirm = () => {
-        setConfirmModal(prev => ({ ...prev, show: false }));
+        setConfirmModal((prev) => ({ ...prev, show: false }));
     };
 
     useEffect(() => {
@@ -44,7 +68,7 @@ export default function Reviews() {
 
     // Added local search handler instead of fetching on every keystroke
     const handleSearch = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
             fetchReviews(1);
         }
     };
@@ -52,27 +76,33 @@ export default function Reviews() {
     const fetchReviews = async (page = 1) => {
         setLoading(true);
 
-        
         try {
             const params = new URLSearchParams();
-            if (ratingFilter !== 'all') params.append('rating_filter', ratingFilter);
-            if (searchTerm) params.append('search', searchTerm);
-            params.append('page', page);
+            if (ratingFilter !== "all")
+                params.append("rating_filter", ratingFilter);
+            if (searchTerm) params.append("search", searchTerm);
+            params.append("page", page);
 
             const response = await api.get(`/reviews?${params.toString()}`);
-            
-            if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-                showToast('Failed to load reviews: Server returned an invalid format', 'error');
+
+            if (
+                typeof response.data === "string" &&
+                response.data.includes("<!DOCTYPE html>")
+            ) {
+                showToast(
+                    "Failed to load reviews: Server returned an invalid format",
+                    "error",
+                );
                 setReviews([]);
                 return;
             }
 
             const data = response.data;
-            
+
             if (data.stats) {
                 setStats(data.stats);
             }
-            
+
             if (data && data.data) {
                 const reviewsPage = data.data;
                 // If standard laravel pagination object
@@ -81,18 +111,22 @@ export default function Reviews() {
                     setPagination({
                         current_page: reviewsPage.current_page,
                         last_page: reviewsPage.last_page,
-                        total: reviewsPage.total
+                        total: reviewsPage.total,
                     });
                 } else if (Array.isArray(reviewsPage)) {
                     setReviews(reviewsPage);
-                    setPagination({ current_page: 1, last_page: 1, total: reviewsPage.length });
+                    setPagination({
+                        current_page: 1,
+                        last_page: 1,
+                        total: reviewsPage.length,
+                    });
                 }
             } else {
                 setReviews([]);
             }
         } catch (error) {
-            console.error('Failed to fetch reviews:', error);
-            showToast('Failed to load reviews', 'error');
+            console.error("Failed to fetch reviews:", error);
+            showToast("Failed to load reviews", "error");
             setReviews([]);
         } finally {
             setLoading(false);
@@ -101,24 +135,27 @@ export default function Reviews() {
 
     const deleteReview = async (reviewId) => {
         showConfirm(
-            'Delete Review',
-            'Are you sure you want to delete this review? This action cannot be undone.',
+            "Delete Review",
+            "Are you sure you want to delete this review? This action cannot be undone.",
             async () => {
                 closeConfirm();
                 try {
                     await api.delete(`/reviews/${reviewId}`);
-                    showToast('Review deleted successfully');
-                    
+                    showToast("Review deleted successfully");
+
                     // Trigger sync for Admin and Customer (storefront product ratings)
-                    markStale(STALE_KEYS.ADMIN_REVIEWS, STALE_KEYS.CUSTOMER_SHOP);
-                    
+                    markStale(
+                        STALE_KEYS.ADMIN_REVIEWS,
+                        STALE_KEYS.CUSTOMER_SHOP,
+                    );
+
                     setSelectedReview(null);
                 } catch (error) {
-                    console.error('Failed to delete review:', error);
-                    showToast('Failed to delete review', 'error');
+                    console.error("Failed to delete review:", error);
+                    showToast("Failed to delete review", "error");
                 }
             },
-            'destructive'
+            "destructive",
         );
     };
 
@@ -128,7 +165,7 @@ export default function Reviews() {
                 {Array.from({ length: 5 }, (_, i) => (
                     <Star
                         key={i}
-                        className={`h-4 w-4 ${i < rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+                        className={`h-4 w-4 ${i < rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
                     />
                 ))}
             </div>
@@ -140,36 +177,40 @@ export default function Reviews() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold">Product Review Analytics</h1>
-                    <p className="text-muted-foreground">Monitor and analyze customer product feedback</p>
+                    <h1 className="text-2xl font-bold">
+                        Product Review Analytics
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Monitor and analyze customer product feedback
+                    </p>
                 </div>
             </div>
 
             {/* Stats Summary */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard 
-                    label="Total Reviews" 
-                    value={stats.total} 
-                    icon={MessageSquare} 
-                    accentColor="blue" 
+                <StatCard
+                    label="Total Reviews"
+                    value={stats.total}
+                    icon={MessageSquare}
+                    accentColor="blue"
                 />
-                <StatCard 
-                    label="Average Rating" 
-                    value={`${stats.average} / 5`} 
-                    icon={Star} 
-                    accentColor="amber" 
+                <StatCard
+                    label="Average Rating"
+                    value={`${stats.average} / 5`}
+                    icon={Star}
+                    accentColor="amber"
                 />
-                <StatCard 
-                    label="Good Reviews (4-5)" 
-                    value={stats.good} 
-                    icon={ThumbsUp} 
-                    accentColor="green" 
+                <StatCard
+                    label="Good Reviews (4-5)"
+                    value={stats.good}
+                    icon={ThumbsUp}
+                    accentColor="green"
                 />
-                <StatCard 
-                    label="Low Reviews (1-3)" 
-                    value={stats.low} 
-                    icon={ThumbsDown} 
-                    accentColor="red" 
+                <StatCard
+                    label="Low Reviews (1-3)"
+                    value={stats.low}
+                    icon={ThumbsDown}
+                    accentColor="red"
                 />
             </div>
 
@@ -184,26 +225,35 @@ export default function Reviews() {
                                     type="text"
                                     placeholder="Search by product or customer... (Press Enter to search)"
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
                                     onKeyDown={handleSearch}
                                     className="w-full pl-10 pr-4 py-2 border rounded-l-md focus:outline-none focus:ring-1 focus:ring-primary"
                                 />
-                                <Button 
-                                    onClick={() => fetchReviews(1)} 
+                                <Button
+                                    onClick={() => fetchReviews(1)}
                                     className="rounded-l-none"
                                 >
                                     Search
                                 </Button>
                             </div>
                         </div>
-                        <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                        <Select
+                            value={ratingFilter}
+                            onValueChange={setRatingFilter}
+                        >
                             <SelectTrigger className="w-full sm:w-56">
                                 <SelectValue placeholder="Filter by Ratings" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Ratings</SelectItem>
-                                <SelectItem value="good">Good Reviews (4-5 Stars)</SelectItem>
-                                <SelectItem value="low">Low Reviews (1-3 Stars)</SelectItem>
+                                <SelectItem value="good">
+                                    Good Reviews (4-5 Stars)
+                                </SelectItem>
+                                <SelectItem value="low">
+                                    Low Reviews (1-3 Stars)
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -212,40 +262,89 @@ export default function Reviews() {
 
             {/* Data Table */}
             <Card>
+                {!loading && pagination.last_page > 1 && (
+                    <div className="p-4 border-b flex items-center justify-end gap-2">
+                        <p className="text-sm text-muted-foreground mr-auto hidden md:block">
+                            Showing page {pagination.current_page} of{" "}
+                            {pagination.last_page} ({pagination.total} total
+                            reviews)
+                        </p>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={pagination.current_page === 1}
+                            onClick={() =>
+                                fetchReviews(pagination.current_page - 1)
+                            }
+                        >
+                            <ArrowLeft className="h-4 w-4 mr-1" /> Prev
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={
+                                pagination.current_page === pagination.last_page
+                            }
+                            onClick={() =>
+                                fetchReviews(pagination.current_page + 1)
+                            }
+                        >
+                            Next <ArrowRight className="h-4 w-4 ml-1" />
+                        </Button>
+                    </div>
+                )}
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left border-collapse">
                         <thead className="bg-muted text-muted-foreground border-b">
                             <tr>
                                 <th className="p-4 font-semibold">Product</th>
                                 <th className="p-4 font-semibold">Customer</th>
-                                <th className="p-4 font-semibold text-center">Rating</th>
+                                <th className="p-4 font-semibold text-center">
+                                    Rating
+                                </th>
                                 <th className="p-4 font-semibold">Feedback</th>
                                 <th className="p-4 font-semibold">Date</th>
-                                <th className="p-4 font-semibold text-right">Actions</th>
+                                <th className="p-4 font-semibold text-right">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan="6" className="h-48 text-center">
+                                    <td
+                                        colSpan="6"
+                                        className="h-48 text-center"
+                                    >
                                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                                     </td>
                                 </tr>
                             ) : reviews.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="h-48 text-center text-muted-foreground">
+                                    <td
+                                        colSpan="6"
+                                        className="h-48 text-center text-muted-foreground"
+                                    >
                                         <Table className="h-10 w-10 mx-auto mb-2 opacity-50" />
                                         No reviews found
                                     </td>
                                 </tr>
                             ) : (
                                 reviews.map((review) => (
-                                    <tr key={review.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
-                                        <td className="p-4 font-medium max-w-[200px] truncate" title={review.product?.name}>
-                                            {review.product?.name || 'Unknown Product'}
+                                    <tr
+                                        key={review.id}
+                                        className="border-b last:border-0 hover:bg-muted/50 transition-colors"
+                                    >
+                                        <td
+                                            className="p-4 font-medium max-w-[200px] truncate"
+                                            title={review.product?.name}
+                                        >
+                                            {review.product?.name ||
+                                                "Unknown Product"}
                                         </td>
                                         <td className="p-4">
-                                            {review.customer?.name || 'Guest'}
+                                            {review.customer?.name || "Guest"}
                                         </td>
                                         <td className="p-4">
                                             <div className="flex justify-center">
@@ -253,19 +352,35 @@ export default function Reviews() {
                                             </div>
                                         </td>
                                         <td className="p-4 max-w-[300px]">
-                                            <p className="truncate text-muted-foreground" title={review.review_text}>
-                                                {review.review_text || <span className="italic">No text provided</span>}
+                                            <p
+                                                className="truncate text-muted-foreground"
+                                                title={review.review_text}
+                                            >
+                                                {review.review_text || (
+                                                    <span className="italic">
+                                                        No text provided
+                                                    </span>
+                                                )}
                                             </p>
                                         </td>
                                         <td className="p-4 whitespace-nowrap text-muted-foreground">
-                                            {new Date(review.created_at).toLocaleDateString()}
+                                            {new Date(
+                                                review.created_at,
+                                            ).toLocaleDateString()}
                                         </td>
                                         <td className="p-4 text-right">
-                                            <Tooltip label="View Review Details" position="top">
+                                            <Tooltip
+                                                label="View Review Details"
+                                                position="top"
+                                            >
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
-                                                    onClick={() => setSelectedReview(review)}
+                                                    onClick={() =>
+                                                        setSelectedReview(
+                                                            review,
+                                                        )
+                                                    }
                                                 >
                                                     View
                                                 </Button>
@@ -277,33 +392,6 @@ export default function Reviews() {
                         </tbody>
                     </table>
                 </div>
-
-                {/* Pagination Controls */}
-                {!loading && pagination.last_page > 1 && (
-                    <div className="p-4 border-t flex items-center justify-between">
-                        <p className="text-sm text-muted-foreground">
-                            Showing page {pagination.current_page} of {pagination.last_page} ({pagination.total} total reviews)
-                        </p>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={pagination.current_page === 1}
-                                onClick={() => fetchReviews(pagination.current_page - 1)}
-                            >
-                                <ArrowLeft className="h-4 w-4 mr-1" /> Prev
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={pagination.current_page === pagination.last_page}
-                                onClick={() => fetchReviews(pagination.current_page + 1)}
-                            >
-                                Next <ArrowRight className="h-4 w-4 ml-1" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
             </Card>
 
             {/* Review Details Modal */}
@@ -325,9 +413,18 @@ export default function Reviews() {
                         <CardContent className="pt-6 space-y-4">
                             <div className="flex justify-between items-center">
                                 <div className="space-y-1">
-                                    <h4 className="font-semibold text-lg">{selectedReview.product?.name || 'Unknown Product'}</h4>
+                                    <h4 className="font-semibold text-lg">
+                                        {selectedReview.product?.name ||
+                                            "Unknown Product"}
+                                    </h4>
                                     <p className="text-sm text-muted-foreground">
-                                        By {selectedReview.customer?.name || 'Guest'} • {new Date(selectedReview.created_at).toLocaleString()}
+                                        By{" "}
+                                        {selectedReview.customer?.name ||
+                                            "Guest"}{" "}
+                                        •{" "}
+                                        {new Date(
+                                            selectedReview.created_at,
+                                        ).toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="flex bg-muted p-2 rounded-md">
@@ -337,9 +434,13 @@ export default function Reviews() {
 
                             <div className="bg-muted/30 p-4 rounded-lg border min-h-[100px]">
                                 {selectedReview.review_text ? (
-                                    <p className="text-sm leading-relaxed">{selectedReview.review_text}</p>
+                                    <p className="text-sm leading-relaxed">
+                                        {selectedReview.review_text}
+                                    </p>
                                 ) : (
-                                    <p className="text-sm italic text-muted-foreground">No written feedback provided.</p>
+                                    <p className="text-sm italic text-muted-foreground">
+                                        No written feedback provided.
+                                    </p>
                                 )}
                             </div>
 
@@ -352,7 +453,9 @@ export default function Reviews() {
                                 </Button>
                                 <Button
                                     variant="destructive"
-                                    onClick={() => deleteReview(selectedReview.id)}
+                                    onClick={() =>
+                                        deleteReview(selectedReview.id)
+                                    }
                                 >
                                     Delete Review
                                 </Button>
