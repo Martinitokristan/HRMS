@@ -960,6 +960,10 @@ input, select, textarea {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
+.mx-1{
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
 .-ml-2{
   margin-left: -0.5rem;
 }
@@ -4161,6 +4165,9 @@ input, select, textarea {
 .text-yellow-800{
   --tw-text-opacity: 1;
   color: rgb(133 77 14 / var(--tw-text-opacity));
+}
+.text-muted-foreground\/70{
+  color: hsl(var(--muted-foreground) / 0.7);
 }
 .underline{
   text-decoration-line: underline;

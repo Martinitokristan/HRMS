@@ -757,10 +757,10 @@ export default function Returns() {
                 </Card>
             ) : (
                 <div className="space-y-3">
-                    {pagination.last_page > 1 && (
+                    {returns.length > 0 && (
                         <div className="flex justify-end gap-2 pb-1">
                             <span className="hidden md:flex items-center px-3 text-sm text-muted-foreground mr-auto">
-                                Page {page} of {pagination.last_page}
+                                Page {page} of {pagination.last_page || 1}
                             </span>
                             <Button
                                 variant="outline"
@@ -773,7 +773,7 @@ export default function Returns() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                disabled={page >= pagination.last_page}
+                                disabled={page >= (pagination.last_page || 1)}
                                 onClick={() => setPage((p) => p + 1)}
                             >
                                 Next

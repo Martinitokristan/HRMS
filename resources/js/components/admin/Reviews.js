@@ -262,12 +262,12 @@ export default function Reviews() {
 
             {/* Data Table */}
             <Card>
-                {!loading && pagination.last_page > 1 && (
+                {!loading && reviews.length > 0 && (
                     <div className="p-4 border-b flex items-center justify-end gap-2">
                         <p className="text-sm text-muted-foreground mr-auto hidden md:block">
                             Showing page {pagination.current_page} of{" "}
-                            {pagination.last_page} ({pagination.total} total
-                            reviews)
+                            {pagination.last_page || 1} ({pagination.total}{" "}
+                            total reviews)
                         </p>
                         <Button
                             variant="outline"
@@ -283,7 +283,8 @@ export default function Reviews() {
                             variant="outline"
                             size="sm"
                             disabled={
-                                pagination.current_page === pagination.last_page
+                                pagination.current_page ===
+                                (pagination.last_page || 1)
                             }
                             onClick={() =>
                                 fetchReviews(pagination.current_page + 1)

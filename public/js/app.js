@@ -8076,7 +8076,7 @@ function GCashLogs() {
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_3__.Card, {
       className: "min-w-full inline-block align-middle",
-      children: [totalPages > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
+      children: [Array.isArray(logs) && logs.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
         className: "px-6 py-4 border-b border-slate-200 flex items-center justify-end gap-2",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("p", {
           className: "text-sm text-slate-600 mr-auto hidden md:block",
@@ -9657,11 +9657,11 @@ function Returns() {
       })]
     }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsxs)("div", {
       className: "space-y-3",
-      children: [pagination.last_page > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsxs)("div", {
+      children: [returns.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsxs)("div", {
         className: "flex justify-end gap-2 pb-1",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsxs)("span", {
           className: "hidden md:flex items-center px-3 text-sm text-muted-foreground mr-auto",
-          children: ["Page ", page, " of ", pagination.last_page]
+          children: ["Page ", page, " of ", pagination.last_page || 1]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
           variant: "outline",
           size: "sm",
@@ -9675,7 +9675,7 @@ function Returns() {
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_25__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
           variant: "outline",
           size: "sm",
-          disabled: page >= pagination.last_page,
+          disabled: page >= (pagination.last_page || 1),
           onClick: function onClick() {
             return setPage(function (p) {
               return p + 1;
@@ -10116,11 +10116,11 @@ function Reviews() {
         })
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)(_components_ui_card__WEBPACK_IMPORTED_MODULE_2__.Card, {
-      children: [!loading && pagination.last_page > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
+      children: [!loading && reviews.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("div", {
         className: "p-4 border-b flex items-center justify-end gap-2",
         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)("p", {
           className: "text-sm text-muted-foreground mr-auto hidden md:block",
-          children: ["Showing page ", pagination.current_page, " of", " ", pagination.last_page, " (", pagination.total, " total reviews)"]
+          children: ["Showing page ", pagination.current_page, " of", " ", pagination.last_page || 1, " (", pagination.total, " ", "total reviews)"]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_3__.Button, {
           variant: "outline",
           size: "sm",
@@ -10134,7 +10134,7 @@ function Reviews() {
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_19__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_3__.Button, {
           variant: "outline",
           size: "sm",
-          disabled: pagination.current_page === pagination.last_page,
+          disabled: pagination.current_page === (pagination.last_page || 1),
           onClick: function onClick() {
             return fetchReviews(pagination.current_page + 1);
           },
@@ -36492,14 +36492,17 @@ function Pagination(_ref2) {
     perPage = _ref2$perPage === void 0 ? 15 : _ref2$perPage,
     page = _ref2.page,
     onChange = _ref2.onChange;
-  var totalPages = Math.ceil(total / perPage);
-  if (totalPages <= 1) return null;
+  var safeTotal = Number.isFinite(Number(total)) ? Math.max(0, Number(total)) : 0;
+  var safePerPage = Number.isFinite(Number(perPage)) ? Math.max(1, Number(perPage)) : 15;
+  var totalPages = Math.max(1, Math.ceil(safeTotal / safePerPage));
+  var safePage = Number.isFinite(Number(page)) ? Math.min(Math.max(1, Number(page)), totalPages) : 1;
+  var currentPageCount = safeTotal === 0 ? 0 : Math.max(0, Math.min(safePerPage, safeTotal - (safePage - 1) * safePerPage));
   var renderButtons = function renderButtons() {
     var buttons = [];
-    var startPage = Math.max(1, page - 2);
-    var endPage = Math.min(totalPages, page + 2);
-    if (page <= 3) endPage = Math.min(5, totalPages);
-    if (page >= totalPages - 2) startPage = Math.max(1, totalPages - 4);
+    var startPage = Math.max(1, safePage - 2);
+    var endPage = Math.min(totalPages, safePage + 2);
+    if (safePage <= 3) endPage = Math.min(5, totalPages);
+    if (safePage >= totalPages - 2) startPage = Math.max(1, totalPages - 4);
     if (startPage > 1) {
       buttons.push(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(PaginationBtn, {
         onClick: function onClick() {
@@ -36514,7 +36517,7 @@ function Pagination(_ref2) {
     }
     var _loop = function _loop(i) {
       buttons.push(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(PaginationBtn, {
-        active: page === i,
+        active: safePage === i,
         onClick: function onClick() {
           return onChange(i);
         },
@@ -36539,37 +36542,49 @@ function Pagination(_ref2) {
     return buttons;
   };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-    className: "flex flex-wrap items-center justify-between gap-3",
+    className: "w-full flex flex-wrap items-center justify-between gap-3",
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("p", {
       className: "text-[13px] text-muted-foreground",
       children: ["Showing", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
         className: "font-semibold text-foreground",
-        children: (page - 1) * perPage + 1
-      }), " ", "to", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+        children: currentPageCount
+      }), " ", "out of", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
         className: "font-semibold text-foreground",
-        children: Math.min(page * perPage, total)
-      }), " ", "of", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
-        className: "font-semibold text-foreground",
-        children: total
-      })]
+        children: safeTotal
+      }), " "]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
       className: "flex items-center gap-1",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(PaginationBtn, {
-        disabled: page === 1,
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("span", {
+        className: "mr-1 whitespace-nowrap rounded-md border border-border bg-white px-2 py-1 text-[12px] font-semibold text-muted-foreground",
+        children: ["Page ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+          className: "text-foreground",
+          children: safePage
+        }), " of", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+          className: "text-foreground",
+          children: totalPages
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("button", {
+        disabled: safePage === 1,
         onClick: function onClick() {
-          return onChange(page - 1);
+          return onChange(safePage - 1);
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_1__["default"], {
+        className: "flex h-8 items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 text-[12px] font-semibold text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_1__["default"], {
           className: "h-4 w-4"
-        })
-      }), renderButtons(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(PaginationBtn, {
-        disabled: page === totalPages,
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+          children: "Prev"
+        })]
+      }), renderButtons(), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("button", {
+        disabled: safePage === totalPages,
         onClick: function onClick() {
-          return onChange(page + 1);
+          return onChange(safePage + 1);
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        className: "flex h-8 items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 text-[12px] font-semibold text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
+          children: "Next"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_2__["default"], {
           className: "h-4 w-4"
-        })
+        })]
       })]
     })]
   });

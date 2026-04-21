@@ -127,7 +127,7 @@ export default function GCashLogs() {
             </div>
 
             <Card className="min-w-full inline-block align-middle">
-                {totalPages > 1 && (
+                {Array.isArray(logs) && logs.length > 0 && (
                     <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-end gap-2">
                         <p className="text-sm text-slate-600 mr-auto hidden md:block">
                             Showing page{" "}
