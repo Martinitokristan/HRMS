@@ -14,6 +14,7 @@ use App\Notifications\GCashPaymentReceived;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class GCashController extends Controller
 {
@@ -87,97 +88,120 @@ class GCashController extends Controller
 
         Log::info("Parsed GCash phone: {$parsedPhone}, amount: {$amount}");
 
-        $matchingSale = null;
+        $amountFormatted = number_format($amount, 2, '.', '');
 
-        if ($parsedPhone) {
+        $saleIdForSms = null;
+        $transactionResult = DB::transaction(function () use (
+            $parsedPhone,
+            $amountFormatted,
+            $smsBody,
+            $amount,
+            $parsedRef,
+            $request,
+            &$saleIdForSms
+        ) {
+            if (!$parsedPhone) {
+                GCashTransaction::create([
+                    'sms_body' => $smsBody,
+                    'parsed_amount' => $amount,
+                    'parsed_ref' => $parsedRef,
+                    'raw_payload' => json_encode($request->all()),
+                    'matched' => false,
+                ]);
+
+                return ['status' => 'ignored', 'reason' => 'no_sender_phone'];
+            }
+
             // Normalize: try both 09XX and +639XX formats
             $phoneVariants = [
-                $parsedPhone,                                    // 09070574360
-                '+63' . substr($parsedPhone, 1),                 // +639070574360
-                str_replace('+63', '0', $parsedPhone),           // safety fallback
+                $parsedPhone, // 09070574360
+                '+63' . substr($parsedPhone, 1), // +639070574360
+                str_replace('+63', '0', $parsedPhone), // safety fallback
             ];
 
             $matchingSale = Sale::where('status', 'pending_payment')
-                                ->where('payment_method', 'gcash')
-                                ->where('total_amount', $amount)
-                                ->where(function($q) use ($phoneVariants) {
-                                    $q->whereIn('payment_phone_number', $phoneVariants);
-                                })
-                                ->orderBy('created_at', 'asc')
-                                ->first();
-        }
+                ->where('payment_method', 'gcash')
+                ->where('total_amount', $amountFormatted)
+                ->where(function ($q) use ($phoneVariants) {
+                    $q->whereIn('payment_phone_number', $phoneVariants);
+                })
+                ->orderBy('created_at', 'asc')
+                ->lockForUpdate()
+                ->first();
 
-        if (!$matchingSale) {
-            Log::warning("No pending order found for phone: {$parsedPhone}, amount: {$amount}");
-            
-            GCashTransaction::create([
-                'sms_body' => $smsBody,
-                'parsed_amount' => $amount,
-                'parsed_ref' => $parsedRef,
-                'raw_payload' => json_encode($request->all()),
-                'matched' => false
-            ]);
+            if (!$matchingSale) {
+                Log::warning("No pending order found for phone: {$parsedPhone}, amount: {$amountFormatted}");
 
-            return response()->json(['status' => 'ignored', 'reason' => 'no_matching_order']);
-        }
+                GCashTransaction::create([
+                    'sms_body' => $smsBody,
+                    'parsed_amount' => $amount,
+                    'parsed_ref' => $parsedRef,
+                    'raw_payload' => json_encode($request->all()),
+                    'matched' => false,
+                ]);
 
-        $sale = $matchingSale;
+                return ['status' => 'ignored', 'reason' => 'no_matching_order'];
+            }
 
-        // 5. Update the order to confirmed inside a transaction
-        DB::beginTransaction();
-        try {
-            $sale->status = 'confirmed';
-            $sale->payment_confirmed_at = now();
-            $sale->save();
-            Cache::tags(['products'])->flush();
+            // Re-check state under lock for idempotency.
+            if ($matchingSale->status !== 'pending_payment') {
+                return ['status' => 'ignored', 'reason' => 'already_processed', 'sale_id' => $matchingSale->id];
+            }
+
+            $matchingSale->forceFill([
+                'status' => 'confirmed',
+                'payment_confirmed_at' => now(),
+            ])->save();
+
+            try {
+                Cache::tags(['products'])->flush();
+            } catch (\BadMethodCallException $e) {
+                Cache::flush();
+            }
 
             // Create GCash Transaction Log
             GCashTransaction::create([
-                'sale_id' => $sale->id,
+                'sale_id' => $matchingSale->id,
                 'sms_body' => $smsBody,
                 'parsed_amount' => $amount,
                 'parsed_ref' => $parsedRef,
                 'matched' => true,
                 'auto_confirmed' => true,
-                'raw_payload' => json_encode($request->all())
+                'raw_payload' => json_encode($request->all()),
             ]);
 
-            // Update delivery status from created (or null) to pending, if it exists
-            $delivery = $sale->delivery;
+            // Update delivery status from created/waiting to pending, if it exists
+            $delivery = $matchingSale->delivery;
             if ($delivery) {
                 if (in_array($delivery->status, ['created', 'waiting'])) {
-                    $delivery->status = 'pending';
-                    $delivery->save();
+                    $delivery->forceFill(['status' => 'pending'])->save();
                 }
             } else {
                 $delivery = Delivery::create([
-                    'sale_id' => $sale->id,
+                    'sale_id' => $matchingSale->id,
                     'status' => 'pending',
                 ]);
             }
 
             // Send notification to customer
             CustomerNotification::create([
-                'customer_id' => $sale->customer_id,
+                'customer_id' => $matchingSale->customer_id,
                 'delivery_id' => $delivery ? $delivery->id : null,
                 'title' => 'Payment Confirmed',
-                'message' => "Your GCash payment of ₱" . number_format($amount, 2) . " for order #{$sale->order_number} has been received and confirmed.",
+                'message' => "Your GCash payment of ₱" . number_format($amount, 2) . " for order #{$matchingSale->order_number} has been received and confirmed.",
                 'type' => 'payment_confirmed',
-                'is_read' => false
+                'is_read' => false,
             ]);
 
             // Send notification to admin users about GCash payment
             $admins = User::whereIn('id', \Illuminate\Support\Facades\Cache::remember('admin_user_ids', 300, fn () => \App\Models\User::where('role', 'admin')->pluck('id')->all()))->get();
             foreach ($admins as $admin) {
-                $admin->notify(new GCashPaymentReceived($sale, $smsBody, $amount, $parsedPhone));
+                $admin->notify(new GCashPaymentReceived($matchingSale, $smsBody, $amount, $parsedPhone));
             }
-
-            DB::commit();
-            Log::info("Successfully auto-confirmed order #{$sale->order_number} for ₱{$amount}");
 
             // Broadcast real-time update so customer's order list and notifications refresh instantly
             broadcast(new DataMutated(
-                "private-customer.{$sale->customer_id}",
+                "private-customer.{$matchingSale->customer_id}",
                 ['customer_orders', 'customer_notifications'],
                 'payment.confirmed'
             ));
@@ -187,15 +211,21 @@ class GCashController extends Controller
                 'payment.confirmed'
             ));
 
-            dispatch(new SendGcashConfirmationSms($sale, $amount))->afterCommit();
-            
-            return response()->json(['status' => 'success', 'sale_id' => $sale->id]);
+            $saleIdForSms = $matchingSale->id;
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Failed to confirm order #{$sale->id}: " . $e->getMessage());
-            return response()->json(['error' => 'Server error'], 500);
+            Log::info("Successfully auto-confirmed order #{$matchingSale->order_number} for ₱{$amountFormatted}");
+
+            return ['status' => 'success', 'sale_id' => $matchingSale->id];
+        });
+
+        if (!empty($saleIdForSms) && ($transactionResult['status'] ?? null) === 'success') {
+            $saleForSms = Sale::find($saleIdForSms);
+            if ($saleForSms) {
+                dispatch(new SendGcashConfirmationSms($saleForSms, $amount))->afterCommit();
+            }
         }
+
+        return response()->json($transactionResult);
     }
 
     /**
@@ -230,37 +260,51 @@ class GCashController extends Controller
      */
     public function submitProof(Request $request, string $token)
     {
-        if (!Sale::where('payment_proof_token', $token)->where('status', 'pending_payment')->exists()) {
-            return response()->json(['error' => 'Invalid link or proof already submitted.'], 404);
-        }
-
-        $sale = Sale::where('payment_proof_token', $token)
-            ->where('status', 'pending_payment')
-            ->first();
-
-        if (!$sale) {
-            return response()->json(['error' => 'Invalid link or proof already submitted.'], 404);
-        }
-
         $request->validate([
             'payment_reference' => 'required|string|max:50',
             'payment_proof'     => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
-        $path = $request->file('payment_proof')->store('payment_proofs', 'public');
+        $storedPath = null;
+        try {
+            $matched = true;
 
-        $sale->update([
-            'payment_reference' => $request->payment_reference,
-            'payment_proof_path'=> $path,
-            'status'            => 'verifying_payment',
-        ]);
+            DB::transaction(function () use ($token, $request, &$storedPath, &$matched) {
+                $sale = Sale::where('payment_proof_token', $token)
+                    ->where('status', 'pending_payment')
+                    ->lockForUpdate()
+                    ->first();
 
-        $sale->update(['payment_proof_token' => null]);
+                if (!$sale) {
+                    $matched = false;
+                    return;
+                }
+
+                // Only store the file after we confirm the row is still claimable under lock.
+                $storedPath = $request->file('payment_proof')->store('payment_proofs', 'public');
+
+                $sale->update([
+                    'payment_reference' => $request->payment_reference,
+                    'payment_proof_path' => $storedPath,
+                    'status' => 'verifying_payment',
+                    'payment_proof_token' => null,
+                ]);
+            });
+
+            if (!$matched) {
+                return response()->json(['error' => 'Invalid link or proof already submitted.'], 404);
+            }
+        } catch (\Throwable $e) {
+            if ($storedPath) {
+                Storage::disk('public')->delete($storedPath);
+            }
+            throw $e;
+        }
 
         // Notify admin in real-time
         broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'payment.proof_submitted'));
 
-        Log::info("Proof submitted for order #{$sale->order_number} via token link.");
+        Log::info("Proof submitted via token link.", ['token' => $token]);
 
         return response()->json([
             'message' => 'Proof submitted successfully. Our admin will verify your payment shortly.',

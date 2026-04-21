@@ -599,7 +599,7 @@ export default function OrderHistory() {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Payment:</span>
                                                     <span className="text-[9px] font-black text-foreground uppercase">
-                                                        {order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method === 'gcash' ? 'GCash' : order.payment_method === 'bank_transfer' ? 'Bank Transfer' : 'Direct Payment'}
+                                                        {order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method === 'gcash' ? 'GCash' : 'COD'}
                                                     </span>
                                                 </div>
                                             </div>

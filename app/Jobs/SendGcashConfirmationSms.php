@@ -16,6 +16,8 @@ class SendGcashConfirmationSms implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+
     protected Sale $sale;
     protected float $amount;
 
@@ -25,33 +27,41 @@ class SendGcashConfirmationSms implements ShouldQueue
         $this->amount = $amount;
     }
 
+    public function backoff(): array
+    {
+        return [10, 30, 60];
+    }
+
     public function handle(): void
     {
-        try {
-            $smsEnabled = Setting::get('sms_enabled', '0');
-            $gcashSmsEnabled = Setting::get('gcash_confirmed_sms', '0');
+        $smsEnabled = Setting::get('sms_enabled', '0');
+        $gcashSmsEnabled = Setting::get('gcash_confirmed_sms', '0');
 
-            if ($smsEnabled !== '1' || $gcashSmsEnabled !== '1') {
-                return;
-            }
-
-            $this->sale->loadMissing(['customer', 'items.product']);
-
-            $customer = $this->sale->customer;
-            $customerPhone = $this->sale->payment_phone_number ?? ($customer->phone ?? null);
-            if (!$customerPhone) {
-                return;
-            }
-
-            $customerName = $customer->name ?? 'Valued Customer';
-            $itemSummary = $this->sale->items->count() > 0
-                ? $this->sale->items->map(fn($i) => $i->quantity . 'x ' . ($i->product->name ?? 'Item'))->join(', ')
-                : "order #{$this->sale->order_number}";
-
-            $message = BrevoSmsService::gcashConfirmedMessage($customerName, $this->amount, $itemSummary);
-            BrevoSmsService::send($customerPhone, $message);
-        } catch (\Exception $e) {
-            Log::warning('GCash confirmed SMS failed: ' . $e->getMessage());
+        if ($smsEnabled !== '1' || $gcashSmsEnabled !== '1') {
+            return;
         }
+
+        $this->sale->loadMissing(['customer', 'items.product']);
+
+        $customer = $this->sale->customer;
+        $customerPhone = $this->sale->payment_phone_number ?? optional($customer)->phone;
+        if (!$customerPhone) {
+            return;
+        }
+
+        $customerName = optional($customer)->name ?? 'Valued Customer';
+        $itemSummary = $this->sale->items->count() > 0
+            ? $this->sale->items->map(fn($i) => $i->quantity . 'x ' . ($i->product->name ?? 'Item'))->join(', ')
+            : "order #{$this->sale->order_number}";
+
+        $message = BrevoSmsService::gcashConfirmedMessage($customerName, $this->amount, $itemSummary);
+        BrevoSmsService::send($customerPhone, $message);
+    }
+
+    public function failed(\Throwable $e): void
+    {
+        Log::warning('GCash confirmed SMS final failure: ' . $e->getMessage(), [
+            'sale_id' => $this->sale->id ?? null,
+        ]);
     }
 }

@@ -407,7 +407,7 @@ export default function CustomerOrder() {
                                 <div className="mb-4">
                                     <div className="text-sm text-muted-foreground mb-1">Payment Method:</div>
                                     <Badge variant="secondary" className="text-sm">
-                                        {payment === "cod" ? "💵 Cash on Delivery" : payment === "gcash" ? "📱 GCash" : payment === "bank_transfer" ? "🏦 Bank Transfer" : "💳 In-Store Payment"}
+                                        {payment === "cod" ? "💵 Cash on Delivery" : payment === "gcash" ? "📱 GCash" : "Cash on Delivery"}
                                     </Badge>
                                 </div>
 

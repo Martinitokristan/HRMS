@@ -347,19 +347,23 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
                                             <div className="flex items-center gap-4">
                                                 <div className="flex-shrink-0">
                                                     {variantImagePreviews[idx] ? (
-                                                        <div className="relative w-20 h-20 rounded-xl overflow-hidden border">
-                                                            <img src={variantImagePreviews[idx]} className="w-full h-full object-cover" alt={`Variant ${idx}`} />
-                                                            <button 
-                                                                type="button"
-                                                                onClick={() => removeVariantImage(idx)} 
-                                                                className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition-colors"
-                                                            >
-                                                                <X className="h-3 w-3" />
-                                                            </button>
-                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setImageModalTarget(idx);
+                                                                setImageModalOpen(true);
+                                                            }}
+                                                            className="w-20 h-20 p-0 rounded-xl border-2 border-dashed border-border overflow-hidden bg-secondary/30 flex flex-col justify-center items-center cursor-pointer hover:border-orange-300 transition-all group relative"
+                                                        >
+                                                            <img src={variantImagePreviews[idx]} alt={`Variant ${idx}`} className="w-full h-full object-cover" />
+                                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                                                                <Plus className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            </div>
+                                                        </button>
                                                     ) : (
-                                                        <label className="flex w-20 h-20 rounded-xl border-2 border-dashed border-border flex-col items-center justify-center cursor-pointer hover:bg-white transition-all group">
-                                                            <Upload className="h-5 w-5 opacity-30 group-hover:opacity-100 group-hover:text-primary transition-all" />
+                                                        <label className="flex w-20 h-20 rounded-xl border-2 border-dashed border-border overflow-hidden bg-secondary/30 flex-col items-center justify-center cursor-pointer hover:bg-white hover:border-orange-300 transition-all group m-0">
+                                                            <Upload className="h-5 w-5 text-muted-foreground opacity-30 group-hover:scale-110 group-hover:text-orange-500 transition-all" />
                                                             <input type="file" accept="image/*" onChange={(e) => handleVariantImageChange(idx, e)} className="hidden" />
                                                         </label>
                                                     )}
@@ -400,15 +404,33 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
 
                     {/* Right: Gallery */}
                     <div className="space-y-5">
-                        <Card className="p-5">
-                            <h3 className="font-bold text-foreground mb-4">Gallery</h3>
-                            <div className="aspect-square bg-secondary rounded-xl border-2 border-dashed flex flex-col items-center justify-center overflow-hidden relative group">
+                        <Card className="p-5 pb-6">
+                            <h3 className="font-bold text-foreground mb-4 text-sm">Product Photo Gallery</h3>
+                            <div
+                                onClick={() => {
+                                    if (imagePreview) {
+                                        setImageModalTarget('base');
+                                        setImageModalOpen(true);
+                                    }
+                                }}
+                                className="w-full aspect-square rounded-xl bg-secondary border-2 border-dashed border-border flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-secondary/40 hover:border-orange-200 transition-all group relative"
+                            >
                                 {imagePreview ? (
-                                    <img src={imagePreview} className="w-full h-full object-cover" />
+                                    <>
+                                        <img src={imagePreview} className="w-full h-full object-cover" alt="Main preview" />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                                            <div className="bg-white/90 text-foreground px-4 py-2 rounded-full text-xs font-bold shadow-xl opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
+                                                OPEN GALLERY
+                                            </div>
+                                        </div>
+                                    </>
                                 ) : (
-                                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
-                                        <Upload className="h-6 w-6 text-orange-500 mb-2" />
-                                        <span className="text-sm font-bold">Add Photo</span>
+                                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer p-4 group-hover:bg-white transition-colors">
+                                        <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                                            <Upload className="h-6 w-6 text-orange-500" />
+                                        </div>
+                                        <div className="text-sm font-bold text-foreground">Add Product Photo</div>
+                                        <div className="text-[10px] mt-1 opacity-50 text-muted-foreground">Main + 3 Gallery Photos</div>
                                         <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                                     </label>
                                 )}
@@ -423,6 +445,145 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
                     </div>
                 </div>
             </form>
+
+            {imageModalOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+                    onClick={() => setImageModalOpen(false)}
+                >
+                    <div
+                        className="relative w-full bg-white flex flex-col"
+                        style={{ maxWidth: 620, maxHeight: 530, borderRadius: 10, boxShadow: '0 8px 30px rgba(0,0,0,0.16)', overflow: 'hidden', width: '90vw' }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between shrink-0" style={{ padding: '12px 20px 10px', borderBottom: '1px solid #f0f0f0' }}>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>
+                                Manage Gallery - {imageModalTarget === 'base' ? 'Main Product' : `Variant #${Number(imageModalTarget) + 1}`}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setImageModalOpen(false)}
+                                style={{ fontSize: 16, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: '2px 4px', borderRadius: 4 }}
+                                onMouseEnter={e => e.currentTarget.style.color = '#111827'}
+                                onMouseLeave={e => e.currentTarget.style.color = '#6b7280'}
+                            >
+                                <X className="h-[16px] w-[16px]" />
+                            </button>
+                        </div>
+
+                        <div style={{ overflowY: 'auto', flex: 1, minHeight: 0 }}>
+                            <div style={{ padding: '10px 20px 8px' }}>
+                                <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+                                    <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>Main Showcased Photo</span>
+                                    {(imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]) && (
+                                        <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: 10, padding: '2px 8px', borderRadius: 20 }}>Active</span>
+                                    )}
+                                </div>
+
+                                <div className="relative" style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #e0e0e0', background: '#f0f0f0', height: 200, width: '100%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {(imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]) ? (
+                                        <>
+                                            <img
+                                                src={imageModalTarget === 'base' ? imagePreview : variantImagePreviews[imageModalTarget]}
+                                                alt="Main"
+                                                style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }}
+                                            />
+                                            <label style={{ position: 'absolute', bottom: 8, right: 8, fontSize: 12, color: '#555', background: 'white', border: '1px solid #ccc', borderRadius: 4, padding: '4px 10px', cursor: 'pointer' }}>
+                                                Change Photo
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={e => imageModalTarget === 'base' ? handleImageChange(e) : handleVariantImageChange(imageModalTarget, e)}
+                                                />
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => imageModalTarget === 'base' ? (setForm({ ...form, image: null }), setImagePreview(null)) : removeVariantImage(imageModalTarget)}
+                                                style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,0.55)', color: 'white', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
+                                            >
+                                                <X className="h-[11px] w-[11px]" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer" style={{ height: '100%' }}>
+                                            <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                                                <Upload className="h-5 w-5" style={{ color: '#f97316' }} />
+                                            </div>
+                                            <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>Upload Main Photo</span>
+                                            <span style={{ fontSize: 11, color: '#9ca3af', marginTop: 3 }}>Recommended: 800x800px</span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={e => imageModalTarget === 'base' ? handleImageChange(e) : handleVariantImageChange(imageModalTarget, e)}
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div style={{ padding: '0 20px 8px' }}>
+                                <div className="flex items-center justify-between" style={{ marginTop: 12, marginBottom: 8 }}>
+                                    <span style={{ fontSize: 13, fontWeight: 600, color: '#f97316' }}>+ Extra Gallery Photos</span>
+                                    <span style={{ fontSize: 11, color: '#9ca3af' }}>Max: 3</span>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    {[0, 1, 2].map(i => {
+                                        let preview = null;
+                                        let isExisting = false;
+
+                                        if (imageModalTarget === 'base') {
+                                            isExisting = i < (existingAdditionalImages || []).length;
+                                            preview = additionalImagePreviews[i];
+                                        } else {
+                                            const v = variants[imageModalTarget];
+                                            isExisting = Boolean(v?.existing_extra_images && v.existing_extra_images[i]);
+                                            preview = (variantExtraPreviews[imageModalTarget] || [])[i];
+                                        }
+
+                                        return (
+                                            <div
+                                                key={i}
+                                                className="group relative"
+                                                style={{ flex: 1, height: 90, border: '1.5px dashed #d0d0d0', borderRadius: 6, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', transition: 'border-color 0.15s, background 0.15s' }}
+                                                onMouseEnter={e => { if (!preview) { e.currentTarget.style.borderColor = '#f97316'; e.currentTarget.style.background = '#fff8f5'; } }}
+                                                onMouseLeave={e => { if (!preview) { e.currentTarget.style.borderColor = '#d0d0d0'; e.currentTarget.style.background = '#f0f0f0'; } }}
+                                            >
+                                                {preview ? (
+                                                    <>
+                                                        <img src={preview} alt={`Gallery ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }} />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => imageModalTarget === 'base' ? removeAdditionalImage(i, isExisting) : removeVariantExtraImage(imageModalTarget, i, isExisting)}
+                                                            style={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', color: 'white', border: 'none', cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}
+                                                        >
+                                                            <X className="h-[10px] w-[10px]" />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                                                        <span style={{ fontSize: 20, color: '#c0c0c0', lineHeight: 1 }}>+</span>
+                                                        <span style={{ fontSize: 11, color: '#9e9e9e', marginTop: 3 }}>Add Photo</span>
+                                                        <input
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            multiple
+                                                            onChange={e => imageModalTarget === 'base' ? handleAdditionalImagesChange(e) : handleVariantExtraImagesChange(imageModalTarget, e)}
+                                                        />
+                                                    </label>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

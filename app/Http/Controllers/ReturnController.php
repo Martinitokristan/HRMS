@@ -8,11 +8,14 @@ use App\Models\Sale;
 use App\Models\Inventory;
 use App\Models\CustomerNotification;
 use App\Models\Setting;
+use App\Traits\RestoresStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReturnController extends Controller
 {
+    use RestoresStock;
+
     public function index(Request $request)
     {
         $query = ReturnOrder::with(['sale.customer', 'sale.items.product', 'requestedBy', 'approvedBy'])
@@ -188,21 +191,7 @@ class ReturnController extends Controller
 
         DB::transaction(function () use ($return, $request) {
             // Restore stock for returned items (sold count intentionally unchanged)
-            foreach ($return->items as $item) {
-                if (!empty($item['product_variant_id'])) {
-                    $variant = \App\Models\ProductVariant::find($item['product_variant_id']);
-                    if ($variant) {
-                        $variant->increment('stock', $item['quantity']);
-                    }
-                } else {
-                    $inv = Inventory::where('product_id', $item['product_id'])
-                        ->whereNull('product_variant_id')
-                        ->first();
-                    if ($inv) {
-                        $inv->increment('current_stock', $item['quantity']);
-                    }
-                }
-            }
+            $this->restoreStockFromReturnItems($return->items ?? []);
 
             $return->update([
                 'status'        => 'approved',

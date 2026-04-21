@@ -72,6 +72,14 @@ In production, make sure a queue worker is always running:
 php artisan queue:work --tries=3
 ```
 
+## Scheduler (Production)
+
+GCash expiry SMS is driven by the Laravel scheduler (`gcash:check-expired`), so production must also run the scheduler every minute:
+
+```bash
+php artisan schedule:run
+```
+
 ## Rollback Procedure
 
 If this release must be rolled back:

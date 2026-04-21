@@ -27,6 +27,9 @@ yarn-error.log
 /.test_crash.php
 /.analysis_results.md
 
+# Local agent/dev helpers (not for commit)
+/scripts
+
 
 # Log files
 *.log

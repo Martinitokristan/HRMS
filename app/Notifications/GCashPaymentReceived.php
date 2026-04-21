@@ -52,7 +52,7 @@ class GCashPaymentReceived extends Notification implements \Illuminate\Contracts
             'phone' => $this->phone,
             'order_number' => $this->sale->order_number,
             'sale_id' => $this->sale->id,
-            'customer_name' => $this->sale->customer->name ?? 'Unknown',
+            'customer_name' => optional($this->sale->customer)->name ?? 'Unknown',
             'items' => $items,
         ];
     }

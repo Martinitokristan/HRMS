@@ -217,6 +217,7 @@ export default function Settings() {
                             {[
                                 { k: 'return_approved_notify', t: 'Return Approved Notification (Customer)', d: 'Notify customer via in-app notification when their return request is approved' },
                                 { k: 'gcash_confirmed_sms', t: 'GCash Payment Confirmed SMS (Customer)', d: 'Send SMS to customer when their GCash payment is verified and order is confirmed' },
+                                { k: 'gcash_expiry_sms', t: 'GCash Payment Expiry SMS (Customer)', d: 'Send SMS to customer after 15 minutes if their GCash payment was not automatically matched, with a proof-submission link' },
                                 { k: 'gcash_payment_toast', t: 'GCash Payment Received Toast (Admin)', d: 'Show a pop-up toast notification on the admin dashboard when a GCash payment is received' }
                             ].map(item => (
                                 <Card key={item.k} className="p-4 flex items-center justify-between gap-4">

@@ -11,9 +11,13 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use App\Traits\RestoresStock;
+use Illuminate\Validation\ValidationException;
 
 class SaleController extends Controller
 {
+    use RestoresStock;
+
     public function index(Request $request)
     {
         $query = Sale::with(['customer', 'items.product', 'items.productVariant.sizeValue', 'items.productVariant.colorValue', 'items.productVariant.weightValue', 'delivery'])
@@ -50,7 +54,7 @@ class SaleController extends Controller
             'items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity'   => 'required|numeric|min:1',
             'items.*.price'      => 'nullable|numeric|min:0',
-            'payment_method'     => 'required|in:cod,cash,gcash,bank_transfer',
+            'payment_method'     => 'required|in:cod,gcash',
             'payment_phone_number'=> 'nullable|string|max:20',
             'discount_pct'   => 'nullable|numeric|between:0,100',
             'notes'          => 'nullable|string',
@@ -61,30 +65,6 @@ class SaleController extends Controller
         \Log::info('New order received:', $data);
 
         // No expiration needed - reservations are only used during checkout
-
-        // --- Stock validation before processing (accounts for reservations by OTHER customers) ---
-        $customerId = $data['customer_id'];
-        foreach ($data['items'] as $item) {
-            $product = \App\Models\Product::findOrFail($item['product_id']);
-            $variantId = $item['product_variant_id'] ?? null;
-
-            if (!empty($variantId)) {
-                $variant = \App\Models\ProductVariant::find($variantId);
-                $totalStock = $variant ? $variant->stock : 0;
-            } else {
-                $inv = Inventory::where('product_id', $item['product_id'])->whereNull('product_variant_id')->first();
-                $totalStock = $inv ? $inv->current_stock : 0;
-            }
-
-            $available = max(0, $totalStock);
-
-            if ($item['quantity'] > $available) {
-                return response()->json([
-                    'message' => "Insufficient stock for {$product->name}. Available: {$available}",
-                    'status' => 'error',
-                ], 422);
-            }
-        }
 
         $sale = DB::transaction(function () use ($data, $request) {
             $subtotal = 0;
@@ -108,39 +88,66 @@ class SaleController extends Controller
 
                 // Deduct stock
                 if (!empty($item['product_variant_id'])) {
-                    $variant = \App\Models\ProductVariant::find($item['product_variant_id']);
-                    if ($variant) {
-                        $oldStock = $variant->stock;
-                        $variant->decrement('stock', $item['quantity']);
-                        
-                        // Also deduct from inventory current_stock for variants to maintain sync
-                        $variantInventory = \App\Models\Inventory::where('product_id', $item['product_id'])
-                            ->where('product_variant_id', $item['product_variant_id'])
-                            ->first();
-                        
-                        if ($variantInventory) {
-                            $variantInventory->decrement('current_stock', $item['quantity']);
-                        }
-                        
-                        \Log::info('Stock deducted for variant', ['variant_id' => $item['product_variant_id'], 'old_stock' => $oldStock, 'quantity' => $item['quantity'], 'new_stock' => $oldStock - $item['quantity']]);
-
-                        // Stock alert checks for variant
-                        $newStock = $oldStock - $item['quantity'];
-                        $threshold = $variantInventory->reorder_threshold ?? 5;
-                        $productName = $product->name . ' (variant)';
-                        static::checkStockAlerts($productName, $newStock, $threshold);
+                    $variant = \App\Models\ProductVariant::whereKey($item['product_variant_id'])->lockForUpdate()->first();
+                    if (!$variant) {
+                        throw ValidationException::withMessages([
+                            'items' => ["Insufficient stock for {$product->name}. Available: 0"],
+                        ]);
                     }
+
+                    $available = max(0, (int) $variant->stock);
+                    if ($item['quantity'] > $available) {
+                        throw ValidationException::withMessages([
+                            'items' => ["Insufficient stock for {$product->name}. Available: {$available}"],
+                        ]);
+                    }
+
+                    $oldStock = $variant->stock;
+                    $variant->decrement('stock', $item['quantity']);
+
+                    // Also deduct from inventory current_stock for variants to maintain sync
+                    $variantInventory = \App\Models\Inventory::where('product_id', $item['product_id'])
+                        ->where('product_variant_id', $item['product_variant_id'])
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($variantInventory) {
+                        $variantInventory->decrement('current_stock', $item['quantity']);
+                    }
+
+                    \Log::info('Stock deducted for variant', ['variant_id' => $item['product_variant_id'], 'old_stock' => $oldStock, 'quantity' => $item['quantity'], 'new_stock' => $oldStock - $item['quantity']]);
+
+                    // Stock alert checks for variant
+                    $newStock = $oldStock - $item['quantity'];
+                    $threshold = $variantInventory ? (int) $variantInventory->reorder_threshold : 5;
+                    $productName = $product->name . ' (variant)';
+                    static::checkStockAlerts($productName, $newStock, $threshold);
                 } else {
-                    $inv = Inventory::where('product_id', $item['product_id'])->first();
-                    if ($inv) {
-                        $oldStock = $inv->current_stock;
-                        $inv->decrement('current_stock', $item['quantity']);
-                        \Log::info('Stock deducted for product', ['product_id' => $item['product_id'], 'old_stock' => $oldStock, 'quantity' => $item['quantity'], 'new_stock' => $oldStock - $item['quantity']]);
-
-                        // Stock alert checks for base product
-                        $newStock = $oldStock - $item['quantity'];
-                        static::checkStockAlerts($product->name, $newStock, $inv->reorder_threshold ?? 5);
+                    $inv = Inventory::where('product_id', $item['product_id'])
+                        ->whereNull('product_variant_id')
+                        ->lockForUpdate()
+                        ->first();
+                    if (!$inv) {
+                        throw ValidationException::withMessages([
+                            'items' => ["Insufficient stock for {$product->name}. Available: 0"],
+                        ]);
                     }
+
+                    $available = max(0, (int) $inv->current_stock);
+                    if ($item['quantity'] > $available) {
+                        throw ValidationException::withMessages([
+                            'items' => ["Insufficient stock for {$product->name}. Available: {$available}"],
+                        ]);
+                    }
+
+                    $oldStock = $inv->current_stock;
+                    $inv->decrement('current_stock', $item['quantity']);
+
+                    \Log::info('Stock deducted for product', ['product_id' => $item['product_id'], 'old_stock' => $oldStock, 'quantity' => $item['quantity'], 'new_stock' => $oldStock - $item['quantity']]);
+
+                    // Stock alert checks for base product
+                    $newStock = $oldStock - $item['quantity'];
+                    static::checkStockAlerts($product->name, $newStock, $inv->reorder_threshold ?? 5);
                 }
             }
 
@@ -243,7 +250,11 @@ class SaleController extends Controller
         $sale->update(['status' => $newStatus]);
 
         if ($newStatus === 'confirmed') {
-            Cache::tags(['products'])->flush();
+            try {
+                Cache::tags(['products'])->flush();
+            } catch (\BadMethodCallException $e) {
+                Cache::flush();
+            }
         }
 
         // Sync delivery status with sale status
@@ -291,24 +302,12 @@ class SaleController extends Controller
 
     public function processReturn(Request $request, $id)
     {
-        $sale = Sale::findOrFail($id);
-        $sale->update(['status' => 'returned']);
+        $sale = Sale::with('items')->findOrFail($id);
 
-        // Restore stock
-        foreach ($sale->items as $item) {
-            if ($item->product_variant_id) {
-                $variant = \App\Models\ProductVariant::find($item->product_variant_id);
-                if ($variant) {
-                    $variant->increment('stock', $item->quantity);
-                    // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
-                }
-            } else {
-                $inv = Inventory::where('product_id', $item->product_id)->first();
-                if ($inv) {
-                    $inv->increment('current_stock', $item->quantity);
-                }
-            }
-        }
+        DB::transaction(function () use ($sale) {
+            $sale->update(['status' => 'returned']);
+            $this->restoreStock($sale);
+        });
 
         $customerId = $sale->customer_id;
         broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_inventory', 'admin_dashboard'], 'sale.returned'));
@@ -345,7 +344,13 @@ class SaleController extends Controller
             ], 422);
         }
 
-        if (!$isAdmin && $sale->status === 'confirmed') {
+        // Policy:
+        // - Customer + pending: direct cancel
+        // - Customer + confirmed: submit cancellation request
+        // - Admin + pending/confirmed: direct cancel
+        $isCustomer = !$isAdmin;
+
+        if ($isCustomer && $sale->status === 'confirmed') {
             if ($sale->cancellation_status === 'pending') {
                 return response()->json([
                     'message' => 'Cancellation request is already pending approval.',
@@ -353,17 +358,30 @@ class SaleController extends Controller
                 ], 422);
             }
 
-            $sale->update([
-                'cancellation_status' => 'pending',
-                'cancellation_reason' => $request->reason,
-                'cancellation_notes' => $request->notes,
-                'cancelled_by' => $user->id,
-                'cancelled_at' => now(),
-            ]);
+            DB::transaction(function () use ($sale, $request, $user) {
+                $sale->update([
+                    'cancellation_status' => 'pending',
+                    'cancellation_reason' => $request->reason,
+                    'cancellation_notes' => $request->notes,
+                    'cancellation_requested_by' => $user->id,
+                    'cancellation_requested_at' => now(),
+                    'cancelled_by' => null,
+                    'cancelled_at' => null,
+                ]);
 
-            $customerId = $sale->customer_id;
-            broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'sale.cancellation_requested'));
-            broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'sale.cancellation_requested'));
+                \App\Models\CustomerNotification::create([
+                    'customer_id' => $sale->customer_id,
+                    'delivery_id' => $sale->delivery->id ?? null,
+                    'type' => 'cancellation_requested',
+                    'title' => 'Cancellation Requested',
+                    'message' => "Your cancellation request for order #{$sale->order_number} has been submitted and is pending admin review.",
+                    'is_read' => false,
+                ]);
+
+                $customerId = $sale->customer_id;
+                broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'sale.cancellation_requested'));
+                broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'sale.cancellation_requested'));
+            });
 
             return response()->json([
                 'data' => $sale->fresh()->load(['items.product', 'delivery']),
@@ -375,13 +393,6 @@ class SaleController extends Controller
         if (!in_array($sale->status, ['pending', 'confirmed'])) {
             return response()->json([
                 'message' => 'Only pending or confirmed orders can be cancelled.',
-                'status' => 'error',
-            ], 422);
-        }
-
-        if (!$isAdmin && $sale->status !== 'pending') {
-            return response()->json([
-                'message' => 'Only pending orders can be cancelled directly. Confirmed orders require admin approval.',
                 'status' => 'error',
             ], 422);
         }
@@ -439,7 +450,7 @@ class SaleController extends Controller
                         });
                 });
             })
-            ->latest('cancelled_at');
+            ->latest('cancellation_requested_at');
 
         return response()->json([
             'data' => $query->paginate($request->get('per_page', 20)),
@@ -656,34 +667,6 @@ class SaleController extends Controller
             ],
             'status' => 'success',
         ]);
-    }
-
-    protected function restoreStock(Sale $sale): void
-    {
-        foreach ($sale->items as $item) {
-            if ($item->product_variant_id) {
-                $variant = \App\Models\ProductVariant::find($item->product_variant_id);
-                if ($variant) {
-                    $variant->increment('stock', $item->quantity);
-                }
-
-                $variantInventory = \App\Models\Inventory::where('product_id', $item->product_id)
-                    ->where('product_variant_id', $item->product_variant_id)
-                    ->first();
-
-                if ($variantInventory) {
-                    $variantInventory->increment('current_stock', $item->quantity);
-                }
-            } else {
-                $inv = Inventory::where('product_id', $item->product_id)
-                    ->whereNull('product_variant_id')
-                    ->first();
-
-                if ($inv) {
-                    $inv->increment('current_stock', $item->quantity);
-                }
-            }
-        }
     }
 
     /**

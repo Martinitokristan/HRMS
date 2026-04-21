@@ -8,6 +8,7 @@ use App\Models\SupplierProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class SupplierProductController extends Controller
 {
@@ -218,49 +219,103 @@ class SupplierProductController extends Controller
             $product->update($data);
 
             if ($request->has('variants')) {
-                $variantPathsToDelete = [];
-                $existingVariants = $product->variants()->get();
-                foreach ($existingVariants as $existingVariant) {
-                    $variantPathsToDelete[] = $existingVariant->image_path;
-                    $variantPathsToDelete = array_merge($variantPathsToDelete, $existingVariant->additional_images ?? []);
+                $variantsRaw = $request->variants;
+                $variants = json_decode($variantsRaw, true);
+                if (!is_array($variants) && !is_null($variantsRaw) && trim((string) $variantsRaw) !== '') {
+                    throw ValidationException::withMessages([
+                        'variants' => ['Invalid variants JSON.'],
+                    ]);
+                }
+                $variants = is_array($variants) ? $variants : [];
+
+                $incomingVariantIds = [];
+
+                foreach ($variants as $index => $v) {
+                    $variantId = $v['id'] ?? null;
+
+                    $existingVariant = null;
+                    if (!empty($variantId)) {
+                        $existingVariant = $product->variants()->whereKey($variantId)->first();
+                    }
+
+                    // Image: prefer uploaded file, else keep existing payload, else keep DB value (when updating).
+                    $fileKey = "variant_image_{$index}";
+                    $newImagePath = null;
+                    $variantImage = null;
+                    if ($request->hasFile($fileKey)) {
+                        $newImagePath = $request->file($fileKey)->store('supplier-product-variants', 'public');
+                        $variantImage = $newImagePath;
+                    } elseif (!empty($v['existing_image_path'])) {
+                        $variantImage = $v['existing_image_path'];
+                    } elseif ($existingVariant) {
+                        $variantImage = $existingVariant->image_path;
+                    }
+
+                    // Extra images: start from payload (or DB when updating), then append uploads.
+                    $variantExtras = [];
+                    if (isset($v['existing_extra_images']) && is_array($v['existing_extra_images'])) {
+                        $variantExtras = $v['existing_extra_images'];
+                    } elseif ($existingVariant && is_array($existingVariant->additional_images)) {
+                        $variantExtras = $existingVariant->additional_images;
+                    }
+
+                    $extraKey = "variant_extra_images_{$index}";
+                    if ($request->hasFile($extraKey)) {
+                        foreach ($request->file($extraKey) as $file) {
+                            $variantExtras[] = $file->store('supplier-product-variants', 'public');
+                        }
+                    }
+
+                    $payload = [
+                        'supplier_product_id' => $product->id,
+                        'size' => $v['size'] ?? null,
+                        'color' => $v['color'] ?? null,
+                        'weight' => $v['weight'] ?? null,
+                        'stock' => $v['stock'] ?? 0,
+                        'price_override' => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
+                        'barcode_suffix' => $v['barcode_suffix'] ?? null,
+                        'image_path' => $variantImage,
+                        'additional_images' => $variantExtras,
+                    ];
+
+                    if ($existingVariant) {
+                        $oldImage = $existingVariant->image_path;
+                        $oldExtras = $existingVariant->additional_images ?? [];
+
+                        $existingVariant->update($payload);
+                        $incomingVariantIds[] = $existingVariant->id;
+
+                        // Delete replaced image only.
+                        if ($newImagePath && $oldImage && $oldImage !== $newImagePath) {
+                            $this->deleteFiles([$oldImage]);
+                        }
+
+                        // Delete removed extras (only if client provided a keep-list).
+                        if (isset($v['existing_extra_images']) && is_array($v['existing_extra_images'])) {
+                            $removedExtras = array_diff($oldExtras, $variantExtras);
+                            $this->deleteFiles($removedExtras);
+                        }
+                    } else {
+                        $created = $product->variants()->create($payload);
+                        $incomingVariantIds[] = $created->id;
+                    }
                 }
 
-                $product->variants()->delete();
-                $this->deleteFiles($variantPathsToDelete);
+                // Delete only variants that were removed from the incoming list.
+                $removedVariants = $product->variants()
+                    ->when(!empty($incomingVariantIds), fn ($q) => $q->whereNotIn('id', $incomingVariantIds))
+                    ->when(empty($incomingVariantIds), fn ($q) => $q) // delete all if caller sent empty list
+                    ->get();
 
-                $variants = json_decode($request->variants, true);
-                if (is_array($variants)) {
-                    foreach ($variants as $index => $v) {
-                        $variantImage = null;
-                        $fileKey = "variant_image_{$index}";
-                        if ($request->hasFile($fileKey)) {
-                            $variantImage = $request->file($fileKey)->store('supplier-product-variants', 'public');
-                        } elseif (!empty($v['existing_image_path'])) {
-                            $variantImage = $v['existing_image_path'];
-                        }
+                $removedPaths = [];
+                foreach ($removedVariants as $rv) {
+                    $removedPaths[] = $rv->image_path;
+                    $removedPaths = array_merge($removedPaths, $rv->additional_images ?? []);
+                }
 
-                        $variantExtras = [];
-                        if (isset($v['existing_extra_images']) && is_array($v['existing_extra_images'])) {
-                            $variantExtras = $v['existing_extra_images'];
-                        }
-                        $extraKey = "variant_extra_images_{$index}";
-                        if ($request->hasFile($extraKey)) {
-                            foreach ($request->file($extraKey) as $file) {
-                                $variantExtras[] = $file->store('supplier-product-variants', 'public');
-                            }
-                        }
-
-                        $product->variants()->create([
-                            'size' => $v['size'] ?? null,
-                            'color' => $v['color'] ?? null,
-                            'weight' => $v['weight'] ?? null,
-                            'stock' => $v['stock'] ?? 0,
-                            'price_override' => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
-                            'barcode_suffix' => $v['barcode_suffix'] ?? null,
-                            'image_path' => $variantImage,
-                            'additional_images' => $variantExtras,
-                        ]);
-                    }
+                if ($removedVariants->count() > 0) {
+                    $product->variants()->whereIn('id', $removedVariants->pluck('id'))->delete();
+                    $this->deleteFiles($removedPaths);
                 }
             }
         });
