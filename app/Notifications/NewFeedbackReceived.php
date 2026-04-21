@@ -6,7 +6,7 @@ use App\Models\Delivery;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class NewFeedbackReceived extends Notification
+class NewFeedbackReceived extends Notification implements \Illuminate\Contracts\Queue\ShouldQueue
 {
     use Queueable;
 

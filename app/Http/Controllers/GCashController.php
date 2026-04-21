@@ -9,9 +9,8 @@ use App\Models\GCashTransaction;
 use App\Models\Delivery;
 use App\Models\CustomerNotification;
 use App\Events\DataMutated;
+use App\Jobs\SendGcashConfirmationSms;
 use App\Notifications\GCashPaymentReceived;
-use App\Services\BrevoSmsService;
-use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,11 +22,11 @@ class GCashController extends Controller
      */
     public function smsWebhook(Request $request)
     {
-        // 1. Verify Secret Header or URL Parameter
+        // 1. Verify Secret Header
         $secret = env('GCASH_SMS_SECRET');
-        $providedSecret = $request->header('X-SMS-Secret') ?? $request->query('secret');
+        $providedSecret = $request->header('X-SMS-Secret');
         
-        if (empty($secret) || $providedSecret !== $secret) {
+        if (empty($secret) || !is_string($providedSecret) || !hash_equals((string) $secret, $providedSecret)) {
             Log::warning('Unauthorized SMS Webhook attempt', ['ip' => $request->ip()]);
             return response()->json(['error' => 'Unauthorized'], 401);
         }
@@ -168,7 +167,7 @@ class GCashController extends Controller
             ]);
 
             // Send notification to admin users about GCash payment
-            $admins = User::where('role', 'admin')->get();
+            $admins = User::whereIn('id', \Illuminate\Support\Facades\Cache::remember('admin_user_ids', 300, fn () => \App\Models\User::where('role', 'admin')->pluck('id')->all()))->get();
             foreach ($admins as $admin) {
                 $admin->notify(new GCashPaymentReceived($sale, $smsBody, $amount, $parsedPhone));
             }
@@ -188,26 +187,7 @@ class GCashController extends Controller
                 'payment.confirmed'
             ));
 
-            // Send SMS to customer if enabled in settings
-            try {
-                $smsEnabled = Setting::get('sms_enabled', '0');
-                $gcashSmsEnabled = Setting::get('gcash_confirmed_sms', '0');
-                if ($smsEnabled === '1' && $gcashSmsEnabled === '1') {
-                    $customer = $sale->customer;
-                    $customerPhone = $sale->payment_phone_number ?? $customer->phone ?? null;
-                    if ($customerPhone) {
-                        $customerName = $customer->name ?? 'Valued Customer';
-                        $sale->loadMissing('items.product');
-                        $itemSummary = $sale->items->count() > 0
-                            ? $sale->items->map(fn($i) => $i->quantity . 'x ' . ($i->product->name ?? 'Item'))->join(', ')
-                            : "order #{$sale->order_number}";
-                        $message = BrevoSmsService::gcashConfirmedMessage($customerName, $amount, $itemSummary);
-                        BrevoSmsService::send($customerPhone, $message);
-                    }
-                }
-            } catch (\Exception $smsErr) {
-                Log::warning('GCash confirmed SMS failed: ' . $smsErr->getMessage());
-            }
+            dispatch(new SendGcashConfirmationSms($sale, $amount))->afterCommit();
             
             return response()->json(['status' => 'success', 'sale_id' => $sale->id]);
 
@@ -250,6 +230,10 @@ class GCashController extends Controller
      */
     public function submitProof(Request $request, string $token)
     {
+        if (!Sale::where('payment_proof_token', $token)->where('status', 'pending_payment')->exists()) {
+            return response()->json(['error' => 'Invalid link or proof already submitted.'], 404);
+        }
+
         $sale = Sale::where('payment_proof_token', $token)
             ->where('status', 'pending_payment')
             ->first();
@@ -260,7 +244,7 @@ class GCashController extends Controller
 
         $request->validate([
             'payment_reference' => 'required|string|max:50',
-            'payment_proof'     => 'required|image|max:5120',
+            'payment_proof'     => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         $path = $request->file('payment_proof')->store('payment_proofs', 'public');
@@ -270,6 +254,8 @@ class GCashController extends Controller
             'payment_proof_path'=> $path,
             'status'            => 'verifying_payment',
         ]);
+
+        $sale->update(['payment_proof_token' => null]);
 
         // Notify admin in real-time
         broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'payment.proof_submitted'));

@@ -40,6 +40,8 @@ export default function Pagination({ total, perPage = 15, page, onChange }) {
                   ),
               );
 
+    if (safeTotal === 0 || totalPages <= 1) return null;
+
     const renderButtons = () => {
         let buttons = [];
         let startPage = Math.max(1, safePage - 2);

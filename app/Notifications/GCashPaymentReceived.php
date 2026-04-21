@@ -6,7 +6,7 @@ use App\Models\Sale;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class GCashPaymentReceived extends Notification
+class GCashPaymentReceived extends Notification implements \Illuminate\Contracts\Queue\ShouldQueue
 {
     use Queueable;
 

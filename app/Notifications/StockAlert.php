@@ -6,7 +6,7 @@ use App\Models\Inventory;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class StockAlert extends Notification
+class StockAlert extends Notification implements \Illuminate\Contracts\Queue\ShouldQueue
 {
     use Queueable;
 

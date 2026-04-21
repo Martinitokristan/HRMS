@@ -7,6 +7,7 @@ use App\Models\SupplierProduct;
 use App\Models\SupplierProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SupplierProductController extends Controller
 {
@@ -27,6 +28,17 @@ class SupplierProductController extends Controller
             abort(403, 'No supplier account linked to this user.');
         }
         return $supplier->id;
+    }
+
+    private function deleteFiles(array $paths): void
+    {
+        $clean = array_values(array_unique(array_filter($paths, function ($path) {
+            return is_string($path) && trim($path) !== '';
+        })));
+
+        if (!empty($clean)) {
+            Storage::disk('public')->delete($clean);
+        }
     }
 
     // Supplier-facing: list their own products
@@ -182,8 +194,12 @@ class SupplierProductController extends Controller
         ]);
 
         DB::transaction(function () use ($product, $data, $request) {
+            $oldImage = $product->image_path;
+            $oldAdditional = $product->additional_images ?? [];
+
             if ($request->hasFile('image')) {
                 $data['image_path'] = $request->file('image')->store('supplier-products', 'public');
+                $this->deleteFiles([$oldImage]);
             }
 
             // Handle base product additional images
@@ -196,12 +212,22 @@ class SupplierProductController extends Controller
                     $additionalImages[] = $file->store('supplier-products', 'public');
                 }
             }
+            $this->deleteFiles(array_diff($oldAdditional, $additionalImages));
             $data['additional_images'] = $additionalImages;
 
             $product->update($data);
 
             if ($request->has('variants')) {
+                $variantPathsToDelete = [];
+                $existingVariants = $product->variants()->get();
+                foreach ($existingVariants as $existingVariant) {
+                    $variantPathsToDelete[] = $existingVariant->image_path;
+                    $variantPathsToDelete = array_merge($variantPathsToDelete, $existingVariant->additional_images ?? []);
+                }
+
                 $product->variants()->delete();
+                $this->deleteFiles($variantPathsToDelete);
+
                 $variants = json_decode($request->variants, true);
                 if (is_array($variants)) {
                     foreach ($variants as $index => $v) {
@@ -255,6 +281,16 @@ class SupplierProductController extends Controller
     {
         $supplierId = $this->resolveSupplierID($request);
         $product = SupplierProduct::where('supplier_id', $supplierId)->findOrFail($id);
+
+        $pathsToDelete = [$product->image_path];
+        $pathsToDelete = array_merge($pathsToDelete, $product->additional_images ?? []);
+        $variants = $product->variants()->get();
+        foreach ($variants as $variant) {
+            $pathsToDelete[] = $variant->image_path;
+            $pathsToDelete = array_merge($pathsToDelete, $variant->additional_images ?? []);
+        }
+        $this->deleteFiles($pathsToDelete);
+
         $product->delete();
 
         broadcast(new DataMutated('private-admin', ['admin_inventory', 'admin_purchases'], 'supplier_product.deleted'));

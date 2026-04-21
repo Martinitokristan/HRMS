@@ -132,10 +132,28 @@ export default function OrderHistory() {
         const orderId = cancelModal.order.id;
         setCancellingId(orderId);
         try {
-            await api.post(`/customer/orders/${orderId}/cancel`, {
+            const response = await api.post(`/customer/orders/${orderId}/cancel`, {
                 reason: cancelReason,
                 notes: cancelNotes || null,
             });
+
+            if (response?.data?.status === 'pending_request') {
+                const updatedOrder = response?.data?.data;
+                showToast("Cancellation request submitted for admin review", "success");
+                setOrders(prev => prev.map(order => {
+                    if (order.id !== orderId) return order;
+                    return {
+                        ...order,
+                        ...(updatedOrder || {}),
+                        status: 'confirmed',
+                        cancellation_status: 'pending',
+                    };
+                }));
+                markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_ORDERS, STALE_KEYS.ADMIN_DASHBOARD);
+                closeCancelModal();
+                return;
+            }
+
             showToast("Order cancelled successfully", "success");
             markStale(STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_INVENTORY);
             fetchData(true);
@@ -309,8 +327,10 @@ export default function OrderHistory() {
                             const currentStep = currentStatus.step;
                             const isDelivered = order.status === 'delivered';
                             const isPending = order.status === 'pending';
+                            const isConfirmed = order.status === 'confirmed';
                             const isCancelled = order.status === 'cancelled';
                             const isReturned = order.status === 'returned';
+                            const isCancellationPendingReview = order.cancellation_status === 'pending';
                             const hasRating = order.delivery?.rating;
                             const isExpanded = expandedOrders[order.id];
                             
@@ -339,6 +359,14 @@ export default function OrderHistory() {
                                                 >
                                                     {currentStatus.label}
                                                 </Badge>
+                                                {isCancellationPendingReview && (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="text-[9px] font-black uppercase px-2 py-0 h-5 border shadow-none bg-amber-50 text-amber-700 border-amber-200"
+                                                    >
+                                                        Cancellation Pending Review
+                                                    </Badge>
+                                                )}
                                                 {isDelivered && !hasRating && (
                                                     <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest animate-pulse">
                                                         · Rate now
@@ -401,6 +429,15 @@ export default function OrderHistory() {
                                                     <div className="text-xs font-bold leading-tight">
                                                         {isCancelled ? `Order Cancelled: ${order.cancellation_reason ? CANCEL_REASONS.find(r => r.value === order.cancellation_reason)?.label || order.cancellation_reason : 'No reason provided'}` : 'Order has been returned'}
                                                         {order.cancellation_notes && <div className="mt-1 font-medium opacity-70 italic text-[10px]">"{order.cancellation_notes}"</div>}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {isConfirmed && isCancellationPendingReview && (
+                                                <div className="p-4 mb-6 rounded-2xl flex items-center gap-3 border bg-amber-50 border-amber-200 text-amber-900">
+                                                    <AlertTriangle className="h-5 w-5 shrink-0" />
+                                                    <div className="text-xs font-bold leading-tight">
+                                                        Cancellation request submitted and pending admin review.
                                                     </div>
                                                 </div>
                                             )}
@@ -481,7 +518,7 @@ export default function OrderHistory() {
                                             {/* Expanded Panel Actions Footer */}
                                             <div className="flex flex-wrap gap-2 justify-center pt-6 mt-6 border-t border-dashed border-border/60">
                                                 {/* Only for Pending Orders */}
-                                                {(isPending || order.status === 'pending_payment') && (
+                                                {(isPending || isConfirmed || order.status === 'pending_payment') && (
                                                     <div className="flex flex-wrap gap-2 justify-center w-full md:w-auto">
                                                         {order.status === 'pending_payment' && order.payment_method === 'gcash' && (
                                                             <Button
@@ -498,9 +535,13 @@ export default function OrderHistory() {
                                                             size="sm"
                                                             className="text-[10px] font-black uppercase text-red-500 hover:text-red-600 hover:bg-red-50 tracking-widest h-10 px-6"
                                                             onClick={(e) => { e.stopPropagation(); openCancelModal(order); }}
-                                                            disabled={cancellingId === order.id}
+                                                            disabled={cancellingId === order.id || isCancellationPendingReview}
                                                         >
-                                                            {cancellingId === order.id ? "Cancelling..." : "Cancel Order"}
+                                                            {isCancellationPendingReview
+                                                                ? "Cancellation Requested"
+                                                                : (cancellingId === order.id
+                                                                    ? "Cancelling..."
+                                                                    : (isConfirmed ? "Request Cancellation" : "Cancel Order"))}
                                                         </Button>
                                                     </div>
                                                 )}

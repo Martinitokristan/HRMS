@@ -62,3 +62,26 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Queue Worker (Production)
+
+This project uses queued notifications/jobs for admin fanout and GCash confirmation SMS.
+In production, make sure a queue worker is always running:
+
+```bash
+php artisan queue:work --tries=3
+```
+
+## Rollback Procedure
+
+If this release must be rolled back:
+
+```bash
+php artisan migrate:rollback --step=2
+```
+
+Then revert the merge commit and redeploy:
+
+```bash
+git revert <merge_commit_sha>
+```

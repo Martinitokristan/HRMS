@@ -151,14 +151,9 @@ class SaleController extends Controller
             // Include 12% VAT in total
             $totalWithVat = round($subtotal * 1.12, 2);
 
-            // Concurrency-safe order number
-            $lastNumber = Sale::lockForUpdate()->max('id');
-            $orderNumber = 'ORD-' . str_pad(($lastNumber ?? 0) + 1, 5, '0', STR_PAD_LEFT);
-
             $status = $data['payment_method'] === 'gcash' ? 'pending_payment' : 'pending';
 
             $sale = Sale::create([
-                'order_number'       => $orderNumber,
                 'customer_id'        => $data['customer_id'],
                 'processed_by'       => $request->user()->id,
                 'discount_pct'       => $data['discount_pct'] ?? null,
@@ -167,6 +162,10 @@ class SaleController extends Controller
                 'payment_phone_number'=> $data['payment_phone_number'] ?? null,
                 'status'             => $status,
                 'notes'              => $data['notes'] ?? null,
+            ]);
+
+            $sale->update([
+                'order_number' => 'ORD-' . str_pad($sale->id, 5, '0', STR_PAD_LEFT),
             ]);
 
             foreach ($itemsData as $item) {
@@ -339,36 +338,57 @@ class SaleController extends Controller
             'notes'  => 'nullable|string|max:500',
         ]);
 
-        // Cancellation rules based on status and role
-        $cancellableByCustomer = ['pending'];
-        $cancellableByAdmin = ['pending', 'confirmed'];
+        if (in_array($sale->status, ['cancelled', 'returned', 'delivered'])) {
+            return response()->json([
+                'message' => 'This order can no longer be cancelled.',
+                'status' => 'error',
+            ], 422);
+        }
 
-        $allowedStatuses = $isAdmin ? $cancellableByAdmin : $cancellableByCustomer;
+        if (!$isAdmin && $sale->status === 'confirmed') {
+            if ($sale->cancellation_status === 'pending') {
+                return response()->json([
+                    'message' => 'Cancellation request is already pending approval.',
+                    'status' => 'error',
+                ], 422);
+            }
 
-        if (!in_array($sale->status, $allowedStatuses)) {
-            $msg = $isAdmin
-                ? 'Only pending or confirmed orders can be cancelled.'
-                : 'Only pending orders can be cancelled. Contact support for confirmed orders.';
-            return response()->json(['message' => $msg, 'status' => 'error'], 422);
+            $sale->update([
+                'cancellation_status' => 'pending',
+                'cancellation_reason' => $request->reason,
+                'cancellation_notes' => $request->notes,
+                'cancelled_by' => $user->id,
+                'cancelled_at' => now(),
+            ]);
+
+            $customerId = $sale->customer_id;
+            broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'sale.cancellation_requested'));
+            broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'sale.cancellation_requested'));
+
+            return response()->json([
+                'data' => $sale->fresh()->load(['items.product', 'delivery']),
+                'message' => 'Cancellation request submitted and pending admin approval.',
+                'status' => 'pending_request',
+            ]);
+        }
+
+        if (!in_array($sale->status, ['pending', 'confirmed'])) {
+            return response()->json([
+                'message' => 'Only pending or confirmed orders can be cancelled.',
+                'status' => 'error',
+            ], 422);
+        }
+
+        if (!$isAdmin && $sale->status !== 'pending') {
+            return response()->json([
+                'message' => 'Only pending orders can be cancelled directly. Confirmed orders require admin approval.',
+                'status' => 'error',
+            ], 422);
         }
 
         DB::transaction(function () use ($sale, $request, $user) {
             // Restore stock
-            foreach ($sale->items as $item) {
-                if ($item->product_variant_id) {
-                    $variant = \App\Models\ProductVariant::find($item->product_variant_id);
-                    if ($variant) {
-                        $variant->increment('stock', $item->quantity);
-                    }
-                } else {
-                    $inv = Inventory::where('product_id', $item->product_id)
-                        ->whereNull('product_variant_id')
-                        ->first();
-                    if ($inv) {
-                        $inv->increment('current_stock', $item->quantity);
-                    }
-                }
-            }
+            $this->restoreStock($sale);
 
             $sale->update([
                 'status'              => 'cancelled',
@@ -402,6 +422,124 @@ class SaleController extends Controller
             'data'    => $sale->fresh()->load(['items.product', 'delivery']),
             'message' => 'Order cancelled successfully. Stock has been restored.',
             'status'  => 'success',
+        ]);
+    }
+
+    public function getCancellationRequests(Request $request)
+    {
+        $query = Sale::with(['customer', 'items.product', 'delivery'])
+            ->where('cancellation_status', 'pending')
+            ->when($request->search, function ($q) use ($request) {
+                $search = $request->search;
+
+                return $q->where(function ($sq) use ($search) {
+                    $sq->where('order_number', 'like', "%{$search}%")
+                        ->orWhereHas('customer', function ($cq) use ($search) {
+                            return $cq->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->latest('cancelled_at');
+
+        return response()->json([
+            'data' => $query->paginate($request->get('per_page', 20)),
+            'status' => 'success',
+        ]);
+    }
+
+    public function approveCancellation(Request $request, $id)
+    {
+        $sale = Sale::with(['items', 'delivery'])->findOrFail($id);
+
+        if ($sale->cancellation_status !== 'pending') {
+            return response()->json([
+                'message' => 'Only pending cancellation requests can be approved.',
+                'status' => 'error',
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        DB::transaction(function () use ($sale, $user) {
+            $this->restoreStock($sale);
+
+            $sale->update([
+                'status' => 'cancelled',
+                'cancellation_status' => 'approved',
+                'cancelled_by' => $user->id,
+                'cancelled_at' => now(),
+            ]);
+
+            if ($sale->delivery) {
+                $sale->delivery->update(['status' => 'failed']);
+            }
+
+            \App\Models\CustomerNotification::create([
+                'customer_id' => $sale->customer_id,
+                'delivery_id' => $sale->delivery->id ?? null,
+                'type' => 'cancellation_approved',
+                'title' => 'Cancellation Approved',
+                'message' => "Your cancellation request for order #{$sale->order_number} has been approved.",
+                'is_read' => false,
+            ]);
+        });
+
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_inventory', 'admin_dashboard'], 'sale.cancellation_approved'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications', 'customer_shop'], 'sale.cancellation_approved'));
+
+        return response()->json([
+            'data' => $sale->fresh()->load(['customer', 'items.product', 'delivery']),
+            'message' => 'Cancellation request approved successfully.',
+            'status' => 'success',
+        ]);
+    }
+
+    public function rejectCancellation(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'admin_notes' => 'nullable|string|max:500',
+        ]);
+
+        $sale = Sale::with(['delivery'])->findOrFail($id);
+
+        if ($sale->cancellation_status !== 'pending') {
+            return response()->json([
+                'message' => 'Only pending cancellation requests can be rejected.',
+                'status' => 'error',
+            ], 422);
+        }
+
+        $adminNotes = $validated['admin_notes'] ?? null;
+
+        DB::transaction(function () use ($sale, $adminNotes) {
+            $sale->update([
+                'cancellation_status' => 'rejected',
+            ]);
+
+            $message = "Your cancellation request for order #{$sale->order_number} has been rejected.";
+            if (!empty($adminNotes)) {
+                $message .= " Admin note: {$adminNotes}";
+            }
+
+            \App\Models\CustomerNotification::create([
+                'customer_id' => $sale->customer_id,
+                'delivery_id' => $sale->delivery->id ?? null,
+                'type' => 'cancellation_rejected',
+                'title' => 'Cancellation Rejected',
+                'message' => $message,
+                'is_read' => false,
+            ]);
+        });
+
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'sale.cancellation_rejected'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'sale.cancellation_rejected'));
+
+        return response()->json([
+            'data' => $sale->fresh()->load(['customer', 'items.product', 'delivery']),
+            'message' => 'Cancellation request rejected successfully.',
+            'status' => 'success',
         ]);
     }
 
@@ -456,13 +594,15 @@ class SaleController extends Controller
             }
         }
 
-        $cancellable = in_array($sale->status, ['pending', 'confirmed']);
+        $alreadyRequested = $sale->cancellation_status === 'pending';
+        $cancellable = in_array($sale->status, ['pending', 'confirmed']) && !$alreadyRequested;
         $customerCanCancel = $sale->status === 'pending';
         $needsAdminApproval = $sale->status === 'confirmed';
 
         return response()->json([
             'data' => [
                 'cancellable'          => $cancellable,
+            'already_requested'    => $alreadyRequested,
                 'customer_can_cancel'  => $customerCanCancel,
                 'needs_admin_approval' => $needsAdminApproval,
                 'current_status'       => $sale->status,
@@ -518,6 +658,34 @@ class SaleController extends Controller
         ]);
     }
 
+    protected function restoreStock(Sale $sale): void
+    {
+        foreach ($sale->items as $item) {
+            if ($item->product_variant_id) {
+                $variant = \App\Models\ProductVariant::find($item->product_variant_id);
+                if ($variant) {
+                    $variant->increment('stock', $item->quantity);
+                }
+
+                $variantInventory = \App\Models\Inventory::where('product_id', $item->product_id)
+                    ->where('product_variant_id', $item->product_variant_id)
+                    ->first();
+
+                if ($variantInventory) {
+                    $variantInventory->increment('current_stock', $item->quantity);
+                }
+            } else {
+                $inv = Inventory::where('product_id', $item->product_id)
+                    ->whereNull('product_variant_id')
+                    ->first();
+
+                if ($inv) {
+                    $inv->increment('current_stock', $item->quantity);
+                }
+            }
+        }
+    }
+
     /**
      * Check stock levels after a sale and notify admins if thresholds are hit.
      * Respects the low_stock_alerts and out_of_stock_alerts settings.
@@ -526,12 +694,12 @@ class SaleController extends Controller
     {
         try {
             if ($newStock <= 0 && Setting::get('out_of_stock_alerts', '0') === '1') {
-                $admins = \App\Models\User::where('role', 'admin')->get();
+                $admins = \App\Models\User::whereIn('id', \Illuminate\Support\Facades\Cache::remember('admin_user_ids', 300, fn () => \App\Models\User::where('role', 'admin')->pluck('id')->all()))->get();
                 foreach ($admins as $admin) {
                     $admin->notify(new \App\Notifications\StockAlert('out_of_stock', $productName, max(0, $newStock), $reorderThreshold));
                 }
             } elseif ($newStock > 0 && $newStock <= $reorderThreshold && Setting::get('low_stock_alerts', '0') === '1') {
-                $admins = \App\Models\User::where('role', 'admin')->get();
+                $admins = \App\Models\User::whereIn('id', \Illuminate\Support\Facades\Cache::remember('admin_user_ids', 300, fn () => \App\Models\User::where('role', 'admin')->pluck('id')->all()))->get();
                 foreach ($admins as $admin) {
                     $admin->notify(new \App\Notifications\StockAlert('low_stock', $productName, $newStock, $reorderThreshold));
                 }

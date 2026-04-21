@@ -26,7 +26,6 @@ class CreateSalesTable extends Migration
             $table->text('notes')->nullable();
             $table->string('cancellation_reason')->nullable();
             $table->text('cancellation_notes')->nullable();
-            $table->enum('cancellation_status', ['pending', 'approved', 'rejected'])->nullable();
             $table->foreignId('cancelled_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();

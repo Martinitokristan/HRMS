@@ -62,11 +62,13 @@ Route::get('/reviews/public', [ProductReviewController::class , 'publicReviews']
 Route::middleware(['throttle:60,1'])->post('/route', [RouteController::class , 'getRoute']);
 
 // GCash Public Webhook (No Auth - SMS Forwarder)
-Route::post('/gcash/sms-webhook', [GCashController::class, 'smsWebhook']);
+Route::middleware(['throttle:30,1'])->post('/gcash/sms-webhook', [GCashController::class, 'smsWebhook']);
 
 // GCash Proof Submission (No Auth - Token-based link from SMS)
-Route::get('/gcash/proof/{token}',  [GCashController::class, 'getProofOrder']);
-Route::post('/gcash/proof/{token}', [GCashController::class, 'submitProof']);
+Route::middleware(['throttle:10,1'])->group(function () {
+    Route::get('/gcash/proof/{token}',  [GCashController::class, 'getProofOrder']);
+    Route::post('/gcash/proof/{token}', [GCashController::class, 'submitProof']);
+});
 
 // Test route
 Route::get('/test', function () {

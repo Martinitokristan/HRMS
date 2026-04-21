@@ -200,9 +200,15 @@ class SettingsController extends Controller
     private function resolveNotifiable(Request $request)
     {
         $user = $request->user();
-        if ($user->role === 'supplier') {
+
+        if ($user === null) {
+            abort(401, 'Authentication required.');
+        }
+
+        if ($user instanceof \App\Models\User && $user->role === 'supplier') {
             return \App\Models\Supplier::where('email', $user->email)->first() ?? $user;
         }
+
         return $user;
     }
 
