@@ -17,7 +17,12 @@ class SettingsController extends Controller
     public function index(Request $request)
     {
         // Optimized: Cache static data and only return what's requested
-        $allSettings = Cache::tags(['settings'])->remember('settings:all', 86400, fn() => Setting::all());
+        $cacheKey = 'settings:all';
+        $isTaggable = Cache::getStore() instanceof \Illuminate\Cache\TaggableStore;
+
+        $allSettings = $isTaggable
+            ? Cache::tags(['settings'])->remember($cacheKey, 86400, fn() => Setting::all())
+            : Cache::remember($cacheKey, 86400, fn() => Setting::all());
 
         $user = $request->user();
         $isAdmin = $user instanceof \App\Models\User && $user->role === 'admin';
@@ -67,7 +72,11 @@ class SettingsController extends Controller
             }
         }
 
-        Cache::tags(['settings'])->flush();
+        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
+            Cache::tags(['settings'])->flush();
+        } else {
+            Cache::forget('settings:all');
+        }
 
         // Broadcast payment settings changes for real-time checkout updates
         if ($request->group === 'payments') {
@@ -185,7 +194,11 @@ class SettingsController extends Controller
             $request->only(['name', 'description'])
         );
 
-        Cache::tags(['categories'])->flush();
+        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
+            Cache::tags(['categories'])->flush();
+        } else {
+            Cache::forget('categories:all');
+        }
 
         return response()->json(['data' => $category, 'status' => 'success']);
     }
@@ -193,8 +206,14 @@ class SettingsController extends Controller
     public function deleteCategory($id)
     {
         Category::destroy($id);
-        Cache::tags(['categories'])->flush();
-        return response()->json(['status' => 'success']);
+
+        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
+            Cache::tags(['categories'])->flush();
+        } else {
+            Cache::forget('categories:all');
+        }
+
+        return response()->json(['status' => 'success', 'message' => 'Category deleted successfully']);
     }
 
     private function resolveNotifiable(Request $request)

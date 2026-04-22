@@ -11,6 +11,7 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import NotificationPanel from '../shared/NotificationPanel';
+import PaymentToastContainer from '../shared/PaymentToast';
 import ProductCarousel from './ProductCarousel';
 import Tooltip from '../shared/Tooltip';
 
@@ -239,6 +240,8 @@ export default function CustomerHome() {
     const [notifOpen, setNotifOpen] = useState(false);
     const [proofModalUrl, setProofModalUrl] = useState(null);
     const notifRef = useRef(null);
+    const seenPaymentIds = useRef(new Set());
+    const initialFetchDone = useRef(false);
 
     // Recommendations
     const [recommendations, setRecommendations] = useState([]);
@@ -348,8 +351,33 @@ export default function CustomerHome() {
     useEffect(() => {
         if (!user) return;
         api.get('/customer/notifications').then(r => {
-            setNotifications(r.data?.data || []);
+            const notis = r.data?.data || [];
+            setNotifications(notis);
             setUnreadCount(r.data?.unread || 0);
+
+            // Detect new payment_confirmed notifications and fire toast
+            const paymentNotis = notis.filter(n => n.type === 'payment_confirmed');
+
+            if (!initialFetchDone.current) {
+                // First fetch — just record existing IDs, don't toast
+                paymentNotis.forEach(n => seenPaymentIds.current.add(n.id));
+                initialFetchDone.current = true;
+            } else {
+                // Subsequent fetches — toast for any new ones
+                paymentNotis.forEach(n => {
+                    if (!seenPaymentIds.current.has(n.id)) {
+                        seenPaymentIds.current.add(n.id);
+                        // Extract amount and order number from message
+                        const amountMatch = n.message?.match(/₱([\d,]+\.?\d*)/);
+                        const orderMatch = n.message?.match(/order #(\S+)/);
+                        PaymentToastContainer.show({
+                            customerName: user.name,
+                            amount: amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : null,
+                            orderNumber: orderMatch ? orderMatch[1] : null,
+                        });
+                    }
+                });
+            }
         }).catch(() => { });
     }, [user, notifRefresh.refreshTrigger]);
 
@@ -510,9 +538,8 @@ export default function CustomerHome() {
                         <div className="relative" ref={notifRef}>
                             <Tooltip label="Notifications" position="bottom">
                                 <button
-                                    type="button"
-                                    className={`relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 rounded-xl transition-all ${notifOpen ? 'bg-gray-50 text-orange-500' : ''}`}
-                                    onClick={(e) => { e.stopPropagation(); setNotifOpen(prev => !prev); }}
+                                    className="relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl"
+                                    onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
                                     aria-label="Notifications"
                                 >
                                     <Bell className="h-5 w-5" />
@@ -521,6 +548,7 @@ export default function CustomerHome() {
                                     )}
                                 </button>
                             </Tooltip>
+
                             <NotificationPanel
                                 notifications={notifications}
                                 setNotifications={setNotifications}
@@ -726,7 +754,9 @@ export default function CustomerHome() {
             />
 
             <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
-            
+
+            <PaymentToastContainer />
+
             {/* Proof View Modal */}
             {proofModalUrl && (
                 <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setProofModalUrl(null)}>

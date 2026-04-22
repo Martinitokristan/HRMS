@@ -1,5 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import { toast } from 'sonner';
+import { Toaster } from '@/components/ui/sonner';
 
 const ToastContext = createContext(null);
 
@@ -19,6 +20,7 @@ export function ToastProvider({ children }) {
 
     return (
         <ToastContext.Provider value={{ showToast }}>
+            <Toaster richColors position="top-right" />
             {children}
         </ToastContext.Provider>
     );
