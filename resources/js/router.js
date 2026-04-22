@@ -41,6 +41,7 @@ import CartPage from './components/customer-portal/CartPage';
 import OrderHistory from './components/customer-portal/OrderHistory';
 import CustomerSettings from './components/customer-portal/CustomerSettings';
 import ProductReviewsPage from './components/customer-portal/ProductReviewsPage';
+import CustomerPaymentToastListener from './components/customer-portal/CustomerPaymentToastListener';
 
 // Rider App
 import RiderApp from './components/rider/RiderApp';
@@ -131,6 +132,7 @@ export default function AppRouter() {
             {/* Customer Portal */}
             <Route element={
                 <ProtectedRoute roles={['customer']}>
+                    <CustomerPaymentToastListener />
                     <Outlet />
                 </ProtectedRoute>
             }>

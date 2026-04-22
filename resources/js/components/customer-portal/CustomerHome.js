@@ -11,7 +11,6 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import NotificationPanel from '../shared/NotificationPanel';
-import PaymentToastContainer from '../shared/PaymentToast';
 import ProductCarousel from './ProductCarousel';
 import Tooltip from '../shared/Tooltip';
 
@@ -240,8 +239,6 @@ export default function CustomerHome() {
     const [notifOpen, setNotifOpen] = useState(false);
     const [proofModalUrl, setProofModalUrl] = useState(null);
     const notifRef = useRef(null);
-    const seenPaymentIds = useRef(new Set());
-    const initialFetchDone = useRef(false);
 
     // Recommendations
     const [recommendations, setRecommendations] = useState([]);
@@ -351,33 +348,8 @@ export default function CustomerHome() {
     useEffect(() => {
         if (!user) return;
         api.get('/customer/notifications').then(r => {
-            const notis = r.data?.data || [];
-            setNotifications(notis);
+            setNotifications(r.data?.data || []);
             setUnreadCount(r.data?.unread || 0);
-
-            // Detect new payment_confirmed notifications and fire toast
-            const paymentNotis = notis.filter(n => n.type === 'payment_confirmed');
-
-            if (!initialFetchDone.current) {
-                // First fetch — just record existing IDs, don't toast
-                paymentNotis.forEach(n => seenPaymentIds.current.add(n.id));
-                initialFetchDone.current = true;
-            } else {
-                // Subsequent fetches — toast for any new ones
-                paymentNotis.forEach(n => {
-                    if (!seenPaymentIds.current.has(n.id)) {
-                        seenPaymentIds.current.add(n.id);
-                        // Extract amount and order number from message
-                        const amountMatch = n.message?.match(/₱([\d,]+\.?\d*)/);
-                        const orderMatch = n.message?.match(/order #(\S+)/);
-                        PaymentToastContainer.show({
-                            customerName: user.name,
-                            amount: amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : null,
-                            orderNumber: orderMatch ? orderMatch[1] : null,
-                        });
-                    }
-                });
-            }
         }).catch(() => { });
     }, [user, notifRefresh.refreshTrigger]);
 
@@ -754,8 +726,6 @@ export default function CustomerHome() {
             />
 
             <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
-
-            <PaymentToastContainer />
 
             {/* Proof View Modal */}
             {proofModalUrl && (
