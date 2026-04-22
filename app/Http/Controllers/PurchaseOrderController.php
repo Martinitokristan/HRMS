@@ -10,6 +10,7 @@ use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\SupplierProduct;
+use App\Models\SupplierProductVariant;
 use App\Models\User;
 use App\Notifications\PurchaseOrderRequest;
 use App\Notifications\PurchaseOrderAccepted;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 
 class PurchaseOrderController extends Controller
 {
@@ -292,18 +294,10 @@ class PurchaseOrderController extends Controller
 
     public function markReceived($id)
     {
-        // Helper function to generate truly unique barcodes
-        $generateUniqueBarcode = function ($prefix = 'BARCODE-') {
-            do {
-                $barcode = $prefix . strtoupper(\Illuminate\Support\Str::random(10));
-                $exists = \App\Models\Product::where('barcode', $barcode)->exists() ||
-                    \App\Models\ProductVariant::where('barcode', $barcode)->exists();
-            } while ($exists);
-
-            return $barcode;
-        };
-
-        $po = PurchaseOrder::with('items')->findOrFail($id);
+        $po = PurchaseOrder::with([
+            'items.supplierProduct',
+            'items.supplierProductVariant',
+        ])->findOrFail($id);
 
         if ($po->status !== 'supplier_delivered') {
             return response()->json([
@@ -312,359 +306,306 @@ class PurchaseOrderController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($po, $generateUniqueBarcode) {
+        // ----------------------------------------------------------------
+        // PRE-FETCH PHASE (outside the transaction)
+        // Collect all IDs we will need so we can batch-load data and
+        // generate barcodes without holding any row locks.
+        // ----------------------------------------------------------------
+
+        $supplierProductIds        = $po->items->pluck('supplier_product_id')->filter()->unique()->values();
+        $supplierProductVariantIds = $po->items->pluck('supplier_product_variant_id')->filter()->unique()->values();
+        $productIds                = $po->items->pluck('product_id')->filter()->unique()->values();
+        $productVariantIds         = $po->items->pluck('product_variant_id')->filter()->unique()->values();
+
+        // Eager-load supplier variants (already on the relation, but index by id for O(1) access)
+        $supplierVariantsById = SupplierProductVariant::whereIn('id', $supplierProductVariantIds)
+            ->get()->keyBy('id');
+
+        // Eager-load supplier products
+        $supplierProductsById = SupplierProduct::whereIn('id', $supplierProductIds)
+            ->get()->keyBy('id');
+
+        // Batch-load existing inventory records that might match any of our items.
+        // We load by every possible lookup key so we can resolve them in PHP.
+        $existingInventories = Inventory::where(function ($q) use (
+            $productIds, $productVariantIds, $supplierProductIds, $supplierProductVariantIds
+        ) {
+            $q->whereIn('product_id', $productIds->merge($productIds)->unique())
+              ->orWhereIn('product_variant_id', $productVariantIds)
+              ->orWhereIn('supplier_product_id', $supplierProductIds)
+              ->orWhereIn('supplier_product_variant_id', $supplierProductVariantIds);
+        })->get();
+
+        // Build lookup maps for O(1) resolution inside the loop
+        $invByVariant         = $existingInventories->whereNotNull('product_variant_id')->keyBy('product_variant_id');
+        $invBySupplierVariant = $existingInventories->whereNotNull('supplier_product_variant_id')->keyBy('supplier_product_variant_id');
+        $invBySupplierProduct = $existingInventories->whereNull('supplier_product_variant_id')
+                                                    ->whereNotNull('supplier_product_id')
+                                                    ->keyBy('supplier_product_id');
+        // Base-product inventory: keyed by product_id (variant_id is null)
+        $invByProduct = $existingInventories->whereNull('product_variant_id')
+                                            ->whereNotNull('product_id')
+                                            ->keyBy('product_id');
+
+        // Pre-load existing variant_values to avoid per-row lookups inside the transaction
+        $variantValuesByLabelCategory = DB::table('variant_values')
+            ->whereIn('category', ['size', 'color', 'weight'])
+            ->get()
+            ->groupBy(fn($r) => $r->category . '|' . $r->label)
+            ->map(fn($g) => $g->first());
+
+        // Determine which supplier barcodes are already taken so we can skip them
+        $takenBarcodes = Product::pluck('barcode')
+            ->merge(ProductVariant::pluck('barcode'))
+            ->filter()
+            ->flip(); // use as a hash-set
+
+        // Generate a unique barcode without hitting the DB in a loop
+        $generateUniqueBarcode = function (string $prefix = 'BARCODE-') use (&$takenBarcodes): string {
+            do {
+                $barcode = $prefix . strtoupper(Str::random(10));
+            } while (isset($takenBarcodes[$barcode]));
+
+            // Reserve it immediately so subsequent calls in the same request don't collide
+            $takenBarcodes[$barcode] = true;
+
+            return $barcode;
+        };
+
+        // Per-request product cache: supplier_product_id => internal product_id
+        $productCache = [];
+
+        // ----------------------------------------------------------------
+        // TRANSACTION PHASE
+        // Focused exclusively on data mutations with pessimistic locking
+        // on inventory rows to prevent concurrent-request races.
+        // ----------------------------------------------------------------
+
+        DB::transaction(function () use (
+            $po,
+            $supplierVariantsById,
+            $supplierProductsById,
+            $invByVariant,
+            $invBySupplierVariant,
+            $invBySupplierProduct,
+            $invByProduct,
+            $variantValuesByLabelCategory,
+            $generateUniqueBarcode,
+            &$productCache
+        ) {
             foreach ($po->items as $item) {
                 $inv = null;
 
-                // DEBUG: Log what we're working with
-                \Log::info('Processing PO Item:', [
-                    'product_id' => $item->product_id,
-                    'product_variant_id' => $item->product_variant_id,
-                    'supplier_product_id' => $item->supplier_product_id,
-                    'supplier_product_variant_id' => $item->supplier_product_variant_id,
-                    'quantity' => $item->quantity,
-                    'product_name' => $item->product ? $item->product->name : 'N/A',
-                    'variant_info' => $item->productVariant ? $item->productVariant->size_value . $item->productVariant->color_value . $item->productVariant->weight_value : 'Base Product'
-                ]);
+                // ----------------------------------------------------------
+                // STEP 1: Resolve existing inventory record (single pass)
+                // Priority: product_variant_id > supplier_product_variant_id
+                //           > supplier_product_id (base) > product_id (base)
+                // ----------------------------------------------------------
 
-                // CACHE: Share created/found products across items in the same PO
-                static $productLocalCache = [];
-                $supplierProductId = $item->supplier_product_id;
-
-                // FIXED: Improved lookup logic with proper base vs variant distinction
-
-                // CASE 1: For BASE PRODUCTS (both product_variant_id and supplier_product_variant_id are null)
-                if (is_null($item->product_variant_id) && is_null($item->supplier_product_variant_id)) {
-                    \Log::info('Looking for BASE PRODUCT inventory', []);
-
-                    // Look for base product inventory (product_variant_id must be null)
-                    $inv = Inventory::where('product_id', $item->product_id)
-                        ->whereNull('product_variant_id')
-                        ->first();
-
-                    \Log::info('Base product inventory found', $inv ? ['id' => $inv->id, 'warehouse_stock' => $inv->warehouse_stock] : ['result' => 'No']);
+                if (!is_null($item->product_variant_id)) {
+                    $inv = $invByVariant->get($item->product_variant_id);
                 }
-                // CASE 2: For VARIANTS (either product_variant_id or supplier_product_variant_id is not null)
-                else {
-                    \Log::info('Looking for VARIANT inventory', [
-                        'product_variant_id' => $item->product_variant_id,
-                        'supplier_product_variant_id' => $item->supplier_product_variant_id
-                    ]);
 
-                    // First try to find by product_variant_id if it exists
-                    if (!is_null($item->product_variant_id)) {
-                        $inv = Inventory::where('product_id', $item->product_id)
-                            ->where('product_variant_id', $item->product_variant_id)
-                            ->first();
+                if (!$inv && !is_null($item->supplier_product_variant_id)) {
+                    $inv = $invBySupplierVariant->get($item->supplier_product_variant_id);
+                }
 
-                        \Log::info('Variant inventory found by product_variant_id', $inv ? ['id' => $inv->id, 'warehouse_stock' => $inv->warehouse_stock] : ['result' => 'No']);
+                if (!$inv && is_null($item->product_variant_id) && is_null($item->supplier_product_variant_id)) {
+                    // Base product: try supplier_product_id first, then product_id
+                    if (!is_null($item->supplier_product_id)) {
+                        $inv = $invBySupplierProduct->get($item->supplier_product_id);
                     }
-
-                    // If not found, try by supplier_product_variant_id
-                    if (!$inv && !is_null($item->supplier_product_variant_id)) {
-                        $inv = Inventory::where('supplier_product_variant_id', $item->supplier_product_variant_id)->first();
-
-                        \Log::info('Variant inventory found by supplier_product_variant_id', $inv ? ['id' => $inv->id, 'warehouse_stock' => $inv->warehouse_stock] : ['result' => 'No']);
+                    if (!$inv && !is_null($item->product_id)) {
+                        $inv = $invByProduct->get($item->product_id);
                     }
                 }
 
-                // CASE 3: If no inventory found via product, check by supplier references
-                if (!$inv && $item->supplier_product_variant_id) {
-                    \Log::info('Checking by supplier variant', []);
-                    $inv = Inventory::where('supplier_product_variant_id', $item->supplier_product_variant_id)->first();
-                    \Log::info('Supplier variant check result', $inv ? ['found' => true, 'id' => $inv->id] : ['found' => false]);
+                // If we found an inventory record, lock it for update to prevent
+                // concurrent requests from double-incrementing the same row.
+                if ($inv) {
+                    $inv = Inventory::where('id', $inv->id)->lockForUpdate()->first();
                 }
 
-                if (!$inv && $item->supplier_product_id) {
-                    \Log::info('Checking by supplier product', []);
-                    if (is_null($item->product_variant_id) && is_null($item->supplier_product_variant_id)) {
-                        // Only look for base product if this is actually a base product
-                        $inv = Inventory::where('supplier_product_id', $item->supplier_product_id)
-                            ->whereNull('supplier_product_variant_id')
-                            ->first();
-                    } else {
-                        // For variants, don't fall back to base product inventory
-                        \Log::info('Skipping base product lookup for variant', []);
-                    }
-                    \Log::info('Supplier product check result', $inv ? ['found' => true, 'id' => $inv->id] : ['found' => false]);
-                }
+                // ----------------------------------------------------------
+                // STEP 2: Create missing product / variant / inventory
+                // ----------------------------------------------------------
 
-                // CASE 3.5: For supplier variants, always create separate inventory if not found
-                \Log::info('Before inventory creation check', [
-                    'inv_exists' => $inv ? true : false,
-                    'supplier_product_variant_id' => $item->supplier_product_variant_id,
-                    'inv_id' => $inv ? $inv->id : null
-                ]);
-
-                if (!$inv && $item->supplier_product_variant_id) {
-                    \Log::info('Creating inventory for supplier variant', [
-                        'supplier_product_variant_id' => $item->supplier_product_variant_id,
-                        'product_id' => $item->product_id,
-                        'product_variant_id' => $item->product_variant_id
-                    ]);
-
-                    // First, find or create the product variant if it doesn't exist
-                    $productVariantId = $item->product_variant_id;
-                    $currentProductId = $item->product_id ?: (isset($productLocalCache[$supplierProductId]) ? $productLocalCache[$supplierProductId] : null);
-
-                    if (!$productVariantId && $item->supplier_product_variant_id && $currentProductId) {
-                        $spVariant = \App\Models\SupplierProductVariant::find($item->supplier_product_variant_id);
-                        if ($spVariant) {
-                            // Look for existing product variant via relationships since string columns don't exist
-                            $existingVariant = \App\Models\ProductVariant::where('product_id', $currentProductId)
-                                ->where(function ($q) use ($spVariant) {
-                                    if ($spVariant->size) {
-                                        $q->whereHas('sizeValue', fn($sq) => $sq->where('label', $spVariant->size));
-                                    } else {
-                                        $q->whereNull('size_value_id');
-                                    }
-                                })
-                                ->where(function ($q) use ($spVariant) {
-                                    if ($spVariant->color) {
-                                        $q->whereHas('colorValue', fn($sq) => $sq->where('label', $spVariant->color));
-                                    } else {
-                                        $q->whereNull('color_value_id');
-                                    }
-                                })
-                                ->where(function ($q) use ($spVariant) {
-                                    if ($spVariant->weight) {
-                                        $q->whereHas('weightValue', fn($sq) => $sq->where('label', $spVariant->weight));
-                                    } else {
-                                        $q->whereNull('weight_value_id');
-                                    }
-                                })
-                                ->first();
-
-                            if ($existingVariant) {
-                                $productVariantId = $existingVariant->id;
-                                \Log::info('Found existing product variant', ['variant_id' => $productVariantId]);
-                            } else {
-                                \Log::info('No existing product variant found, will create later in Case 4');
-                            }
-                        }
-                    }
-
-                    // Check if inventory record already exists for this variant (double-check)
-                    $existingInv = null;
-                    if ($productVariantId && $currentProductId) {
-                        $existingInv = Inventory::where('product_id', $currentProductId)
-                            ->where('product_variant_id', $productVariantId)
-                            ->first();
-                    }
-
-                    if (!$existingInv && $item->supplier_product_variant_id) {
-                        $existingInv = Inventory::where('supplier_product_variant_id', $item->supplier_product_variant_id)
-                            ->first();
-                    }
-
-                    if ($existingInv) {
-                        \Log::info('Found existing variant inventory record, using it', ['inventory_id' => $existingInv->id]);
-                        $inv = $existingInv;
-                        // Ensure it's linked to the correct product if it was an orphan
-                        if (!$inv->product_id && $currentProductId) {
-                            $inv->product_id = $currentProductId;
-                            if ($productVariantId) {
-                                $inv->product_variant_id = $productVariantId;
-                            }
-                            $inv->save();
-                            \Log::info('Linked orphan inventory to existing product', ['product_id' => $currentProductId]);
-                        }
-                    } else {
-                        \Log::info('Creating new variant inventory record');
-                        $inv = Inventory::create([
-                            'product_id' => $currentProductId,
-                            'product_variant_id' => $productVariantId,
-                            'supplier_product_id' => $item->supplier_product_id,
-                            'supplier_product_variant_id' => $item->supplier_product_variant_id,
-                            'current_stock' => 0,
-                            'warehouse_stock' => 0,
-                            'reorder_threshold' => 10,
-                        ]);
-                        \Log::info('Created supplier variant inventory', ['inventory_id' => $inv->id]);
-                    }
-                }
-
-                // CASE 4: Create products from supplier data if they don't exist
                 if (!$inv || (is_null($inv->product_id) && $item->supplier_product_id)) {
-                    \Log::info('Creating or finding product from supplier data', []);
+                    $productId = $item->product_id
+                        ?? ($productCache[$item->supplier_product_id] ?? null);
 
-                    $productId = $item->product_id ?: (isset($productLocalCache[$supplierProductId]) ? $productLocalCache[$supplierProductId] : null);
+                    // Find or create the internal Product from the supplier product
                     if (!$productId && $item->supplier_product_id) {
-                        // Check if a product already exists for this supplier product globally
-                        $existingProd = Product::whereHas('inventory', function ($q) use ($item) {
-                            $q->where('supplier_product_id', $item->supplier_product_id);
-                        })->first();
+                        $supplierProduct = $supplierProductsById->get($item->supplier_product_id);
 
-                        if ($existingProd) {
-                            $productId = $existingProd->id;
-                            $productLocalCache[$supplierProductId] = $productId;
-                            \Log::info('Found existing linked product', ['product_id' => $productId]);
+                        if ($supplierProduct) {
+                            // Check if a product is already linked via inventory
+                            $linkedProduct = Product::whereHas('inventory', function ($q) use ($item) {
+                                $q->where('supplier_product_id', $item->supplier_product_id);
+                            })->first();
+
+                            if ($linkedProduct) {
+                                $productId = $linkedProduct->id;
+                            } else {
+                                $barcode = (!empty($supplierProduct->barcode) && $supplierProduct->barcode !== 'undefined')
+                                    ? $supplierProduct->barcode
+                                    : $generateUniqueBarcode();
+
+                                $newProduct = Product::updateOrCreate(
+                                    ['barcode' => $barcode],
+                                    [
+                                        'name'          => $supplierProduct->name,
+                                        'description'   => $supplierProduct->description,
+                                        'category_id'   => $supplierProduct->category_id,
+                                        'brand_id'      => $supplierProduct->brand_id,
+                                        'unit_type_id'  => 1,
+                                        'supplier_id'   => $supplierProduct->supplier_id ?? 1,
+                                        'purchase_price' => $supplierProduct->price,
+                                        'sell_price'    => $supplierProduct->price * 1.3,
+                                        'image_path'    => $supplierProduct->image_path,
+                                        'is_active'     => 0,
+                                    ]
+                                );
+                                $productId = $newProduct->id;
+
+                                if (!empty($newProduct->image_path) && empty($newProduct->image_banner_path)) {
+                                    ProcessProductBannerImage::dispatch($newProduct->id, $newProduct->image_path);
+                                }
+                            }
+
+                            $productCache[$item->supplier_product_id] = $productId;
                         }
                     }
 
                     $variantId = $item->product_variant_id;
 
-                    // If we have supplier product but no product, create the product
-                    if (!$productId && $item->supplier_product_id) {
-                        \Log::info('Creating new product from supplier product', []);
-                        $supplierProduct = SupplierProduct::find($item->supplier_product_id);
-
-                        if ($supplierProduct) {
-                            $newProduct = Product::updateOrCreate(
-                                ['barcode' => !empty($supplierProduct->barcode) && $supplierProduct->barcode !== 'undefined' ? $supplierProduct->barcode : $generateUniqueBarcode()],
-                                [
-                                    'name' => $supplierProduct->name,
-                                    'description' => $supplierProduct->description,
-                                    'category_id' => $supplierProduct->category_id,
-                                    'brand_id' => $supplierProduct->brand_id,
-                                    'unit_type_id' => 1, // Default unit type
-                                    'supplier_id' => $supplierProduct->supplier_id ?? 1,
-                                    'purchase_price' => $supplierProduct->price,
-                                    'sell_price' => $supplierProduct->price * 1.3, // 30% markup
-                                    'image_path' => $supplierProduct->image_path, // Copy image from supplier
-                                    'is_active' => 0, // Inactive until explicitly displayed to storefront
-                                ]
-                            );
-                            $productId = $newProduct->id;
-                            $productLocalCache[$supplierProductId] = $productId;
-                            \Log::info('Created new product', ['product_id' => $productId, 'name' => $newProduct->name]);
-
-                            if (!empty($newProduct->image_path) && empty($newProduct->image_banner_path)) {
-                                ProcessProductBannerImage::dispatch($newProduct->id, $newProduct->image_path);
-                            }
-                        }
-                    }
-
-                    // If we have supplier variant but no variant, create the variant
+                    // Find or create the internal ProductVariant from the supplier variant
                     if (!$variantId && $item->supplier_product_variant_id && $productId) {
-                        \Log::info('Creating new variant from supplier variant', []);
-                        $supplierVariant = \App\Models\SupplierProductVariant::find($item->supplier_product_variant_id);
+                        $spVariant = $supplierVariantsById->get($item->supplier_product_variant_id);
 
-                        if ($supplierVariant) {
-                            // Find or create appropriate variant values
-                            $sizeValueId = null;
-                            $colorValueId = null;
-                            $weightValueId = null;
+                        if ($spVariant) {
+                            // Try to match an existing variant by its value labels
+                            $existingVariant = ProductVariant::where('product_id', $productId)
+                                ->where(function ($q) use ($spVariant) {
+                                    $spVariant->size
+                                        ? $q->whereHas('sizeValue', fn($sq) => $sq->where('label', $spVariant->size))
+                                        : $q->whereNull('size_value_id');
+                                })
+                                ->where(function ($q) use ($spVariant) {
+                                    $spVariant->color
+                                        ? $q->whereHas('colorValue', fn($sq) => $sq->where('label', $spVariant->color))
+                                        : $q->whereNull('color_value_id');
+                                })
+                                ->where(function ($q) use ($spVariant) {
+                                    $spVariant->weight
+                                        ? $q->whereHas('weightValue', fn($sq) => $sq->where('label', $spVariant->weight))
+                                        : $q->whereNull('weight_value_id');
+                                })
+                                ->lockForUpdate()
+                                ->first();
 
-                            // Handle size value - extract from supplier variant if possible
-                            if ($supplierVariant->size) {
-                                $existing = DB::table('variant_values')->where('label', $supplierVariant->size)->where('category', 'size')->first();
-                                $sizeValueId = $existing ? $existing->id : DB::table('variant_values')->insertGetId([
-                                    'variant_id' => 1,
-                                    'label' => $supplierVariant->size,
-                                    'category' => 'size',
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
+                            if ($existingVariant) {
+                                $variantId = $existingVariant->id;
+                            } else {
+                                // Resolve variant value IDs from the pre-fetched map
+                                $sizeValueId   = $spVariant->size
+                                    ? optional($variantValuesByLabelCategory->get('size|' . $spVariant->size))->id
+                                      ?? DB::table('variant_values')->insertGetId([
+                                          'variant_id' => 1, 'label' => $spVariant->size,
+                                          'category' => 'size', 'created_at' => now(), 'updated_at' => now(),
+                                      ])
+                                    : null;
+
+                                $colorValueId  = $spVariant->color
+                                    ? optional($variantValuesByLabelCategory->get('color|' . $spVariant->color))->id
+                                      ?? DB::table('variant_values')->insertGetId([
+                                          'variant_id' => 2, 'label' => $spVariant->color,
+                                          'category' => 'color', 'created_at' => now(), 'updated_at' => now(),
+                                      ])
+                                    : null;
+
+                                $weightValueId = $spVariant->weight
+                                    ? optional($variantValuesByLabelCategory->get('weight|' . $spVariant->weight))->id
+                                      ?? DB::table('variant_values')->insertGetId([
+                                          'variant_id' => 3, 'label' => $spVariant->weight,
+                                          'category' => 'weight', 'created_at' => now(), 'updated_at' => now(),
+                                      ])
+                                    : null;
+
+                                $newVariant = ProductVariant::create([
+                                    'product_id'       => $productId,
+                                    'size_value_id'    => $sizeValueId,
+                                    'color_value_id'   => $colorValueId,
+                                    'weight_value_id'  => $weightValueId,
+                                    'stock'            => 0,
+                                    'price_override'   => $spVariant->price_override,
+                                    'barcode'          => $generateUniqueBarcode('VAR-'),
+                                    'sale_percentage'  => 0,
+                                    'image_path'       => $spVariant->image_path,
+                                    'additional_images' => $spVariant->additional_images,
                                 ]);
+                                $variantId = $newVariant->id;
                             }
-
-                            // Handle color value
-                            if ($supplierVariant->color) {
-                                $existing = DB::table('variant_values')->where('label', $supplierVariant->color)->where('category', 'color')->first();
-                                $colorValueId = $existing ? $existing->id : DB::table('variant_values')->insertGetId([
-                                    'variant_id' => 2,
-                                    'label' => $supplierVariant->color,
-                                    'category' => 'color',
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
-                                ]);
-                            }
-
-                            // Handle weight value
-                            if ($supplierVariant->weight) {
-                                $existing = DB::table('variant_values')->where('label', $supplierVariant->weight)->where('category', 'weight')->first();
-                                $weightValueId = $existing ? $existing->id : DB::table('variant_values')->insertGetId([
-                                    'variant_id' => 3,
-                                    'label' => $supplierVariant->weight,
-                                    'category' => 'weight',
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
-                                ]);
-                            }
-
-                            $newVariant = ProductVariant::create([
-                                'product_id' => $productId,
-                                'size_value_id' => $sizeValueId,
-                                'color_value_id' => $colorValueId,
-                                'weight_value_id' => $weightValueId,
-                                'stock' => 0,
-                                'price_override' => $supplierVariant->price_override,
-                                'barcode' => $generateUniqueBarcode('VAR-'), // Generate unique barcode for variant
-                                'sale_percentage' => 0,
-                                'image_path' => $supplierVariant->image_path,
-                                'additional_images' => $supplierVariant->additional_images, // Copy additional images
-                            ]);
-                            $variantId = $newVariant->id;
-                            \Log::info('Created new variant', ['variant_id' => $variantId, 'product_id' => $productId]);
                         }
                     }
 
                     if ($inv) {
-                        // Link existing inventory to found/created product
+                        // Link an orphaned inventory record to the resolved product/variant
                         $inv->product_id = $productId;
                         if ($variantId) {
                             $inv->product_variant_id = $variantId;
                         }
                         $inv->save();
-                        \Log::info('Linked existing inventory to product/variant', ['inv_id' => $inv->id, 'product_id' => $productId]);
                     } else {
-                        // Now create the inventory record with the proper IDs
-                        \Log::info('Creating new inventory record', []);
-                        $inv = Inventory::create([
-                            'product_id' => $productId,
-                            'product_variant_id' => $variantId,
-                            'supplier_product_id' => $item->supplier_product_id,
-                            'supplier_product_variant_id' => $item->supplier_product_variant_id,
-                            'current_stock' => 0,
-                            'warehouse_stock' => 0,
-                            'reorder_threshold' => 10,
-                        ]);
+                        // Create a brand-new inventory record, using firstOrCreate to guard
+                        // against a concurrent request that may have just inserted the same row.
+                        $inv = Inventory::firstOrCreate(
+                            array_filter([
+                                'product_id'                  => $productId,
+                                'product_variant_id'          => $variantId,
+                                'supplier_product_id'         => $item->supplier_product_id,
+                                'supplier_product_variant_id' => $item->supplier_product_variant_id,
+                            ], fn($v) => !is_null($v)),
+                            [
+                                'current_stock'    => 0,
+                                'warehouse_stock'  => 0,
+                                'reorder_threshold' => 10,
+                            ]
+                        );
                     }
 
-                    // Update the PO item to reference the newly created product/variant
+                    // Keep the PO item in sync with the resolved product/variant IDs
                     $item->update([
-                        'product_id' => $productId,
+                        'product_id'         => $productId,
                         'product_variant_id' => $variantId,
                     ]);
-                    \Log::info('Updated PO item with new product/variant IDs', []);
                 }
 
-                // Update warehouse stock
-                $oldStock = $inv->warehouse_stock;
+                // ----------------------------------------------------------
+                // STEP 3: Increment warehouse stock atomically
+                // ----------------------------------------------------------
                 $inv->increment('warehouse_stock', $item->quantity);
-                $inv->last_adjusted_at = now();
-                $inv->save();
-
-                \Log::info('Stock updated:', [
-                    'inventory_id' => $inv->id,
-                    'old_stock' => $oldStock,
-                    'added_quantity' => $item->quantity,
-                    'new_stock' => $inv->warehouse_stock,
-                    'is_base_product' => is_null($item->product_variant_id)
-                ]);
-
-                // Base products and variants should maintain separate stock management
-                // They both go to the warehouse first and require a manual 'Transfer' to store.
+                $inv->update(['last_adjusted_at' => now()]);
             }
 
-            // REMOVED: Don't automatically sync base product stock with variants
-            // Base products and variants should maintain separate stock management
-            // This prevents incorrect stock merging in the inventory display
             $po->update(['status' => 'received']);
         });
 
-        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore)
+        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
             Cache::tags(['inventory', 'products'])->flush();
+        }
 
         broadcast(new DataMutated('private-admin', ['admin_purchases', 'admin_inventory', 'admin_dashboard', 'supplier_products'], 'purchase_order.received'));
         broadcast(new DataMutated("private-supplier.{$po->supplier_id}", ['supplier_orders', 'supplier_dashboard', 'supplier_products'], 'purchase_order.received'));
 
         return response()->json([
-            'data' => $po->fresh()->load(['supplier', 'items.product', 'items.productVariant']),
+            'data'    => $po->fresh()->load(['supplier', 'items.product', 'items.productVariant']),
             'message' => 'Purchase order received. Stock added to Warehouse inventory.',
-            'status' => 'success',
+            'status'  => 'success',
         ]);
     }
+
+
 
     // Supplier-specific methods
 
