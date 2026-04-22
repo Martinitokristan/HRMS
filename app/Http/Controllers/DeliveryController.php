@@ -114,17 +114,10 @@ class DeliveryController extends Controller
             return response()->json(['error' => 'Unauthorized - must be a rider'], 403);
         }
 
-        $delivery = Delivery::findOrFail($id);
-        
-        // Verify delivery is not already assigned
-        if ($delivery->rider_id) {
-            return response()->json(['error' => 'Order already assigned'], 400);
-        }
-
-        // Verify delivery is pending
-        if ($delivery->status !== 'pending') {
-            return response()->json(['error' => 'Order not available for assignment'], 400);
-        }
+        // Strictly scope the query to unassigned, pending deliveries to prevent IDOR
+        $delivery = Delivery::where('status', 'pending')
+            ->whereNull('rider_id')
+            ->findOrFail($id);
 
         // Assign the rider
         $delivery->update([
@@ -169,17 +162,10 @@ class DeliveryController extends Controller
             return response()->json(['error' => 'Unauthorized - must be a rider'], 403);
         }
 
-        $delivery = Delivery::findOrFail($id);
-        
-        // Verify this delivery is assigned to this rider
-        if ($delivery->rider_id !== $rider->id) {
-            return response()->json(['error' => 'This order is not assigned to you'], 400);
-        }
-
-        // Verify delivery is still pending
-        if (!in_array($delivery->status, ['pending', 'assigned'])) {
-            return response()->json(['error' => 'Order cannot be declined'], 400);
-        }
+        // Strictly scope the query to this rider's deliveries to prevent IDOR
+        $delivery = Delivery::where('rider_id', $rider->id)
+            ->whereIn('status', ['pending', 'assigned'])
+            ->findOrFail($id);
 
         // Remove rider assignment and make available again
         $delivery->update([
@@ -487,7 +473,7 @@ class DeliveryController extends Controller
     public function uploadProof(Request $request, $id)
     {
         $request->validate([
-            'photo' => 'required|image|max:5120', // 5MB max
+            'photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max
         ]);
 
         $delivery = Delivery::with('sale.items.product')->findOrFail($id);

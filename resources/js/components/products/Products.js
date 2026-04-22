@@ -323,12 +323,12 @@ export default function Products() {
                                     >
                                         <TableCell className="px-4 py-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-secondary border-2 border-border flex-shrink-0">
+                                                <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-transparent border-2 border-border flex-shrink-0 flex items-center justify-center">
                                                     {imgSrc ? (
                                                         <img
                                                             src={imgSrc}
                                                             alt={p.name}
-                                                            className="h-full w-full object-cover"
+                                                            className="max-h-full max-w-full object-contain mix-blend-multiply"
                                                             onError={(e) => {
                                                                 e.target.style.display =
                                                                     "none";

@@ -317,12 +317,12 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                         )}
 
                         {/* Main Image Box */}
-                        <div className="w-full aspect-square relative rounded-2xl bg-white shadow-xl shadow-gray-200/50 border border-gray-100 flex items-center justify-center overflow-hidden mb-4">
+                        <div className="w-full aspect-square relative rounded-2xl bg-transparent shadow-xl shadow-gray-200/50 border border-gray-100 flex items-center justify-center overflow-hidden mb-4">
                             {displayImage ? (
                                 <img
                                     src={`/storage/${displayImage}`}
                                     alt={product.name}
-                                    className="w-full h-full object-contain p-4"
+                                    className="w-full h-full object-contain p-4 mix-blend-multiply"
                                 />
                             ) : (
                                 <div className="text-8xl opacity-10">📦</div>
@@ -337,12 +337,12 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                                         <button
                                             key={i}
                                             onClick={() => setActiveGalleryImage(img)}
-                                            className={`w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-white flex items-center justify-center p-1 ${displayImage === img
+                                            className={`w-14 h-14 rounded-xl border-2 transition-all overflow-hidden bg-transparent flex items-center justify-center p-1 ${displayImage === img
                                                 ? 'border-orange-500 shadow-md ring-2 ring-orange-100'
                                                 : 'border-gray-100 hover:border-orange-200'
                                                 }`}
                                         >
-                                            <img src={`/storage/${img}`} className="w-full h-full object-contain p-1 rounded-lg" />
+                                            <img src={`/storage/${img}`} className="w-full h-full object-contain p-1 rounded-lg mix-blend-multiply" />
                                         </button>
                                     ))}
                                 </div>

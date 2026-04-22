@@ -146,7 +146,6 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     Route::get('/gcash-logs', [GCashController::class, 'index']);
     // Users
     Route::get('/users', [UserController::class , 'index']);
-    Route::post('/users', [UserController::class , 'store']);
     Route::put('/users/{id}', [UserController::class , 'update']);
     Route::put('/users/{id}/restore', [UserController::class , 'restore']);
     Route::delete('/users/{id}', [UserController::class , 'destroy']);

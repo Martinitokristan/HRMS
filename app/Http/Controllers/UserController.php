@@ -36,45 +36,18 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email',
-            'phone'    => 'nullable|string|max:20',
-            'role'     => 'required|in:admin,customer,rider',
-            'password' => 'required|string|min:8',
-        ]);
-
-        $user = User::create(array_merge($data, [
-            'password' => Hash::make($data['password']),
-            'status'   => 'active',
-        ]));
-
-        // Auto-create rider profile
-        if ($user->role === 'rider') {
-            $user->riderProfile()->create(['availability' => 'available']);
-        }
-
-        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'user.created'));
-
-        return response()->json([
-            'data'    => $user->load('riderProfile'),
-            'message' => 'User created successfully',
-            'status'  => 'success',
-        ], 201);
-    }
-
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        $data = $request->validate([
+        $request->validate([
             'name'  => 'required|string|max:100',
             'email' => "required|email|unique:users,email,{$id}",
             'phone' => 'nullable|string|max:20',
             'role'  => 'required|in:admin,customer,rider',
         ]);
+
+        $data = $request->only(['name', 'email', 'phone', 'role']);
 
         if ($request->password) {
             $data['password'] = Hash::make($request->password);
@@ -95,7 +68,8 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->update(['status' => 'suspended']);
-        // Revoke all tokens
+        
+        // Revoke all API tokens
         $user->tokens()->delete();
 
         broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'user.suspended'));

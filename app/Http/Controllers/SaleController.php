@@ -247,7 +247,13 @@ class SaleController extends Controller
             ], 422);
         }
 
-        $sale->update(['status' => $newStatus]);
+        DB::transaction(function () use ($sale, $newStatus) {
+            $sale->update(['status' => $newStatus]);
+
+            if ($newStatus === 'cancelled') {
+                $this->restoreStock($sale);
+            }
+        });
 
         if ($newStatus === 'confirmed') {
             try {
@@ -265,6 +271,8 @@ class SaleController extends Controller
                 $sale->delivery->update(['status' => 'in_progress', 'pickup_at' => now()]);
             } elseif ($newStatus === 'delivered') {
                 $sale->delivery->update(['status' => 'delivered', 'delivered_at' => now()]);
+            } elseif ($newStatus === 'cancelled') {
+                $sale->delivery->update(['status' => 'failed']);
             }
         }
 
@@ -568,7 +576,7 @@ class SaleController extends Controller
         }
 
         $request->validate([
-            'payment_proof' => 'required|image|max:5120', // max 5MB
+            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // max 5MB
             'payment_reference' => 'nullable|string|max:50',
         ]);
 

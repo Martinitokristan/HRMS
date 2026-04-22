@@ -12,9 +12,11 @@ class RemoveBgService
      * Remove background from an image and save as transparent PNG.
      *
      * @param string $imagePath Relative path inside storage/app/public (e.g. "products/abc.jpg")
-     * @return string|null Relative path to the banner PNG, or null on failure
+     * @param string $outputDir Relative path to output directory
+     * @param string $prefix    Prefix for the output filename
+     * @return string|null Relative path to the transparent PNG, or null on failure
      */
-    public function process($imagePath)
+    public function process($imagePath, $outputDir = 'products/banner', $prefix = 'banner_')
     {
         $apiKey = config('services.removebg.key');
 
@@ -71,17 +73,17 @@ class RemoveBgService
                 return null;
             }
 
-            $bannerDir = 'products/banner';
+            $bannerDir = $outputDir;
             if (!Storage::disk('public')->exists($bannerDir)) {
                 Storage::disk('public')->makeDirectory($bannerDir);
             }
 
             $filename = pathinfo($imagePath, PATHINFO_FILENAME);
-            $bannerRelPath = $bannerDir . '/banner_' . $filename . '.png';
+            $bannerRelPath = $bannerDir . '/' . $prefix . $filename . '.png';
 
             Storage::disk('public')->put($bannerRelPath, $body);
             
-            Log::info('RemoveBgService: Banner saved successfully', ['path' => $bannerRelPath, 'size' => strlen($body)]);
+            Log::info('RemoveBgService: Image saved successfully', ['path' => $bannerRelPath, 'size' => strlen($body)]);
 
             return $bannerRelPath;
         } catch (\Exception $e) {

@@ -128,6 +128,7 @@ class ProductController extends Controller
                         $imagePath = null;
                         $fileKey = "variant_image_{$index}";
                         if ($request->hasFile($fileKey)) {
+                            $request->validate([$fileKey => 'image|mimes:jpeg,png,jpg,webp|max:5120']);
                             $imagePath = $request->file($fileKey)->store('product-variants', 'public');
                         }
                         $product->productVariants()->create([
@@ -217,6 +218,7 @@ class ProductController extends Controller
                     $imagePath = null;
                     $fileKey = "variant_image_{$index}";
                     if ($request->hasFile($fileKey)) {
+                        $request->validate([$fileKey => 'image|mimes:jpeg,png,jpg,webp|max:5120']);
                         $imagePath = $request->file($fileKey)->store('product-variants', 'public');
                     } elseif (!empty($v['existing_image_path'])) {
                         // Keep the existing image if no new one is uploaded

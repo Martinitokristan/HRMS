@@ -157,12 +157,12 @@ export default function SupplierProducts() {
                                 onClick={() => navigate("/supplier/inventory")}
                             >
                                 {/* Product Image */}
-                                <div className="relative aspect-square bg-gradient-to-br from-secondary to-secondary/50 overflow-hidden">
+                                <div className="relative aspect-square bg-transparent overflow-hidden flex items-center justify-center border-b border-border/50">
                                     {imgSrc ? (
                                         <img
                                             src={imgSrc}
                                             alt={p.name}
-                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                            className="w-full h-full object-contain p-4 mix-blend-multiply transition-transform duration-300 group-hover:scale-110"
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center">

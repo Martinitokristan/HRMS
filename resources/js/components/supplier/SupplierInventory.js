@@ -121,9 +121,9 @@ export default function SupplierInventory() {
                                     return (
                                         <tr key={p.id} className="hover:bg-muted/30 transition-colors">
                                             <td className="px-5 py-3">
-                                                <div className="h-10 w-10 rounded border border-border bg-secondary overflow-hidden shrink-0 flex items-center justify-center">
+                                                <div className="h-10 w-10 rounded border border-border bg-transparent overflow-hidden shrink-0 flex items-center justify-center">
                                                     {p.image_path ? (
-                                                        <img src={`/storage/${p.image_path}`} alt={p.name} className="h-full w-full object-cover" />
+                                                        <img src={`/storage/${p.image_path}`} alt={p.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                                                     ) : (
                                                         <Package className="h-5 w-5 text-muted-foreground opacity-30" />
                                                     )}

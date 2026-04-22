@@ -188,9 +188,8 @@ class PurchaseOrderController extends Controller
                             if ($supplierVariant) {
                                 $supplierVariant->increment('stock', $item->quantity);
 
-                                // Sync total_stock
-                                $totalVariantStock = \App\Models\SupplierProductVariant::where('supplier_product_id', $supplierProduct->id)->sum('stock');
-                                $supplierProduct->update(['total_stock' => $totalVariantStock]);
+                                // Sync total_stock atomically to prevent race conditions
+                                $supplierProduct->increment('total_stock', $item->quantity);
                             }
                         } else {
                             // Restore base product stock
@@ -264,9 +263,8 @@ class PurchaseOrderController extends Controller
                             if ($supplierVariant) {
                                 $supplierVariant->increment('stock', $item->quantity);
 
-                                // Sync total_stock
-                                $totalVariantStock = \App\Models\SupplierProductVariant::where('supplier_product_id', $supplierProduct->id)->sum('stock');
-                                $supplierProduct->update(['total_stock' => $totalVariantStock]);
+                                // Sync total_stock atomically to prevent race conditions
+                                $supplierProduct->increment('total_stock', $item->quantity);
                             }
                         } else {
                             // Restore base product stock

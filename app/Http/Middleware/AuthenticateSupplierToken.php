@@ -18,6 +18,14 @@ class AuthenticateSupplierToken
 
             if ($accessToken && $accessToken->tokenable instanceof Supplier) {
                 $supplier = $accessToken->tokenable;
+
+                if ($supplier->status === 'suspended') {
+                    return response()->json([
+                        'message' => 'Your supplier account has been suspended.',
+                        'status'  => 'error',
+                    ], 403);
+                }
+
                 auth()->setUser($supplier);
                 $request->setUserResolver(function () use ($supplier) {
                     return $supplier;

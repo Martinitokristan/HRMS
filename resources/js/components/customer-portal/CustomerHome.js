@@ -90,14 +90,14 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
             onClick={() => setSelectedProduct(product)}
         >
             {/* Image Container with Badges */}
-            <div className="relative aspect-[3/2] overflow-hidden bg-white border-b border-gray-100/50">
+            <div className="relative aspect-[3/2] overflow-hidden bg-transparent border-b border-gray-100/50">
                 {/* Product Image */}
                 {imgSrc ? (
                     <img
                         src={imgSrc}
                         alt={product.name}
                         loading="lazy"
-                        className="w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-700 ease-out"
+                        className="w-full h-full object-contain p-3 mix-blend-multiply group-hover:scale-110 transition-transform duration-700 ease-out"
                         onError={(e) => {
                             e.target.style.display = 'none';
                             e.target.nextSibling.style.display = 'flex';

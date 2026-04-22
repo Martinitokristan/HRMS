@@ -59,6 +59,8 @@ class ReturnController extends Controller
             'items'          => 'required|array|min:1',
             'items.*.sale_item_id' => 'required|integer',
             'items.*.quantity'     => 'required|integer|min:1',
+            'images'         => 'nullable|array|max:5',
+            'images.*'       => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         $sale = Sale::with('items')->findOrFail($data['sale_id']);

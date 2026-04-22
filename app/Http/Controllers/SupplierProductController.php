@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\DataMutated;
+use App\Jobs\ProcessSupplierProductImage;
 use App\Models\SupplierProduct;
 use App\Models\SupplierProductVariant;
 use Illuminate\Http\Request;
@@ -92,6 +93,9 @@ class SupplierProductController extends Controller
             'is_promoted' => 'nullable|boolean',
             'variants' => 'nullable|string',
             'brand_id' => 'nullable|exists:brands,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'additional_images' => 'nullable|array',
+            'additional_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         $product = DB::transaction(function () use ($data, $request, $supplierId) {
@@ -131,12 +135,17 @@ class SupplierProductController extends Controller
                         $variantImage = null;
                         $fileKey = "variant_image_{$index}";
                         if ($request->hasFile($fileKey)) {
+                            $request->validate([$fileKey => 'image|mimes:jpeg,png,jpg,webp|max:5120']);
                             $variantImage = $request->file($fileKey)->store('supplier-product-variants', 'public');
                         }
 
                         $variantExtras = [];
                         $extraKey = "variant_extra_images_{$index}";
                         if ($request->hasFile($extraKey)) {
+                            $request->validate([
+                                $extraKey => 'array',
+                                "{$extraKey}.*" => 'image|mimes:jpeg,png,jpg,webp|max:5120'
+                            ]);
                             foreach ($request->file($extraKey) as $file) {
                                 $variantExtras[] = $file->store('supplier-product-variants', 'public');
                             }
@@ -162,6 +171,10 @@ class SupplierProductController extends Controller
         $supplierId = $product->supplier_id;
         broadcast(new DataMutated('private-admin', ['admin_inventory', 'admin_purchases'], 'supplier_product.created'));
         broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.created'));
+
+        if ($product->image_path || !empty($product->additional_images)) {
+            ProcessSupplierProductImage::dispatch($product->id);
+        }
 
         return response()->json([
             'data' => $product->load(['category', 'variants']),
@@ -192,6 +205,9 @@ class SupplierProductController extends Controller
             'is_promoted' => 'nullable|boolean',
             'variants' => 'nullable|string',
             'brand_id' => 'nullable|exists:brands,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'additional_images' => 'nullable|array',
+            'additional_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         DB::transaction(function () use ($product, $data, $request) {
@@ -243,6 +259,7 @@ class SupplierProductController extends Controller
                     $newImagePath = null;
                     $variantImage = null;
                     if ($request->hasFile($fileKey)) {
+                        $request->validate([$fileKey => 'image|mimes:jpeg,png,jpg,webp|max:5120']);
                         $newImagePath = $request->file($fileKey)->store('supplier-product-variants', 'public');
                         $variantImage = $newImagePath;
                     } elseif (!empty($v['existing_image_path'])) {
@@ -261,6 +278,10 @@ class SupplierProductController extends Controller
 
                     $extraKey = "variant_extra_images_{$index}";
                     if ($request->hasFile($extraKey)) {
+                        $request->validate([
+                            $extraKey => 'array',
+                            "{$extraKey}.*" => 'image|mimes:jpeg,png,jpg,webp|max:5120'
+                        ]);
                         foreach ($request->file($extraKey) as $file) {
                             $variantExtras[] = $file->store('supplier-product-variants', 'public');
                         }
@@ -323,6 +344,10 @@ class SupplierProductController extends Controller
         $supplierId = $product->supplier_id;
         broadcast(new DataMutated('private-admin', ['admin_inventory', 'admin_purchases'], 'supplier_product.updated'));
         broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.updated'));
+
+        if ($request->hasFile('image') || $request->hasFile('additional_images')) {
+            ProcessSupplierProductImage::dispatch($product->id);
+        }
 
         return response()->json([
             'data' => $product->load(['category', 'variants']),

@@ -21,6 +21,15 @@ class AuthenticateHttpOnlyToken
 
             if ($accessToken) {
                 $user = $accessToken->tokenable;
+
+                // Ensure the user/supplier is not suspended
+                if (isset($user->status) && $user->status === 'suspended') {
+                    return response()->json([
+                        'message' => 'Your account has been suspended.',
+                        'status'  => 'error',
+                    ], 403);
+                }
+
                 auth()->setUser($user);
                 $request->setUserResolver(function () use ($user) {
                     return $user;
