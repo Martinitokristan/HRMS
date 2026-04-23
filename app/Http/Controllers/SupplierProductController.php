@@ -173,7 +173,7 @@ class SupplierProductController extends Controller
         broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.created'));
 
         if ($product->image_path || !empty($product->additional_images)) {
-            ProcessSupplierProductImage::dispatch($product->id);
+            ProcessSupplierProductImage::dispatchSync($product->id);
         }
 
         return response()->json([
@@ -324,8 +324,8 @@ class SupplierProductController extends Controller
 
                 // Delete only variants that were removed from the incoming list.
                 $removedVariants = $product->variants()
-                    ->when(!empty($incomingVariantIds), fn ($q) => $q->whereNotIn('id', $incomingVariantIds))
-                    ->when(empty($incomingVariantIds), fn ($q) => $q) // delete all if caller sent empty list
+                    ->when(!empty($incomingVariantIds), fn($q) => $q->whereNotIn('id', $incomingVariantIds))
+                    ->when(empty($incomingVariantIds), fn($q) => $q) // delete all if caller sent empty list
                     ->get();
 
                 $removedPaths = [];
@@ -346,7 +346,7 @@ class SupplierProductController extends Controller
         broadcast(new DataMutated("private-supplier.{$supplierId}", ['supplier_products', 'supplier_dashboard'], 'supplier_product.updated'));
 
         if ($request->hasFile('image') || $request->hasFile('additional_images')) {
-            ProcessSupplierProductImage::dispatch($product->id);
+            ProcessSupplierProductImage::dispatchSync($product->id);
         }
 
         return response()->json([

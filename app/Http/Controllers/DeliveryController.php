@@ -29,16 +29,16 @@ class DeliveryController extends Controller
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('tracking_number', 'like', "%{$request->search}%")
-                  ->orWhere('address', 'like', "%{$request->search}%")
-                  ->orWhereHas('sale', function ($sq) use ($request) {
-                      $sq->where('order_number', 'like', "%{$request->search}%")
-                         ->orWhereHas('customer', function ($cq) use ($request) {
-                             $cq->where('name', 'like', "%{$request->search}%");
-                         });
-                  })
-                  ->orWhereHas('rider', function ($rq) use ($request) {
-                      $rq->where('name', 'like', "%{$request->search}%");
-                  });
+                    ->orWhere('address', 'like', "%{$request->search}%")
+                    ->orWhereHas('sale', function ($sq) use ($request) {
+                        $sq->where('order_number', 'like', "%{$request->search}%")
+                            ->orWhereHas('customer', function ($cq) use ($request) {
+                                $cq->where('name', 'like', "%{$request->search}%");
+                            });
+                    })
+                    ->orWhereHas('rider', function ($rq) use ($request) {
+                        $rq->where('name', 'like', "%{$request->search}%");
+                    });
             });
         }
 
@@ -55,8 +55,8 @@ class DeliveryController extends Controller
         ];
 
         return response()->json([
-            'data'   => $deliveries,
-            'stats'  => $stats,
+            'data' => $deliveries,
+            'stats' => $stats,
             'status' => 'success',
         ]);
     }
@@ -84,7 +84,7 @@ class DeliveryController extends Controller
 
         $delivery->update([
             'rider_id' => $request->rider_id,
-            'status'   => 'pending',
+            'status' => 'pending',
         ]);
 
         // Do NOT set on_delivery yet — rider must accept first (in_progress transition does this)
@@ -92,23 +92,24 @@ class DeliveryController extends Controller
         // Notify Rider
         $delivery->rider->notify(new NewOrderAssigned($delivery));
 
-        $riderId  = $request->rider_id;
+        $riderId = $request->rider_id;
         $customerId = $delivery->sale->customer_id ?? null;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard'], 'delivery.rider_assigned'));
         broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard', 'rider_notifications'], 'delivery.rider_assigned'));
-        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.rider_assigned'));
+        if ($customerId)
+            broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.rider_assigned'));
 
         return response()->json([
-            'data'    => $delivery->fresh()->load(['sale', 'rider']),
+            'data' => $delivery->fresh()->load(['sale', 'rider']),
             'message' => 'Rider assigned successfully',
-            'status'  => 'success',
+            'status' => 'success',
         ]);
     }
 
     public function selfAssign(Request $request, $id)
     {
         $rider = $request->user();
-        
+
         // Verify user is a rider
         if ($rider->role !== 'rider') {
             return response()->json(['error' => 'Unauthorized - must be a rider'], 403);
@@ -122,7 +123,7 @@ class DeliveryController extends Controller
         // Assign the rider
         $delivery->update([
             'rider_id' => $rider->id,
-            'status'   => 'confirmed', // Rider accepted
+            'status' => 'confirmed', // Rider accepted
         ]);
 
         // Update sale status to confirmed
@@ -142,21 +143,22 @@ class DeliveryController extends Controller
         $customerId = $delivery->sale->customer_id ?? null;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.self_assigned'));
         broadcast(new DataMutated("private-rider.{$rider->id}", ['rider_dashboard'], 'delivery.self_assigned'));
-        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.self_assigned'));
+        if ($customerId)
+            broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.self_assigned'));
 
         return response()->json([
-            'data'    => $delivery->fresh()->load(['sale', 'rider']),
+            'data' => $delivery->fresh()->load(['sale', 'rider']),
             'message' => 'Order assigned successfully! Please accept to start delivery.',
-            'status'  => 'success',
+            'status' => 'success',
         ]);
     }
 
     public function declineOrder(Request $request, $id)
     {
         $request->validate(['note' => 'required|string|max:500']);
-        
+
         $rider = $request->user();
-        
+
         // Verify user is a rider
         if ($rider->role !== 'rider') {
             return response()->json(['error' => 'Unauthorized - must be a rider'], 403);
@@ -170,8 +172,8 @@ class DeliveryController extends Controller
         // Remove rider assignment and make available again
         $delivery->update([
             'rider_id' => null,
-            'status'   => 'pending',
-            'notes'    => ($delivery->notes ? $delivery->notes . "\n" : '') . "Declined by rider: {$request->note}"
+            'status' => 'pending',
+            'notes' => ($delivery->notes ? $delivery->notes . "\n" : '') . "Declined by rider: {$request->note}"
         ]);
 
         // Update rider availability back to available
@@ -188,23 +190,24 @@ class DeliveryController extends Controller
         $customerId = $delivery->sale->customer_id ?? null;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard'], 'delivery.declined'));
         broadcast(new DataMutated("private-rider.{$rider->id}", ['rider_dashboard'], 'delivery.declined'));
-        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.declined'));
+        if ($customerId)
+            broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.declined'));
 
         return response()->json([
             'message' => 'Order declined successfully',
-            'status'  => 'success',
+            'status' => 'success',
         ]);
     }
 
     public function updateStatus(Request $request, $id)
     {
         $delivery = Delivery::findOrFail($id);
-        
+
         // Verify this delivery belongs to the authenticated rider
         if ($delivery->rider_id !== $request->user()->id) {
             return response()->json(['message' => 'Unauthorized - You can only update your own deliveries'], 403);
         }
-        
+
         $request->validate(['status' => 'required|in:pending,in_progress,delivered,failed']);
 
         $updates = ['status' => $request->status];
@@ -224,7 +227,11 @@ class DeliveryController extends Controller
             $updates['delivered_at'] = now();
             // Update sale status
             $delivery->sale->update(['status' => 'delivered']);
-            Cache::tags(['products'])->flush();
+            try {
+                Cache::tags(['products'])->flush();
+            } catch (\BadMethodCallException $e) {
+                Cache::forget('products:all');
+            }
             // Update rider stats
             if ($delivery->rider_id) {
                 $profile = RiderProfile::where('user_id', $delivery->rider_id)->first();
@@ -258,16 +265,17 @@ class DeliveryController extends Controller
 
         $delivery->update($updates);
 
-        $riderId    = $request->user()->id;
+        $riderId = $request->user()->id;
         $customerId = $delivery->sale->customer_id ?? null;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.status_updated'));
         broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard'], 'delivery.status_updated'));
-        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.status_updated'));
+        if ($customerId)
+            broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.status_updated'));
 
         return response()->json([
-            'data'    => $delivery->fresh()->load(['sale', 'rider']),
+            'data' => $delivery->fresh()->load(['sale', 'rider']),
             'message' => 'Delivery status updated',
-            'status'  => 'success',
+            'status' => 'success',
         ]);
     }
 
@@ -277,7 +285,7 @@ class DeliveryController extends Controller
     public function riderProximityUpdate(Request $request, $id)
     {
         $request->validate([
-            'latitude'  => 'required|numeric',
+            'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
         ]);
 
@@ -314,12 +322,12 @@ class DeliveryController extends Controller
                 CustomerNotification::create([
                     'customer_id' => $delivery->sale->customer_id,
                     'delivery_id' => $delivery->id,
-                    'type'        => 'proximity',
-                    'title'       => 'Rider is nearby!',
-                    'message'     => "{$riderName} is approximately {$distanceStr} away from your location. Please prepare to receive your order.",
-                    'meta'        => [
-                        'distance_km'  => round($distance, 3),
-                        'rider_name'   => $riderName,
+                    'type' => 'proximity',
+                    'title' => 'Rider is nearby!',
+                    'message' => "{$riderName} is approximately {$distanceStr} away from your location. Please prepare to receive your order.",
+                    'meta' => [
+                        'distance_km' => round($distance, 3),
+                        'rider_name' => $riderName,
                         'order_number' => $delivery->sale->order_number ?? null,
                     ],
                 ]);
@@ -329,8 +337,8 @@ class DeliveryController extends Controller
 
         return response()->json([
             'distance_km' => round($distance, 3),
-            'notified'    => $notified,
-            'status'      => 'success',
+            'notified' => $notified,
+            'status' => 'success',
         ]);
     }
 
@@ -345,7 +353,7 @@ class DeliveryController extends Controller
             ->get();
 
         return response()->json([
-            'data'   => $notifications,
+            'data' => $notifications,
             'unread' => $notifications->where('is_read', false)->count(),
             'status' => 'success',
         ]);
@@ -357,7 +365,7 @@ class DeliveryController extends Controller
     public function getRiderLocation(Request $request, $id)
     {
         $delivery = Delivery::findOrFail($id);
-        
+
         // Verify this delivery belongs to the authenticated customer
         if ($delivery->sale->customer_id !== $request->user()->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -368,7 +376,7 @@ class DeliveryController extends Controller
         }
 
         $riderProfile = RiderProfile::where('user_id', $delivery->rider_id)->first();
-        
+
         if (!$riderProfile || !$riderProfile->current_latitude || !$riderProfile->current_longitude) {
             return response()->json(['data' => null]);
         }
@@ -458,10 +466,12 @@ class DeliveryController extends Controller
         }
 
         $customerId = $delivery->sale->customer_id ?? null;
-        $riderId    = $delivery->rider_id;
+        $riderId = $delivery->rider_id;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_riders'], 'delivery.rated'));
-        if ($riderId)    broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard', 'rider_notifications'], 'delivery.rated'));
-        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders'], 'delivery.rated'));
+        if ($riderId)
+            broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard', 'rider_notifications'], 'delivery.rated'));
+        if ($customerId)
+            broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders'], 'delivery.rated'));
 
         return response()->json([
             'data' => $delivery,
@@ -531,11 +541,12 @@ class DeliveryController extends Controller
             ]);
         }
 
-        $riderId    = $request->user()->id;
+        $riderId = $request->user()->id;
         $customerId = $delivery->sale->customer_id ?? null;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.proof_uploaded'));
         broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard'], 'delivery.proof_uploaded'));
-        if ($customerId) broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.proof_uploaded'));
+        if ($customerId)
+            broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'delivery.proof_uploaded'));
 
         return response()->json([
             'data' => [

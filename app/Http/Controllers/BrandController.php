@@ -44,7 +44,11 @@ class BrandController extends Controller
             'description' => $data['description'] ?? null,
         ]);
 
-        Cache::tags(['products'])->flush();
+        try {
+            Cache::tags(['products'])->flush();
+        } catch (\BadMethodCallException $e) {
+            Cache::flush();
+        }
 
         return response()->json(['data' => $brand, 'status' => 'success'], 201);
     }
@@ -61,7 +65,11 @@ class BrandController extends Controller
 
         $brand->delete();
 
-        Cache::tags(['products'])->flush();
+        try {
+            Cache::tags(['products'])->flush();
+        } catch (\BadMethodCallException $e) {
+            Cache::flush();
+        }
 
         return response()->json(['message' => 'Brand deleted.', 'status' => 'success']);
     }

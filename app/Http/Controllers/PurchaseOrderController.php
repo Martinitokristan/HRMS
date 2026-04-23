@@ -469,17 +469,14 @@ class PurchaseOrderController extends Controller
                         $item->update([
                             'product_id' => $inv->product_id,
                             'product_variant_id' => $inv->product_variant_id,
-                            'received_quantity' => $item->quantity,
                         ]);
 
-                        \App\Models\StockAdjustment::create([
-                            'inventory_id' => $inv->id,
+                        \App\Models\InventoryAdjustment::create([
+                            'product_id' => $inv->product_id,
                             'user_id' => auth()->id(),
-                            'adjustment_type' => 'addition',
+                            'type' => 'add',
                             'quantity' => $item->quantity,
-                            'reason' => "Received from PO #{$po->po_number}",
-                            'previous_stock' => $oldStock,
-                            'new_stock' => $inv->warehouse_stock,
+                            'note' => "Received from PO #{$po->po_number}",
                         ]);
                     }
                 }
