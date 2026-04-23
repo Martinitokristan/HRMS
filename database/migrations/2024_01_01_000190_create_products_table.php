@@ -14,6 +14,7 @@ class CreateProductsTable extends Migration
             $table->string('name', 150);
             $table->text('description')->nullable();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignId('brand_id')->nullable()->constrained('brands')->nullOnDelete();
             $table->foreignId('unit_type_id')->constrained('unit_types')->onDelete('cascade');
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->nullOnDelete();
             $table->decimal('purchase_price', 10, 2);

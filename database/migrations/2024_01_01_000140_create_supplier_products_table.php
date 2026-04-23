@@ -15,6 +15,7 @@ class CreateSupplierProductsTable extends Migration
             $table->string('barcode', 50)->nullable();
             $table->text('description')->nullable();
             $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
+            $table->foreignId('brand_id')->nullable()->constrained('brands')->nullOnDelete();
             $table->decimal('price', 12, 2)->default(0);
             $table->integer('min_order_qty')->default(1);
             $table->integer('total_stock')->default(0);
