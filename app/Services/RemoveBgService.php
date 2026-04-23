@@ -43,7 +43,7 @@ class RemoveBgService
                 file_get_contents($fullPath),
                 basename($fullPath)
             )->post('https://api.remove.bg/v1.0/removebg', [
-                'size' => 'auto',
+                'size' => 'preview',
             ]);
 
             Log::info('RemoveBgService: API response', [
