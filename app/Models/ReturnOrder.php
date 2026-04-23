@@ -11,13 +11,11 @@ class ReturnOrder extends Model
     protected $fillable = [
         'return_number', 'sale_id', 'requested_by', 'approved_by',
         'reason', 'reason_details', 'status', 'refund_amount',
-        'refund_method', 'items', 'images', 'admin_notes',
+        'refund_method', 'admin_notes',
         'approved_at', 'rejected_at', 'completed_at',
     ];
 
     protected $casts = [
-        'items'        => 'array',
-        'images'       => 'array',
         'approved_at'  => 'datetime',
         'rejected_at'  => 'datetime',
         'completed_at' => 'datetime',
@@ -36,5 +34,16 @@ class ReturnOrder extends Model
     public function approvedBy()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    // Normalized relationships
+    public function items()
+    {
+        return $this->hasMany(ReturnsItem::class, 'return_id');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ReturnsImage::class, 'return_id');
     }
 }

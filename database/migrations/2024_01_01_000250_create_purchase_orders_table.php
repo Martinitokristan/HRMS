@@ -23,6 +23,9 @@ class CreatePurchaseOrdersTable extends Migration
             $table->foreignId('delivered_by')->nullable()->constrained('suppliers')->nullOnDelete();
             $table->text('delivery_notes')->nullable();
             $table->timestamps();
+            
+            // Performance index for status-based queries
+            $table->index('status', 'idx_po_status');
         });
     }
 

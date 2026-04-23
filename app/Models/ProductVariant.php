@@ -8,12 +8,10 @@ class ProductVariant extends Model
 {
     protected $fillable = [
         'product_id', 'size_value_id', 'color_value_id', 'weight_value_id',
-        'stock', 'price_override', 'barcode', 'sale_percentage', 'image_path', 'additional_images'
+        'stock', 'price_override', 'barcode', 'sale_percentage', 'image_path'
     ];
 
-    protected $casts = [
-        'additional_images' => 'array',
-    ];
+    protected $casts = [];
 
     public function product()
     {
@@ -33,5 +31,11 @@ class ProductVariant extends Model
     public function weightValue()
     {
         return $this->belongsTo(VariantValue::class, 'weight_value_id');
+    }
+
+    // Normalized relationship for images
+    public function images()
+    {
+        return $this->hasMany(ProductVariantImage::class, 'variant_id');
     }
 }

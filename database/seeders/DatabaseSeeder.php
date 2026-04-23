@@ -52,16 +52,23 @@ class DatabaseSeeder extends Seeder
         ]);
 
         \App\Models\CustomerProfile::create([
-            'user_id'      => $customer->id,
-            'age'          => 28,
-            'sex'          => 'male',
-            'province'     => 'Davao del Sur',
-            'municipality' => 'Davao City',
-            'zip_code'     => '8000',
-            'address'      => 'Quimpo Blvd, Ecoland',
-            'landmark'     => 'SM City Davao',
-            'latitude'     => 7.0543,
-            'longitude'    => 125.5947,
+            'user_id'           => $customer->id,
+            'age'               => 28,
+            'sex'               => 'male',
+            'region_code'       => '11',
+            'region_name'       => 'Region XI (Davao Region)',
+            'province_code'     => '1140',
+            'province_name'     => 'Davao del Sur',
+            'city_code'         => '114027',
+            'city_name'         => 'Davao City',
+            'barangay_code'     => '114027021',
+            'barangay_name'     => 'Ecoland',
+            'street'            => 'Quimpo Blvd, Ecoland',
+            'zip_code'          => '8000',
+            'address'           => 'Quimpo Blvd, Ecoland',
+            'landmark'          => 'SM City Davao',
+            'latitude'          => 7.0543,
+            'longitude'         => 125.5947,
         ]);
 
         // ─── 2. SYSTEM SETTINGS ──────────────────────────────────────────────

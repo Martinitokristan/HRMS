@@ -314,21 +314,29 @@ class RiderController extends Controller
         $user = $request->user();
         $request->validate([
             'name' => 'required|string|max:255',
+            'email' => 'sometimes|nullable|string|email|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'phone' => $request->phone,
-        ]);
-
-        if ($request->has('address')) {
-            $user->riderProfile()->updateOrCreate(
-                ['user_id' => $user->id],
-                ['address' => $request->address]
-            );
+        // Update user-level fields
+        $userFields = array_filter(
+            $request->only(['name', 'email', 'phone']),
+            function($v) { return $v !== null; }
+        );
+        if (!empty($userFields)) {
+            $user->update($userFields);
         }
+
+        // Update rider profile with name, email, and address
+        $profileData = array_filter(
+            $request->only(['name', 'email', 'address']),
+            function($v) { return $v !== null; }
+        );
+        $user->riderProfile()->updateOrCreate(
+            ['user_id' => $user->id],
+            $profileData
+        );
 
         return response()->json([
             'status' => 'success',

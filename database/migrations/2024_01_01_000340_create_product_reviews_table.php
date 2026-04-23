@@ -17,8 +17,6 @@ class CreateProductReviewsTable extends Migration
             $table->tinyInteger('rating')->unsigned();
             $table->string('title', 100)->nullable();
             $table->text('review_text')->nullable();
-            $table->json('images')->nullable();
-            $table->integer('helpful_count')->default(0);
             $table->boolean('is_verified_purchase')->default(false);
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('admin_response')->nullable();
@@ -26,6 +24,16 @@ class CreateProductReviewsTable extends Migration
 
             $table->index(['product_id', 'status']);
             $table->index(['customer_id', 'product_id']);
+        });
+
+        // Normalized product review images table (replaces images JSON)
+        Schema::create('product_review_images', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('review_id')->constrained('product_reviews')->onDelete('cascade');
+            $table->string('image_path');
+            $table->string('alt_text')->nullable();
+            $table->unsignedSmallInteger('sort_order')->default(0);
+            $table->timestamps();
         });
 
         Schema::create('review_helpfulness', function (Blueprint $table) {
@@ -42,6 +50,7 @@ class CreateProductReviewsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('review_helpfulness');
+        Schema::dropIfExists('product_review_images');
         Schema::dropIfExists('product_reviews');
     }
 }

@@ -21,6 +21,12 @@ class CreateInventoryTable extends Migration
             $table->timestamps();
 
             $table->unique(['product_id', 'product_variant_id', 'supplier_product_id'], 'inventory_refined_unique');
+            
+            // Performance indexes for common query patterns
+            $table->index('product_id', 'idx_inv_product_id');
+            $table->index('product_variant_id', 'idx_inv_product_variant_id');
+            $table->index('supplier_product_id', 'idx_inv_supplier_product_id');
+            $table->index('supplier_product_variant_id', 'idx_inv_supplier_product_variant_id');
         });
     }
 

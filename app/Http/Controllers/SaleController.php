@@ -410,11 +410,16 @@ class SaleController extends Controller
             $this->restoreStock($sale);
 
             $sale->update([
-                'status'              => 'cancelled',
-                'cancellation_reason' => $request->reason,
-                'cancellation_notes'  => $request->notes,
-                'cancelled_by'        => $user->id,
-                'cancelled_at'        => now(),
+                'status' => 'cancelled',
+            ]);
+
+            // Create cancellation record
+            \App\Models\SalesCancellation::create([
+                'sale_id'      => $sale->id,
+                'reason'       => $request->reason,
+                'notes'        => $request->notes,
+                'cancelled_by' => $user->id,
+                'cancelled_at' => now(),
             ]);
 
             // Cancel associated delivery
@@ -468,11 +473,11 @@ class SaleController extends Controller
 
     public function approveCancellation(Request $request, $id)
     {
-        $sale = Sale::with(['items', 'delivery'])->findOrFail($id);
+        $sale = Sale::with(['items', 'delivery', 'cancellation'])->findOrFail($id);
 
-        if ($sale->cancellation_status !== 'pending') {
+        if (!$sale->cancellation) {
             return response()->json([
-                'message' => 'Only pending cancellation requests can be approved.',
+                'message' => 'No pending cancellation found for this order.',
                 'status' => 'error',
             ], 422);
         }
@@ -484,7 +489,10 @@ class SaleController extends Controller
 
             $sale->update([
                 'status' => 'cancelled',
-                'cancellation_status' => 'approved',
+            ]);
+
+            // Update the cancellation record
+            $sale->cancellation->update([
                 'cancelled_by' => $user->id,
                 'cancelled_at' => now(),
             ]);

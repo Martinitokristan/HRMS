@@ -78,34 +78,57 @@ class CustomerController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'name'         => 'sometimes|string|max:255',
-            'phone'        => 'sometimes|nullable|string|max:20',
-            'address'      => 'nullable|string|max:500',
-            'landmark'     => 'nullable|string|max:255',
-            'province'     => 'nullable|string|max:100',
-            'municipality' => 'nullable|string|max:100',
-            'zip_code'     => 'nullable|string|max:10',
-            'latitude'     => 'nullable|numeric',
-            'longitude'    => 'nullable|numeric',
-            'age'          => 'nullable|integer|min:1|max:150',
-            'sex'          => 'nullable|string|in:male,female,other',
+            // User information
+            'name'           => 'sometimes|nullable|string|max:255',
+            'email'          => 'sometimes|nullable|string|email|max:255',
+            'phone'          => 'sometimes|nullable|string|max:20',
+            // Personal information
+            'age'            => 'nullable|integer|min:1|max:150',
+            'sex'            => 'nullable|string|in:male,female,other',
+            // Simple address fields
+            'address'        => 'nullable|string|max:500',
+            'landmark'       => 'nullable|string|max:255',
+            'zip_code'       => 'nullable|string|max:10',
+            // PSGC hierarchical fields
+            'region_code'    => 'nullable|string|max:20',
+            'region_name'    => 'nullable|string|max:100',
+            'province_code'  => 'nullable|string|max:20',
+            'province_name'  => 'nullable|string|max:100',
+            'city_code'      => 'nullable|string|max:20',
+            'city_name'      => 'nullable|string|max:100',
+            'barangay_code'  => 'nullable|string|max:20',
+            'barangay_name'  => 'nullable|string|max:100',
+            'street'         => 'nullable|string|max:255',
+            // Geolocation
+            'latitude'       => 'nullable|numeric',
+            'longitude'      => 'nullable|numeric',
         ]);
 
-        // Update user-level fields
-        $userFields = array_filter($request->only(['name', 'phone']), function($v) { return $v !== null; });
+        // Update user-level fields in users table
+        $userFields = array_filter($request->only(['name', 'email', 'phone']), function($v) { return $v !== null; });
         if (!empty($userFields)) {
             $user->update($userFields);
         }
 
-        // Update profile-level fields
-        $profileData = $request->only(['address', 'landmark', 'province', 'municipality', 'zip_code', 'latitude', 'longitude', 'age', 'sex']);
+        // Update profile-level fields (all fields including new name/email + PSGC)
+        $profileData = $request->only([
+            'name', 'email',
+            'age', 'sex',
+            'address', 'landmark', 'zip_code',
+            'region_code', 'region_name',
+            'province_code', 'province_name',
+            'city_code', 'city_name',
+            'barangay_code', 'barangay_name',
+            'street',
+            'latitude', 'longitude'
+        ]);
         $profile = \App\Models\CustomerProfile::updateOrCreate(
             ['user_id' => $user->id],
             array_filter($profileData, function($v) { return $v !== null; })
         );
 
         return response()->json([
-            'data'    => array_merge($profile->toArray(), ['name' => $user->fresh()->name, 'phone' => $user->fresh()->phone, 'email' => $user->email]),
+            'data'    => $profile->toArray(),
             'message' => 'Profile updated successfully',
             'status'  => 'success',
         ]);

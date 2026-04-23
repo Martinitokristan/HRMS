@@ -10,14 +10,9 @@ class Sale extends Model
         'order_number', 'customer_id', 'processed_by', 'discount_pct',
         'total_amount', 'payment_method', 'payment_phone_number', 'payment_reference', 'payment_proof_path', 'status', 'notes',
         'payment_confirmed_at', 'payment_expiry_sms_sent_at', 'payment_proof_token',
-        'cancellation_reason', 'cancellation_notes', 'cancellation_status',
-        'cancellation_requested_by', 'cancellation_requested_at',
-        'cancelled_by', 'cancelled_at',
     ];
 
     protected $casts = [
-        'cancelled_at'              => 'datetime',
-        'cancellation_requested_at'  => 'datetime',
         'payment_confirmed_at'      => 'datetime',
         'payment_expiry_sms_sent_at'=> 'datetime',
     ];
@@ -45,5 +40,17 @@ class Sale extends Model
     public function gcashTransaction()
     {
         return $this->hasOne(GCashTransaction::class);
+    }
+
+    // Normalized cancellation relationship
+    public function cancellation()
+    {
+        return $this->hasOne(SalesCancellation::class, 'sale_id');
+    }
+
+    // Check if sale is cancelled
+    public function isCancelled()
+    {
+        return $this->cancellation()->exists();
     }
 }

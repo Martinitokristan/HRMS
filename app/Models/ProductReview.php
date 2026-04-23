@@ -8,12 +8,11 @@ class ProductReview extends Model
 {
     protected $fillable = [
         'product_id', 'product_variant_id', 'customer_id', 'sale_id',
-        'rating', 'title', 'review_text', 'images', 'helpful_count',
+        'rating', 'title', 'review_text',
         'is_verified_purchase', 'status', 'admin_response',
     ];
 
     protected $casts = [
-        'images' => 'array',
         'is_verified_purchase' => 'boolean',
     ];
 
@@ -37,9 +36,21 @@ class ProductReview extends Model
         return $this->belongsTo(Sale::class);
     }
 
+    // Normalized relationship for review images
+    public function images()
+    {
+        return $this->hasMany(ProductReviewImage::class, 'review_id');
+    }
+
     public function helpfulness()
     {
         return $this->hasMany(ReviewHelpfulness::class, 'review_id');
+    }
+
+    // Calculated helpful count
+    public function getHelpfulCountAttribute()
+    {
+        return $this->helpfulness()->where('is_helpful', true)->count();
     }
 
     public function scopeApproved($query)
