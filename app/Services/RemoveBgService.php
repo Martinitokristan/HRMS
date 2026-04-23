@@ -18,10 +18,11 @@ class RemoveBgService
      */
     public function process($imagePath, $outputDir = 'products/banner', $prefix = 'banner_')
     {
+        Log::info('RemoveBgService: process() called for ' . $imagePath);
         $apiKey = config('services.removebg.key');
 
         if (empty($apiKey)) {
-            Log::warning('RemoveBgService: API key not configured.');
+            Log::error('RemoveBgService: API key is MISSING or empty in config. Ensure REMOVEBG_API_KEY is set in Railway Variables.');
             return null;
         }
 
