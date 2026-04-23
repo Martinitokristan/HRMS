@@ -26,6 +26,7 @@ class MeController extends Controller
                 'contact_name' => $user->contact_name,
                 'email'        => $user->email,
                 'phone'        => $user->phone,
+                'city'         => $user->city,
                 'role'         => 'supplier',
                 'status'       => $user->status,
                 'photo'        => null,

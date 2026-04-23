@@ -33,7 +33,11 @@ export default function Login() {
             else if (user.role === 'supplier') navigate('/supplier/dashboard', { replace: true });
             else                               navigate('/dashboard', { replace: true });
         } catch (err) {
-            setError('Invalid email or password. Please try again.');
+            if (err.response && err.response.status === 429) {
+                setError('Too many login attempts. Please try again after 1 minute.');
+            } else {
+                setError('Invalid email or password. Please try again.');
+            }
             setLoading(false);
         }
     };

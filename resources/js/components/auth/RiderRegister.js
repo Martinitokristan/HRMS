@@ -173,7 +173,7 @@ export default function RiderRegister() {
         <div className="min-h-screen flex">
             {/* Success Modal */}
             {!!successMsg && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
                     <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: '90vw', maxWidth: 400, padding: '32px 28px 24px', position: 'relative', borderTop: '3px solid #F97316', textAlign: 'center', fontFamily: 'Inter, system-ui, sans-serif' }}>
                         <button
                             type="button"

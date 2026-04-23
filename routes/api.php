@@ -31,7 +31,7 @@ use App\Http\Controllers\BrandController;
 
 // Auth (public)
 Route::post('/auth/register', [AuthController::class , 'register']);
-Route::post('/login', LoginController::class);
+Route::middleware(['throttle:login'])->post('/login', LoginController::class);
 Route::get('/auth/verify-email', [AuthController::class , 'verifyEmail']);
 Route::post('/auth/resend-verification', [AuthController::class , 'resendVerification']);
 
@@ -42,7 +42,9 @@ Route::middleware(['throttle:password.reset'])->group(function () {
 });
 
 // Supplier Auth (public)
-Route::post('/supplier/auth/login', [SupplierAuthController::class , 'login']);
+Route::middleware(['throttle:login'])->group(function () {
+    Route::post('/supplier/auth/login', [SupplierAuthController::class , 'login']);
+});
 Route::post('/supplier/auth/register', [SupplierAuthController::class , 'register']);
 Route::get('/supplier/auth/verify-email', [SupplierAuthController::class , 'verifyEmail']);
 Route::post('/supplier/auth/resend-verification', [SupplierAuthController::class , 'resendVerification']);

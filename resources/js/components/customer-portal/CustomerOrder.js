@@ -14,11 +14,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, Navigation, Loader2, Download, Smartphone } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, Navigation, Loader2, Download } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
 import { STALE_KEYS, markStale } from "../../store/dataStore";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { usePhilippineAddress } from "../../hooks/usePhilippineAddress";
+import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
 
 import "leaflet/dist/leaflet.css";
 
@@ -407,7 +408,7 @@ export default function CustomerOrder() {
                                 <div className="mb-4">
                                     <div className="text-sm text-muted-foreground mb-1">Payment Method:</div>
                                     <Badge variant="secondary" className="text-sm">
-                                        {payment === "cod" ? "💵 Cash on Delivery" : payment === "gcash" ? "📱 GCash" : "Cash on Delivery"}
+                                        {payment === "cod" ? <div className="flex items-center gap-1.5"><CODIcon size={16} /> Cash on Delivery</div> : payment === "gcash" ? <div className="flex items-center gap-1.5"><GCashIcon size={16} /> GCash</div> : "Cash on Delivery"}
                                     </Badge>
                                 </div>
 
@@ -491,7 +492,7 @@ export default function CustomerOrder() {
                                                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${payment === "cod" ? "border-primary" : "border-muted-foreground"}`}>
                                                     {payment === "cod" && <div className="w-2 h-2 rounded-full bg-primary" />}
                                                 </div>
-                                                💵 Cash on Delivery
+                                                <CODIcon size={20} /> Cash on Delivery
                                             </div>
                                             <div className="text-sm text-muted-foreground mt-1 ml-6">Pay when your order arrives</div>
                                         </div>
@@ -505,14 +506,14 @@ export default function CustomerOrder() {
                                                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${payment === "gcash" ? "border-blue-500" : "border-muted-foreground"}`}>
                                                     {payment === "gcash" && <div className="w-2 h-2 rounded-full bg-blue-500" />}
                                                 </div>
-                                                📱 GCash
+                                                <GCashIcon size={20} /> GCash
                                             </div>
                                             <div className="text-sm text-muted-foreground mt-1 ml-6">Pay via QR code with reference verification</div>
                                         </div>
                                         ) : (
                                         <div className="border rounded-lg p-3 opacity-40 cursor-not-allowed border-border bg-secondary/30">
                                             <div className="flex items-center gap-2 font-semibold text-sm text-muted-foreground">
-                                                📱 GCash
+                                                <GCashIcon size={20} className="grayscale opacity-60" /> GCash
                                             </div>
                                             <div className="text-xs text-muted-foreground mt-1">GCash not available at the moment</div>
                                         </div>
@@ -522,7 +523,7 @@ export default function CustomerOrder() {
                                     {payment === "gcash" && (
                                         <div className="mt-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
                                             <Label className="text-base font-bold text-blue-900 mb-1.5 block flex items-center gap-2">
-                                                <Smartphone className="h-5 w-5" /> GCash Number Used to Pay
+                                                <GCashIcon size={20} /> GCash Number Used to Pay
                                             </Label>
                                             <p className="text-sm text-blue-700/80 mb-3 italic">
                                                 Please confirm the exact GCash number you will use to send the payment. This is required to verify your transaction automatically.
@@ -690,7 +691,7 @@ export default function CustomerOrder() {
 
                 {/* GCash Payment Modal */}
                 {gcashModal && (
-                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
                         <div style={{ background: '#fff', borderRadius: 14, boxShadow: '0 8px 30px rgba(0,0,0,0.16)', width: '90vw', maxWidth: 420, fontFamily: 'Inter, system-ui, sans-serif', overflow: 'hidden' }}>
 
                             {/* Blue header */}
@@ -745,7 +746,7 @@ export default function CustomerOrder() {
                                             }, 1000);
                                         }}
                                     >
-                                        <Smartphone className="h-3.5 w-3.5" /> Open GCash App
+                                        <GCashIcon size={14} /> Open GCash App
                                     </button>
                                 </div>
 

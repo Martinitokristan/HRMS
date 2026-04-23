@@ -12,6 +12,7 @@ import { useToast } from '../../context/ToastContext';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
+import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
 
 const CANCEL_REASONS = [
     { value: 'changed_mind', label: 'Changed my mind' },
@@ -598,9 +599,19 @@ export default function OrderHistory() {
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Payment:</span>
-                                                    <span className="text-[9px] font-black text-foreground uppercase">
-                                                        {order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method === 'gcash' ? 'GCash' : 'COD'}
-                                                    </span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        {order.payment_method === 'gcash' ? (
+                                                            <>
+                                                                <GCashIcon size={12} />
+                                                                <span className="text-[9px] font-black text-foreground uppercase">GCash</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <CODIcon size={12} />
+                                                                <span className="text-[9px] font-black text-foreground uppercase">Cash on Delivery</span>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

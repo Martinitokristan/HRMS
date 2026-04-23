@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { Smartphone, X, CheckCircle } from 'lucide-react';
+import { X, CheckCircle } from 'lucide-react';
+import { GCashIcon } from '@/components/icons/PaymentIcons';
 
 /**
  * PaymentToast — A premium GCash payment received toast notification.
@@ -161,7 +162,7 @@ function SingleToast({ data, onDone }) {
                         justifyContent: 'center',
                         flexShrink: 0,
                     }}>
-                        <Smartphone size={20} color="#fff" />
+                        <GCashIcon size={20} color="#fff" />
                     </div>
                     <div style={{ flex: 1 }}>
                         <div style={{

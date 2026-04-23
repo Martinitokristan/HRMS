@@ -21,6 +21,7 @@ import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { STALE_KEYS, markStale } from "../../store/dataStore";
 import ConfirmModal from "../shared/ConfirmModal";
 import { X, AlertTriangle, ShieldAlert } from "lucide-react";
+import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
 
 export default function SalesTab() {
     const { showToast } = useToast();
@@ -340,8 +341,13 @@ export default function SalesTab() {
                                         ₱{Number(sale.total_amount).toFixed(2)}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
-                                        <Badge variant="secondary">
-                                            {sale.payment_method}
+                                        <Badge variant="secondary" className="gap-1.5">
+                                            {sale.payment_method?.toLowerCase() === 'gcash' ? (
+                                                <GCashIcon size={14} />
+                                            ) : (
+                                                <CODIcon size={14} />
+                                            )}
+                                            <span className="capitalize">{sale.payment_method?.replace(/_/g, " ")}</span>
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
@@ -411,9 +417,16 @@ export default function SalesTab() {
                                     <span className="text-muted-foreground">
                                         Payment:
                                     </span>{" "}
-                                    <span className="font-semibold text-foreground">
-                                        {viewOrder.payment_method.toUpperCase()}
-                                    </span>
+                                    <div className="flex items-center gap-1.5">
+                                        {viewOrder.payment_method?.toLowerCase() === 'gcash' ? (
+                                            <GCashIcon size={16} />
+                                        ) : (
+                                            <CODIcon size={16} />
+                                        )}
+                                        <span className="font-semibold text-foreground capitalize">
+                                            {viewOrder.payment_method?.replace(/_/g, " ")}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div className="flex justify-between font-bold text-lg mt-3 pt-3 border-t border-border">
                                     <span>Total:</span>{" "}
@@ -768,9 +781,16 @@ function SalesReceiptModal({ order, onClose, settings }) {
                             <p className="text-[10px] text-[#9ca3af] uppercase tracking-[0.06em] mb-0.5">
                                 Payment
                             </p>
-                            <span className="inline-flex items-center rounded-[20px] px-[10px] py-[2px] text-[11px] font-medium bg-blue-50 text-blue-600">
-                                {paymentLabel || "—"}
-                            </span>
+                            <div className="flex justify-end pt-1">
+                                <span className="inline-flex items-center rounded-[20px] px-[10px] py-[2px] text-[11px] font-medium bg-blue-50 text-blue-600 gap-1.5">
+                                    {order.payment_method?.toLowerCase() === 'gcash' ? (
+                                        <GCashIcon size={12} />
+                                    ) : (
+                                        <CODIcon size={12} />
+                                    )}
+                                    {paymentLabel || "—"}
+                                </span>
+                            </div>
                             {order.payment_reference && (
                                 <p className="text-[11px] text-[#9ca3af] font-mono mt-1">
                                     Ref: {order.payment_reference}

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { STALE_KEYS, markStale } from "../../store/dataStore";
+import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
 import {
     RotateCcw,
     Search,
@@ -26,7 +27,6 @@ import {
     FileText,
     ArrowRight,
     Copy,
-    Smartphone,
     ExternalLink,
 } from "lucide-react";
 
@@ -273,12 +273,21 @@ export default function Returns() {
                                         <span className="text-muted-foreground">
                                             Refund Method
                                         </span>
-                                        <p className="font-bold capitalize">
-                                            {(r.refund_method || "—").replace(
-                                                "_",
-                                                " ",
-                                            )}
-                                        </p>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                            {r.refund_method === "original_payment" && r.sale?.payment_method === "gcash" ? (
+                                                <GCashIcon size={16} />
+                                            ) : r.refund_method === "original_payment" && r.sale?.payment_method === "cod" ? (
+                                                <CODIcon size={16} />
+                                            ) : r.refund_method === "cash" ? (
+                                                <CODIcon size={16} />
+                                            ) : null}
+                                            <p className="font-bold capitalize">
+                                                {(r.refund_method || "—").replace(
+                                                    "_",
+                                                    " ",
+                                                )}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -477,7 +486,7 @@ export default function Returns() {
                                         r.sale?.payment_phone_number && (
                                             <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
                                                 <div className="flex items-center gap-2 text-green-800 font-bold text-sm">
-                                                    <Smartphone className="h-4 w-4" />
+                                                    <GCashIcon size={16} />
                                                     GCash Refund Details
                                                 </div>
                                                 <div className="space-y-2">
@@ -537,9 +546,9 @@ export default function Returns() {
                                                                     "gcash://";
                                                             }
                                                         }}
-                                                        className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors"
+                                                        className="flex items-center justify-center gap-2 w-full bg-[#007DFE] hover:bg-[#0066CC] text-white text-sm font-bold py-2.5 px-4 rounded-lg transition-colors"
                                                     >
-                                                        <ExternalLink className="h-4 w-4" />
+                                                        <GCashIcon size={16} />
                                                         Open GCash App
                                                     </button>
                                                 ) : (
@@ -820,14 +829,19 @@ export default function Returns() {
                                         </div>
                                     </div>
                                     <div className="text-right shrink-0">
-                                        <p className="font-bold text-sm">
-                                            ₱
-                                            {Number(
-                                                r.refund_amount,
-                                            ).toLocaleString(undefined, {
-                                                minimumFractionDigits: 2,
-                                            })}
-                                        </p>
+                                        <div className="flex items-center justify-end gap-1.5">
+                                            {r.refund_method === "original_payment" && r.sale?.payment_method === "gcash" && <GCashIcon size={14} />}
+                                            {r.refund_method === "original_payment" && r.sale?.payment_method === "cod" && <CODIcon size={14} />}
+                                            {r.refund_method === "cash" && <CODIcon size={14} />}
+                                            <p className="font-bold text-sm">
+                                                ₱
+                                                {Number(
+                                                    r.refund_amount,
+                                                ).toLocaleString(undefined, {
+                                                    minimumFractionDigits: 2,
+                                                })}
+                                            </p>
+                                        </div>
                                         <p className="text-xs text-muted-foreground">
                                             {new Date(
                                                 r.created_at,

@@ -17,6 +17,7 @@ class Supplier extends Authenticatable
         'email',
         'phone',
         'address',
+        'city',
         'password',
         'status',
         'email_verified_at',

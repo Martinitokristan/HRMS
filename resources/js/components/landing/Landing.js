@@ -6,12 +6,13 @@ import {
     X, Headphones, RefreshCw, Wallet, Zap, Hammer, Ruler,
     Paintbrush, Scissors, Settings, Box, Layers, Star, Send, CheckCircle, Menu, ChevronDown
 } from "lucide-react";
+import { GCashIcon } from "@/components/icons/PaymentIcons";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const BENEFITS = [
     { icon: Truck,      title: 'Express Delivery',   desc: 'Fast and reliable delivery to your site or home.' },
-    { icon: Wallet,     title: 'GCash Payment',       desc: 'Pay using GCash for fast and secure digital transactions.' },
+    { icon: GCashIcon,  title: 'GCash Payment',       desc: 'Pay using GCash for fast and secure digital transactions.' },
     { icon: RefreshCw,  title: 'Hassle Free Returns', desc: 'Easy returns within 7 days of purchase.' },
     { icon: Headphones, title: 'Online Support',      desc: '24/7 customer support for all your queries.' },
 ];

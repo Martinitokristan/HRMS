@@ -9,12 +9,13 @@ import { Button } from '@/components/ui/button';
 export default function EmailVerification() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-
+    const { setUser } = useAuth();
     const token = searchParams.get('token');
     const type = searchParams.get('type');
 
     const [status, setStatus] = useState('verifying'); // verifying, success, error, pending
     const [message, setMessage] = useState('Verifying your email address...');
+    const [countdown, setCountdown] = useState(3);
 
     useEffect(() => {
         if (!token || !type) {
@@ -37,6 +38,30 @@ export default function EmailVerification() {
                         navigate('/supplier/pending-approval', { replace: true });
                         return;
                     }
+                    
+                    // Handle Customer Auto-login
+                    if (response.data.data && response.data.data.role === 'customer') {
+                        setStatus('success');
+                        setMessage('Email verified successfully! Redirecting to shop in 3s...');
+                        
+                        // Set user in context immediately
+                        if (response.data.data) {
+                            setUser(response.data.data);
+                        }
+
+                        // Start countdown
+                        let timer = 3;
+                        const interval = setInterval(() => {
+                            timer -= 1;
+                            setCountdown(timer);
+                            if (timer <= 0) {
+                                clearInterval(interval);
+                                navigate('/shop', { replace: true });
+                            }
+                        }, 1000);
+                        return;
+                    }
+
                     setStatus('success');
                     setMessage('Email verified successfully! Please head to the login page to continue.');
                 } else {
@@ -84,7 +109,14 @@ export default function EmailVerification() {
                         <CheckCircle2 className="h-12 w-12 text-green-500 mb-4" />
                         <h2 className="text-xl font-bold mb-2">Verified!</h2>
                         <Alert className="bg-green-50 text-green-800 border-green-200">
-                            <AlertDescription>{message}</AlertDescription>
+                            <AlertDescription>
+                                {message}
+                                {type === 'customer' && (
+                                    <div className="mt-2 font-bold text-lg">
+                                        Redirecting in {countdown}s...
+                                    </div>
+                                )}
+                            </AlertDescription>
                         </Alert>
                     </div>
                 )}

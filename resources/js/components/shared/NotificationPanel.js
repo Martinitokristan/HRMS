@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import api from '../../lib/api';
 import { Bell, Trash2, CheckCheck, X, AlertCircle } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { GCashIcon, CODIcon } from '@/components/icons/PaymentIcons';
 
 /**
  * Shared NotificationPanel for all roles (admin, supplier, customer, rider)
@@ -210,8 +211,19 @@ export default function NotificationPanel({
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-center mb-1">
-                                        <span className="text-[10px] font-bold text-[#FF6B35] tracking-wider uppercase">
-                                            {renderLabel(n)}
+                                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#FF6B35] tracking-wider uppercase">
+                                            {(() => {
+                                                const labelText = renderLabel(n);
+                                                const isGCash = typeof labelText === 'string' && labelText.toLowerCase().includes('gcash');
+                                                const isCOD = typeof labelText === 'string' && labelText.toLowerCase().includes('cod');
+                                                return (
+                                                    <>
+                                                        {isGCash && <GCashIcon size={12} />}
+                                                        {isCOD && <CODIcon size={12} />}
+                                                        {labelText}
+                                                    </>
+                                                );
+                                            })()}
                                         </span>
                                         <span className="text-[10px] text-muted-foreground">
                                             {n.created_at ? timeAgo(n.created_at) : 'Just now'}

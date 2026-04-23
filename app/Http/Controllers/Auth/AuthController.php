@@ -52,6 +52,15 @@ class AuthController extends Controller
                 'municipality' => 'required|string|max:100',
                 'zip_code' => 'nullable|string|max:10',
                 'address' => 'required|string|max:255',
+                // Optional PSGC codes for consistency with settings dropdowns
+                'region_code' => 'nullable|string|max:20',
+                'region_name' => 'nullable|string|max:100',
+                'province_code' => 'nullable|string|max:20',
+                'city_code' => 'nullable|string|max:20',
+                'barangay_code' => 'nullable|string|max:20',
+                'barangay_name' => 'nullable|string|max:100',
+                'street' => 'nullable|string|max:255',
+                'landmark' => 'nullable|string|max:255',
             ]);
         }
 
@@ -91,20 +100,29 @@ class AuthController extends Controller
                     'availability' => 'off_duty',
                 ]);
             } else {
-                \App\Models\CustomerProfile::create([
-                    'user_id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'age' => $request->age,
-                    'sex' => $request->sex,
-                    'province_name' => $request->province,
-                    'city_name' => $request->municipality,
-                    'zip_code' => $request->zip_code,
-                    'address' => $request->address,
-                    'landmark' => $request->landmark,
-                    'latitude' => $request->latitude,
-                    'longitude' => $request->longitude,
-                ]);
+                    \App\Models\CustomerProfile::create([
+                        'user_id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'age' => $request->age,
+                        'sex' => $request->sex,
+                        // PSGC structured data
+                        'region_code' => $request->region_code,
+                        'region_name' => $request->region_name,
+                        'province_code' => $request->province_code,
+                        'province_name' => $request->province_code ? $request->province : $request->province,
+                        'city_code' => $request->city_code,
+                        'city_name' => $request->city_code ? $request->municipality : $request->municipality,
+                        'barangay_code' => $request->barangay_code,
+                        'barangay_name' => $request->barangay_name,
+                        // Address details
+                        'zip_code' => $request->zip_code,
+                        'address' => $request->address,
+                        'street' => $request->street ?? $request->address, // Fallover for consistency
+                        'landmark' => $request->landmark,
+                        'latitude' => $request->latitude,
+                        'longitude' => $request->longitude,
+                    ]);
             }
 
             return $user;
@@ -145,11 +163,39 @@ class AuthController extends Controller
             'email_verification_token' => null,
             'status' => $status
         ]);
-        return response()->json([
-            'message' => 'Email verified successfully! Please log in.',
+
+        $response = [
+            'message' => $user->role === 'customer' 
+                ? 'Email verified successfully! Logging you in...' 
+                : 'Email verified successfully! Please log in.',
             'status' => 'success',
             'data' => $user
-        ]);
+        ];
+
+        // Auto-login for customers
+        if ($user->role === 'customer') {
+            $token = $user->createToken('auth_token')->plainTextToken;
+            $response['token'] = $token;
+            $cookie = $this->buildAuthCookie($token);
+            return response()->json($response)->withCookie($cookie);
+        }
+
+        return response()->json($response);
+    }
+
+    private function buildAuthCookie(string $token)
+    {
+        return cookie(
+            'auth_token',
+            $token,
+            60 * 24 * 365,
+            '/',
+            null,
+            app()->environment('production'),
+            true, // httpOnly
+            false,
+            'lax'
+        );
     }
 
     public function resendVerification(Request $request)

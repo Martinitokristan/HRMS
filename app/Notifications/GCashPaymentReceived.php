@@ -46,7 +46,7 @@ class GCashPaymentReceived extends Notification implements \Illuminate\Contracts
 
         return [
             'type' => 'gcash_payment',
-            'title' => '💰 GCash Payment Received!',
+            'title' => 'GCash Payment Received!',
             'message' => $cleanBody,
             'amount' => $this->amount,
             'phone' => $this->phone,

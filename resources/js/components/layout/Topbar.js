@@ -7,6 +7,7 @@ import { cn } from '../../lib/utils';
 import NotificationPanel from '../shared/NotificationPanel';
 import Tooltip from '../shared/Tooltip';
 import PaymentToastContainer from '../shared/PaymentToast';
+import { GCashIcon } from '../icons/PaymentIcons';
 
 export default function Topbar({ toggleSidebar, isCollapsed }) {
     const { user, logout } = useAuth();
@@ -141,7 +142,7 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
                         apiPrefix="/notifications"
                         renderMessage={(n) => n.data?.message || n.message || 'New notification'}
                         renderLabel={(n) => {
-                            if (n.data?.type === 'gcash_payment') return '💰 GCash';
+                            if (n.data?.type === 'gcash_payment') return <span className="flex items-center gap-1"><GCashIcon size={14} /> GCash</span>;
                             return n.data?.supplier_name || n.data?.title || 'HRMS';
                         }}
                         isRead={(n) => !!n.read_at}

@@ -12,6 +12,7 @@ import {
     TableCell,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
 
 export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
     const { showToast } = useToast();
@@ -132,13 +133,22 @@ export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
                                             delivery.sale?.total_amount,
                                         )}
                                     </span>
-                                    {delivery.sale?.payment_method ===
-                                        "cod" && (
+                                    {delivery.sale?.payment_method === "cod" && (
                                         <Badge
                                             variant="outline"
-                                            className="bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100"
+                                            className="bg-green-50 text-green-800 border-green-200 hover:bg-green-100 gap-1"
                                         >
+                                            <CODIcon size={12} />
                                             COD
+                                        </Badge>
+                                    )}
+                                    {delivery.sale?.payment_method === "gcash" && (
+                                        <Badge
+                                            variant="outline"
+                                            className="bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100 gap-1"
+                                        >
+                                            <GCashIcon size={12} />
+                                            GCash
                                         </Badge>
                                     )}
                                 </div>

@@ -677,7 +677,7 @@ export default function RiderDashboardV3() {
                 position: 'relative'
             }}>
                 {/* Global Rider Notifications Bell */}
-                <div style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 50 }}>
+                <div style={{ position: 'absolute', top: '2rem', right: '2rem', zIndex: 1001 }}>
                     <div style={{ position: 'relative' }}>
                         <Tooltip label="Notifications" position="bottom">
                             <button

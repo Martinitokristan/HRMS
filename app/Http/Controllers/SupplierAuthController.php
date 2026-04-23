@@ -28,6 +28,7 @@ class SupplierAuthController extends Controller
             'email' => 'required|email|unique:suppliers,email',
             'phone' => ['required', 'string', 'regex:/^63\d{10}$/'],
             'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
         ], $customMessages);
 
@@ -47,6 +48,7 @@ class SupplierAuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'address' => $request->address,
+            'city' => $request->city,
             'password' => Hash::make($request->password),
             'status' => 'pending',
             'email_verified_at' => null,
@@ -140,6 +142,7 @@ class SupplierAuthController extends Controller
             'email'        => $supplier->email,
             'phone'        => $supplier->phone,
             'address'      => $supplier->address,
+            'city'         => $supplier->city,
             'role'         => 'supplier',
             'status'       => $supplier->status,
             'photo'        => null,
@@ -177,6 +180,7 @@ class SupplierAuthController extends Controller
             'contact_name' => 'sometimes|string|max:100',
             'phone' => 'sometimes|string|max:20',
             'address' => 'sometimes|string',
+            'city' => 'sometimes|string|max:100',
             'password' => 'sometimes|string|min:8|confirmed',
         ]);
 
@@ -188,7 +192,7 @@ class SupplierAuthController extends Controller
             ], 422);
         }
 
-        $updateData = $request->only(['name', 'contact_name', 'phone', 'address']);
+        $updateData = $request->only(['name', 'contact_name', 'phone', 'address', 'city']);
 
         if ($request->has('password')) {
             $updateData['password'] = Hash::make($request->password);

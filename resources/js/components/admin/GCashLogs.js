@@ -4,7 +4,6 @@ import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-    Smartphone,
     CheckCircle,
     XCircle,
     Search,
@@ -12,6 +11,7 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { format } from "date-fns";
+import { GCashIcon } from "@/components/icons/PaymentIcons";
 
 export default function GCashLogs() {
     const { refreshTrigger } = useSilentRefresh("admin_orders");
@@ -77,7 +77,7 @@ export default function GCashLogs() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        <Smartphone className="h-6 w-6 text-[#007DFE]" />
+                        <GCashIcon size={24} />
                         GCash Payments Log
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
