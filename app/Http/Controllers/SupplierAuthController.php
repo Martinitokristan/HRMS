@@ -134,12 +134,15 @@ class SupplierAuthController extends Controller
     {
         $supplier = $request->user();
         return response()->json([
-            'id'     => $supplier->id,
-            'name'   => $supplier->contact_name ?? $supplier->name,
-            'email'  => $supplier->email,
-            'role'   => 'supplier',
-            'status' => $supplier->status,
-            'photo'  => null,
+            'id'           => $supplier->id,
+            'name'         => $supplier->name,
+            'contact_name' => $supplier->contact_name,
+            'email'        => $supplier->email,
+            'phone'        => $supplier->phone,
+            'address'      => $supplier->address,
+            'role'         => 'supplier',
+            'status'       => $supplier->status,
+            'photo'        => null,
         ]);
     }
 

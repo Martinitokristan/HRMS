@@ -38,7 +38,6 @@ class ProcessSupplierProductImage implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('ProcessSupplierProductImage: Handle started for ID ' . $this->supplierProductId);
         $product = SupplierProduct::find($this->supplierProductId);
 
         if (!$product) {

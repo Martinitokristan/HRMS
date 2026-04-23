@@ -21,12 +21,14 @@ class MeController extends Controller
 
         if ($user instanceof \App\Models\Supplier) {
             return response()->json([
-                'id'     => $user->id,
-                'name'   => $user->contact_name ?? $user->name,
-                'email'  => $user->email,
-                'role'   => 'supplier',
-                'status' => $user->status,
-                'photo'  => null,
+                'id'           => $user->id,
+                'name'         => $user->name,
+                'contact_name' => $user->contact_name,
+                'email'        => $user->email,
+                'phone'        => $user->phone,
+                'role'         => 'supplier',
+                'status'       => $user->status,
+                'photo'        => null,
             ], 200);
         }
 
@@ -34,6 +36,7 @@ class MeController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'phone' => $user->phone,
             'role' => $user->role,
             'status' => $user->status,
             'photo' => $user->photo ? asset('storage/' . $user->photo) : null,

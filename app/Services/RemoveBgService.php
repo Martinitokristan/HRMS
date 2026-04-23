@@ -18,7 +18,6 @@ class RemoveBgService
      */
     public function process($imagePath, $outputDir = 'products/banner', $prefix = 'banner_')
     {
-        Log::info('RemoveBgService: process() called for ' . $imagePath);
         $apiKey = config('services.removebg.key');
 
         if (empty($apiKey)) {

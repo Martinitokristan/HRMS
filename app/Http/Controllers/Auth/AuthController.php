@@ -93,10 +93,12 @@ class AuthController extends Controller
             } else {
                 \App\Models\CustomerProfile::create([
                     'user_id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
                     'age' => $request->age,
                     'sex' => $request->sex,
-                    'province' => $request->province,
-                    'municipality' => $request->municipality,
+                    'province_name' => $request->province,
+                    'city_name' => $request->municipality,
                     'zip_code' => $request->zip_code,
                     'address' => $request->address,
                     'landmark' => $request->landmark,

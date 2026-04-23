@@ -56,19 +56,33 @@ class CustomerController extends Controller
 
     public function myProfile(Request $request)
     {
-        $profile = \App\Models\CustomerProfile::where('user_id', $request->user()->id)
+        $user = $request->user();
+        $profile = \App\Models\CustomerProfile::where('user_id', $user->id)
             ->first();
         
         if (!$profile) {
-            // Return empty profile instead of 404 so checkout can still proceed
+            // Return empty profile with user info
             return response()->json([
-                'data' => null,
+                'data' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'photo' => $user->photo ? asset('storage/' . $user->photo) : null,
+                ],
                 'status' => 'success'
             ]);
         }
 
+        // Add user info to response
+        $data = $profile->toArray();
+        $data['phone'] = $user->phone;
+        $data['photo'] = $user->photo ? asset('storage/' . $user->photo) : null;
+        // Ensure name/email are present
+        $data['name'] = $user->name;
+        $data['email'] = $user->email;
+
         return response()->json([
-            'data' => $profile,
+            'data' => $data,
             'status' => 'success'
         ]);
     }
