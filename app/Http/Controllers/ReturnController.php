@@ -254,8 +254,8 @@ class ReturnController extends Controller
 
         $customerId = $return->sale->customer_id;
         $notifyKeys = Setting::get('return_approved_notify', '0') === '1'
-            ? ['customer_returns', 'customer_notifications']
-            : ['customer_returns'];
+            ? ['customer_returns', 'customer_notifications', 'customer_shop']
+            : ['customer_returns', 'customer_shop'];
         broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_inventory', 'admin_dashboard'], 'return.approved'));
         broadcast(new DataMutated("private-customer.{$customerId}", $notifyKeys, 'return.approved'));
 
@@ -310,7 +310,7 @@ class ReturnController extends Controller
 
     public function complete(Request $request, $id)
     {
-        $return = ReturnOrder::findOrFail($id);
+        $return = ReturnOrder::with(['items.saleItem'])->findOrFail($id);
 
         if ($return->status !== 'approved') {
             return response()->json([
@@ -319,10 +319,24 @@ class ReturnController extends Controller
             ], 422);
         }
 
-        $return->update([
-            'status'       => 'completed',
-            'completed_at' => now(),
-        ]);
+        DB::transaction(function () use ($return) {
+            // Restore stock as fallback (in case it wasn't done during approval)
+            $normalizedItems = $return->items->map(function ($ri) {
+                $variantId = $ri->saleItem ? $ri->saleItem->product_variant_id : null;
+                return [
+                    'product_id' => $ri->product_id,
+                    'product_variant_id' => $variantId,
+                    'quantity' => (int) $ri->quantity_returned,
+                ];
+            })->toArray();
+
+            $this->restoreStockFromReturnItems($normalizedItems);
+
+            $return->update([
+                'status'       => 'completed',
+                'completed_at' => now(),
+            ]);
+        });
 
         // Notify customer
         CustomerNotification::create([
@@ -335,7 +349,7 @@ class ReturnController extends Controller
 
         $customerId = $return->sale->customer_id;
         broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_dashboard'], 'return.completed'));
-        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_returns', 'customer_notifications'], 'return.completed'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_returns', 'customer_notifications', 'customer_shop'], 'return.completed'));
 
         return response()->json([
             'data'    => $return->fresh()->load(['sale.customer', 'requestedBy', 'approvedBy']),
