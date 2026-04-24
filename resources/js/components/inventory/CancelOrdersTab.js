@@ -23,6 +23,12 @@ export default function CancelOrdersTab() {
     const { showToast } = useToast();
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.ADMIN_ORDERS);
 
+    const formatQty = (qty) => {
+        const n = typeof qty === "number" ? qty : parseFloat(qty);
+        if (Number.isNaN(n)) return qty;
+        return Number.isInteger(n) ? `${n}` : `${n}`;
+    };
+
     const [requests, setRequests] = useState({
         data: [],
         total: 0,
@@ -167,8 +173,8 @@ export default function CancelOrdersTab() {
                             <TableHead>Items</TableHead>
                             <TableHead>Reason</TableHead>
                             <TableHead>Notes</TableHead>
-                            <TableHead align="right">Amount</TableHead>
-                            <TableHead align="right">Actions</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -202,7 +208,7 @@ export default function CancelOrdersTab() {
                                                             item.product?.name
                                                         }
                                                     >
-                                                        {item.quantity}x{" "}
+                                                        {formatQty(item.quantity)}pcs{" "}
                                                         {item.product?.name}
                                                     </span>
                                                 ))}
@@ -220,28 +226,27 @@ export default function CancelOrdersTab() {
                                             className="capitalize"
                                         >
                                             {(
-                                                req.cancellationRequest?.reason || ""
+                                                req.cancellation_request?.reason || ""
                                             ).replace(/_/g, " ")}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
                                         <p
                                             className="text-xs max-w-[200px] truncate"
-                                            title={req.cancellationRequest?.notes}
+                                            title={req.cancellation_request?.notes}
                                         >
-                                            {req.cancellationRequest?.notes || "-"}
+                                            {req.cancellation_request?.notes || "-"}
                                         </p>
                                     </TableCell>
                                     <TableCell
-                                        align="right"
-                                        className="font-semibold text-primary"
+                                        className="text-right font-semibold text-primary"
                                     >
                                         ₱
                                         {parseFloat(
                                             req.total_amount,
                                         ).toLocaleString()}
                                     </TableCell>
-                                    <TableCell align="right">
+                                    <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
                                             <Button
                                                 size="sm"

@@ -22979,6 +22979,11 @@ function CancelOrdersTab() {
     showToast = _useToast.showToast;
   var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_11__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_12__.STALE_KEYS.ADMIN_ORDERS),
     refreshTrigger = _useSilentRefresh.refreshTrigger;
+  var formatQty = function formatQty(qty) {
+    var n = typeof qty === "number" ? qty : parseFloat(qty);
+    if (Number.isNaN(n)) return qty;
+    return Number.isInteger(n) ? "".concat(n) : "".concat(n);
+  };
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       data: [],
       total: 0,
@@ -23169,10 +23174,10 @@ function CancelOrdersTab() {
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableHead, {
               children: "Notes"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableHead, {
-              align: "right",
+              className: "text-right",
               children: "Amount"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableHead, {
-              align: "right",
+              className: "text-right",
               children: "Actions"
             })]
           })
@@ -23184,7 +23189,7 @@ function CancelOrdersTab() {
               children: "No pending cancellation requests found."
             })
           }) : requests.data.map(function (req) {
-            var _req$customer, _req$items, _req$items2, _req$cancellationRequ, _req$cancellationRequ2, _req$cancellationRequ3;
+            var _req$customer, _req$items, _req$items2, _req$cancellation_req, _req$cancellation_req2, _req$cancellation_req3;
             return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableRow, {
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableCell, {
                 className: "font-semibold",
@@ -23199,7 +23204,7 @@ function CancelOrdersTab() {
                     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("span", {
                       className: "text-sm truncate max-w-[200px]",
                       title: (_item$product = item.product) === null || _item$product === void 0 ? void 0 : _item$product.name,
-                      children: [item.quantity, "x", " ", (_item$product2 = item.product) === null || _item$product2 === void 0 ? void 0 : _item$product2.name]
+                      children: [formatQty(item.quantity), "pcs", " ", (_item$product2 = item.product) === null || _item$product2 === void 0 ? void 0 : _item$product2.name]
                     }, i);
                   }), ((_req$items2 = req.items) === null || _req$items2 === void 0 ? void 0 : _req$items2.length) > 2 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("span", {
                     className: "text-xs text-muted-foreground",
@@ -23210,20 +23215,19 @@ function CancelOrdersTab() {
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_13__.Badge, {
                   variant: "outline",
                   className: "capitalize",
-                  children: (((_req$cancellationRequ = req.cancellationRequest) === null || _req$cancellationRequ === void 0 ? void 0 : _req$cancellationRequ.reason) || "").replace(/_/g, " ")
+                  children: (((_req$cancellation_req = req.cancellation_request) === null || _req$cancellation_req === void 0 ? void 0 : _req$cancellation_req.reason) || "").replace(/_/g, " ")
                 })
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableCell, {
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("p", {
                   className: "text-xs max-w-[200px] truncate",
-                  title: (_req$cancellationRequ2 = req.cancellationRequest) === null || _req$cancellationRequ2 === void 0 ? void 0 : _req$cancellationRequ2.notes,
-                  children: ((_req$cancellationRequ3 = req.cancellationRequest) === null || _req$cancellationRequ3 === void 0 ? void 0 : _req$cancellationRequ3.notes) || "-"
+                  title: (_req$cancellation_req2 = req.cancellation_request) === null || _req$cancellation_req2 === void 0 ? void 0 : _req$cancellation_req2.notes,
+                  children: ((_req$cancellation_req3 = req.cancellation_request) === null || _req$cancellation_req3 === void 0 ? void 0 : _req$cancellation_req3.notes) || "-"
                 })
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableCell, {
-                align: "right",
-                className: "font-semibold text-primary",
+                className: "text-right font-semibold text-primary",
                 children: ["\u20B1", parseFloat(req.total_amount).toLocaleString()]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableCell, {
-                align: "right",
+                className: "text-right",
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
                   className: "flex justify-end gap-2",
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_8__.Button, {

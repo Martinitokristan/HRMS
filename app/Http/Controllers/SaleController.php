@@ -7,6 +7,7 @@ use App\Models\Delivery;
 use App\Models\Inventory;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\Setting;
 use App\Models\SupplierProduct;
 use App\Models\SalesCancellation;
 use App\Models\SalesCancellationRequest;
@@ -485,8 +486,15 @@ class SaleController extends Controller
             })
             ->latest('cancellation_requested_at');
 
+        $paginated = $query->paginate($request->get('per_page', 20));
+
+        $paginated->getCollection()->transform(function ($sale) {
+            $sale->cancellation_request = $sale->cancellationRequest;
+            return $sale;
+        });
+
         return response()->json([
-            'data' => $query->paginate($request->get('per_page', 20)),
+            'data' => $paginated,
             'status' => 'success',
         ]);
     }
