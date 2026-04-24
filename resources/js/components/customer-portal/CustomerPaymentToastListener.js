@@ -32,7 +32,6 @@ export default function CustomerPaymentToastListener() {
                             const amountMatch = n.message?.match(/₱([\d,]+\.?\d*)/);
                             const orderMatch = n.message?.match(/order #(\S+)/);
                             PaymentToastContainer.show({
-                                customerName: user.name,
                                 amount: amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : null,
                                 orderNumber: orderMatch ? orderMatch[1] : null,
                             });

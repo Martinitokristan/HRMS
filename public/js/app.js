@@ -16863,7 +16863,6 @@ function CustomerPaymentToastListener() {
                     var amountMatch = (_n$message = n.message) === null || _n$message === void 0 ? void 0 : _n$message.match(/₱([\d,]+\.?\d*)/);
                     var orderMatch = (_n$message2 = n.message) === null || _n$message2 === void 0 ? void 0 : _n$message2.match(/order #(\S+)/);
                     _shared_PaymentToast__WEBPACK_IMPORTED_MODULE_3__["default"].show({
-                      customerName: user.name,
                       amount: amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : null,
                       orderNumber: orderMatch ? orderMatch[1] : null
                     });
@@ -37104,12 +37103,23 @@ function SingleToast(_ref) {
     orderNumber = data.orderNumber;
 
   // Build item summary string
+  var formatQty = function formatQty(qty) {
+    var n = typeof qty === 'number' ? qty : parseFloat(qty);
+    if (Number.isNaN(n)) return 1;
+    return Number.isInteger(n) ? n : n;
+  };
   var itemSummary = Array.isArray(items) && items.length > 0 ? items.map(function (i) {
-    return "".concat(i.quantity || i.qty || 1, "x ").concat(i.name || i.product_name || 'Item');
+    var _ref2, _i$quantity;
+    var q = formatQty((_ref2 = (_i$quantity = i.quantity) !== null && _i$quantity !== void 0 ? _i$quantity : i.qty) !== null && _ref2 !== void 0 ? _ref2 : 1);
+    var unit = q === 1 ? 'pc' : 'pcs';
+    return "".concat(q).concat(unit, " ").concat(i.name || i.product_name || 'Item');
   }).join(', ') : null;
   var totalPcs = Array.isArray(items) ? items.reduce(function (sum, i) {
-    return sum + (i.quantity || i.qty || 1);
+    var _ref3, _i$quantity2;
+    return sum + Number(formatQty((_ref3 = (_i$quantity2 = i.quantity) !== null && _i$quantity2 !== void 0 ? _i$quantity2 : i.qty) !== null && _ref3 !== void 0 ? _ref3 : 1));
   }, 0) : null;
+  var totalUnit = totalPcs === 1 ? 'pc' : 'pcs';
+  var hasDetailsRows = Boolean(itemSummary || phone || customerName);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
     style: {
       pointerEvents: 'auto',
@@ -37189,29 +37199,31 @@ function SingleToast(_ref) {
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
           style: {
-            flex: 1
+            flex: 1,
+            textAlign: 'center'
           },
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
             style: {
               display: 'flex',
               alignItems: 'center',
-              gap: 6
+              gap: 6,
+              justifyContent: 'center'
             },
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_2__["default"], {
               size: 14,
               color: "#4ADE80"
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
               style: {
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: 700,
                 color: '#fff',
                 letterSpacing: '0.02em'
               },
-              children: "GCash Payment Received"
+              children: customerName ? 'GCash payment received' : 'Your GCash payment was successfully received'
             })]
           }), orderNumber && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
             style: {
-              fontSize: 11,
+              fontSize: 12,
               color: 'rgba(255,255,255,0.6)',
               fontWeight: 500
             },
@@ -37230,15 +37242,15 @@ function SingleToast(_ref) {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: itemSummary || customerName || phone ? 8 : 0,
-            paddingBottom: itemSummary || customerName || phone ? 8 : 0,
-            borderBottom: itemSummary || customerName || phone ? '1px solid rgba(255,255,255,0.12)' : 'none'
+            marginBottom: hasDetailsRows ? 8 : 0,
+            paddingBottom: hasDetailsRows ? 8 : 0,
+            borderBottom: hasDetailsRows ? '1px solid rgba(255,255,255,0.12)' : 'none'
           },
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
             style: {
-              fontSize: 12,
+              fontSize: 13,
               color: 'rgba(255,255,255,0.7)',
-              fontWeight: 500
+              fontWeight: 600
             },
             children: "Amount"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
@@ -37261,16 +37273,16 @@ function SingleToast(_ref) {
           },
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("span", {
             style: {
-              fontSize: 11,
+              fontSize: 12,
               color: 'rgba(255,255,255,0.6)',
-              fontWeight: 500,
+              fontWeight: 600,
               flexShrink: 0,
               marginRight: 8
             },
-            children: ["Items (", totalPcs, " pc", totalPcs > 1 ? 's' : '', ")"]
+            children: ["Items (", totalPcs, " ", totalUnit, ")"]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
             style: {
-              fontSize: 11,
+              fontSize: 12,
               color: 'rgba(255,255,255,0.9)',
               fontWeight: 600,
               textAlign: 'right',
@@ -37283,7 +37295,7 @@ function SingleToast(_ref) {
             },
             children: itemSummary
           })]
-        }), customerName && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
           style: {
             display: 'flex',
             justifyContent: 'space-between',
@@ -37292,20 +37304,20 @@ function SingleToast(_ref) {
           },
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
             style: {
-              fontSize: 11,
+              fontSize: 12,
               color: 'rgba(255,255,255,0.6)',
-              fontWeight: 500
-            },
-            children: "Customer"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
-            style: {
-              fontSize: 11,
-              color: 'rgba(255,255,255,0.9)',
               fontWeight: 600
             },
-            children: customerName
+            children: "From"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
+            style: {
+              fontSize: 12,
+              color: 'rgba(255,255,255,0.9)',
+              fontWeight: 700
+            },
+            children: customerName || 'HRMS'
           })]
-        }), phone && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
+        }), phone && customerName && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
           style: {
             display: 'flex',
             justifyContent: 'space-between',
@@ -37313,9 +37325,9 @@ function SingleToast(_ref) {
           },
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {
             style: {
-              fontSize: 11,
+              fontSize: 12,
               color: 'rgba(255,255,255,0.6)',
-              fontWeight: 500
+              fontWeight: 600
             },
             children: "GCash No."
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("span", {

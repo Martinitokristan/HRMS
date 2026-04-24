@@ -82,13 +82,29 @@ function SingleToast({ data, onDone }) {
     const { customerName, amount, phone, items, orderNumber } = data;
 
     // Build item summary string
+    const formatQty = (qty) => {
+        const n = typeof qty === 'number' ? qty : parseFloat(qty);
+        if (Number.isNaN(n)) return 1;
+        return Number.isInteger(n) ? n : n;
+    };
+
     const itemSummary = Array.isArray(items) && items.length > 0
-        ? items.map(i => `${i.quantity || i.qty || 1}x ${i.name || i.product_name || 'Item'}`).join(', ')
+        ? items
+            .map((i) => {
+                const q = formatQty(i.quantity ?? i.qty ?? 1);
+                const unit = q === 1 ? 'pc' : 'pcs';
+                return `${q}${unit} ${i.name || i.product_name || 'Item'}`;
+            })
+            .join(', ')
         : null;
 
     const totalPcs = Array.isArray(items)
-        ? items.reduce((sum, i) => sum + (i.quantity || i.qty || 1), 0)
+        ? items.reduce((sum, i) => sum + Number(formatQty(i.quantity ?? i.qty ?? 1)), 0)
         : null;
+
+    const totalUnit = totalPcs === 1 ? 'pc' : 'pcs';
+
+    const hasDetailsRows = Boolean(itemSummary || phone || customerName);
 
     return (
         <div
@@ -164,25 +180,26 @@ function SingleToast({ data, onDone }) {
                     }}>
                         <GCashIcon size={20} color="#fff" />
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, textAlign: 'center' }}>
                         <div style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: 6,
+                            justifyContent: 'center',
                         }}>
                             <CheckCircle size={14} color="#4ADE80" />
                             <span style={{
-                                fontSize: 13,
+                                fontSize: 15,
                                 fontWeight: 700,
                                 color: '#fff',
                                 letterSpacing: '0.02em',
                             }}>
-                                GCash Payment Received
+                                {customerName ? 'GCash payment received' : 'Your GCash payment was successfully received'}
                             </span>
                         </div>
                         {orderNumber && (
                             <span style={{
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: 'rgba(255,255,255,0.6)',
                                 fontWeight: 500,
                             }}>
@@ -204,11 +221,11 @@ function SingleToast({ data, onDone }) {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: itemSummary || customerName || phone ? 8 : 0,
-                        paddingBottom: itemSummary || customerName || phone ? 8 : 0,
-                        borderBottom: itemSummary || customerName || phone ? '1px solid rgba(255,255,255,0.12)' : 'none',
+                        marginBottom: hasDetailsRows ? 8 : 0,
+                        paddingBottom: hasDetailsRows ? 8 : 0,
+                        borderBottom: hasDetailsRows ? '1px solid rgba(255,255,255,0.12)' : 'none',
                     }}>
-                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+                        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
                             Amount
                         </span>
                         <span style={{
@@ -229,11 +246,11 @@ function SingleToast({ data, onDone }) {
                             alignItems: 'flex-start',
                             marginBottom: 6,
                         }}>
-                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontWeight: 500, flexShrink: 0, marginRight: 8 }}>
-                                Items ({totalPcs} pc{totalPcs > 1 ? 's' : ''})
+                            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: 600, flexShrink: 0, marginRight: 8 }}>
+                                Items ({totalPcs} {totalUnit})
                             </span>
                             <span style={{
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: 'rgba(255,255,255,0.9)',
                                 fontWeight: 600,
                                 textAlign: 'right',
@@ -249,31 +266,29 @@ function SingleToast({ data, onDone }) {
                         </div>
                     )}
 
-                    {/* Customer name */}
-                    {customerName && (
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: phone ? 6 : 0,
-                        }}>
-                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
-                                Customer
-                            </span>
-                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>
-                                {customerName}
-                            </span>
-                        </div>
-                    )}
+                    {/* From — shows customer name for admin, HRMS for customer */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: phone ? 6 : 0,
+                    }}>
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
+                            From
+                        </span>
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>
+                            {customerName || 'HRMS'}
+                        </span>
+                    </div>
 
-                    {/* Phone */}
-                    {phone && (
+                    {/* Phone — only show for admin (when customerName is provided) */}
+                    {phone && customerName && (
                         <div style={{
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
                         }}>
-                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
+                            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
                                 GCash No.
                             </span>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.9)', fontWeight: 600, fontFamily: 'monospace' }}>
