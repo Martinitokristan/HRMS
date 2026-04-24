@@ -236,15 +236,10 @@ class DeliveryController extends Controller
             } catch (\BadMethodCallException $e) {
                 Cache::forget('products:all');
             }
-            // Update rider stats
+            // Free up the rider
             if ($delivery->rider_id) {
-                $profile = RiderProfile::where('user_id', $delivery->rider_id)->first();
-                if ($profile) {
-                    $profile->increment('total_deliveries');
-                    $profile->on_time_count += 1;
-                    $profile->availability = 'available';
-                    $profile->save();
-                }
+                RiderProfile::where('user_id', $delivery->rider_id)
+                    ->update(['availability' => 'available']);
             }
             // Notify customer that delivery is complete
             if ($delivery->sale && $delivery->sale->customer_id) {

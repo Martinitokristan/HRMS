@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LogOut, RefreshCw, MapIcon, Smartphone, Phone, Navigation, CheckCircle2, XCircle, PhilippinePeso, Truck, Package, MapPin, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -49,6 +50,7 @@ function RecenterMap({ pos }) {
 export default function RiderApp() {
     const { user, logout } = useAuth();
     const { showToast } = useToast();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('nearby');
     const [hideMap, setHideMap] = useState(false);
@@ -159,15 +161,15 @@ export default function RiderApp() {
         return (
             <div className="min-h-screen flex items-center justify-center p-8 bg-secondary/30">
                 <Card className="max-w-md w-full p-8 text-center border-destructive/50 shadow-2xl">
-                    <div className="text-lg font-black text-foreground mb-6 tracking-tighter">BOSHET <span className="text-destructive font-light">| HRMS</span></div>
+                    <div className="text-lg font-black text-foreground mb-6 tracking-tighter">HRMS</div>
                     <div className="mb-4"><XCircle className="h-16 w-16 mx-auto text-destructive" /></div>
                     <h1 className="text-xl font-bold text-foreground mb-3">Account Suspended</h1>
                     <p className="text-muted-foreground leading-relaxed mb-6 max-w-sm mx-auto">
                         Your rider account has been suspended by the management. Please contact support or visit the main office for clarification regarding your account status.
                     </p>
                     <div className="flex flex-col gap-2">
-                        <Button variant="outline" onClick={logout} className="border-destructive/20 hover:bg-destructive/5">
-                            <LogOut className="h-4 w-4 mr-1" /> Sign Out
+                        <Button variant="outline" onClick={() => navigate('/login')} className="border-destructive/20 hover:bg-destructive/5">
+                            Back to Login
                         </Button>
                     </div>
                 </Card>
@@ -179,7 +181,7 @@ export default function RiderApp() {
         return (
             <div className="min-h-screen flex items-center justify-center p-8 bg-secondary/30">
                 <Card className="max-w-md w-full p-8 text-center border-orange-500/50 shadow-2xl">
-                    <div className="text-lg font-black text-foreground mb-6 tracking-tighter">BOSHET <span className="text-orange-500 font-light">| HRMS</span></div>
+                    <div className="text-lg font-black text-foreground mb-6 tracking-tighter">HRMS</div>
                     <div className="mb-4"><Clock className="h-16 w-16 mx-auto text-orange-500" /></div>
                     <h1 className="text-xl font-bold text-foreground mb-3">
                         {user.status === 'interview_set' ? 'Interview Scheduled' : 'Application Pending'}
@@ -190,8 +192,8 @@ export default function RiderApp() {
                             : 'Your rider application is under review. Please wait for the admin to schedule an interview or approve your account.'}
                     </p>
                     <div className="flex flex-col gap-2">
-                        <Button variant="outline" onClick={logout} className="border-orange-500/20 hover:bg-orange-500/5">
-                            <LogOut className="h-4 w-4 mr-1" /> Sign Out
+                        <Button variant="outline" onClick={() => navigate('/login')} className="border-orange-500/20 hover:bg-orange-500/5">
+                            Back to Login
                         </Button>
                     </div>
                 </Card>

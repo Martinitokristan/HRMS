@@ -41,7 +41,6 @@ class RiderProfile extends Model
     {
         return Delivery::where('rider_id', $this->user_id)
             ->where('status', 'delivered')
-            ->where('on_time', true)
             ->count();
     }
 

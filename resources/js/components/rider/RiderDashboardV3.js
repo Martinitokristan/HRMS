@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api, { silentApi } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import RiderSettings from './RiderSettings';
 import RatingStatsCard from './RatingStatsCard';
 import RatingNotificationsPanel from './RatingNotificationsPanel';
@@ -110,6 +111,7 @@ const customerIcon = L.divIcon({
 
 export default function RiderDashboardV3() {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const { refreshTrigger: dashTrigger } = useSilentRefresh(STALE_KEYS.RIDER_DASHBOARD);
     const { refreshTrigger: notifTrigger } = useSilentRefresh(STALE_KEYS.RIDER_NOTIFICATIONS);
     const [view, setView] = useState('dashboard');
@@ -540,15 +542,15 @@ export default function RiderDashboardV3() {
         return (
             <div className="min-h-screen flex items-center justify-center p-8 bg-secondary/30">
                 <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center border-red-500/50">
-                    <div className="text-lg font-black text-gray-900 mb-6 tracking-tighter">BOSHET <span className="text-red-500 font-light">| HRMS</span></div>
+                    <div className="text-lg font-black text-gray-900 mb-6 tracking-tighter">HRMS</div>
                     <div className="mb-4"><XCircle className="h-16 w-16 mx-auto text-red-500" /></div>
                     <h1 className="text-xl font-bold text-gray-900 mb-3">Account Suspended</h1>
                     <p className="text-gray-600 leading-relaxed mb-6 max-w-sm mx-auto">
                         Your rider account has been suspended by the management. Please contact support or visit the main office for clarification regarding your account status.
                     </p>
                     <div className="flex flex-col gap-2">
-                        <button onClick={logout} className="w-full py-2.5 border border-red-500/20 text-red-600 rounded-lg hover:bg-red-50 font-semibold text-sm">
-                            Sign Out
+                        <button onClick={() => navigate('/login')} className="w-full py-2.5 border border-red-500/20 text-red-600 rounded-lg hover:bg-red-50 font-semibold text-sm">
+                            Back to Login
                         </button>
                     </div>
                 </div>
@@ -560,7 +562,7 @@ export default function RiderDashboardV3() {
         return (
             <div className="min-h-screen flex items-center justify-center p-8 bg-secondary/30">
                 <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center border-orange-500/50">
-                    <div className="text-lg font-black text-gray-900 mb-6 tracking-tighter">BOSHET <span className="text-orange-500 font-light">| HRMS</span></div>
+                    <div className="text-lg font-black text-gray-900 mb-6 tracking-tighter">HRMS</div>
                     <div className="mb-4"><Clock className="h-16 w-16 mx-auto text-orange-500" /></div>
                     <h1 className="text-xl font-bold text-gray-900 mb-3">
                         {user.status === 'interview_set' ? 'Interview Scheduled' : 'Application Pending'}
@@ -571,8 +573,8 @@ export default function RiderDashboardV3() {
                             : 'Your rider application is under review. Please wait for the admin to schedule an interview or approve your account.'}
                     </p>
                     <div className="flex flex-col gap-2">
-                        <button onClick={logout} className="w-full py-2.5 border border-orange-500/20 text-orange-600 rounded-lg hover:bg-orange-50 font-semibold text-sm">
-                            Sign Out
+                        <button onClick={() => navigate('/login')} className="w-full py-2.5 border border-orange-500/20 text-orange-600 rounded-lg hover:bg-orange-50 font-semibold text-sm">
+                            Back to Login
                         </button>
                     </div>
                 </div>
