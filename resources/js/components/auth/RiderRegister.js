@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, Upload, Bike, Eye, EyeOff, Package, Truck, Star } from 'lucide-react';
+import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, Upload, Bike, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { PhAddressFields } from '../shared/PhAddressFields';
 
@@ -34,11 +35,6 @@ export default function RiderRegister() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
-    const features = [
-        { icon: Package, label: 'Wide Product Selection',  desc: 'Tools, supplies & equipment for every project' },
-        { icon: Truck,   label: 'Fast & Tracked Delivery',  desc: 'Real-time delivery tracking to your location' },
-        { icon: Star,    label: 'Trusted by Contractors',   desc: 'Quality products from verified suppliers' },
-    ];
     const [idFile, setIdFile] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const { showToast } = useToast();
@@ -170,7 +166,7 @@ export default function RiderRegister() {
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen bg-white">
             {/* Success Modal */}
             {!!successMsg && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
@@ -222,9 +218,16 @@ export default function RiderRegister() {
                 </div>
             )}
 
-            {/* Left - Form */}
-            <div className="flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto">
+            <div className="relative flex items-center justify-center p-8 overflow-y-auto">
                 <div className="w-full max-w-lg">
+                    <button
+                        type="button"
+                        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+                        className="fixed top-6 left-6 z-50 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm backdrop-blur hover:bg-white hover:text-gray-900"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </button>
                     <div className="flex items-center gap-2.5 cursor-pointer mb-8" onClick={() => navigate('/')}>
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F97316] shadow-lg shadow-orange-200">
                             <span className="text-sm font-black text-white">H</span>
@@ -234,8 +237,8 @@ export default function RiderRegister() {
                             <span className="block text-[10px] text-gray-400 font-medium -mt-0.5 tracking-widest uppercase">Hardware Store</span>
                         </div>
                     </div>
-                    <h1 className="text-[26px] font-black text-gray-900 tracking-tight mb-1">Rider Fleet Application</h1>
-                    <p className="text-gray-500 mb-8">Apply to become a professional logistics partner.</p>
+                    <h1 className="text-[28px] font-black text-gray-900 tracking-tight mb-1">Rider Registration</h1>
+                    <p className="text-base text-gray-500 mb-8">Create your rider account to apply for delivery assignments.</p>
 
                     {errors.form && (
                         <Alert variant="destructive" className="mb-6">
@@ -252,28 +255,31 @@ export default function RiderRegister() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Driver Profile */}
-                        <div>
-                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">👤 Driver Profile</h3>
-                            <div className="space-y-4">
+                        <Card className="bg-secondary/50">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-2 text-base font-bold">
+                                    👤 Driver Profile
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
                                 <div className="space-y-1.5">
-                                    <Label>Full Legal Name *</Label>
-                                    <Input type="text" value={form.name} onChange={(e) => handleChange('name', e.target.value)} required placeholder="Enter your full name" className={errors.name ? 'border-red-500' : ''} />
-                                    {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                                    <Label className="text-base font-medium">Full Legal Name *</Label>
+                                    <Input type="text" value={form.name} onChange={(e) => handleChange('name', e.target.value)} required placeholder="Enter your full name" className={`h-12 text-base ${errors.name ? 'border-red-500' : ''}`} />
+                                    {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label>Email Address *</Label>
-                                        <Input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} required placeholder="" className={errors.email ? 'border-red-500' : ''} />
-                                        {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                                        <Label className="text-base font-medium">Email Address *</Label>
+                                        <Input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} required placeholder="" className={`h-12 text-base ${errors.email ? 'border-red-500' : ''}`} />
+                                        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label>Phone Number *</Label>
+                                        <Label className="text-base font-medium">Phone Number *</Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-2 text-sm text-muted-foreground">+63</span>
-                                            <Input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} required placeholder="9XXXXXXXXX" className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`} />
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground font-medium" style={{pointerEvents:'none'}}>+63</span>
+                                            <Input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} required placeholder="9XXXXXXXXX" className={`h-12 pl-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
                                         </div>
-                                        {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                                        {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -292,38 +298,41 @@ export default function RiderRegister() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label>System Password *</Label>
+                                        <Label className="text-base font-medium">System Password *</Label>
                                         <div className="relative">
-                                            <Input type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => handleChange('password', e.target.value)} onKeyDown={handleKeyDown} required placeholder="Min 8 chars, 1 letter, 1 number" className={`pr-11 ${errors.password ? 'border-red-500' : ''}`} />
+                                            <Input type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => handleChange('password', e.target.value)} onKeyDown={handleKeyDown} required placeholder="Min 8 chars, 1 letter, 1 number" className={`h-12 text-base pr-11 ${errors.password ? 'border-red-500' : ''}`} />
                                             <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                             </button>
                                         </div>
-                                        {capsWarning && <p className="text-xs text-orange-500 my-1 font-semibold">Caps Lock is on!</p>}
-                                        {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                                        {capsWarning && <p className="text-sm text-orange-500 my-1 font-semibold">⚠ Caps Lock is on!</p>}
+                                        {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label>Confirm Password *</Label>
+                                        <Label className="text-base font-medium">Confirm Password *</Label>
                                         <div className="relative">
-                                            <Input type={showConfirm ? 'text' : 'password'} value={form.password_confirmation} onChange={(e) => handleChange('password_confirmation', e.target.value)} required placeholder="Repeat password" className={`pr-11 ${errors.password_confirmation ? 'border-red-500' : ''}`} />
+                                            <Input type={showConfirm ? 'text' : 'password'} value={form.password_confirmation} onChange={(e) => handleChange('password_confirmation', e.target.value)} required placeholder="Repeat password" className={`h-12 text-base pr-11 ${errors.password_confirmation ? 'border-red-500' : ''}`} />
                                             <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                                                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                             </button>
                                         </div>
-                                        {errors.password_confirmation && <p className="text-sm text-red-500">{errors.password_confirmation}</p>}
+                                        {errors.password_confirmation && <p className="text-sm text-red-500 mt-1">{errors.password_confirmation}</p>}
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
 
-                        {/* Logistics Equipment */}
-                        <div>
-                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">🚛 Logistics Equipment</h3>
-                            <div className="space-y-4">
+                        <Card className="bg-secondary/50">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-2 text-base font-bold">
+                                    🚛 Logistics Equipment
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label>Vehicle Category</Label>
-                                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={form.vehicle_type} onChange={(e) => setForm({...form, vehicle_type: e.target.value})}>
+                                        <Label className="text-base font-medium">Vehicle Category</Label>
+                                        <select className="flex h-12 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={form.vehicle_type} onChange={(e) => setForm({...form, vehicle_type: e.target.value})}>
                                             <option value="Motorcycle">Motorcycle</option>
                                             <option value="Bicycle">Bicycle</option>
                                             <option value="Car">Car</option>
@@ -331,28 +340,28 @@ export default function RiderRegister() {
                                         </select>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label>Vehicle Model</Label>
-                                        <Input type="text" value={form.vehicle_model} onChange={(e) => setForm({...form, vehicle_model: e.target.value})} required placeholder="Honda TMX 155" />
+                                        <Label className="text-base font-medium">Vehicle Model</Label>
+                                        <Input type="text" value={form.vehicle_model} onChange={(e) => setForm({...form, vehicle_model: e.target.value})} required placeholder="Honda TMX 155" className="h-12 text-base" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label>Plate Number</Label>
-                                        <Input type="text" value={form.plate_number} onChange={(e) => setForm({...form, plate_number: e.target.value})} required placeholder="ABC-1234" />
+                                        <Label className="text-base font-medium">Plate Number</Label>
+                                        <Input type="text" value={form.plate_number} onChange={(e) => setForm({...form, plate_number: e.target.value})} required placeholder="ABC-1234" className="h-12 text-base" />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label>Emergency Contact</Label>
-                                        <Input type="tel" value={form.emergency_contact} onChange={(e) => setForm({...form, emergency_contact: e.target.value})} required placeholder="09XXXXXXXXX" />
+                                        <Label className="text-base font-medium">Emergency Contact</Label>
+                                        <Input type="tel" value={form.emergency_contact} onChange={(e) => setForm({...form, emergency_contact: e.target.value})} required placeholder="09XXXXXXXXX" className="h-12 text-base" />
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label>Driver's License Number</Label>
-                                    <Input type="text" value={form.license_number} onChange={(e) => setForm({...form, license_number: e.target.value})} required placeholder="NXX-XX-XXXXXX" />
+                                    <Label className="text-base font-medium">Driver's License Number</Label>
+                                    <Input type="text" value={form.license_number} onChange={(e) => setForm({...form, license_number: e.target.value})} required placeholder="NXX-XX-XXXXXX" className="h-12 text-base" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <Label>Verification ID Type</Label>
-                                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={form.valid_id_type} onChange={(e) => setForm({...form, valid_id_type: e.target.value})}>
+                                        <Label className="text-base font-medium">Verification ID Type</Label>
+                                        <select className="flex h-12 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={form.valid_id_type} onChange={(e) => setForm({...form, valid_id_type: e.target.value})}>
                                             <option value="Drivers License">Drivers License</option>
                                             <option value="UMID">UMID</option>
                                             <option value="SSS">SSS</option>
@@ -361,61 +370,31 @@ export default function RiderRegister() {
                                         </select>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label>ID Number</Label>
-                                        <Input type="text" value={form.id_number} onChange={(e) => setForm({...form, id_number: e.target.value})} required placeholder="ID Number" />
+                                        <Label className="text-base font-medium">ID Number</Label>
+                                        <Input type="text" value={form.id_number} onChange={(e) => setForm({...form, id_number: e.target.value})} required placeholder="ID Number" className="h-12 text-base" />
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label>ID Image Upload</Label>
+                                    <Label className="text-base font-medium">ID Image Upload</Label>
                                     <div className="relative">
                                         <Input type="file" onChange={handleFileChange} required accept="image/jpeg,image/png,image/jpg" className={`text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 ${errors.valid_id_file ? 'border-red-500' : ''}`} />
                                     </div>
                                     {errors.valid_id_file && <p className="text-sm text-red-500">{errors.valid_id_file}</p>}
                                 </div>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
 
                         <Button type="submit" disabled={submitting} className="w-full h-12 text-[15px] font-bold bg-[#F97316] hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25">
-                            {submitting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Processing…</> : 'Submit Professional Application'}
+                            {submitting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Creating account...</> : 'Create Rider Account'}
                         </Button>
 
-                        <div className="text-center text-sm text-muted-foreground">
+                        <div className="text-center text-base text-muted-foreground">
                             Already have a rider account? <Link to="/login" className="text-primary font-semibold no-underline hover:underline">Rider Sign In</Link>
                         </div>
                     </form>
                 </div>
             </div>
             
-            {/* Right — Hardware Image Panel */}
-            <div className="hidden lg:flex flex-col justify-end w-[480px] xl:w-[560px] relative overflow-hidden">
-                <img
-                    src="https://img.pikbest.com/wp/202343/hardware-tools-displayed-against-textured-metal-background_9965912.jpg!f305cw"
-                    alt="Hardware Tools"
-                    className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/55 to-black/20" />
-                <div className="relative z-10 p-10 pb-12">
-                    <p className="text-[#F97316] text-[11px] font-black uppercase tracking-[0.2em] mb-2">Rider Fleet Program</p>
-                    <h2 className="text-3xl font-black text-white leading-tight mb-2">Join Our<br/>Delivery Network</h2>
-                    <p className="text-gray-400 text-sm mb-7 leading-relaxed">Professional last-mile delivery with real-time tracking and route optimization.</p>
-                    <div className="space-y-3">
-                        {[
-                            { n: '1', t: 'Application', d: 'Submit your credentials.' },
-                            { n: '2', t: 'Verification', d: 'Document review by HR.' },
-                            { n: '3', t: 'Screening', d: 'Interview & background check.' },
-                            { n: '4', t: 'Deployment', d: 'Start your first route.' },
-                        ].map((s, i) => (
-                            <div key={i} className="flex items-center gap-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 px-4 py-3">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F97316]/20 border border-[#F97316]/30 text-[#F97316] text-sm font-black">{s.n}</div>
-                                <div>
-                                    <p className="text-sm font-bold text-white">{s.t}</p>
-                                    <p className="text-[11px] text-gray-400">{s.d}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }

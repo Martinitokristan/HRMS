@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { ShieldCheck, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ShieldCheck, CheckCircle, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,7 +46,15 @@ export default function Login() {
         <div className="flex min-h-screen">
             {/* Left - Form */}
             <div className="flex flex-1 items-center justify-center px-6 py-12 bg-card">
-                <div className="w-full max-w-[420px]">
+                <div className="w-full max-w-[420px] relative">
+                    <button
+                        type="button"
+                        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+                        className="fixed top-6 left-6 z-50 inline-flex items-center gap-2 rounded-full border border-border bg-white/90 px-4 py-2 text-sm font-semibold text-muted-foreground shadow-sm backdrop-blur hover:bg-white hover:text-foreground"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </button>
                     <div className="flex items-center gap-2 cursor-pointer mb-10" onClick={() => navigate('/')}>
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
                             <span className="text-sm font-black text-primary-foreground">H</span>
@@ -56,8 +64,8 @@ export default function Login() {
                         </span>
                     </div>
 
-                    <h1 className="text-[26px] font-black text-foreground tracking-tight mb-2">Unified Access Portal</h1>
-                    <p className="text-sm text-muted-foreground mb-8">Enter your credentials to manage your hardware operations.</p>
+                    <h1 className="text-[26px] font-black text-foreground tracking-tight mb-2">Sign In to Your Account</h1>
+                    <p className="text-sm text-muted-foreground mb-8">Access customer, rider, supplier, or admin tools using your registered account.</p>
 
                     {successMessage && (
                         <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
@@ -111,17 +119,17 @@ export default function Login() {
                         </div>
 
                         <Button type="submit" disabled={loading} className="w-full h-12 text-[15px] font-bold shadow-md shadow-primary/20">
-                            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Verifying Identity...</> : 'Sign In to Instance'}
+                            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing in...</> : 'Sign In'}
                         </Button>
                     </form>
 
                     <div className="mt-8 text-center space-y-3">
                         <p className="text-sm text-muted-foreground">
-                            Need a hardware account? <Link to="/register" className="font-bold text-primary hover:underline">Register here</Link>
+                            Need an account? <Link to="/register" className="font-bold text-primary hover:underline">Create account</Link>
                         </p>
                         <Separator />
                         <p className="text-sm text-muted-foreground">
-                            Supplier Partner? <Link to="/supplier/register" className="font-bold text-primary hover:underline">Join our Network</Link>
+                            Supplier partner? <Link to="/supplier/register" className="font-bold text-primary hover:underline">Create supplier account</Link>
                         </p>
                     </div>
                 </div>

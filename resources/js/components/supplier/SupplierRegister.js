@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { CheckCircle2, User, Building2, AlertCircle, CheckCircle, Mail, RefreshCw, Loader2, Eye, EyeOff, Package, Truck, Star } from 'lucide-react';
+import { CheckCircle2, User, Building2, AlertCircle, CheckCircle, Mail, RefreshCw, Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { PhAddressFields } from '../shared/PhAddressFields';
 
@@ -28,11 +29,6 @@ export default function SupplierRegister() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
-    const features = [
-        { icon: Package, label: 'Wide Product Selection',  desc: 'Tools, supplies & equipment for every project' },
-        { icon: Truck,   label: 'Direct PO Integration',   desc: 'Automated purchase order management' },
-        { icon: Star,    label: 'Real-time Sync',          desc: 'Live inventory and payment tracking' },
-    ];
     const [loading, setLoading] = useState(false);
     const { showToast } = useToast();
     const navigate = useNavigate();
@@ -145,7 +141,7 @@ export default function SupplierRegister() {
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen bg-white">
             {/* Success Modal */}
             {!!successMsg && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
@@ -197,8 +193,16 @@ export default function SupplierRegister() {
                 </div>
             )}
 
-            <div className="flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto">
+            <div className="relative flex items-center justify-center p-8 overflow-y-auto">
                 <div className="w-full max-w-lg">
+                    <button
+                        type="button"
+                        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+                        className="fixed top-6 left-6 z-50 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm backdrop-blur hover:bg-white hover:text-gray-900"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </button>
                     <div className="flex items-center gap-2.5 cursor-pointer mb-8" onClick={() => navigate('/')}>
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F97316] shadow-lg shadow-orange-200">
                             <span className="text-sm font-black text-white">H</span>
@@ -208,9 +212,9 @@ export default function SupplierRegister() {
                             <span className="block text-[10px] text-gray-400 font-medium -mt-0.5 tracking-widest uppercase">Hardware Store</span>
                         </div>
                     </div>
-                    <h1 className="text-[26px] font-black text-gray-900 tracking-tight mb-1">Supplier Partner Program</h1>
+                    <h1 className="text-[26px] font-black text-gray-900 tracking-tight mb-1">Supplier Registration</h1>
                     <p className="text-gray-500 mb-8">
-                        Create your supplier account to start providing products to HRMS.
+                        Create your supplier account to manage catalog and purchase orders with HRMS.
                     </p>
 
                     {errors.form && (
@@ -221,10 +225,13 @@ export default function SupplierRegister() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Company Section */}
-                        <div>
-                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><Building2 className="h-4 w-4" /> Company Information</h3>
-                            <div className="space-y-4">
+                        <Card className="bg-secondary/50">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-2 text-sm">
+                                    <Building2 className="h-4 w-4" /> Company Information
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
                                 <div className="space-y-1.5">
                                     <Label>Company Name *</Label>
                                     <Input name="name" type="text" value={formData.name} onChange={handleChange} required placeholder="Legal business name" className={errors.name ? 'border-red-500' : ''} />
@@ -244,13 +251,16 @@ export default function SupplierRegister() {
                                         disabled={loading}
                                     />
                                 </div>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
 
-                        {/* Contact Section */}
-                        <div>
-                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><User className="h-4 w-4" /> Primary Contact</h3>
-                            <div className="space-y-4">
+                        <Card className="bg-secondary/50">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-2 text-sm">
+                                    <User className="h-4 w-4" /> Primary Contact
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
                                 <div className="space-y-1.5">
                                     <Label>Full Name *</Label>
                                     <Input name="contact_name" type="text" value={formData.contact_name} onChange={handleChange} required placeholder="Primary account manager" className={errors.contact_name ? 'border-red-500' : ''} />
@@ -294,11 +304,11 @@ export default function SupplierRegister() {
                                         {errors.password_confirmation && <p className="text-sm text-red-500">{errors.password_confirmation}</p>}
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
 
                         <Button type="submit" disabled={loading} className="w-full h-12 text-[15px] font-bold bg-[#F97316] hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25">
-                            {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Registering…</> : 'Initialize Supplier Partnership'}
+                            {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Creating account...</> : 'Create Supplier Account'}
                         </Button>
 
                         <div className="text-center text-sm text-muted-foreground">
@@ -308,33 +318,6 @@ export default function SupplierRegister() {
                 </div>
             </div>
 
-            {/* Right — Hardware Image Panel */}
-            <div className="hidden lg:flex flex-col justify-end w-[480px] xl:w-[560px] relative overflow-hidden">
-                <img
-                    src="https://img.pikbest.com/wp/202343/hardware-tools-displayed-against-textured-metal-background_9965912.jpg!f305cw"
-                    alt="Hardware Tools"
-                    className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/55 to-black/20" />
-                <div className="relative z-10 p-10 pb-12">
-                    <p className="text-[#F97316] text-[11px] font-black uppercase tracking-[0.2em] mb-2">Supplier Partner Program</p>
-                    <h2 className="text-3xl font-black text-white leading-tight mb-2">Grow Your<br/>Business with HRMS</h2>
-                    <p className="text-gray-400 text-sm mb-7 leading-relaxed">Streamline your fulfillment through our automated retail and logistics engine.</p>
-                    <div className="space-y-3">
-                        {features.map(({ icon: Icon, label, desc }) => (
-                            <div key={label} className="flex items-center gap-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 px-4 py-3">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F97316]/20 border border-[#F97316]/30">
-                                    <Icon className="h-4 w-4 text-[#F97316]" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-white">{label}</p>
-                                    <p className="text-[11px] text-gray-400">{desc}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { silentApi } from "../../lib/api";
 import {
@@ -126,8 +126,10 @@ export default function Landing() {
     const [bestSellers, setBestSellers]           = useState([]);
     const [testimonials, setTestimonials]         = useState([]);
     const [mobileMenuOpen, setMobileMenuOpen]     = useState(false);
+    const [desktopNavOpen, setDesktopNavOpen]     = useState(false);
     const [newsletterSuccess, setNewsletterSuccess] = useState(false);
     const [newsletterError, setNewsletterError] = useState('');
+    const navCloseTimeoutRef = useRef(null);
 
     useEffect(() => {
         let mounted = true;
@@ -200,6 +202,25 @@ export default function Landing() {
         setTimeout(() => setNotification(false), 2000);
     };
 
+    const openDesktopMenu = () => {
+        if (navCloseTimeoutRef.current) {
+            clearTimeout(navCloseTimeoutRef.current);
+            navCloseTimeoutRef.current = null;
+        }
+        setDesktopNavOpen(true);
+    };
+
+    const closeDesktopMenuSoon = () => {
+        navCloseTimeoutRef.current = setTimeout(() => {
+            setDesktopNavOpen(false);
+        }, 120);
+    };
+
+    const scrollToCategories = () => {
+        const el = document.getElementById('categories');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     const STATIC_CATS = [
         { id: 'power',   name: 'Power Tools', icon: Zap },
         { id: 'hand',    name: 'Hand Tools',  icon: Hammer },
@@ -243,32 +264,70 @@ export default function Landing() {
 
             {/* ── NAV ── */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200 shadow-sm">
-                <div className="max-w-[1400px] mx-auto px-6 md:px-10 flex items-center justify-between h-16">
+                <div className="w-full mx-auto px-4 md:px-6 lg:px-8 xl:px-10 flex items-center justify-between h-16">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
                             <span className="text-xs font-black text-white">H</span>
                         </div>
                         <span className="text-lg font-black text-gray-900">HRMS</span>
                     </div>
-                    <div className="hidden lg:flex items-center gap-1 overflow-x-auto">
+                    <div className="hidden lg:flex items-center gap-2">
                         {[
-                            { href: '#hero',         label: 'Home' },
-                            { href: '#categories',   label: 'Categories' },
-                            { href: '#products',     label: 'Popular Products' },
-                            { href: '#deals',        label: 'Best Sellers' },
-                            { href: '#benefits',     label: 'Benefits' },
-                            { href: '#testimonials', label: 'Testimonials' },
-                            { href: '#newsletter',   label: 'Newsletter' },
+                            { href: '#hero',       label: 'HOME' },
+                            { href: '#categories', label: 'CATEGORIES' },
+                            { href: '#products',   label: 'PRODUCTS' },
                         ].map(({ href, label }) => (
-                            <a key={href} href={href} className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors whitespace-nowrap">
+                            <a
+                                key={href}
+                                href={href}
+                                className="px-4 py-1.5 rounded-full text-sm font-semibold uppercase tracking-wide text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors whitespace-nowrap"
+                            >
                                 {label}
                             </a>
                         ))}
+
+                        <div
+                            className="relative"
+                            onMouseEnter={openDesktopMenu}
+                            onMouseLeave={closeDesktopMenuSoon}
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setDesktopNavOpen(v => !v)}
+                                className="px-4 py-1.5 rounded-full text-sm font-semibold uppercase tracking-wide text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors whitespace-nowrap flex items-center gap-1"
+                            >
+                                MORE
+                                <ChevronDown className={cn("h-4 w-4 transition-transform", desktopNavOpen ? "rotate-180" : "")} />
+                            </button>
+                            {desktopNavOpen && (
+                                <div
+                                    className="absolute left-0 top-[calc(100%+6px)] w-44 rounded-xl border border-gray-200 bg-white shadow-lg py-1 z-50"
+                                    onMouseEnter={openDesktopMenu}
+                                    onMouseLeave={closeDesktopMenuSoon}
+                                >
+                                    {[
+                                        { href: '#deals', label: 'BEST SELLERS' },
+                                        { href: '#benefits', label: 'BENEFITS' },
+                                        { href: '#testimonials', label: 'FEEDBACK' },
+                                        { href: '#newsletter', label: 'NEWSLETTER' },
+                                    ].map(({ href, label }) => (
+                                        <a
+                                            key={href}
+                                            href={href}
+                                            onClick={() => setDesktopNavOpen(false)}
+                                            className="block px-4 py-2 text-sm font-medium uppercase tracking-wide text-gray-600 hover:bg-orange-50 hover:text-orange-500"
+                                        >
+                                            {label}
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Button variant="ghost" className="font-semibold text-gray-600 hidden sm:flex" asChild><Link to="/login">Log in</Link></Button>
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" className="font-semibold text-gray-600 hidden sm:flex" asChild><Link to="/login">Sign In</Link></Button>
                         <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/20 hidden sm:flex" asChild>
-                            <Link to="/register">Get Started <ArrowRight className="h-4 w-4" /></Link>
+                            <Link to="/register">Create Account</Link>
                         </Button>
                         <button className="lg:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                             <Menu className="h-6 w-6 text-gray-700" />
@@ -280,22 +339,22 @@ export default function Landing() {
                     <div className="lg:hidden bg-white border-t border-gray-200">
                         <div className="px-6 py-4 space-y-3">
                             {[
-                                { href: '#hero',         label: 'Home' },
-                                { href: '#categories',   label: 'Categories' },
-                                { href: '#products',     label: 'Popular Products' },
-                                { href: '#deals',        label: 'Best Sellers' },
-                                { href: '#benefits',     label: 'Benefits' },
-                                { href: '#testimonials', label: 'Testimonials' },
-                                { href: '#newsletter',   label: 'Newsletter' },
+                                { href: '#hero',         label: 'HOME' },
+                                { href: '#categories',   label: 'CATEGORIES' },
+                                { href: '#products',     label: 'PRODUCTS' },
+                                { href: '#deals',        label: 'BEST SELLERS' },
+                                { href: '#benefits',     label: 'BENEFITS' },
+                                { href: '#testimonials', label: 'FEEDBACK' },
+                                { href: '#newsletter',   label: 'NEWSLETTER' },
                             ].map(({ href, label }) => (
                                 <a key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
                                     {label}
                                 </a>
                             ))}
                             <div className="pt-3 border-t border-gray-100 space-y-2">
-                                <Button variant="ghost" className="w-full font-semibold text-gray-600" asChild><Link to="/login" onClick={() => setMobileMenuOpen(false)}>Log in</Link></Button>
+                                <Button variant="ghost" className="w-full font-semibold text-gray-600" asChild><Link to="/login" onClick={() => setMobileMenuOpen(false)}>Sign In</Link></Button>
                                 <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/20" asChild>
-                                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>Get Started <ArrowRight className="h-4 w-4" /></Link>
+                                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>Create Account</Link>
                                 </Button>
                             </div>
                         </div>
@@ -304,30 +363,54 @@ export default function Landing() {
             </nav>
 
             {/* ── SECTION 1: HERO ── */}
-            <header id="hero" className="relative pt-16 min-h-[480px] md:min-h-[560px] flex items-center overflow-hidden">
-                <div className="absolute inset-0">
-                    <img src="/images/hero-banner.png" alt="" className="w-full h-full object-cover object-center md:object-right" />
-                    <div className="absolute inset-0 bg-black/65" />
-                </div>
-                <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-10 py-20 md:py-28">
-                    <p className="text-orange-500 font-black uppercase tracking-[0.2em] text-xs mb-4">Your Trusted Hardware Store</p>
-                    <h1 className="text-4xl sm:text-5xl md:text-[3.75rem] font-black text-white leading-[1.08] tracking-tight mb-5 max-w-2xl">
-                        For all your Home and<br />Hardware Needs
-                    </h1>
-                    <p className="text-base text-gray-300 max-w-xl leading-relaxed mb-8">
-                        Shop the widest selection of hardware, tools, and supplies for your construction, repair, and home improvement projects — all in one place.
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                        <Button size="lg" className="h-12 px-8 bg-white text-gray-900 hover:bg-gray-100 font-bold text-sm shadow-xl" onClick={triggerLoginNotice}>
-                            <ShoppingCart className="h-4 w-4" /> Explore Products
-                        </Button>
-                        <Button size="lg" className="h-12 px-8 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-xl shadow-orange-500/30" asChild>
-                            <Link to="/supplier/register">Partner with Us <ArrowRight className="h-4 w-4" /></Link>
-                        </Button>
+            <header id="hero" className="relative pt-16 overflow-hidden">
+                <div className="absolute inset-0 bg-gray-100/70" />
+                <div className="w-full max-w-[1400px] mx-auto px-6 md:px-10 py-12 md:py-16 relative">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                        <div className="max-w-2xl">
+                            <p className="text-orange-500 font-black uppercase tracking-[0.2em] text-xs mb-4">
+                                Your Trusted Hardware Store
+                            </p>
+                            <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] font-black text-gray-900 leading-[1.06] tracking-tight mb-5">
+                                For All Your Home and<br />Hardware Needs
+                            </h1>
+                            <p className="text-base text-gray-600 max-w-xl leading-relaxed mb-8">
+                                Shop the widest selection of hardware, tools, and supplies for your construction, repair, and home improvement projects.
+                            </p>
+                            <div className="flex flex-wrap gap-3">
+                                <Button size="lg" className="h-12 px-8 bg-gray-900 text-white hover:bg-gray-800 font-bold text-sm shadow-lg" onClick={triggerLoginNotice}>
+                                    <ShoppingCart className="h-4 w-4" /> Explore Products
+                                </Button>
+                                <Button size="lg" className="h-12 px-8 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-500/30" asChild>
+                                    <Link to="/supplier/register">Partner with Us <ArrowRight className="h-4 w-4" /></Link>
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="relative">
+                            <div className="rounded-3xl border border-gray-200 bg-white shadow-xl shadow-gray-200/70 overflow-hidden">
+                                <div className="relative bg-gray-100">
+                                    <img
+                                        src="/LandingImage.png"
+                                        alt="Hardware tools and supplies"
+                                        className="w-full h-[300px] md:h-[360px] object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/15" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce">
-                    <ChevronDown className="h-8 w-8 text-white/70" />
+
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce z-20">
+                    <button
+                        type="button"
+                        onClick={scrollToCategories}
+                        aria-label="Scroll to categories"
+                        className="h-10 w-10 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 transition-colors"
+                    >
+                        <ChevronDown className="h-8 w-8" />
+                    </button>
                 </div>
             </header>
 

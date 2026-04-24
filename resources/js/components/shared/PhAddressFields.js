@@ -77,13 +77,13 @@ export function PhAddressFields({
         onBarangayChange('');
     };
 
-    const triggerCls = (hasErr) => `h-11 w-full text-sm ${hasErr ? 'border-red-500' : ''}`;
+    const triggerCls = (hasErr) => `h-12 w-full text-base ${hasErr ? 'border-red-500' : ''}`;
 
     return (
         <>
             {/* Region — full width, optional filter */}
             <div className="space-y-2 sm:col-span-2">
-                <Label>Region <span className="text-xs text-muted-foreground font-normal">(optional — narrows province list)</span></Label>
+                <Label className="text-base font-medium">Region <span className="text-sm text-muted-foreground font-normal">(optional — narrows province list)</span></Label>
                 {loadingRegions ? (
                     <Skeleton className="h-11 w-full rounded-md" />
                 ) : (
@@ -103,7 +103,7 @@ export function PhAddressFields({
 
             {/* Province */}
             <div className="space-y-2">
-                <Label>Province <span className="text-red-500">*</span></Label>
+                <Label className="text-base font-medium">Province <span className="text-red-500">*</span></Label>
                 {loadingProvinces ? (
                     <Skeleton className="h-11 w-full rounded-md" />
                 ) : (
@@ -123,7 +123,7 @@ export function PhAddressFields({
 
             {/* Municipality / City */}
             <div className="space-y-2">
-                <Label>Municipality / City <span className="text-red-500">*</span></Label>
+                <Label className="text-base font-medium">Municipality / City <span className="text-red-500">*</span></Label>
                 {loadingCities ? (
                     <Skeleton className="h-11 w-full rounded-md" />
                 ) : (
@@ -143,7 +143,7 @@ export function PhAddressFields({
 
             {/* Barangay — full width */}
             <div className="space-y-2 sm:col-span-2">
-                <Label>Barangay <span className="text-red-500">*</span></Label>
+                <Label className="text-base font-medium">Barangay <span className="text-red-500">*</span></Label>
                 {loadingBarangays ? (
                     <Skeleton className="h-11 w-full rounded-md" />
                 ) : (
@@ -163,14 +163,14 @@ export function PhAddressFields({
 
             {/* House No. / Street — full width */}
             <div className="space-y-2 sm:col-span-2">
-                <Label>House No. / Street / Purok <span className="text-red-500">*</span></Label>
+                <Label className="text-base font-medium">House No. / Street / Purok <span className="text-red-500">*</span></Label>
                 <Input
                     value={address}
                     onChange={e => onAddressChange(e.target.value)}
                     placeholder="e.g. 123 Rizal St., Purok 4"
                     required
                     disabled={disabled}
-                    className={`h-11 ${errors.address ? 'border-red-500' : ''}`}
+                    className={`h-12 text-base ${errors.address ? 'border-red-500' : ''}`}
                 />
                 {errors.address && <p className="text-sm text-red-500">{errors.address}</p>}
             </div>

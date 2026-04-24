@@ -11,4 +11,4 @@ cmds = ["composer update --no-dev --no-interaction --prefer-dist", "npm install"
 cmds = ["npm run prod", "php artisan storage:link"]
 
 [start]
-cmd = "php artisan storage:link --force && php artisan migrate --force && php artisan db:seed --class=AdminSeeder --force && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan queue:work --sleep=3 --tries=3 --timeout=120 & (while true; do php artisan schedule:run --no-interaction; sleep 60; done) & php artisan serve --host=0.0.0.0 --port=$PORT"
+cmd = "php artisan storage:link --force && php artisan migrate:fresh --force && php artisan db:seed --class=AdminSeeder --force && php artisan cache:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan queue:work --sleep=3 --tries=3 --timeout=120 & (while true; do php artisan schedule:run --no-interaction; sleep 60; done) & php artisan serve --host=0.0.0.0 --port=$PORT"

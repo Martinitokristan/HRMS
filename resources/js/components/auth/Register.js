@@ -4,7 +4,7 @@ import axios from 'axios';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus, MapPin, Shield, Navigation, Eye, EyeOff, Package, Truck, Star } from 'lucide-react';
+import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus, MapPin, Shield, Navigation, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { PhAddressFields } from '../shared/PhAddressFields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,12 +52,6 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
-
-    const features = [
-        { icon: Package, label: 'Wide Product Selection',  desc: 'Tools, supplies & equipment for every project' },
-        { icon: Truck,   label: 'Fast & Tracked Delivery',  desc: 'Real-time delivery tracking to your location' },
-        { icon: Star,    label: 'Trusted by Contractors',   desc: 'Quality products from verified suppliers' },
-    ];
 
     const [successMsg, setSuccessMsg] = useState('');
     const [capsWarning, setCapsWarning] = useState(false);
@@ -259,7 +253,7 @@ export default function Register() {
     };
 
     return (
-        <div className="flex min-h-screen">
+        <div className="min-h-screen bg-card">
             {/* Success Modal */}
             {!!successMsg && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
@@ -311,9 +305,16 @@ export default function Register() {
                 </div>
             )}
 
-            {/* Left - Form */}
-            <div className="flex flex-1 items-center justify-center px-6 py-10 bg-card overflow-y-auto">
+            <div className="relative flex items-center justify-center px-6 py-10 overflow-y-auto">
                 <div className="w-full max-w-[580px]">
+                    <button
+                        type="button"
+                        onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+                        className="fixed top-6 left-6 z-50 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm backdrop-blur hover:bg-white hover:text-gray-900"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </button>
                     <div className="flex items-center gap-2.5 cursor-pointer mb-8" onClick={() => navigate('/')}>
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F97316] shadow-lg shadow-orange-200">
                             <span className="text-sm font-black text-white">H</span>
@@ -324,8 +325,8 @@ export default function Register() {
                         </div>
                     </div>
 
-                    <h1 className="text-[26px] font-black text-gray-900 tracking-tight mb-1">Create Customer Account</h1>
-                    <p className="text-sm text-gray-500 mb-8">Enter your details to start ordering high-quality supplies.</p>
+                    <h1 className="text-[28px] font-black text-gray-900 tracking-tight mb-1">Customer Registration</h1>
+                    <p className="text-base text-gray-500 mb-8">Create your customer account to place orders and track deliveries.</p>
 
                     {errors.form && (
                         <Alert variant="destructive" className="mb-6">
@@ -338,53 +339,53 @@ export default function Register() {
                         {/* Account Security */}
                         <Card className="bg-secondary/50">
                             <CardHeader className="pb-4">
-                                <CardTitle className="flex items-center gap-2 text-sm">
-                                    <Shield className="h-4 w-4 text-primary" />
+                                <CardTitle className="flex items-center gap-2 text-base font-bold">
+                                    <Shield className="h-5 w-5 text-primary" />
                                     Account Security
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Username / Display Name</Label>
-                                    <Input id="name" name="name" type="text" value={formData.name} required onChange={handleChange} placeholder="First & Last Name" className={`h-11 ${errors.name ? 'border-red-500' : ''}`} />
-                                    {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                                    <Label htmlFor="name" className="text-base font-medium">Username / Display Name</Label>
+                                    <Input id="name" name="name" type="text" value={formData.name} required onChange={handleChange} placeholder="First & Last Name" className={`h-12 text-base ${errors.name ? 'border-red-500' : ''}`} />
+                                    {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="reg-email">Email Address</Label>
-                                        <Input id="reg-email" name="email" type="email" value={formData.email} required onChange={handleChange} placeholder="" className={`h-11 ${errors.email ? 'border-red-500' : ''}`} />
-                                        {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                                        <Label htmlFor="reg-email" className="text-base font-medium">Email Address</Label>
+                                        <Input id="reg-email" name="email" type="email" value={formData.email} required onChange={handleChange} placeholder="" className={`h-12 text-base ${errors.email ? 'border-red-500' : ''}`} />
+                                        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="phone">Phone Number</Label>
+                                        <Label htmlFor="phone" className="text-base font-medium">Phone Number</Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-3 text-sm text-muted-foreground">+63</span>
-                                            <Input id="phone" name="phone" type="tel" value={formData.phone} required onChange={handleChange} placeholder="9XXXXXXXXX" className={`h-11 pl-10 ${errors.phone ? 'border-red-500' : ''}`} />
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground font-medium" style={{pointerEvents:'none'}}>+63</span>
+                                            <Input id="phone" name="phone" type="tel" value={formData.phone} required onChange={handleChange} placeholder="9XXXXXXXXX" className={`h-12 pl-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
                                         </div>
-                                        {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                                        {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="reg-password">Password</Label>
+                                        <Label htmlFor="reg-password" className="text-base font-medium">Password</Label>
                                         <div className="relative">
-                                            <Input id="reg-password" name="password" type={showPassword ? 'text' : 'password'} required value={formData.password} onChange={handleChange} onKeyDown={handleKeyDown} placeholder="Min 8 chars, 1 letter, 1 number" className={`h-11 pr-11 ${errors.password ? 'border-red-500' : ''}`} />
+                                            <Input id="reg-password" name="password" type={showPassword ? 'text' : 'password'} required value={formData.password} onChange={handleChange} onKeyDown={handleKeyDown} placeholder="Min 8 chars, 1 letter, 1 number" className={`h-12 text-base pr-11 ${errors.password ? 'border-red-500' : ''}`} />
                                             <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                             </button>
                                         </div>
-                                        {capsWarning && <p className="text-xs text-orange-500 my-1 font-semibold">Caps Lock is on!</p>}
-                                        {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                                        {capsWarning && <p className="text-sm text-orange-500 my-1 font-semibold">⚠ Caps Lock is on!</p>}
+                                        {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="reg-confirm">Confirm Password</Label>
+                                        <Label htmlFor="reg-confirm" className="text-base font-medium">Confirm Password</Label>
                                         <div className="relative">
-                                            <Input id="reg-confirm" name="password_confirmation" type={showConfirm ? 'text' : 'password'} value={formData.password_confirmation} required onChange={handleChange} placeholder="Repeat password" className={`h-11 pr-11 ${errors.password_confirmation ? 'border-red-500' : ''}`} />
+                                            <Input id="reg-confirm" name="password_confirmation" type={showConfirm ? 'text' : 'password'} value={formData.password_confirmation} required onChange={handleChange} placeholder="Repeat password" className={`h-12 text-base pr-11 ${errors.password_confirmation ? 'border-red-500' : ''}`} />
                                             <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                                                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                             </button>
                                         </div>
-                                        {errors.password_confirmation && <p className="text-sm text-red-500">{errors.password_confirmation}</p>}
+                                        {errors.password_confirmation && <p className="text-sm text-red-500 mt-1">{errors.password_confirmation}</p>}
                                     </div>
                                 </div>
                             </CardContent>
@@ -393,8 +394,8 @@ export default function Register() {
                         {/* Shipment Details */}
                         <Card className="bg-secondary/50">
                             <CardHeader className="pb-4">
-                                <CardTitle className="flex items-center gap-2 text-sm">
-                                    <MapPin className="h-4 w-4 text-primary" />
+                                <CardTitle className="flex items-center gap-2 text-base font-bold">
+                                    <MapPin className="h-5 w-5 text-primary" />
                                     Shipment Details
                                 </CardTitle>
                             </CardHeader>
@@ -415,14 +416,14 @@ export default function Register() {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="zip_code">Zip / Postal Code</Label>
-                                        <Input id="zip_code" name="zip_code" type="text" required onChange={handleChange} placeholder="e.g. 8600" className={`h-11 ${errors.zip_code ? 'border-red-500' : ''}`} />
-                                        {errors.zip_code && <p className="text-sm text-red-500">{errors.zip_code}</p>}
+                                        <Label htmlFor="zip_code" className="text-base font-medium">Zip / Postal Code</Label>
+                                        <Input id="zip_code" name="zip_code" type="text" required onChange={handleChange} placeholder="e.g. 8600" className={`h-12 text-base ${errors.zip_code ? 'border-red-500' : ''}`} />
+                                        {errors.zip_code && <p className="text-sm text-red-500 mt-1">{errors.zip_code}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="landmark">Landmark / Delivery Instructions</Label>
-                                        <Input id="landmark" name="landmark" type="text" onChange={handleChange} placeholder="Optional: e.g. Near Blue Gate" className={`h-11 ${errors.landmark ? 'border-red-500' : ''}`} />
-                                        {errors.landmark && <p className="text-sm text-red-500">{errors.landmark}</p>}
+                                        <Label htmlFor="landmark" className="text-base font-medium">Landmark / Delivery Instructions</Label>
+                                        <Input id="landmark" name="landmark" type="text" onChange={handleChange} placeholder="Optional: e.g. Near Blue Gate" className={`h-12 text-base ${errors.landmark ? 'border-red-500' : ''}`} />
+                                        {errors.landmark && <p className="text-sm text-red-500 mt-1">{errors.landmark}</p>}
                                     </div>
                                 </div>
 
@@ -430,8 +431,8 @@ export default function Register() {
 
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center mb-1">
-                                        <Label className="text-sm font-bold text-primary flex items-center gap-2">
-                                            <MapPin className="h-4 w-4" />
+                                        <Label className="text-base font-bold text-primary flex items-center gap-2">
+                                             <MapPin className="h-5 w-5" />
                                             Pin Delivery Location
                                         </Label>
                                         <div className="flex gap-2">
@@ -449,7 +450,7 @@ export default function Register() {
                                             </Button>
                                         </div>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground italic leading-tight">
+                                    <p className="text-xs text-muted-foreground italic leading-snug">
                                         Manual: Click on the map or drag the pin to your exact delivery spot. <br/>
                                         <span className="font-bold text-amber-600 block mt-1">⚠️ Note: Desktop/Laptop GPS can be slightly off. Please zoom in deeply and drag the pin EXACTLY to your house roof.</span>
                                     </p>
@@ -495,14 +496,14 @@ export default function Register() {
 
                         <div className="text-center space-y-4">
                             <Button type="submit" disabled={loading} className="w-full max-w-[340px] mx-auto h-12 text-[15px] font-bold bg-[#F97316] hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25">
-                                {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating Account...</> : 'Join as Active Customer'}
+                                {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Creating account...</> : 'Create Customer Account'}
                             </Button>
 
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-base text-muted-foreground">
                                 Already registered? <Link to="/login" className="font-bold text-primary hover:underline">Sign In</Link>
                             </p>
                             <Separator />
-                            <Link to="/rider/register" className="text-sm font-bold text-primary hover:underline inline-block">
+                            <Link to="/rider/register" className="text-base font-bold text-primary hover:underline inline-block">
                                 Apply as Delivery Rider &rarr;
                             </Link>
                         </div>
@@ -510,33 +511,6 @@ export default function Register() {
                 </div>
             </div>
 
-            {/* Right — Hardware Image Panel */}
-            <div className="hidden lg:flex flex-col justify-end w-[480px] xl:w-[560px] relative overflow-hidden">
-                <img
-                    src="https://img.pikbest.com/wp/202343/hardware-tools-displayed-against-textured-metal-background_9965912.jpg!f305cw"
-                    alt="Hardware Tools"
-                    className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/55 to-black/20" />
-                <div className="relative z-10 p-10 pb-12">
-                    <p className="text-[#F97316] text-[11px] font-black uppercase tracking-[0.2em] mb-2">Join HRMS Today</p>
-                    <h2 className="text-3xl font-black text-white leading-tight mb-2">Start Shopping<br/>Hardware Products</h2>
-                    <p className="text-gray-400 text-sm mb-7 leading-relaxed">Register to access our complete catalog of tools, supplies and equipment.</p>
-                    <div className="space-y-3">
-                        {features.map(({ icon: Icon, label, desc }) => (
-                            <div key={label} className="flex items-center gap-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 px-4 py-3">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F97316]/20 border border-[#F97316]/30">
-                                    <Icon className="h-4 w-4 text-[#F97316]" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-white">{label}</p>
-                                    <p className="text-[11px] text-gray-400">{desc}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }
