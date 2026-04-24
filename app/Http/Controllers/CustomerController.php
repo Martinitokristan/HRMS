@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Sale;
+use App\Models\ReturnOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -41,12 +43,12 @@ class CustomerController extends Controller
 
     public function myOrders(Request $request)
     {
-        $orders = \App\Models\Sale::with(['items.product', 'delivery.rider.riderProfile'])
+        $orders = Sale::with(['items.product', 'delivery.rider.riderProfile'])
             ->where('customer_id', $request->user()->id)
             ->latest()
             ->get()
             ->map(function ($order) {
-                $order->has_return = \App\Models\ReturnOrder::where('sale_id', $order->id)
+                $order->has_return = ReturnOrder::where('sale_id', $order->id)
                     ->whereIn('status', ['pending', 'approved', 'completed'])
                     ->exists();
                 return $order;

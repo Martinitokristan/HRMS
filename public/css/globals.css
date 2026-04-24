@@ -2558,6 +2558,18 @@ input, select, textarea {
   --tw-border-opacity: 1;
   border-color: rgb(254 240 138 / var(--tw-border-opacity));
 }
+.border-orange-500\/20{
+  border-color: rgb(249 115 22 / 0.2);
+}
+.border-orange-500\/50{
+  border-color: rgb(249 115 22 / 0.5);
+}
+.border-red-500\/20{
+  border-color: rgb(239 68 68 / 0.2);
+}
+.border-red-500\/50{
+  border-color: rgb(239 68 68 / 0.5);
+}
 .border-l-\[\#FF6B35\]{
   --tw-border-opacity: 1;
   border-left-color: rgb(255 107 53 / var(--tw-border-opacity));
@@ -5060,6 +5072,10 @@ input, select, textarea {
 
 .hover\:bg-white\/\[0\.06\]:hover{
   background-color: rgb(255 255 255 / 0.06);
+}
+
+.hover\:bg-orange-500\/5:hover{
+  background-color: rgb(249 115 22 / 0.05);
 }
 
 .hover\:text-\[\#111827\]:hover{

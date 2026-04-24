@@ -215,7 +215,9 @@ class DeliveryController extends Controller
         if ($request->status === 'in_progress') {
             $updates['pickup_at'] = now();
             // Update sale status to out_for_delivery
-            $delivery->sale->update(['status' => 'out_for_delivery']);
+            if ($delivery->sale) {
+                $delivery->sale->update(['status' => 'out_for_delivery']);
+            }
             // Mark rider as on_delivery when they accept
             if ($delivery->rider_id) {
                 RiderProfile::where('user_id', $delivery->rider_id)
@@ -226,7 +228,9 @@ class DeliveryController extends Controller
         if ($request->status === 'delivered') {
             $updates['delivered_at'] = now();
             // Update sale status
-            $delivery->sale->update(['status' => 'delivered']);
+            if ($delivery->sale) {
+                $delivery->sale->update(['status' => 'delivered']);
+            }
             try {
                 Cache::tags(['products'])->flush();
             } catch (\BadMethodCallException $e) {
@@ -266,7 +270,7 @@ class DeliveryController extends Controller
         $delivery->update($updates);
 
         $riderId = $request->user()->id;
-        $customerId = $delivery->sale->customer_id ?? null;
+        $customerId = $delivery->sale ? $delivery->sale->customer_id : null;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.status_updated'));
         broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard'], 'delivery.status_updated'));
         if ($customerId)

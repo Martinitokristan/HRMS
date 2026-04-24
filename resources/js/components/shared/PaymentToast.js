@@ -180,12 +180,11 @@ function SingleToast({ data, onDone }) {
                     }}>
                         <GCashIcon size={20} color="#fff" />
                     </div>
-                    <div style={{ flex: 1, textAlign: 'center' }}>
+                    <div style={{ flex: 1 }}>
                         <div style={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: 6,
-                            justifyContent: 'center',
                         }}>
                             <CheckCircle size={14} color="#4ADE80" />
                             <span style={{
