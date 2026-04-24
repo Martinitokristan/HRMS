@@ -156,7 +156,6 @@ class RiderController extends Controller
             if ($profile) {
                 $profile->current_latitude = (float) $request->latitude;
                 $profile->current_longitude = (float) $request->longitude;
-                $profile->current_heading = (float) ($request->heading ?? 0);
                 $profile->save();
                 \Log::debug("Rider profile saved for user {$riderId}");
 
@@ -198,7 +197,6 @@ class RiderController extends Controller
         if ($request->filled('latitude') && $request->filled('longitude') && $riderProfile) {
             $riderProfile->current_latitude = (float) $request->latitude;
             $riderProfile->current_longitude = (float) $request->longitude;
-            $riderProfile->current_heading = (float) ($request->heading ?? 0);
             $riderProfile->save();
         }
         $riderLat = $riderProfile->current_latitude ?? null;
@@ -212,15 +210,26 @@ class RiderController extends Controller
             ->latest()
             ->get()
             ->map(function ($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
+                if (!$d->sale || !$d->sale->customer) {
+                    $d->customer_name = 'Unknown Customer';
+                    $d->customer_address = $d->address ?? 'No Address Provided';
+                    $d->customer_latitude = null;
+                    $d->customer_longitude = null;
+                    $d->distance = null;
+                    $d->distance_value = null;
+                    $d->eta = null;
+                    return $d;
+                }
+
                 // Retrieve customer profile
-                $profile = $d->sale->customer->customerProfile;
+                $profile = optional($d->sale->customer)->customerProfile;
 
                 // Bind customer name and address directly for easy frontend access
                 $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
                 $d->customer_address = $d->address ?? 'No Address Provided';
 
-                $d->customer_latitude = $profile->latitude ?? null;
-                $d->customer_longitude = $profile->longitude ?? null;
+                $d->customer_latitude = optional($profile)->latitude ?? null;
+                $d->customer_longitude = optional($profile)->longitude ?? null;
 
                 // Only calculate distance if both rider and customer have real GPS coordinates
                 if ($riderHasGps && $d->customer_latitude !== null && $d->customer_longitude !== null) {
@@ -244,13 +253,24 @@ class RiderController extends Controller
             ->latest()
             ->get()
             ->map(function ($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
-                $profile = $d->sale->customer->customerProfile;
+                if (!$d->sale || !$d->sale->customer) {
+                    $d->customer_name = 'Unknown Customer';
+                    $d->customer_address = $d->address ?? 'No Address Provided';
+                    $d->latitude = null;
+                    $d->longitude = null;
+                    $d->distance = null;
+                    $d->distance_value = null;
+                    $d->eta = null;
+                    return $d;
+                }
+
+                $profile = optional($d->sale->customer)->customerProfile;
 
                 $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
                 $d->customer_address = $d->address ?? 'No Address Provided';
 
-                $customerLat = $profile->latitude ?? null;
-                $customerLon = $profile->longitude ?? null;
+                $customerLat = optional($profile)->latitude ?? null;
+                $customerLon = optional($profile)->longitude ?? null;
 
                 $d->latitude = $customerLat;
                 $d->longitude = $customerLon;

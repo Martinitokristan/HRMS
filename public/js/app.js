@@ -32897,7 +32897,6 @@ function RiderDashboardV3() {
           if (currentPos) {
             params.latitude = currentPos.lat;
             params.longitude = currentPos.lng;
-            params.heading = currentPos.heading || 0;
           }
           _context5.n = 3;
           return _lib_api__WEBPACK_IMPORTED_MODULE_1__.silentApi.get('/riders/me/dashboard', {
@@ -32991,7 +32990,6 @@ function RiderDashboardV3() {
           type: 'location',
           latitude: latitude,
           longitude: longitude,
-          heading: heading || 0,
           broadcast: true
         }));
       }

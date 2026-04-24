@@ -278,7 +278,6 @@ export default function RiderDashboardV3() {
             if (currentPos) {
                 params.latitude = currentPos.lat;
                 params.longitude = currentPos.lng;
-                params.heading = currentPos.heading || 0;
             }
 
             const response = await silentApi.get('/riders/me/dashboard', { params });
@@ -341,7 +340,6 @@ export default function RiderDashboardV3() {
                         type: 'location',
                         latitude,
                         longitude,
-                        heading: heading || 0,
                         broadcast: true
                     }));
                 }

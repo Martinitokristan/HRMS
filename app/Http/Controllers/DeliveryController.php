@@ -534,16 +534,8 @@ class DeliveryController extends Controller
         }
 
         if ($delivery->rider_id) {
-            $profile = current($delivery->rider ? [$delivery->rider->profile] : [null]); // fallback
-            if (!$profile) {
-                $profile = RiderProfile::where('user_id', $delivery->rider_id)->first();
-            }
-            if ($profile) {
-                $profile->increment('total_deliveries');
-                $profile->on_time_count += 1;
-                $profile->availability = 'available';
-                $profile->save();
-            }
+            RiderProfile::where('user_id', $delivery->rider_id)
+                ->update(['availability' => 'available']);
         }
 
         // Notify customer that proof photo has been uploaded
@@ -568,7 +560,7 @@ class DeliveryController extends Controller
         }
 
         $riderId = $request->user()->id;
-        $customerId = $delivery->sale->customer_id ?? null;
+        $customerId = $delivery->sale ? $delivery->sale->customer_id : null;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.proof_uploaded'));
         broadcast(new DataMutated("private-rider.{$riderId}", ['rider_dashboard'], 'delivery.proof_uploaded'));
         if ($customerId)
