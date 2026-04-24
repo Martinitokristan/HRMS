@@ -148,7 +148,7 @@ export default function CancelOrdersTab() {
         <Card className="p-6">
             <FilterBar
                 search={search}
-                setSearch={setSearch}
+                onSearchChange={setSearch}
                 placeholder="Search cancellations..."
             />
 
@@ -250,11 +250,10 @@ export default function CancelOrdersTab() {
                                         <div className="flex justify-end gap-2">
                                             <Button
                                                 size="sm"
-                                                variant="outline"
+                                                variant="default"
                                                 onClick={() =>
                                                     handleApprove(req)
                                                 }
-                                                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                                             >
                                                 <Check className="h-4 w-4 mr-1" />
                                                 Approve
@@ -280,11 +279,8 @@ export default function CancelOrdersTab() {
 
             {confirmModal.show && (
                 <ConfirmModal
-                    title={confirmModal.title}
-                    message={confirmModal.message}
-                    onConfirm={confirmModal.onConfirm}
-                    onCancel={closeConfirm}
-                    variant={confirmModal.variant}
+                    modal={confirmModal}
+                    onClose={closeConfirm}
                 />
             )}
         </Card>

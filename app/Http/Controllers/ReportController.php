@@ -405,6 +405,27 @@ class ReportController extends Controller
                 ->limit($limit)
                 ->get();
 
+            // Backward compatibility: legacy returns may not have populated `returns_items`.
+            // In that case, fall back to counting all sale_items for the returned sale.
+            if ($returnedByCategory->isEmpty()) {
+                $returnedByCategory = DB::table('returns')
+                    ->join('sales', 'returns.sale_id', '=', 'sales.id')
+                    ->join('sale_items', 'sale_items.sale_id', '=', 'sales.id')
+                    ->join('products', 'sale_items.product_id', '=', 'products.id')
+                    ->join('categories', 'products.category_id', '=', 'categories.id')
+                    ->whereIn('returns.status', ['approved', 'completed'])
+                    ->whereNotNull('products.category_id')
+                    ->groupBy('categories.id', 'categories.name')
+                    ->select(
+                        'categories.id',
+                        'categories.name',
+                        DB::raw('SUM(sale_items.quantity) as returned_units')
+                    )
+                    ->orderByDesc('returned_units')
+                    ->limit($limit)
+                    ->get();
+            }
+
             if ($returnedByCategory->isEmpty()) {
                 return response()->json(['data' => [], 'status' => 'success']);
             }

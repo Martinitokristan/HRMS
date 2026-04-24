@@ -23144,7 +23144,7 @@ function CancelOrdersTab() {
     className: "p-6",
     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_3__["default"], {
       search: search,
-      setSearch: setSearch,
+      onSearchChange: setSearch,
       placeholder: "Search cancellations..."
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
       className: "mt-4 mb-3 flex items-center justify-between",
@@ -23231,11 +23231,10 @@ function CancelOrdersTab() {
                   className: "flex justify-end gap-2",
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_8__.Button, {
                     size: "sm",
-                    variant: "outline",
+                    variant: "default",
                     onClick: function onClick() {
                       return handleApprove(req);
                     },
-                    className: "border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700",
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
                       className: "h-4 w-4 mr-1"
                     }), "Approve"]
@@ -23256,11 +23255,8 @@ function CancelOrdersTab() {
         })]
       })
     }), confirmModal.show && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_5__["default"], {
-      title: confirmModal.title,
-      message: confirmModal.message,
-      onConfirm: confirmModal.onConfirm,
-      onCancel: closeConfirm,
-      variant: confirmModal.variant
+      modal: confirmModal,
+      onClose: closeConfirm
     })]
   });
 }

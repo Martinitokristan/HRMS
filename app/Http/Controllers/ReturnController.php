@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Events\DataMutated;
 use App\Models\ReturnOrder;
+use App\Models\ReturnsImage;
+use App\Models\ReturnsItem;
 use App\Models\Sale;
 use App\Models\Inventory;
 use App\Models\CustomerNotification;
@@ -143,17 +145,40 @@ class ReturnController extends Controller
         $lastId = ReturnOrder::max('id') ?? 0;
         $returnNumber = 'RET-' . str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
 
-        $return = ReturnOrder::create([
-            'return_number'  => $returnNumber,
-            'sale_id'        => $sale->id,
-            'requested_by'   => $user->id,
-            'reason'         => $data['reason'],
-            'reason_details' => $data['reason_details'] ?? null,
-            'status'         => 'pending',
-            'refund_amount'  => $refundAmount,
-            'items'          => $returnItems,
-            'images'         => $images,
-        ]);
+        $return = DB::transaction(function () use ($returnNumber, $sale, $user, $data, $refundAmount, $returnItems, $images) {
+            $created = ReturnOrder::create([
+                'return_number'  => $returnNumber,
+                'sale_id'        => $sale->id,
+                'requested_by'   => $user->id,
+                'reason'         => $data['reason'],
+                'reason_details' => $data['reason_details'] ?? null,
+                'status'         => 'pending',
+                'refund_amount'  => $refundAmount,
+            ]);
+
+            foreach ($returnItems as $idx => $item) {
+                ReturnsItem::create([
+                    'return_id' => $created->id,
+                    'sale_item_id' => $item['sale_item_id'],
+                    'product_id' => $item['product_id'],
+                    'quantity_returned' => $item['quantity'],
+                    'condition' => null,
+                    'item_reason' => null,
+                ]);
+            }
+
+            foreach ($images as $idx => $path) {
+                ReturnsImage::create([
+                    'return_id' => $created->id,
+                    'image_path' => $path,
+                    'alt_text' => null,
+                    'sort_order' => $idx,
+                    'uploaded_at' => now(),
+                ]);
+            }
+
+            return $created;
+        });
 
         $customerId = $return->sale->customer_id;
         broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_dashboard'], 'return.created'));
@@ -177,7 +202,7 @@ class ReturnController extends Controller
 
     public function approve(Request $request, $id)
     {
-        $return = ReturnOrder::with(['sale.items'])->findOrFail($id);
+        $return = ReturnOrder::with(['sale.items', 'items.saleItem'])->findOrFail($id);
 
         if ($return->status !== 'pending') {
             return response()->json([
@@ -193,7 +218,16 @@ class ReturnController extends Controller
 
         DB::transaction(function () use ($return, $request) {
             // Restore stock for returned items (sold count intentionally unchanged)
-            $this->restoreStockFromReturnItems($return->items ? (is_array($return->items) ? $return->items : $return->items->toArray()) : []);
+            $normalizedItems = $return->items->map(function ($ri) {
+                $variantId = $ri->saleItem ? $ri->saleItem->product_variant_id : null;
+                return [
+                    'product_id' => $ri->product_id,
+                    'product_variant_id' => $variantId,
+                    'quantity' => (int) $ri->quantity_returned,
+                ];
+            })->toArray();
+
+            $this->restoreStockFromReturnItems($normalizedItems);
 
             $return->update([
                 'status'        => 'approved',
