@@ -148,6 +148,7 @@ export default function OrderHistory() {
                         ...(updatedOrder || {}),
                         status: 'confirmed',
                         cancellation_status: 'pending',
+                        cancellationRequest: (updatedOrder && updatedOrder.cancellationRequest) ? updatedOrder.cancellationRequest : order.cancellationRequest,
                     };
                 }));
                 markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.ADMIN_ORDERS, STALE_KEYS.ADMIN_DASHBOARD);

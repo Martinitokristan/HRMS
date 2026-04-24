@@ -220,16 +220,16 @@ export default function CancelOrdersTab() {
                                             className="capitalize"
                                         >
                                             {(
-                                                req.cancellation_reason || ""
+                                                req.cancellationRequest?.reason || ""
                                             ).replace(/_/g, " ")}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
                                         <p
                                             className="text-xs max-w-[200px] truncate"
-                                            title={req.cancellation_notes}
+                                            title={req.cancellationRequest?.notes}
                                         >
-                                            {req.cancellation_notes || "-"}
+                                            {req.cancellationRequest?.notes || "-"}
                                         </p>
                                     </TableCell>
                                     <TableCell

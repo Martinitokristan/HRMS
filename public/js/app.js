@@ -18204,7 +18204,8 @@ function OrderHistory() {
                 if (order.id !== orderId) return order;
                 return _objectSpread(_objectSpread(_objectSpread({}, order), updatedOrder || {}), {}, {
                   status: 'confirmed',
-                  cancellation_status: 'pending'
+                  cancellation_status: 'pending',
+                  cancellationRequest: updatedOrder && updatedOrder.cancellationRequest ? updatedOrder.cancellationRequest : order.cancellationRequest
                 });
               });
             });
@@ -23183,7 +23184,7 @@ function CancelOrdersTab() {
               children: "No pending cancellation requests found."
             })
           }) : requests.data.map(function (req) {
-            var _req$customer, _req$items, _req$items2;
+            var _req$customer, _req$items, _req$items2, _req$cancellationRequ, _req$cancellationRequ2, _req$cancellationRequ3;
             return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableRow, {
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableCell, {
                 className: "font-semibold",
@@ -23209,13 +23210,13 @@ function CancelOrdersTab() {
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_13__.Badge, {
                   variant: "outline",
                   className: "capitalize",
-                  children: (req.cancellation_reason || "").replace(/_/g, " ")
+                  children: (((_req$cancellationRequ = req.cancellationRequest) === null || _req$cancellationRequ === void 0 ? void 0 : _req$cancellationRequ.reason) || "").replace(/_/g, " ")
                 })
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableCell, {
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("p", {
                   className: "text-xs max-w-[200px] truncate",
-                  title: req.cancellation_notes,
-                  children: req.cancellation_notes || "-"
+                  title: (_req$cancellationRequ2 = req.cancellationRequest) === null || _req$cancellationRequ2 === void 0 ? void 0 : _req$cancellationRequ2.notes,
+                  children: ((_req$cancellationRequ3 = req.cancellationRequest) === null || _req$cancellationRequ3 === void 0 ? void 0 : _req$cancellationRequ3.notes) || "-"
                 })
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_10__.TableCell, {
                 align: "right",

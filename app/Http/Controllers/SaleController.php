@@ -7,10 +7,13 @@ use App\Models\Delivery;
 use App\Models\Inventory;
 use App\Models\Sale;
 use App\Models\SaleItem;
-use App\Models\Setting;
+use App\Models\SupplierProduct;
+use App\Models\SalesCancellation;
+use App\Models\SalesCancellationRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Traits\RestoresStock;
 use Illuminate\Validation\ValidationException;
 
@@ -366,16 +369,33 @@ class SaleController extends Controller
                 ], 422);
             }
 
+            if ($sale->cancellationRequest && $sale->cancellationRequest->status === 'pending') {
+                return response()->json([
+                    'message' => 'Cancellation request is already pending approval.',
+                    'status' => 'error',
+                ], 422);
+            }
+
             DB::transaction(function () use ($sale, $request, $user) {
                 $sale->update([
                     'cancellation_status' => 'pending',
-                    'cancellation_reason' => $request->reason,
-                    'cancellation_notes' => $request->notes,
                     'cancellation_requested_by' => $user->id,
                     'cancellation_requested_at' => now(),
-                    'cancelled_by' => null,
-                    'cancelled_at' => null,
                 ]);
+
+                SalesCancellationRequest::updateOrCreate(
+                    ['sale_id' => $sale->id],
+                    [
+                        'reason' => $request->reason,
+                        'notes' => $request->notes,
+                        'requested_by' => $user->id,
+                        'requested_at' => now(),
+                        'status' => 'pending',
+                        'admin_notes' => null,
+                        'resolved_by' => null,
+                        'resolved_at' => null,
+                    ]
+                );
 
                 \App\Models\CustomerNotification::create([
                     'customer_id' => $sale->customer_id,
@@ -392,7 +412,7 @@ class SaleController extends Controller
             });
 
             return response()->json([
-                'data' => $sale->fresh()->load(['items.product', 'delivery']),
+                'data' => $sale->fresh()->load(['items.product', 'delivery', 'cancellationRequest']),
                 'message' => 'Cancellation request submitted and pending admin approval.',
                 'status' => 'pending_request',
             ]);
@@ -451,7 +471,7 @@ class SaleController extends Controller
 
     public function getCancellationRequests(Request $request)
     {
-        $query = Sale::with(['customer', 'items.product', 'delivery'])
+        $query = Sale::with(['customer', 'items.product', 'delivery', 'cancellationRequest'])
             ->where('cancellation_status', 'pending')
             ->when($request->search, function ($q) use ($request) {
                 $search = $request->search;
@@ -473,9 +493,9 @@ class SaleController extends Controller
 
     public function approveCancellation(Request $request, $id)
     {
-        $sale = Sale::with(['items', 'delivery', 'cancellation'])->findOrFail($id);
+        $sale = Sale::with(['items', 'delivery', 'cancellationRequest'])->findOrFail($id);
 
-        if (!$sale->cancellation) {
+        if ($sale->cancellation_status !== 'pending' || !$sale->cancellationRequest || $sale->cancellationRequest->status !== 'pending') {
             return response()->json([
                 'message' => 'No pending cancellation found for this order.',
                 'status' => 'error',
@@ -489,12 +509,23 @@ class SaleController extends Controller
 
             $sale->update([
                 'status' => 'cancelled',
+                'cancellation_status' => 'approved',
             ]);
 
-            // Update the cancellation record
-            $sale->cancellation->update([
-                'cancelled_by' => $user->id,
-                'cancelled_at' => now(),
+            SalesCancellation::updateOrCreate(
+                ['sale_id' => $sale->id],
+                [
+                    'reason' => $sale->cancellationRequest->reason,
+                    'notes' => $sale->cancellationRequest->notes,
+                    'cancelled_by' => $user->id,
+                    'cancelled_at' => now(),
+                ]
+            );
+
+            $sale->cancellationRequest->update([
+                'status' => 'approved',
+                'resolved_by' => $user->id,
+                'resolved_at' => now(),
             ]);
 
             if ($sale->delivery) {
@@ -528,9 +559,9 @@ class SaleController extends Controller
             'admin_notes' => 'nullable|string|max:500',
         ]);
 
-        $sale = Sale::with(['delivery'])->findOrFail($id);
+        $sale = Sale::with(['delivery', 'cancellationRequest'])->findOrFail($id);
 
-        if ($sale->cancellation_status !== 'pending') {
+        if ($sale->cancellation_status !== 'pending' || !$sale->cancellationRequest || $sale->cancellationRequest->status !== 'pending') {
             return response()->json([
                 'message' => 'Only pending cancellation requests can be rejected.',
                 'status' => 'error',
@@ -542,6 +573,13 @@ class SaleController extends Controller
         DB::transaction(function () use ($sale, $adminNotes) {
             $sale->update([
                 'cancellation_status' => 'rejected',
+            ]);
+
+            $sale->cancellationRequest->update([
+                'status' => 'rejected',
+                'admin_notes' => $adminNotes,
+                'resolved_by' => request()->user() ? request()->user()->id : null,
+                'resolved_at' => now(),
             ]);
 
             $message = "Your cancellation request for order #{$sale->order_number} has been rejected.";
