@@ -92,32 +92,9 @@ class DatabaseSeeder extends Seeder
         }
 
         // ─── 3. MASTER VARIANT TYPES ──────────────────────────────────────────
-        // These are essential for the Product Matrix UI to function correctly.
-        // We keep the IDs 1, 2, and 3 for Size, Color, and Weight.
-        
-        Variant::create([
-            'id'          => 1,
-            'name'        => 'Size', 
-            'status'      => 'active', 
-            'description' => 'Physical dimensions or measurements (e.g. 1/2 inch, Small)'
-        ]);
+        // Created automatically via migration: 2024_01_01_000125_seed_master_variant_types.php
+        // No need to seed them here.
 
-        Variant::create([
-            'id'          => 2,
-            'name'        => 'Color', 
-            'status'      => 'active', 
-            'description' => 'Product color, finish, or pattern'
-        ]);
-
-        Variant::create([
-            'id'          => 3,
-            'name'        => 'Weight', 
-            'status'      => 'active', 
-            'description' => 'Product weight or volume class (e.g. grams, kg, ml)'
-        ]);
-
-        // No Variant Values, Categories, Suppliers, or Products are created here.
-        // The user will start fresh via the HRMS dashboard.
         
         // ─── 4. UNIT TYPES ────────────────────────────────────────────────────
         $this->call(UnitTypeSeeder::class);
