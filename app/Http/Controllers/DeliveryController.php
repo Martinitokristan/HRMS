@@ -483,7 +483,7 @@ class DeliveryController extends Controller
     public function uploadProof(Request $request, $id)
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB max
+            'photo' => 'required|image|mimes:jpeg,png,jpg,webp,heic,heif|max:10240', // 10MB max, added heic/heif for iPhone
         ]);
 
         $delivery = Delivery::with('sale.items.product')->findOrFail($id);
@@ -493,8 +493,35 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Store photo
-        $path = $request->file('photo')->store('delivery-proofs', 'public');
+        // Handle HEIC/HEIF conversion to JPEG
+        $file = $request->file('photo');
+        $extension = strtolower($file->getClientOriginalExtension());
+        
+        if (in_array($extension, ['heic', 'heif'])) {
+            // Convert HEIC to JPEG using ImageMagick if available
+            try {
+                $imageData = file_get_contents($file->getRealPath());
+                $imagick = new \Imagick();
+                $imagick->readImageBlob($imageData);
+                $imagick->setImageFormat('jpeg');
+                $imagick->setImageCompressionQuality(85);
+                $jpegData = $imagick->getImageBlob();
+                $imagick->destroy();
+                
+                // Store as JPEG
+                $fileName = 'delivery-' . $id . '-' . time() . '.jpg';
+                $path = 'delivery-proofs/' . $fileName;
+                \Storage::disk('public')->put($path, $jpegData);
+            } catch (\Exception $e) {
+                // Fallback: store original HEIC if conversion fails
+                $path = $file->store('delivery-proofs', 'public');
+                \Log::warning('HEIC conversion failed, storing original: ' . $e->getMessage());
+            }
+        } else {
+            // Store other formats directly
+            $path = $file->store('delivery-proofs', 'public');
+        }
+        
         $photoUrl = asset('storage/' . $path);
 
         $delivery->update([

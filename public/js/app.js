@@ -28011,7 +28011,7 @@ function SupplierLayout() {
                     onClick: function onClick(e) {
                       e.preventDefault();
                       e.stopPropagation();
-                      navigate("/supplier/products?category_id=".concat(cat.id, "&open_form=true"));
+                      navigate("/supplier/inventory?category_id=".concat(cat.id, "&open_form=true"));
                       setSidebarOpen(false);
                     },
                     className: "mr-3 flex h-6 w-6 items-center justify-center rounded text-white/40 hover:bg-white/10 hover:text-white shrink-0",
@@ -38790,11 +38790,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -38803,6 +38798,11 @@ function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present,
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -38825,6 +38825,8 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function ProductForm(_ref) {
   var _ref$editing = _ref.editing,
     editing = _ref$editing === void 0 ? null : _ref$editing,
+    _ref$initialCategoryI = _ref.initialCategoryId,
+    initialCategoryId = _ref$initialCategoryI === void 0 ? null : _ref$initialCategoryI,
     onClose = _ref.onClose,
     onSuccess = _ref.onSuccess;
   var _useToast = (0,_context_ToastContext__WEBPACK_IMPORTED_MODULE_2__.useToast)(),
@@ -38867,7 +38869,7 @@ function ProductForm(_ref) {
       total_stock: '0',
       is_promoted: false,
       image: null,
-      base_size: '',
+      base_size: 'Base Product',
       additional_images: []
     }),
     _useState10 = _slicedToArray(_useState1, 2),
@@ -38919,8 +38921,14 @@ function ProductForm(_ref) {
     fetchVariantValues();
     if (editing) {
       setupEditMode(editing);
+    } else if (initialCategoryId) {
+      setForm(function (prev) {
+        return _objectSpread(_objectSpread({}, prev), {}, {
+          category_id: initialCategoryId
+        });
+      });
     }
-  }, [editing]);
+  }, [editing, initialCategoryId]);
   var fetchCategories = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
       var _res$data, res, data, _t;
@@ -39031,7 +39039,7 @@ function ProductForm(_ref) {
       total_stock: product.total_stock || '0',
       is_promoted: product.is_promoted,
       image: null,
-      base_size: product.base_size || '',
+      base_size: product.base_size || 'Base Product',
       additional_images: []
     });
     setExistingAdditionalImages(product.additional_images || []);
@@ -39231,8 +39239,11 @@ function ProductForm(_ref) {
     }
   };
   var getFilteredVariantValues = function getFilteredVariantValues(type) {
-    if (!form.category_id) return variantValues[type];
-    return variantValues[type].filter(function (v) {
+    var values = variantValues[type] || [];
+    if (!form.category_id) return values;
+
+    // Strictly filter by category. If a variant value has no category attached, it's global.
+    return values.filter(function (v) {
       return !v.category || v.category == form.category_id;
     });
   };
@@ -39509,7 +39520,7 @@ function ProductForm(_ref) {
                       base_size: e.target.value
                     }));
                   },
-                  placeholder: "e.g. Regular, 500g"
+                  placeholder: "Base Product"
                 })]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
                 className: "space-y-1.5",
@@ -39577,6 +39588,7 @@ function ProductForm(_ref) {
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
               className: "space-y-3",
               children: variants.map(function (v, idx) {
+                var _getFilteredVariantVa, _getFilteredVariantVa2, _getFilteredVariantVa3;
                 return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_4__.Card, {
                   className: "p-4 bg-secondary/30 border-2",
                   children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
@@ -39620,37 +39632,61 @@ function ProductForm(_ref) {
                         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_6__.Label, {
                           className: "text-[10px] mb-1",
                           children: "Size"
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_5__.Input, {
-                          className: "h-8 text-sm",
-                          placeholder: "e.g. Medium",
-                          value: v.size,
+                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("select", {
+                          className: "flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                          value: v.size || "",
                           onChange: function onChange(e) {
                             return updateVariant(idx, 'size', e.target.value);
-                          }
+                          },
+                          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("option", {
+                            value: "",
+                            children: "No Size"
+                          }), (_getFilteredVariantVa = getFilteredVariantValues('sizes')) === null || _getFilteredVariantVa === void 0 ? void 0 : _getFilteredVariantVa.map(function (val) {
+                            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("option", {
+                              value: val.label,
+                              children: val.label
+                            }, val.id);
+                          })]
                         })]
                       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
                         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_6__.Label, {
                           className: "text-[10px] mb-1",
                           children: "Color"
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_5__.Input, {
-                          className: "h-8 text-sm",
-                          placeholder: "e.g. Red",
-                          value: v.color,
+                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("select", {
+                          className: "flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                          value: v.color || "",
                           onChange: function onChange(e) {
                             return updateVariant(idx, 'color', e.target.value);
-                          }
+                          },
+                          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("option", {
+                            value: "",
+                            children: "No Color"
+                          }), (_getFilteredVariantVa2 = getFilteredVariantValues('colors')) === null || _getFilteredVariantVa2 === void 0 ? void 0 : _getFilteredVariantVa2.map(function (val) {
+                            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("option", {
+                              value: val.label,
+                              children: val.label
+                            }, val.id);
+                          })]
                         })]
                       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
                         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_6__.Label, {
                           className: "text-[10px] mb-1",
                           children: "Weight"
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_5__.Input, {
-                          className: "h-8 text-sm",
-                          placeholder: "e.g. 1kg",
-                          value: v.weight,
+                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("select", {
+                          className: "flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                          value: v.weight || "",
                           onChange: function onChange(e) {
                             return updateVariant(idx, 'weight', e.target.value);
-                          }
+                          },
+                          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("option", {
+                            value: "",
+                            children: "No Weight"
+                          }), (_getFilteredVariantVa3 = getFilteredVariantValues('weights')) === null || _getFilteredVariantVa3 === void 0 ? void 0 : _getFilteredVariantVa3.map(function (val) {
+                            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("option", {
+                              value: val.label,
+                              children: val.label
+                            }, val.id);
+                          })]
                         })]
                       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("div", {
                         children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_6__.Label, {
@@ -41280,6 +41316,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function SupplierInventory() {
   var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_10__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_11__.STALE_KEYS.SUPPLIER_DASHBOARD),
     refreshTrigger = _useSilentRefresh.refreshTrigger;
+  var _useSearchParams = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_1__.useSearchParams)(),
+    _useSearchParams2 = _slicedToArray(_useSearchParams, 1),
+    searchParams = _useSearchParams2[0];
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState2 = _slicedToArray(_useState, 2),
     products = _useState2[0],
@@ -41296,16 +41335,20 @@ function SupplierInventory() {
     _useState8 = _slicedToArray(_useState7, 2),
     isAdding = _useState8[0],
     setIsAdding = _useState8[1];
-  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState0 = _slicedToArray(_useState9, 2),
+    initialCategoryId = _useState0[0],
+    setInitialCategoryId = _useState0[1];
+  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       show: false,
       title: '',
       message: '',
       onConfirm: null,
       variant: 'default'
     }),
-    _useState0 = _slicedToArray(_useState9, 2),
-    confirmModal = _useState0[0],
-    setConfirmModal = _useState0[1];
+    _useState10 = _slicedToArray(_useState1, 2),
+    confirmModal = _useState10[0],
+    setConfirmModal = _useState10[1];
   var closeConfirm = function closeConfirm() {
     return setConfirmModal({
       show: false,
@@ -41355,6 +41398,14 @@ function SupplierInventory() {
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     fetchInventory(products.length > 0);
   }, [refreshTrigger]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var openForm = searchParams.get('open_form');
+    var categoryId = searchParams.get('category_id');
+    if (openForm === 'true') {
+      setInitialCategoryId(categoryId);
+      setIsAdding(true);
+    }
+  }, [searchParams]);
   var handleDelete = function handleDelete(product) {
     setConfirmModal({
       show: true,
@@ -41396,9 +41447,11 @@ function SupplierInventory() {
   if (isAdding || editingProduct) {
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_15__.jsx)(_ProductForm__WEBPACK_IMPORTED_MODULE_14__["default"], {
       editing: editingProduct,
+      initialCategoryId: initialCategoryId,
       onClose: function onClose() {
         setEditingProduct(null);
         setIsAdding(false);
+        setInitialCategoryId(null);
       },
       onSuccess: function onSuccess() {
         return fetchInventory(true);
@@ -42869,24 +42922,14 @@ function SupplierProducts() {
           className: "text-sm text-muted-foreground mt-0.5",
           children: "View your published products"
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)("div", {
-        className: "flex gap-2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
-          variant: "outline",
-          onClick: function onClick() {
-            return navigate("/supplier/inventory");
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
-            className: "h-4 w-4 mr-2"
-          }), " Manage Inventory"]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
-          onClick: function onClick() {
-            return navigate("/supplier/inventory");
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
-            className: "h-4 w-4 mr-2"
-          }), " Add Product"]
-        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_5__.Button, {
+        variant: "outline",
+        onClick: function onClick() {
+          return navigate("/supplier/inventory");
+        },
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
+          className: "h-4 w-4 mr-2"
+        }), " Manage Inventory"]
       })]
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_shared_FilterBar__WEBPACK_IMPORTED_MODULE_3__["default"], {
       search: search,

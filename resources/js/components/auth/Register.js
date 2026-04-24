@@ -62,10 +62,10 @@ export default function Register() {
 
     // Function to search coordinates based on address
     const handleGeocode = async () => {
-        const query = formData.address 
+        const query = formData.address
             ? `${formData.address}, ${formData.municipality}, ${formData.province}, Philippines`
             : `${formData.municipality}, ${formData.province}, Philippines`;
-            
+
         if (formData.municipality.length < 3) {
             alert("Please enter a Municipality/City first.");
             return;
@@ -75,7 +75,7 @@ export default function Register() {
         try {
             // Internal logic: Try full address, then fallback to city
             let response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-            
+
             if (!response.data || response.data.length === 0) {
                 const fallbackQuery = `${formData.municipality}, ${formData.province}, Philippines`;
                 response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}`);
@@ -90,7 +90,7 @@ export default function Register() {
             } else {
                 alert("Location not found. Please click on the map manually to pin your location.");
                 // Center on a rough Filipino coordinate if totally lost
-                setMapCenter([8.9475, 125.5406]); 
+                setMapCenter([8.9475, 125.5406]);
             }
         } catch (error) {
             console.error("Geocoding failed:", error);
@@ -359,7 +359,7 @@ export default function Register() {
                                     <div className="space-y-2">
                                         <Label htmlFor="phone" className="text-base font-medium">Phone Number</Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground font-medium" style={{pointerEvents:'none'}}>+63</span>
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground font-medium" style={{ pointerEvents: 'none' }}>+63</span>
                                             <Input id="phone" name="phone" type="tel" value={formData.phone} required onChange={handleChange} placeholder="9XXXXXXXXX" className={`h-12 pl-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
                                         </div>
                                         {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
@@ -432,14 +432,14 @@ export default function Register() {
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center mb-1">
                                         <Label className="text-base font-bold text-primary flex items-center gap-2">
-                                             <MapPin className="h-5 w-5" />
+                                            <MapPin className="h-5 w-5" />
                                             Pin Delivery Location
                                         </Label>
                                         <div className="flex gap-2">
-                                            <Button 
-                                                type="button" 
-                                                variant="outline" 
-                                                size="sm" 
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
                                                 onClick={handleGetLocation}
                                                 disabled={gpsLoading || !formData.province || !formData.municipality || !formData.address}
                                                 className="text-xs h-8 px-3 font-semibold text-primary"
@@ -451,19 +451,19 @@ export default function Register() {
                                         </div>
                                     </div>
                                     <p className="text-xs text-muted-foreground italic leading-snug">
-                                        Manual: Click on the map or drag the pin to your exact delivery spot. <br/>
+                                        Manual: Click on the map or drag the pin to your exact delivery spot. <br />
                                         <span className="font-bold text-amber-600 block mt-1">⚠️ Note: Desktop/Laptop GPS can be slightly off. Please zoom in deeply and drag the pin EXACTLY to your house roof.</span>
                                     </p>
                                     <div className="h-[260px] w-full rounded-xl border-2 border-primary/20 overflow-hidden relative shadow-inner cursor-crosshair">
                                         <MapContainer center={mapCenter} zoom={15} maxZoom={20} style={{ height: '100%', width: '100%' }}>
                                             <MapController center={mapCenter} zoom={15} onMapClick={handleMapClick} />
-                                            <TileLayer 
-                                                url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" 
-                                                attribution="&copy; Google Maps" 
+                                            <TileLayer
+                                                url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+                                                attribution="&copy; Google Maps"
                                                 maxZoom={20}
                                             />
-                                            <Marker 
-                                                position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : mapCenter} 
+                                            <Marker
+                                                position={formData.latitude && formData.longitude ? [formData.latitude, formData.longitude] : mapCenter}
                                                 draggable={true}
                                                 eventHandlers={{ dragend: onMarkerDragEnd }}
                                             />
@@ -478,7 +478,7 @@ export default function Register() {
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     {(formData.latitude || formData.longitude) && (
                                         <div className="text-xs p-2.5 bg-green-50/50 text-green-800 border-l-4 border-green-500 rounded-lg mt-2 flex items-start gap-2 shadow-sm">
                                             <CheckCircle className="h-4 w-4 shrink-0 mt-0.5 text-green-600" />

@@ -3599,6 +3599,9 @@ input, select, textarea {
 .text-\[26px\]{
   font-size: 26px;
 }
+.text-\[28px\]{
+  font-size: 28px;
+}
 .text-\[8px\]{
   font-size: 8px;
 }
@@ -3624,9 +3627,6 @@ input, select, textarea {
 .text-xs{
   font-size: 0.75rem;
   line-height: 1rem;
-}
-.text-\[28px\]{
-  font-size: 28px;
 }
 .font-black{
   font-weight: 900;

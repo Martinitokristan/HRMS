@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../../lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -13,10 +13,12 @@ import ProductForm from './ProductForm';
 
 export default function SupplierInventory() {
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_DASHBOARD);
+    const [searchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingProduct, setEditingProduct] = useState(null);
     const [isAdding, setIsAdding] = useState(false);
+    const [initialCategoryId, setInitialCategoryId] = useState(null);
 
     const [confirmModal, setConfirmModal] = useState({
         show: false, title: '', message: '',
@@ -40,6 +42,15 @@ export default function SupplierInventory() {
         fetchInventory(products.length > 0);
     }, [refreshTrigger]);
 
+    useEffect(() => {
+        const openForm = searchParams.get('open_form');
+        const categoryId = searchParams.get('category_id');
+        if (openForm === 'true') {
+            setInitialCategoryId(categoryId);
+            setIsAdding(true);
+        }
+    }, [searchParams]);
+
     const handleDelete = (product) => {
         setConfirmModal({
             show: true,
@@ -62,9 +73,10 @@ export default function SupplierInventory() {
 
     if (isAdding || editingProduct) {
         return (
-            <ProductForm 
-                editing={editingProduct} 
-                onClose={() => { setEditingProduct(null); setIsAdding(false); }} 
+            <ProductForm
+                editing={editingProduct}
+                initialCategoryId={initialCategoryId}
+                onClose={() => { setEditingProduct(null); setIsAdding(false); setInitialCategoryId(null); }}
                 onSuccess={() => fetchInventory(true)}
             />
         );

@@ -78,17 +78,12 @@ export default function SupplierProducts() {
                         View your published products
                     </p>
                 </div>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        onClick={() => navigate("/supplier/inventory")}
-                    >
-                        <Database className="h-4 w-4 mr-2" /> Manage Inventory
-                    </Button>
-                    <Button onClick={() => navigate("/supplier/inventory")}>
-                        <Plus className="h-4 w-4 mr-2" /> Add Product
-                    </Button>
-                </div>
+                <Button
+                    variant="outline"
+                    onClick={() => navigate("/supplier/inventory")}
+                >
+                    <Database className="h-4 w-4 mr-2" /> Manage Inventory
+                </Button>
             </div>
 
             <FilterBar

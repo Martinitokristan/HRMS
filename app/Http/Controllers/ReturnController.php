@@ -193,7 +193,7 @@ class ReturnController extends Controller
 
         DB::transaction(function () use ($return, $request) {
             // Restore stock for returned items (sold count intentionally unchanged)
-            $this->restoreStockFromReturnItems($return->items ?? []);
+            $this->restoreStockFromReturnItems($return->items ? (is_array($return->items) ? $return->items : $return->items->toArray()) : []);
 
             $return->update([
                 'status'        => 'approved',

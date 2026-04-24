@@ -11,21 +11,21 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Plus, X, Upload, ClipboardList, CheckCircle2, Trash2 } from 'lucide-react';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 
-export default function ProductForm({ editing = null, onClose, onSuccess }) {
+export default function ProductForm({ editing = null, initialCategoryId = null, onClose, onSuccess }) {
     const { showToast } = useToast();
     const [submitting, setSubmitting] = useState(false);
     const [loading, setLoading] = useState(false);
-    
+
     // Core states
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
     const [variantValues, setVariantValues] = useState({ sizes: [], colors: [], weights: [] });
 
     // Form logic
-    const [form, setForm] = useState({ 
+    const [form, setForm] = useState({
         name: '', barcode: '', description: '', category_id: '',
         price: '', min_order_qty: '1', total_stock: '0', is_promoted: false, image: null,
-        base_size: '', additional_images: []
+        base_size: 'Base Product', additional_images: []
     });
     const [variants, setVariants] = useState([]);
     const [variantImages, setVariantImages] = useState({});
@@ -44,8 +44,10 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
         fetchVariantValues();
         if (editing) {
             setupEditMode(editing);
+        } else if (initialCategoryId) {
+            setForm(prev => ({ ...prev, category_id: initialCategoryId }));
         }
-    }, [editing]);
+    }, [editing, initialCategoryId]);
 
     const fetchCategories = async () => {
         try {
@@ -80,7 +82,7 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
             category_id: product.category_id || '', brand_id: product.brand_id ? String(product.brand_id) : '', price: product.price,
             min_order_qty: product.min_order_qty || '1', total_stock: product.total_stock || '0',
             is_promoted: product.is_promoted, image: null,
-            base_size: product.base_size || '',
+            base_size: product.base_size || 'Base Product',
             additional_images: [],
         });
         setExistingAdditionalImages(product.additional_images || []);
@@ -94,7 +96,7 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
             existing_extra_images: v.additional_images || [],
         }));
         setVariants(productVariants);
-        
+
         const previews = {};
         const extraPreviews = {};
         productVariants.forEach((v, idx) => {
@@ -176,8 +178,8 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
 
     const removeVariantExtraImage = (vIdx, imgIdx, isExisting = false) => {
         if (isExisting) {
-            setVariants(prev => prev.map((v, i) => i === vIdx ? { 
-                ...v, existing_extra_images: v.existing_extra_images.filter((_, j) => j !== imgIdx) 
+            setVariants(prev => prev.map((v, i) => i === vIdx ? {
+                ...v, existing_extra_images: v.existing_extra_images.filter((_, j) => j !== imgIdx)
             } : v));
             setVariantExtraPreviews(prev => {
                 const updated = { ...prev };
@@ -199,8 +201,11 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
     };
 
     const getFilteredVariantValues = (type) => {
-        if (!form.category_id) return variantValues[type];
-        return variantValues[type].filter(v => !v.category || v.category == form.category_id);
+        const values = variantValues[type] || [];
+        if (!form.category_id) return values;
+
+        // Strictly filter by category. If a variant value has no category attached, it's global.
+        return values.filter(v => !v.category || v.category == form.category_id);
     };
 
     const handleSubmit = async (e) => {
@@ -319,7 +324,12 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label>Base Size/Weight</Label>
-                                    <Input type="text" value={form.base_size} onChange={e => setForm({ ...form, base_size: e.target.value })} placeholder="e.g. Regular, 500g" />
+                                    <Input 
+                                        type="text" 
+                                        value={form.base_size} 
+                                        onChange={e => setForm({ ...form, base_size: e.target.value })} 
+                                        placeholder="Base Product" 
+                                    />
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label>Current Stock *</Label>
@@ -341,64 +351,85 @@ export default function ProductForm({ editing = null, onClose, onSuccess }) {
                                 <h3 className="font-bold text-foreground">Product Variants</h3>
                                 <Button type="button" variant="outline" size="sm" onClick={addVariant}><Plus className="h-3 w-3 mr-1" /> Add Variant</Button>
                             </div>
-                                <div className="space-y-3">
-                                    {variants.map((v, idx) => (
-                                        <Card key={idx} className="p-4 bg-secondary/30 border-2">
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex-shrink-0">
-                                                    {variantImagePreviews[idx] ? (
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                setImageModalTarget(idx);
-                                                                setImageModalOpen(true);
-                                                            }}
-                                                            className="w-20 h-20 p-0 rounded-xl border-2 border-dashed border-border overflow-hidden bg-secondary/30 flex flex-col justify-center items-center cursor-pointer hover:border-orange-300 transition-all group relative"
-                                                        >
-                                                            <img src={variantImagePreviews[idx]} alt={`Variant ${idx}`} className="w-full h-full object-cover" />
-                                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                                                                <Plus className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                            </div>
-                                                        </button>
-                                                    ) : (
-                                                        <label className="flex w-20 h-20 rounded-xl border-2 border-dashed border-border overflow-hidden bg-secondary/30 flex-col items-center justify-center cursor-pointer hover:bg-white hover:border-orange-300 transition-all group m-0">
-                                                            <Upload className="h-5 w-5 text-muted-foreground opacity-30 group-hover:scale-110 group-hover:text-orange-500 transition-all" />
-                                                            <input type="file" accept="image/*" onChange={(e) => handleVariantImageChange(idx, e)} className="hidden" />
-                                                        </label>
-                                                    )}
+                            <div className="space-y-3">
+                                {variants.map((v, idx) => (
+                                    <Card key={idx} className="p-4 bg-secondary/30 border-2">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-shrink-0">
+                                                {variantImagePreviews[idx] ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setImageModalTarget(idx);
+                                                            setImageModalOpen(true);
+                                                        }}
+                                                        className="w-20 h-20 p-0 rounded-xl border-2 border-dashed border-border overflow-hidden bg-secondary/30 flex flex-col justify-center items-center cursor-pointer hover:border-orange-300 transition-all group relative"
+                                                    >
+                                                        <img src={variantImagePreviews[idx]} alt={`Variant ${idx}`} className="w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                                                            <Plus className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        </div>
+                                                    </button>
+                                                ) : (
+                                                    <label className="flex w-20 h-20 rounded-xl border-2 border-dashed border-border overflow-hidden bg-secondary/30 flex-col items-center justify-center cursor-pointer hover:bg-white hover:border-orange-300 transition-all group m-0">
+                                                        <Upload className="h-5 w-5 text-muted-foreground opacity-30 group-hover:scale-110 group-hover:text-orange-500 transition-all" />
+                                                        <input type="file" accept="image/*" onChange={(e) => handleVariantImageChange(idx, e)} className="hidden" />
+                                                    </label>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                <div>
+                                                    <Label className="text-[10px] mb-1">Size</Label>
+                                                    <select
+                                                        className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                        value={v.size || ""}
+                                                        onChange={e => updateVariant(idx, 'size', e.target.value)}
+                                                    >
+                                                        <option value="">No Size</option>
+                                                        {getFilteredVariantValues('sizes')?.map(val => <option key={val.id} value={val.label}>{val.label}</option>)}
+                                                    </select>
                                                 </div>
-                                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                                    <div>
-                                                        <Label className="text-[10px] mb-1">Size</Label>
-                                                        <Input className="h-8 text-sm" placeholder="e.g. Medium" value={v.size} onChange={e => updateVariant(idx, 'size', e.target.value)} />
-                                                    </div>
-                                                    <div>
-                                                        <Label className="text-[10px] mb-1">Color</Label>
-                                                        <Input className="h-8 text-sm" placeholder="e.g. Red" value={v.color} onChange={e => updateVariant(idx, 'color', e.target.value)} />
-                                                    </div>
-                                                    <div>
-                                                        <Label className="text-[10px] mb-1">Weight</Label>
-                                                        <Input className="h-8 text-sm" placeholder="e.g. 1kg" value={v.weight} onChange={e => updateVariant(idx, 'weight', e.target.value)} />
-                                                    </div>
-                                                    <div>
-                                                        <Label className="text-[10px] mb-1">Stock</Label>
-                                                        <Input className="h-8 text-sm" type="number" placeholder="0" value={v.stock} onChange={e => updateVariant(idx, 'stock', e.target.value)} />
-                                                    </div>
-                                                    <div>
-                                                        <Label className="text-[10px] mb-1">Price Override (₱)</Label>
-                                                        <Input className="h-8 text-sm" type="number" step="0.01" placeholder="Optional" value={v.price_override} onChange={e => updateVariant(idx, 'price_override', e.target.value)} />
-                                                    </div>
-                                                    <div className="flex items-end">
-                                                        <Button variant="destructive" size="sm" className="h-8 w-full" type="button" onClick={() => removeVariant(idx)}>
-                                                            <Trash2 className="h-4 w-4 mr-2" /> Remove
-                                                        </Button>
-                                                    </div>
+                                                <div>
+                                                    <Label className="text-[10px] mb-1">Color</Label>
+                                                    <select
+                                                        className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                        value={v.color || ""}
+                                                        onChange={e => updateVariant(idx, 'color', e.target.value)}
+                                                    >
+                                                        <option value="">No Color</option>
+                                                        {getFilteredVariantValues('colors')?.map(val => <option key={val.id} value={val.label}>{val.label}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <Label className="text-[10px] mb-1">Weight</Label>
+                                                    <select
+                                                        className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                        value={v.weight || ""}
+                                                        onChange={e => updateVariant(idx, 'weight', e.target.value)}
+                                                    >
+                                                        <option value="">No Weight</option>
+                                                        {getFilteredVariantValues('weights')?.map(val => <option key={val.id} value={val.label}>{val.label}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <Label className="text-[10px] mb-1">Stock</Label>
+                                                    <Input className="h-8 text-sm" type="number" placeholder="0" value={v.stock} onChange={e => updateVariant(idx, 'stock', e.target.value)} />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-[10px] mb-1">Price Override (₱)</Label>
+                                                    <Input className="h-8 text-sm" type="number" step="0.01" placeholder="Optional" value={v.price_override} onChange={e => updateVariant(idx, 'price_override', e.target.value)} />
+                                                </div>
+                                                <div className="flex items-end">
+                                                    <Button variant="destructive" size="sm" className="h-8 w-full" type="button" onClick={() => removeVariant(idx)}>
+                                                        <Trash2 className="h-4 w-4 mr-2" /> Remove
+                                                    </Button>
                                                 </div>
                                             </div>
-                                        </Card>
-                                    ))}
-                                </div>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
                         </Card>
                     </div>
 

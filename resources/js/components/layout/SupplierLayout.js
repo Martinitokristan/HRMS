@@ -179,7 +179,7 @@ export default function SupplierLayout() {
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
-                                                    navigate(`/supplier/products?category_id=${cat.id}&open_form=true`);
+                                                    navigate(`/supplier/inventory?category_id=${cat.id}&open_form=true`);
                                                     setSidebarOpen(false);
                                                 }}
                                                 className="mr-3 flex h-6 w-6 items-center justify-center rounded text-white/40 hover:bg-white/10 hover:text-white shrink-0"
