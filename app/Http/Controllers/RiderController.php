@@ -189,6 +189,19 @@ class RiderController extends Controller
             'collected' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->with('sale')->get()->sum(function ($d) {
                 return optional($d->sale)->payment_method === 'cod' ? $d->sale->total_amount : 0;
             }),
+            // Wave 6 — rider fee earnings (₱30 × today's delivered+eligible/paid rows).
+            'today_earnings' => (float) Delivery::where('rider_id', $riderId)
+                ->where('created_at', '>=', $today)
+                ->where('status', 'delivered')
+                ->whereIn('payout_status', ['eligible', 'paid'])
+                ->sum('delivery_fee'),
+            // Wave 6 — COD cash the rider is still holding for the company today.
+            'cash_to_remit_today' => (float) Delivery::where('rider_id', $riderId)
+                ->whereDate('delivered_at', now()->toDateString())
+                ->where('status', 'delivered')
+                ->whereHas('sale', function ($q) { $q->where('payment_method', 'cod'); })
+                ->whereNull('cash_remitted_at')
+                ->sum('cash_collected'),
         ];
 
         // Get rider's current location for distance calculations
@@ -491,5 +504,52 @@ class RiderController extends Controller
         }
 
         return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * GET /riders/me/wallet — Wave 6 rider wallet figures.
+     */
+    public function wallet(Request $request)
+    {
+        $riderId = $request->user()->id;
+        $today = now()->startOfDay();
+
+        $todayEarnings = (float) Delivery::where('rider_id', $riderId)
+            ->where('status', 'delivered')
+            ->where('created_at', '>=', $today)
+            ->whereIn('payout_status', ['eligible', 'paid'])
+            ->sum('delivery_fee');
+
+        $available = (float) Delivery::where('rider_id', $riderId)
+            ->where('payout_status', 'eligible')
+            ->sum('delivery_fee');
+
+        $pending = (float) Delivery::where('rider_id', $riderId)
+            ->whereIn('payout_status', ['pending', 'held'])
+            ->sum('delivery_fee');
+
+        $cashToRemitToday = (float) Delivery::where('rider_id', $riderId)
+            ->where('status', 'delivered')
+            ->whereDate('delivered_at', now()->toDateString())
+            ->whereHas('sale', function ($q) { $q->where('payment_method', 'cod'); })
+            ->whereNull('cash_remitted_at')
+            ->sum('cash_collected');
+
+        $recentPaid = Delivery::where('rider_id', $riderId)
+            ->where('payout_status', 'paid')
+            ->orderByDesc('paid_at')
+            ->limit(10)
+            ->get(['id', 'tracking_number', 'delivery_fee', 'paid_at']);
+
+        return response()->json([
+            'data' => [
+                'today_earnings'      => $todayEarnings,
+                'available'           => $available,
+                'pending'             => $pending,
+                'cash_to_remit_today' => $cashToRemitToday,
+                'recent_paid'         => $recentPaid,
+            ],
+            'status' => 'success',
+        ]);
     }
 }

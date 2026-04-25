@@ -189,6 +189,13 @@ class SaleController extends Controller
             // Get customer coordinates for delivery destination
             $customerProfile = \App\Models\CustomerProfile::where('user_id', $data['customer_id'])->first();
 
+            // Wave 6 — stamp rider fee + COD cash at delivery creation. Rider can never
+            // edit these. delivery_fee comes from Setting, cash_collected only set on COD.
+            $riderFee = (float) \App\Models\Setting::get('rider_default_delivery_fee', 30);
+            $cashCollected = (($data['payment_method'] ?? null) === 'cod')
+                ? (float) ($sale->total_amount ?? 0)
+                : 0.00;
+
             Delivery::create([
                 'sale_id'         => $sale->id,
                 'tracking_number' => $trackingNumber,
@@ -196,6 +203,9 @@ class SaleController extends Controller
                 'address'         => $data['address'] ?? 'TBD',
                 'latitude'        => $customerProfile->latitude ?? null,
                 'longitude'       => $customerProfile->longitude ?? null,
+                'delivery_fee'    => $riderFee,
+                'cash_collected'  => $cashCollected,
+                'payout_status'   => 'pending',
             ]);
 
 

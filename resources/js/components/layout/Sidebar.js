@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, Package, Warehouse, Truck, Handshake,
     Store, BarChart3, Users, Settings, ChevronDown, 
-    Star, RotateCcw, MessageSquare, UserCheck, Bike
+    Star, RotateCcw, MessageSquare, UserCheck, Bike, Wallet
 } from 'lucide-react';
 import { GCashIcon } from '../icons/PaymentIcons';
 import { cn } from '../../lib/utils';
@@ -99,6 +99,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, toggleCollapse }
                         Inventory
                     </NavItem>
                     <NavItem to="/delivery" icon={Truck} isCollapsed={isCollapsed}>Delivery</NavItem>
+                    <NavItem to="/payouts" icon={Wallet} isActiveProp={location.pathname.startsWith('/payouts')} isCollapsed={isCollapsed}>Rider Payouts</NavItem>
                     <NavItem to="/suppliers" icon={Handshake} isCollapsed={isCollapsed}>Suppliers</NavItem>
                     <NavItem to="/supplier-catalog" icon={Store} isCollapsed={isCollapsed}>Supplier Available Products</NavItem>
                     <NavItem to="/returns" icon={RotateCcw} isCollapsed={isCollapsed}>Returns</NavItem>

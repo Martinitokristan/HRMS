@@ -8221,6 +8221,862 @@ function GCashLogs() {
 
 /***/ },
 
+/***/ "./resources/js/components/admin/Payouts.js"
+/*!**************************************************!*\
+  !*** ./resources/js/components/admin/Payouts.js ***!
+  \**************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Payouts)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _lib_api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../lib/api */ "./resources/js/lib/api.js");
+/* harmony import */ var _context_ToastContext__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../context/ToastContext */ "./resources/js/context/ToastContext.js");
+/* harmony import */ var _components_ui_button__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/components/ui/button */ "./resources/js/components/ui/button.jsx");
+/* harmony import */ var _components_ui_badge__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/components/ui/badge */ "./resources/js/components/ui/badge.jsx");
+/* harmony import */ var _components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/components/ui/tabs */ "./resources/js/components/ui/tabs.jsx");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/circle-check.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/loader-circle.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/triangle-alert.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/banknote.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/calendar.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/chevron-left.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/chevron-right.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/wallet.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+/**
+ * Wave 6 — Admin Cash Remittance + Rider Payouts.
+ * Single-page tabbed UI matching the look-and-feel of CancelOrdersTab.
+ */
+
+var peso = function peso(v) {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP'
+  }).format(Number(v || 0));
+};
+var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+var WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+function toIsoDate(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var day = String(d.getDate()).padStart(2, '0');
+  return "".concat(y, "-").concat(m, "-").concat(day);
+}
+function parseIso(str) {
+  if (!str) return new Date();
+  var _str$split$map = str.split('-').map(Number),
+    _str$split$map2 = _slicedToArray(_str$split$map, 3),
+    y = _str$split$map2[0],
+    m = _str$split$map2[1],
+    d = _str$split$map2[2];
+  return new Date(y, m - 1, d);
+}
+
+/**
+ * iPhone-style calendar popover. Click the trigger to open, pick a day,
+ * the picker closes and calls onChange(isoDate).
+ */
+function IphoneDatePicker(_ref) {
+  var value = _ref.value,
+    onChange = _ref.onChange;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    open = _useState2[0],
+    setOpen = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(function () {
+      return parseIso(value);
+    }),
+    _useState4 = _slicedToArray(_useState3, 2),
+    cursor = _useState4[0],
+    setCursor = _useState4[1]; // month being viewed
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('days'),
+    _useState6 = _slicedToArray(_useState5, 2),
+    mode = _useState6[0],
+    setMode = _useState6[1]; // 'days' | 'months' | 'years'
+  var wrapperRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+
+  // close on outside click / escape
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!open) return;
+    var onDown = function onDown(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
+    };
+    var onKey = function onKey(e) {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return function () {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  // sync cursor when value changes from parent
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    setCursor(parseIso(value));
+  }, [value]);
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var selected = parseIso(value);
+  var year = cursor.getFullYear();
+  var month = cursor.getMonth();
+  var firstOfMonth = new Date(year, month, 1);
+  var startWeekday = firstOfMonth.getDay(); // 0 = Sunday
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var daysInPrev = new Date(year, month, 0).getDate();
+
+  // Build a 6-row x 7-col grid for stable height
+  var cells = [];
+  for (var i = 0; i < startWeekday; i++) {
+    cells.push({
+      day: daysInPrev - startWeekday + i + 1,
+      otherMonth: -1
+    });
+  }
+  for (var d = 1; d <= daysInMonth; d++) {
+    cells.push({
+      day: d,
+      otherMonth: 0
+    });
+  }
+  while (cells.length < 42) {
+    cells.push({
+      day: cells.length - daysInMonth - startWeekday + 1,
+      otherMonth: 1
+    });
+  }
+  var navMonth = function navMonth(delta) {
+    return setCursor(new Date(year, month + delta, 1));
+  };
+  var pick = function pick(cell) {
+    var d = new Date(year + (cell.otherMonth === 1 && month === 11 ? 1 : 0) + (cell.otherMonth === -1 && month === 0 ? -1 : 0), (month + cell.otherMonth + 12) % 12, cell.day);
+    onChange(toIsoDate(d));
+    setOpen(false);
+  };
+  var display = function () {
+    var d = parseIso(value);
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return "".concat(m, "/").concat(day, "/").concat(d.getFullYear());
+  }();
+  var isSameDay = function isSameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+    className: "relative inline-block",
+    ref: wrapperRef,
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("button", {
+      type: "button",
+      onClick: function onClick() {
+        return setOpen(function (o) {
+          return !o;
+        });
+      },
+      className: "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-white text-sm font-semibold text-foreground hover:bg-gray-50 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("span", {
+        children: display
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
+        className: "h-4 w-4 text-blue-500"
+      })]
+    }), open && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+      className: "absolute z-50 mt-2 left-0 w-[300px] rounded-2xl border border-gray-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-4 animate-in fade-in zoom-in-95 duration-150 origin-top-left",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+        className: "flex items-center justify-between mb-2",
+        children: mode === 'years' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+          className: "flex-1 text-center text-[15px] font-bold text-gray-900",
+          children: "Select Year"
+        }) : mode === 'months' ?
+        /*#__PURE__*/
+        /* Months mode: centered year, year text itself is the trigger
+           into years mode. No chevrons. */
+        (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("button", {
+          type: "button",
+          onClick: function onClick() {
+            return setMode('years');
+          },
+          className: "flex-1 text-center text-[15px] font-bold text-gray-900 hover:text-blue-500 active:scale-95 transition py-1",
+          children: year
+        }) :
+        /*#__PURE__*/
+        /* Days mode: month/year on the left, prev/next-month chevrons on the right */
+        (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.Fragment, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("button", {
+            type: "button",
+            onClick: function onClick() {
+              return setMode('months');
+            },
+            className: "inline-flex items-center gap-1 text-[15px] font-bold text-gray-900 hover:text-blue-500 active:scale-95 transition",
+            children: [MONTHS[month], " ", year, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
+              className: "h-4 w-4"
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+            className: "flex items-center gap-1",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("button", {
+              type: "button",
+              onClick: function onClick() {
+                return navMonth(-1);
+              },
+              className: "h-7 w-7 inline-flex items-center justify-center rounded-full text-blue-500 hover:bg-blue-50 active:scale-95 transition",
+              "aria-label": "Previous month",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], {
+                className: "h-4 w-4"
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("button", {
+              type: "button",
+              onClick: function onClick() {
+                return navMonth(1);
+              },
+              className: "h-7 w-7 inline-flex items-center justify-center rounded-full text-blue-500 hover:bg-blue-50 active:scale-95 transition",
+              "aria-label": "Next month",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
+                className: "h-4 w-4"
+              })
+            })]
+          })]
+        })
+      }), mode === 'days' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.Fragment, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+          className: "grid grid-cols-7 mb-1",
+          children: WEEKDAYS.map(function (w) {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+              className: "text-[11px] font-semibold text-gray-400 text-center py-1.5 uppercase tracking-wide",
+              children: w
+            }, w);
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+          className: "grid grid-cols-7 gap-y-1",
+          children: cells.map(function (cell, idx) {
+            var cellDate = new Date(year + (cell.otherMonth === 1 && month === 11 ? 1 : 0) + (cell.otherMonth === -1 && month === 0 ? -1 : 0), (month + cell.otherMonth + 12) % 12, cell.day);
+            var isSelected = isSameDay(cellDate, selected);
+            var isToday = isSameDay(cellDate, today);
+            var dim = cell.otherMonth !== 0;
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("button", {
+              type: "button",
+              onClick: function onClick() {
+                return pick(cell);
+              },
+              className: ['mx-auto h-9 w-9 rounded-full text-[14px] font-semibold transition-all duration-150 flex items-center justify-center', isSelected ? 'bg-blue-500 text-white shadow-md shadow-blue-500/30 scale-105' : isToday ? 'text-blue-500 ring-1 ring-inset ring-blue-200 bg-blue-50/40' : dim ? 'text-gray-300 hover:bg-gray-50' : 'text-gray-800 hover:bg-gray-100 active:scale-95'].join(' '),
+              children: cell.day
+            }, idx);
+          })
+        })]
+      }) : mode === 'months' ?
+      /*#__PURE__*/
+      /* Month grid 4×3 — tap a month to drop back to day mode */
+      (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+        className: "grid grid-cols-4 gap-2",
+        children: MONTHS.map(function (name, idx) {
+          var active = idx === month;
+          var isCurrent = idx === today.getMonth() && year === today.getFullYear();
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("button", {
+            type: "button",
+            onClick: function onClick() {
+              setCursor(new Date(year, idx, 1));
+              setMode('days');
+            },
+            className: ['h-11 rounded-xl text-[13px] font-semibold transition-all duration-150 active:scale-95', active ? 'bg-blue-500 text-white shadow-md shadow-blue-500/30' : isCurrent ? 'text-blue-500 ring-1 ring-inset ring-blue-200 bg-blue-50/40' : 'text-gray-700 hover:bg-gray-100'].join(' '),
+            children: name.slice(0, 3)
+          }, name);
+        })
+      }) :
+      /*#__PURE__*/
+      /* Year grid — vertical scroll, 4 cols, descending from today */
+      (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+        className: "max-h-[260px] overflow-y-auto pr-1 -mr-1 scrollbar-thin",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+          className: "grid grid-cols-4 gap-y-3 gap-x-2 py-1",
+          children: Array.from({
+            length: 60
+          }, function (_, i) {
+            return today.getFullYear() - i;
+          }).map(function (y) {
+            var active = y === year;
+            var isCurrent = y === today.getFullYear();
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("button", {
+              type: "button",
+              onClick: function onClick() {
+                setCursor(new Date(y, month, 1));
+                setMode('months');
+              },
+              className: ['h-10 mx-auto px-3 min-w-[68px] rounded-full text-[15px] font-bold transition-all duration-150 active:scale-95 flex items-center justify-center', active ? 'bg-blue-500 text-white shadow-md shadow-blue-500/30' : isCurrent ? 'text-blue-500' : 'text-gray-800 hover:bg-gray-100'].join(' '),
+              children: y
+            }, y);
+          })
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+        className: "flex items-center justify-between mt-3 pt-3 border-t border-gray-100",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("button", {
+          type: "button",
+          onClick: function onClick() {
+            onChange(toIsoDate(new Date()));
+            setMode('days');
+            setOpen(false);
+          },
+          className: "text-[13px] font-semibold text-blue-500 hover:text-blue-600 active:scale-95 transition",
+          children: "Today"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("button", {
+          type: "button",
+          onClick: function onClick() {
+            setMode('days');
+            setOpen(false);
+          },
+          className: "text-[13px] font-semibold text-gray-500 hover:text-gray-700 active:scale-95 transition",
+          children: "Done"
+        })]
+      })]
+    })]
+  });
+}
+function CashRemittanceTab() {
+  var _useToast = (0,_context_ToastContext__WEBPACK_IMPORTED_MODULE_2__.useToast)(),
+    showToast = _useToast.showToast;
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(new Date().toISOString().slice(0, 10)),
+    _useState8 = _slicedToArray(_useState7, 2),
+    date = _useState8[0],
+    setDate = _useState8[1];
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState0 = _slicedToArray(_useState9, 2),
+    rows = _useState0[0],
+    setRows = _useState0[1];
+  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState10 = _slicedToArray(_useState1, 2),
+    loading = _useState10[0],
+    setLoading = _useState10[1];
+  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState12 = _slicedToArray(_useState11, 2),
+    marking = _useState12[0],
+    setMarking = _useState12[1];
+  var load = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+    var _r$data, r, _t;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.p = _context.n) {
+        case 0:
+          setLoading(true);
+          _context.p = 1;
+          _context.n = 2;
+          return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/admin/cash-remittance', {
+            params: {
+              date: date
+            }
+          });
+        case 2:
+          r = _context.v;
+          setRows(((_r$data = r.data) === null || _r$data === void 0 ? void 0 : _r$data.data) || []);
+          _context.n = 4;
+          break;
+        case 3:
+          _context.p = 3;
+          _t = _context.v;
+          showToast('Failed to load remittance', 'error');
+        case 4:
+          _context.p = 4;
+          setLoading(false);
+          return _context.f(4);
+        case 5:
+          return _context.a(2);
+      }
+    }, _callee, null, [[1, 3, 4, 5]]);
+  })), [date, showToast]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    load();
+  }, [load]);
+  var markRemitted = /*#__PURE__*/function () {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(riderId) {
+      var _t2;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
+          case 0:
+            setMarking(riderId);
+            _context2.p = 1;
+            _context2.n = 2;
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/admin/cash-remittance/".concat(riderId, "/").concat(date, "/mark-remitted"));
+          case 2:
+            showToast('Cash remittance recorded', 'success');
+            _context2.n = 3;
+            return load();
+          case 3:
+            _context2.n = 5;
+            break;
+          case 4:
+            _context2.p = 4;
+            _t2 = _context2.v;
+            showToast('Failed to mark remitted', 'error');
+          case 5:
+            _context2.p = 5;
+            setMarking(null);
+            return _context2.f(5);
+          case 6:
+            return _context2.a(2);
+        }
+      }, _callee2, null, [[1, 4, 5, 6]]);
+    }));
+    return function markRemitted(_x) {
+      return _ref3.apply(this, arguments);
+    };
+  }();
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+    className: "space-y-4",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+      className: "flex items-center gap-3",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("label", {
+        className: "text-sm font-semibold text-foreground",
+        children: "Date"
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(IphoneDatePicker, {
+        value: date,
+        onChange: setDate
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_3__.Button, {
+        variant: "outline",
+        size: "sm",
+        onClick: load,
+        disabled: loading,
+        children: loading ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
+          className: "h-3.5 w-3.5 animate-spin"
+        }) : 'Refresh'
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+      className: "rounded-xl border border-border bg-white overflow-hidden",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("table", {
+        className: "w-full text-sm",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("thead", {
+          className: "bg-gray-50 text-xs uppercase tracking-wider text-muted-foreground",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("tr", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+              className: "px-4 py-3 text-left font-semibold",
+              children: "Rider"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+              className: "px-4 py-3 text-right font-semibold",
+              children: "Deliveries"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+              className: "px-4 py-3 text-right font-semibold",
+              children: "Expected"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+              className: "px-4 py-3 text-right font-semibold",
+              children: "Remitted"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+              className: "px-4 py-3 text-right font-semibold",
+              children: "Outstanding"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+              className: "px-4 py-3 text-right font-semibold",
+              children: "Action"
+            })]
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("tbody", {
+          className: "divide-y divide-border",
+          children: [rows.length === 0 && !loading && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("tr", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+              colSpan: 6,
+              className: "px-4 py-10 text-center text-muted-foreground",
+              children: "No COD deliveries on this date."
+            })
+          }), rows.map(function (r) {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("tr", {
+              className: "hover:bg-gray-50/50",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                className: "px-4 py-3 font-bold text-foreground",
+                children: r.rider_name || "Rider #".concat(r.rider_id)
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                className: "px-4 py-3 text-right",
+                children: r.count
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                className: "px-4 py-3 text-right font-mono",
+                children: peso(r.expected)
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                className: "px-4 py-3 text-right font-mono text-green-600",
+                children: peso(r.remitted)
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                className: "px-4 py-3 text-right font-mono",
+                children: r.outstanding > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("span", {
+                  className: "text-red-600 font-bold",
+                  children: peso(r.outstanding)
+                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("span", {
+                  className: "text-muted-foreground",
+                  children: peso(0)
+                })
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                className: "px-4 py-3 text-right",
+                children: r.outstanding > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_3__.Button, {
+                  size: "sm",
+                  onClick: function onClick() {
+                    return markRemitted(r.rider_id);
+                  },
+                  disabled: marking === r.rider_id,
+                  className: "gap-1",
+                  children: [marking === r.rider_id ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
+                    className: "h-3.5 w-3.5 animate-spin"
+                  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                    className: "h-3.5 w-3.5"
+                  }), "Mark Remitted"]
+                }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_4__.Badge, {
+                  variant: "secondary",
+                  className: "gap-1",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                    className: "h-3 w-3"
+                  }), " Settled"]
+                })
+              })]
+            }, r.rider_id);
+          })]
+        })]
+      })
+    })]
+  });
+}
+function RiderPayoutsTab() {
+  var _useToast2 = (0,_context_ToastContext__WEBPACK_IMPORTED_MODULE_2__.useToast)(),
+    showToast = _useToast2.showToast;
+  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('eligible'),
+    _useState14 = _slicedToArray(_useState13, 2),
+    status = _useState14[0],
+    setStatus = _useState14[1];
+  var _useState15 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState16 = _slicedToArray(_useState15, 2),
+    groups = _useState16[0],
+    setGroups = _useState16[1];
+  var _useState17 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState18 = _slicedToArray(_useState17, 2),
+    loading = _useState18[0],
+    setLoading = _useState18[1];
+  var _useState19 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState20 = _slicedToArray(_useState19, 2),
+    busy = _useState20[0],
+    setBusy = _useState20[1];
+  var load = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+    var _r$data2, r, _t3;
+    return _regenerator().w(function (_context3) {
+      while (1) switch (_context3.p = _context3.n) {
+        case 0:
+          setLoading(true);
+          _context3.p = 1;
+          _context3.n = 2;
+          return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/admin/payouts', {
+            params: {
+              status: status
+            }
+          });
+        case 2:
+          r = _context3.v;
+          setGroups(((_r$data2 = r.data) === null || _r$data2 === void 0 ? void 0 : _r$data2.data) || []);
+          _context3.n = 4;
+          break;
+        case 3:
+          _context3.p = 3;
+          _t3 = _context3.v;
+          showToast('Failed to load payouts', 'error');
+        case 4:
+          _context3.p = 4;
+          setLoading(false);
+          return _context3.f(4);
+        case 5:
+          return _context3.a(2);
+      }
+    }, _callee3, null, [[1, 3, 4, 5]]);
+  })), [status, showToast]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    load();
+  }, [load]);
+  var markPaid = /*#__PURE__*/function () {
+    var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(riderId, deliveryIds) {
+      var _t4;
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.p = _context4.n) {
+          case 0:
+            if (deliveryIds !== null && deliveryIds !== void 0 && deliveryIds.length) {
+              _context4.n = 1;
+              break;
+            }
+            return _context4.a(2);
+          case 1:
+            setBusy("pay-".concat(riderId));
+            _context4.p = 2;
+            _context4.n = 3;
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/admin/payouts/mark-paid', {
+              rider_id: riderId,
+              delivery_ids: deliveryIds
+            });
+          case 3:
+            showToast('Payout marked as paid', 'success');
+            _context4.n = 4;
+            return load();
+          case 4:
+            _context4.n = 6;
+            break;
+          case 5:
+            _context4.p = 5;
+            _t4 = _context4.v;
+            showToast('Failed to mark paid', 'error');
+          case 6:
+            _context4.p = 6;
+            setBusy(null);
+            return _context4.f(6);
+          case 7:
+            return _context4.a(2);
+        }
+      }, _callee4, null, [[2, 5, 6, 7]]);
+    }));
+    return function markPaid(_x2, _x3) {
+      return _ref5.apply(this, arguments);
+    };
+  }();
+  var release = /*#__PURE__*/function () {
+    var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(deliveryId, decision) {
+      var _t5;
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.p = _context5.n) {
+          case 0:
+            setBusy("hold-".concat(deliveryId));
+            _context5.p = 1;
+            _context5.n = 2;
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/admin/payouts/release-hold', {
+              delivery_id: deliveryId,
+              decision: decision
+            });
+          case 2:
+            showToast(decision === 'release' ? 'Released to eligible' : 'Rejected', 'success');
+            _context5.n = 3;
+            return load();
+          case 3:
+            _context5.n = 5;
+            break;
+          case 4:
+            _context5.p = 4;
+            _t5 = _context5.v;
+            showToast('Failed to update hold', 'error');
+          case 5:
+            _context5.p = 5;
+            setBusy(null);
+            return _context5.f(5);
+          case 6:
+            return _context5.a(2);
+        }
+      }, _callee5, null, [[1, 4, 5, 6]]);
+    }));
+    return function release(_x4, _x5) {
+      return _ref6.apply(this, arguments);
+    };
+  }();
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+    className: "space-y-4",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.Tabs, {
+      value: status,
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.TabsList, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.TabsTrigger, {
+          value: "eligible",
+          onClick: function onClick() {
+            return setStatus('eligible');
+          },
+          className: "gap-1.5",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+            className: "h-3.5 w-3.5"
+          }), " Eligible"]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.TabsTrigger, {
+          value: "held",
+          onClick: function onClick() {
+            return setStatus('held');
+          },
+          className: "gap-1.5",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"], {
+            className: "h-3.5 w-3.5"
+          }), " Held"]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.TabsTrigger, {
+          value: "paid",
+          onClick: function onClick() {
+            return setStatus('paid');
+          },
+          className: "gap-1.5",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"], {
+            className: "h-3.5 w-3.5"
+          }), " Paid"]
+        })]
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+      className: "space-y-4",
+      children: [groups.length === 0 && !loading && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+        className: "rounded-xl border border-border bg-white p-10 text-center text-muted-foreground",
+        children: ["No ", status, " payouts."]
+      }), groups.map(function (g) {
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+          className: "rounded-xl border border-border bg-white overflow-hidden",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+            className: "flex items-center justify-between bg-gray-50 px-4 py-3 border-b border-border",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("div", {
+                className: "font-bold text-foreground",
+                children: g.rider_name || "Rider #".concat(g.rider_id)
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+                className: "text-xs text-muted-foreground",
+                children: [g.count, " delivery", g.count === 1 ? '' : 's', " \u2022 ", peso(g.total_fee)]
+              })]
+            }), status === 'eligible' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_button__WEBPACK_IMPORTED_MODULE_3__.Button, {
+              size: "sm",
+              onClick: function onClick() {
+                return markPaid(g.rider_id, g.rows.map(function (r) {
+                  return r.id;
+                }));
+              },
+              disabled: busy === "pay-".concat(g.rider_id),
+              className: "gap-1",
+              children: [busy === "pay-".concat(g.rider_id) ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
+                className: "h-3.5 w-3.5 animate-spin"
+              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                className: "h-3.5 w-3.5"
+              }), "Mark Paid (", peso(g.total_fee), ")"]
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("table", {
+            className: "w-full text-sm",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("thead", {
+              className: "text-xs uppercase tracking-wider text-muted-foreground bg-white",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("tr", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+                  className: "px-4 py-2 text-left font-semibold",
+                  children: "Tracking"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+                  className: "px-4 py-2 text-left font-semibold",
+                  children: "Delivered"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+                  className: "px-4 py-2 text-left font-semibold",
+                  children: "Method"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+                  className: "px-4 py-2 text-right font-semibold",
+                  children: "Fee"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+                  className: "px-4 py-2 text-left font-semibold",
+                  children: "Flags"
+                }), status === 'held' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("th", {
+                  className: "px-4 py-2 text-right font-semibold",
+                  children: "Action"
+                })]
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("tbody", {
+              className: "divide-y divide-border",
+              children: g.rows.map(function (row) {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("tr", {
+                  className: "hover:bg-gray-50/50",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                    className: "px-4 py-2 font-mono text-xs",
+                    children: row.tracking_number || "#".concat(row.id)
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                    className: "px-4 py-2",
+                    children: row.delivered_at ? new Date(row.delivered_at).toLocaleString() : '—'
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                    className: "px-4 py-2 uppercase text-xs",
+                    children: row.payment_method || '—'
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("td", {
+                    className: "px-4 py-2 text-right font-mono",
+                    children: peso(row.delivery_fee)
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("td", {
+                    className: "px-4 py-2",
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+                      className: "flex gap-1.5",
+                      children: [row.geofence_flagged && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_4__.Badge, {
+                        variant: "destructive",
+                        className: "text-[10px]",
+                        children: ["Geofence ", row.geofence_distance != null ? "".concat(row.geofence_distance, "m") : '']
+                      }), row.customer_disputed && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_badge__WEBPACK_IMPORTED_MODULE_4__.Badge, {
+                        variant: "destructive",
+                        className: "text-[10px]",
+                        children: "Disputed"
+                      }), !row.geofence_flagged && !row.customer_disputed && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("span", {
+                        className: "text-xs text-muted-foreground",
+                        children: "\u2014"
+                      })]
+                    }), row.customer_dispute_reason && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+                      className: "text-[11px] text-muted-foreground mt-1 max-w-md",
+                      children: ["\"", row.customer_dispute_reason, "\""]
+                    })]
+                  }), status === 'held' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("td", {
+                    className: "px-4 py-2 text-right space-x-1",
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_3__.Button, {
+                      size: "sm",
+                      variant: "outline",
+                      disabled: busy === "hold-".concat(row.id),
+                      onClick: function onClick() {
+                        return release(row.id, 'release');
+                      },
+                      children: "Release"
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_3__.Button, {
+                      size: "sm",
+                      variant: "destructive",
+                      disabled: busy === "hold-".concat(row.id),
+                      onClick: function onClick() {
+                        return release(row.id, 'reject');
+                      },
+                      children: "Reject"
+                    })]
+                  })]
+                }, row.id);
+              })
+            })]
+          })]
+        }, g.rider_id);
+      })]
+    })]
+  });
+}
+function Payouts(_ref7) {
+  var _ref7$tab = _ref7.tab,
+    tab = _ref7$tab === void 0 ? 'remittance' : _ref7$tab;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+    className: "relative",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)("h2", {
+      className: "text-xl font-bold text-foreground tracking-tight mb-5",
+      children: "Rider Cash & Payouts"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.Tabs, {
+      value: tab,
+      className: "mb-6 relative z-0",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.TabsList, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.TabsTrigger, {
+          value: "remittance",
+          onClick: function onClick() {
+            return window.history.replaceState(null, '', '/payouts');
+          },
+          className: "gap-2",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"], {
+            className: "h-4 w-4"
+          }), " Cash Remittance"]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)(_components_ui_tabs__WEBPACK_IMPORTED_MODULE_5__.TabsTrigger, {
+          value: "payouts",
+          onClick: function onClick() {
+            return window.history.replaceState(null, '', '/payouts/riders');
+          },
+          className: "gap-2",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"], {
+            className: "h-4 w-4"
+          }), " Rider Payouts"]
+        })]
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsxs)("div", {
+      className: "relative z-0",
+      children: [tab === 'remittance' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(CashRemittanceTab, {}), tab === 'payouts' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_14__.jsx)(RiderPayoutsTab, {})]
+    })]
+  });
+}
+
+/***/ },
+
 /***/ "./resources/js/components/admin/RatingAnalytics.js"
 /*!**********************************************************!*\
   !*** ./resources/js/components/admin/RatingAnalytics.js ***!
@@ -14255,17 +15111,27 @@ function CustomerHome() {
     _useState26 = _slicedToArray(_useState25, 2),
     proofModalUrl = _useState26[0],
     setProofModalUrl = _useState26[1];
+  // Wave 6 — delivery confirmation flow
+  var _useState27 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+      open: false,
+      saleId: null,
+      reason: '',
+      submitting: false
+    }),
+    _useState28 = _slicedToArray(_useState27, 2),
+    disputeModal = _useState28[0],
+    setDisputeModal = _useState28[1];
   var notifRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
 
   // Recommendations
-  var _useState27 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
-    _useState28 = _slicedToArray(_useState27, 2),
-    recommendations = _useState28[0],
-    setRecommendations = _useState28[1];
-  var _useState29 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
+  var _useState29 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState30 = _slicedToArray(_useState29, 2),
-    recsLoading = _useState30[0],
-    setRecsLoading = _useState30[1];
+    recommendations = _useState30[0],
+    setRecommendations = _useState30[1];
+  var _useState31 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
+    _useState32 = _slicedToArray(_useState31, 2),
+    recsLoading = _useState32[0],
+    setRecsLoading = _useState32[1];
   var searchLogTimerRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
 
   // Load cart from localStorage
@@ -14694,8 +15560,61 @@ function CustomerHome() {
                 })["catch"](function () {});
               },
               renderExtra: function renderExtra(n) {
-                var _n$meta, _n$data3;
-                var proofUrl = ((_n$meta = n.meta) === null || _n$meta === void 0 ? void 0 : _n$meta.proof_url) || ((_n$data3 = n.data) === null || _n$data3 === void 0 ? void 0 : _n$data3.proof_url);
+                var _n$meta, _n$meta2, _n$meta3, _n$data3;
+                // Wave 6 — "Did you receive your order?" confirmation buttons
+                if (n.type === 'delivery_confirmation_request' && (_n$meta = n.meta) !== null && _n$meta !== void 0 && _n$meta.requires_action && (_n$meta2 = n.meta) !== null && _n$meta2 !== void 0 && _n$meta2.sale_id) {
+                  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+                    className: "mt-2 flex gap-2",
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
+                      onClick: (/*#__PURE__*/function () {
+                        var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(e) {
+                          var _t2;
+                          return _regenerator().w(function (_context3) {
+                            while (1) switch (_context3.p = _context3.n) {
+                              case 0:
+                                e.stopPropagation();
+                                _context3.p = 1;
+                                _context3.n = 2;
+                                return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/sales/".concat(n.meta.sale_id, "/customer-confirm-receipt"));
+                              case 2:
+                                _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/customer/notifications').then(function (r) {
+                                  var _r$data7, _r$data8;
+                                  setNotifications(((_r$data7 = r.data) === null || _r$data7 === void 0 ? void 0 : _r$data7.data) || []);
+                                  setUnreadCount(((_r$data8 = r.data) === null || _r$data8 === void 0 ? void 0 : _r$data8.unread) || 0);
+                                })["catch"](function () {});
+                                _context3.n = 4;
+                                break;
+                              case 3:
+                                _context3.p = 3;
+                                _t2 = _context3.v;
+                              case 4:
+                                return _context3.a(2);
+                            }
+                          }, _callee3, null, [[1, 3]]);
+                        }));
+                        return function (_x3) {
+                          return _ref4.apply(this, arguments);
+                        };
+                      }()),
+                      className: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors",
+                      children: "Yes, I received it"
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
+                      onClick: function onClick(e) {
+                        e.stopPropagation();
+                        setDisputeModal({
+                          open: true,
+                          saleId: n.meta.sale_id,
+                          reason: '',
+                          submitting: false
+                        });
+                        setNotifOpen(false);
+                      },
+                      className: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-lg transition-colors border border-gray-300",
+                      children: "No, something is wrong"
+                    })]
+                  });
+                }
+                var proofUrl = ((_n$meta3 = n.meta) === null || _n$meta3 === void 0 ? void 0 : _n$meta3.proof_url) || ((_n$data3 = n.data) === null || _n$data3 === void 0 ? void 0 : _n$data3.proof_url);
                 if (!proofUrl) return null;
                 return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
                   onClick: function onClick(e) {
@@ -14915,6 +15834,112 @@ function CustomerHome() {
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_20__["default"], {
       modal: confirmModal,
       onClose: closeConfirm
+    }), disputeModal.open && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+      className: "fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4",
+      onClick: function onClick() {
+        return setDisputeModal({
+          open: false,
+          saleId: null,
+          reason: '',
+          submitting: false
+        });
+      },
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+        className: "bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl",
+        onClick: function onClick(e) {
+          return e.stopPropagation();
+        },
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("h2", {
+          className: "text-lg font-black text-gray-900 mb-1",
+          children: "Tell us what's wrong"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("p", {
+          className: "text-sm text-gray-600 mb-4",
+          children: "We'll hold the rider's payout for this order while admin reviews your report."
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("textarea", {
+          value: disputeModal.reason,
+          onChange: function onChange(e) {
+            return setDisputeModal(function (d) {
+              return _objectSpread(_objectSpread({}, d), {}, {
+                reason: e.target.value
+              });
+            });
+          },
+          placeholder: "What's wrong with this delivery?",
+          maxLength: 500,
+          rows: 4,
+          className: "w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+          className: "text-[11px] text-gray-400 mt-1",
+          children: [disputeModal.reason.length, "/500"]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
+          className: "flex gap-2 mt-4",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
+            onClick: function onClick() {
+              return setDisputeModal({
+                open: false,
+                saleId: null,
+                reason: '',
+                submitting: false
+              });
+            },
+            className: "flex-1 px-4 py-2 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors",
+            disabled: disputeModal.submitting,
+            children: "Cancel"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("button", {
+            onClick: /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+              var _t3;
+              return _regenerator().w(function (_context4) {
+                while (1) switch (_context4.p = _context4.n) {
+                  case 0:
+                    if (!(!disputeModal.reason.trim() || disputeModal.submitting)) {
+                      _context4.n = 1;
+                      break;
+                    }
+                    return _context4.a(2);
+                  case 1:
+                    setDisputeModal(function (d) {
+                      return _objectSpread(_objectSpread({}, d), {}, {
+                        submitting: true
+                      });
+                    });
+                    _context4.p = 2;
+                    _context4.n = 3;
+                    return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/sales/".concat(disputeModal.saleId, "/customer-dispute-receipt"), {
+                      reason: disputeModal.reason.trim()
+                    });
+                  case 3:
+                    setDisputeModal({
+                      open: false,
+                      saleId: null,
+                      reason: '',
+                      submitting: false
+                    });
+                    _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].get('/customer/notifications').then(function (r) {
+                      var _r$data9, _r$data0;
+                      setNotifications(((_r$data9 = r.data) === null || _r$data9 === void 0 ? void 0 : _r$data9.data) || []);
+                      setUnreadCount(((_r$data0 = r.data) === null || _r$data0 === void 0 ? void 0 : _r$data0.unread) || 0);
+                    })["catch"](function () {});
+                    _context4.n = 5;
+                    break;
+                  case 4:
+                    _context4.p = 4;
+                    _t3 = _context4.v;
+                    setDisputeModal(function (d) {
+                      return _objectSpread(_objectSpread({}, d), {}, {
+                        submitting: false
+                      });
+                    });
+                  case 5:
+                    return _context4.a(2);
+                }
+              }, _callee4, null, [[2, 4]]);
+            })),
+            disabled: !disputeModal.reason.trim() || disputeModal.submitting,
+            className: "flex-1 px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+            children: disputeModal.submitting ? 'Submitting...' : 'Submit dispute'
+          })]
+        })]
+      })
     }), proofModalUrl && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
       className: "fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4",
       onClick: function onClick() {
@@ -27653,13 +28678,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/truck.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/user-check.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/users.js");
-/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/warehouse.js");
-/* harmony import */ var _icons_PaymentIcons__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../icons/PaymentIcons */ "./resources/js/components/icons/PaymentIcons.jsx");
-/* harmony import */ var _lib_utils__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../../lib/utils */ "./resources/js/lib/utils.js");
-/* harmony import */ var _shared_Tooltip__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../shared/Tooltip */ "./resources/js/components/shared/Tooltip.js");
-/* harmony import */ var _shared_SidebarToggle__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../shared/SidebarToggle */ "./resources/js/components/shared/SidebarToggle.js");
-/* harmony import */ var _shared_SidebarSection__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../shared/SidebarSection */ "./resources/js/components/shared/SidebarSection.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/wallet.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/warehouse.js");
+/* harmony import */ var _icons_PaymentIcons__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../icons/PaymentIcons */ "./resources/js/components/icons/PaymentIcons.jsx");
+/* harmony import */ var _lib_utils__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../../lib/utils */ "./resources/js/lib/utils.js");
+/* harmony import */ var _shared_Tooltip__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../shared/Tooltip */ "./resources/js/components/shared/Tooltip.js");
+/* harmony import */ var _shared_SidebarToggle__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../shared/SidebarToggle */ "./resources/js/components/shared/SidebarToggle.js");
+/* harmony import */ var _shared_SidebarSection__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ../shared/SidebarSection */ "./resources/js/components/shared/SidebarSection.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -27683,19 +28709,19 @@ function NavItem(_ref) {
     end = _ref$end === void 0 ? false : _ref$end,
     isActiveProp = _ref.isActive,
     isCollapsed = _ref.isCollapsed;
-  var link = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
+  var link = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
     to: to,
     end: end,
     className: function className(_ref2) {
       var isActive = _ref2.isActive;
-      return (0,_lib_utils__WEBPACK_IMPORTED_MODULE_19__.cn)('flex w-full items-center gap-2.5 py-1.5 text-sm font-medium rounded-none transition-all duration-200', isCollapsed ? 'justify-center px-0' : 'px-5', 'border-l-[3px] border-transparent', isActive || isActiveProp ? 'text-white bg-white/10 border-l-[#FF6B35]' : 'text-white/60 hover:text-white hover:bg-white/[0.06]');
+      return (0,_lib_utils__WEBPACK_IMPORTED_MODULE_20__.cn)('flex w-full items-center gap-2.5 py-1.5 text-sm font-medium rounded-none transition-all duration-200', isCollapsed ? 'justify-center px-0' : 'px-5', 'border-l-[3px] border-transparent', isActive || isActiveProp ? 'text-white bg-white/10 border-l-[#FF6B35]' : 'text-white/60 hover:text-white hover:bg-white/[0.06]');
     },
-    children: [Icon && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(Icon, {
+    children: [Icon && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(Icon, {
       className: "h-[18px] w-[18px] shrink-0"
     }), !isCollapsed && children]
   });
   if (isCollapsed) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_shared_Tooltip__WEBPACK_IMPORTED_MODULE_20__["default"], {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_Tooltip__WEBPACK_IMPORTED_MODULE_21__["default"], {
       label: children,
       position: "right",
       delay: 200,
@@ -27719,123 +28745,129 @@ function Sidebar(_ref3) {
   react__WEBPACK_IMPORTED_MODULE_0___default().useEffect(function () {
     if (usersActive && !isCollapsed) setUsersOpen(true);
   }, [usersActive, isCollapsed]);
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.Fragment, {
-    children: [isOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.Fragment, {
+    children: [isOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
       className: "fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm lg:hidden",
       onClick: onClose
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("aside", {
-      className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_19__.cn)('fixed top-0 left-0 z-[100] flex h-screen flex-col bg-[#0F172A] transition-all duration-300', isCollapsed ? 'w-[80px]' : 'w-[260px]', isOpen ? 'translate-x-0 shadow-[8px_0_30px_rgba(0,0,0,0.2)]' : '-translate-x-full lg:translate-x-0'),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
-        className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_19__.cn)("relative flex items-center border-b border-white/10 transition-all duration-300", isCollapsed ? "h-14 justify-center" : "h-14 px-5"),
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("aside", {
+      className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_20__.cn)('fixed top-0 left-0 z-[100] flex h-screen flex-col bg-[#0F172A] transition-all duration-300', isCollapsed ? 'w-[80px]' : 'w-[260px]', isOpen ? 'translate-x-0 shadow-[8px_0_30px_rgba(0,0,0,0.2)]' : '-translate-x-full lg:translate-x-0'),
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+        className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_20__.cn)("relative flex items-center border-b border-white/10 transition-all duration-300", isCollapsed ? "h-14 justify-center" : "h-14 px-5"),
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("div", {
           className: "flex items-center gap-2",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
             className: "flex shrink-0 h-8 w-8 items-center justify-center rounded-lg bg-[#FF6B35]",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
               className: "text-[13px] font-black text-white",
               children: "H"
             })
-          }), !isCollapsed && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("span", {
+          }), !isCollapsed && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("span", {
             className: "text-[17px] font-bold tracking-tight text-white line-clamp-1",
             children: "HRMS"
           })]
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("nav", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("nav", {
         className: "flex-1 flex flex-col overflow-y-auto py-2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_shared_SidebarSection__WEBPACK_IMPORTED_MODULE_22__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_SidebarSection__WEBPACK_IMPORTED_MODULE_23__["default"], {
           label: "Main",
           isCollapsed: isCollapsed,
           className: "pt-0"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
-          className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_19__.cn)("flex items-center", isCollapsed ? "justify-center pb-2" : "justify-end px-5 pb-2 -mt-7 mb-1"),
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_shared_SidebarToggle__WEBPACK_IMPORTED_MODULE_21__["default"], {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+          className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_20__.cn)("flex items-center", isCollapsed ? "justify-center pb-2" : "justify-end px-5 pb-2 -mt-7 mb-1"),
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_SidebarToggle__WEBPACK_IMPORTED_MODULE_22__["default"], {
             isCollapsed: isCollapsed,
             onToggle: toggleCollapse
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/dashboard",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"],
           isCollapsed: isCollapsed,
           children: "Dashboard"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/products",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_9__["default"],
           isCollapsed: isCollapsed,
           children: "Products"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/inventory",
-          icon: lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"],
+          icon: lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"],
           isActiveProp: location.pathname.startsWith('/inventory'),
           isCollapsed: isCollapsed,
           children: "Inventory"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/delivery",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_14__["default"],
           isCollapsed: isCollapsed,
           children: "Delivery"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
+          to: "/payouts",
+          icon: lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"],
+          isActiveProp: location.pathname.startsWith('/payouts'),
+          isCollapsed: isCollapsed,
+          children: "Rider Payouts"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/suppliers",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_6__["default"],
           isCollapsed: isCollapsed,
           children: "Suppliers"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/supplier-catalog",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_13__["default"],
           isCollapsed: isCollapsed,
           children: "Supplier Available Products"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/returns",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"],
           isCollapsed: isCollapsed,
           children: "Returns"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/gcash-logs",
-          icon: _icons_PaymentIcons__WEBPACK_IMPORTED_MODULE_18__.GCashIcon,
+          icon: _icons_PaymentIcons__WEBPACK_IMPORTED_MODULE_19__.GCashIcon,
           isCollapsed: isCollapsed,
           children: "GCash Payments"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_shared_SidebarSection__WEBPACK_IMPORTED_MODULE_22__["default"], {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_SidebarSection__WEBPACK_IMPORTED_MODULE_23__["default"], {
           label: "Analytics",
           isCollapsed: isCollapsed
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/reports",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_3__["default"],
           end: true,
           isCollapsed: isCollapsed,
           children: "Reports"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/reports/rating-analytics",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"],
           isCollapsed: isCollapsed,
           children: "Rating Analytics"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/reviews",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_8__["default"],
           isCollapsed: isCollapsed,
           children: "Reviews"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(_shared_SidebarSection__WEBPACK_IMPORTED_MODULE_22__["default"], {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(_shared_SidebarSection__WEBPACK_IMPORTED_MODULE_23__["default"], {
           label: "System",
           isCollapsed: isCollapsed
-        }), isCollapsed ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), isCollapsed ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/users",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"],
           isCollapsed: isCollapsed,
           children: "Users"
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.Fragment, {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("button", {
+        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.Fragment, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("button", {
             onClick: function onClick() {
               return setUsersOpen(!usersOpen);
             },
-            className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_19__.cn)('flex w-full items-center justify-between px-5 py-1.5 text-sm font-medium transition-all duration-200', 'border-l-[3px]', usersActive ? 'text-white bg-white/10 border-l-[#FF6B35]' : 'text-white/60 hover:text-white hover:bg-white/[0.06] border-transparent'),
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)("span", {
+            className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_20__.cn)('flex w-full items-center justify-between px-5 py-1.5 text-sm font-medium transition-all duration-200', 'border-l-[3px]', usersActive ? 'text-white bg-white/10 border-l-[#FF6B35]' : 'text-white/60 hover:text-white hover:bg-white/[0.06] border-transparent'),
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)("span", {
               className: "flex items-center gap-2.5 line-clamp-1",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
                 className: "h-[18px] w-[18px] shrink-0"
               }), "Users"]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
-              className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_19__.cn)('h-4 w-4 shrink-0 transition-transform duration-200', usersOpen && 'rotate-180')
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_5__["default"], {
+              className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_20__.cn)('h-4 w-4 shrink-0 transition-transform duration-200', usersOpen && 'rotate-180')
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)("div", {
-            className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_19__.cn)('overflow-hidden transition-all duration-300', usersOpen ? 'max-h-60' : 'max-h-0'),
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)("div", {
+            className: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_20__.cn)('overflow-hidden transition-all duration-300', usersOpen ? 'max-h-60' : 'max-h-0'),
             children: [{
               to: '/users',
               label: 'All Users',
@@ -27854,20 +28886,20 @@ function Sidebar(_ref3) {
                 label = _ref4.label,
                 end = _ref4.end,
                 Icon = _ref4.Icon;
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_1__.NavLink, {
                 to: to,
                 end: end,
                 className: function className(_ref5) {
                   var isActive = _ref5.isActive;
-                  return (0,_lib_utils__WEBPACK_IMPORTED_MODULE_19__.cn)('flex items-center gap-2 py-1.5 pl-[3.25rem] pr-5 text-[13px] transition-colors duration-200', isActive ? 'text-[#FF6B35] font-semibold' : 'text-white/55 hover:text-white');
+                  return (0,_lib_utils__WEBPACK_IMPORTED_MODULE_20__.cn)('flex items-center gap-2 py-1.5 pl-[3.25rem] pr-5 text-[13px] transition-colors duration-200', isActive ? 'text-[#FF6B35] font-semibold' : 'text-white/55 hover:text-white');
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(Icon, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(Icon, {
                   className: "h-3.5 w-3.5 shrink-0"
                 }), label]
               }, to);
             })
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_23__.jsx)(NavItem, {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_24__.jsx)(NavItem, {
           to: "/settings",
           icon: lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"],
           isCollapsed: isCollapsed,
@@ -32556,14 +33588,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/log-out.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/package.js");
 /* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/star.js");
-/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
-/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
-/* harmony import */ var _shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ../shared/ConfirmModal */ "./resources/js/components/shared/ConfirmModal.js");
-/* harmony import */ var _shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ../shared/NotificationPanel */ "./resources/js/components/shared/NotificationPanel.js");
-/* harmony import */ var _shared_Tooltip__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ../shared/Tooltip */ "./resources/js/components/shared/Tooltip.js");
-/* harmony import */ var _shared_SidebarToggle__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ../shared/SidebarToggle */ "./resources/js/components/shared/SidebarToggle.js");
-/* harmony import */ var _shared_SidebarSection__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ../shared/SidebarSection */ "./resources/js/components/shared/SidebarSection.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var lucide_react__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! lucide-react */ "./node_modules/lucide-react/dist/esm/icons/wallet.js");
+/* harmony import */ var _hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ../../hooks/useSilentRefresh */ "./resources/js/hooks/useSilentRefresh.js");
+/* harmony import */ var _store_dataStore__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ../../store/dataStore */ "./resources/js/store/dataStore.js");
+/* harmony import */ var _shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ../shared/ConfirmModal */ "./resources/js/components/shared/ConfirmModal.js");
+/* harmony import */ var _shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ../shared/NotificationPanel */ "./resources/js/components/shared/NotificationPanel.js");
+/* harmony import */ var _shared_Tooltip__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ../shared/Tooltip */ "./resources/js/components/shared/Tooltip.js");
+/* harmony import */ var _shared_SidebarToggle__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ../shared/SidebarToggle */ "./resources/js/components/shared/SidebarToggle.js");
+/* harmony import */ var _shared_SidebarSection__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ../shared/SidebarSection */ "./resources/js/components/shared/SidebarSection.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
@@ -32657,9 +33690,9 @@ function RiderDashboardV3() {
     user = _useAuth.user,
     logout = _useAuth.logout;
   var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_3__.useNavigate)();
-  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_22__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD),
+  var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_23__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_DASHBOARD),
     dashTrigger = _useSilentRefresh.refreshTrigger;
-  var _useSilentRefresh2 = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_22__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_NOTIFICATIONS),
+  var _useSilentRefresh2 = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_23__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_NOTIFICATIONS),
     notifTrigger = _useSilentRefresh2.refreshTrigger;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('dashboard'),
     _useState2 = _slicedToArray(_useState, 2),
@@ -32683,46 +33716,58 @@ function RiderDashboardV3() {
       active: 0,
       done: 0,
       total: 0,
-      earnings: 0
+      earnings: 0,
+      todayEarnings: 0,
+      cashToRemitToday: 0
     }),
     _useState0 = _slicedToArray(_useState9, 2),
     stats = _useState0[0],
     setStats = _useState0[1];
-  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+      today_earnings: 0,
+      available: 0,
+      pending: 0,
+      cash_to_remit_today: 0,
+      recent_paid: []
+    }),
     _useState10 = _slicedToArray(_useState1, 2),
-    deliveries = _useState10[0],
-    setDeliveries = _useState10[1];
+    walletData = _useState10[0],
+    setWalletData = _useState10[1];
   var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState12 = _slicedToArray(_useState11, 2),
-    nearbyOrders = _useState12[0],
-    setNearbyOrders = _useState12[1];
+    deliveries = _useState12[0],
+    setDeliveries = _useState12[1];
   var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState14 = _slicedToArray(_useState13, 2),
-    notifications = _useState14[0],
-    setNotifications = _useState14[1];
-  var _useState15 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    nearbyOrders = _useState14[0],
+    setNearbyOrders = _useState14[1];
+  var _useState15 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
     _useState16 = _slicedToArray(_useState15, 2),
-    unreadCount = _useState16[0],
-    setUnreadCount = _useState16[1];
-  var _useState17 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    notifications = _useState16[0],
+    setNotifications = _useState16[1];
+  var _useState17 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
     _useState18 = _slicedToArray(_useState17, 2),
-    riderPosition = _useState18[0],
-    setRiderPosition = _useState18[1];
-  var riderPositionRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  var _useState19 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    unreadCount = _useState18[0],
+    setUnreadCount = _useState18[1];
+  var _useState19 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState20 = _slicedToArray(_useState19, 2),
-    showNotifications = _useState20[0],
-    setShowNotifications = _useState20[1];
-  var _useState21 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
+    riderPosition = _useState20[0],
+    setRiderPosition = _useState20[1];
+  var riderPositionRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var _useState21 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState22 = _slicedToArray(_useState21, 2),
+    showNotifications = _useState22[0],
+    setShowNotifications = _useState22[1];
+  var _useState23 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
       show: false,
       title: '',
       message: '',
       onConfirm: null,
       variant: 'default'
     }),
-    _useState22 = _slicedToArray(_useState21, 2),
-    confirmModal = _useState22[0],
-    setConfirmModal = _useState22[1];
+    _useState24 = _slicedToArray(_useState23, 2),
+    confirmModal = _useState24[0],
+    setConfirmModal = _useState24[1];
   var showConfirm = function showConfirm(title, message, onConfirm) {
     var variant = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'default';
     setConfirmModal({
@@ -32744,62 +33789,62 @@ function RiderDashboardV3() {
   };
 
   // State for order management
-  var _useState23 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState24 = _slicedToArray(_useState23, 2),
-    assigningOrder = _useState24[0],
-    setAssigningOrder = _useState24[1];
   var _useState25 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState26 = _slicedToArray(_useState25, 2),
-    decliningOrder = _useState26[0],
-    setDecliningOrder = _useState26[1];
-  var _useState27 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    assigningOrder = _useState26[0],
+    setAssigningOrder = _useState26[1];
+  var _useState27 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState28 = _slicedToArray(_useState27, 2),
-    declineNote = _useState28[0],
-    setDeclineNote = _useState28[1];
-  var _useState29 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    decliningOrder = _useState28[0],
+    setDecliningOrder = _useState28[1];
+  var _useState29 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
     _useState30 = _slicedToArray(_useState29, 2),
-    showDeclineModal = _useState30[0],
-    setShowDeclineModal = _useState30[1];
-
-  // New Proof of Delivery Modal State
+    declineNote = _useState30[0],
+    setDeclineNote = _useState30[1];
   var _useState31 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState32 = _slicedToArray(_useState31, 2),
-    showProofModal = _useState32[0],
-    setShowProofModal = _useState32[1];
-  var _useState33 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    showDeclineModal = _useState32[0],
+    setShowDeclineModal = _useState32[1];
+
+  // New Proof of Delivery Modal State
+  var _useState33 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState34 = _slicedToArray(_useState33, 2),
-    selectedDeliveryToProof = _useState34[0],
-    setSelectedDeliveryToProof = _useState34[1];
+    showProofModal = _useState34[0],
+    setShowProofModal = _useState34[1];
   var _useState35 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState36 = _slicedToArray(_useState35, 2),
-    proofFile = _useState36[0],
-    setProofFile = _useState36[1];
+    selectedDeliveryToProof = _useState36[0],
+    setSelectedDeliveryToProof = _useState36[1];
   var _useState37 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState38 = _slicedToArray(_useState37, 2),
-    proofPreview = _useState38[0],
-    setProofPreview = _useState38[1];
-  var _useState39 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    proofFile = _useState38[0],
+    setProofFile = _useState38[1];
+  var _useState39 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState40 = _slicedToArray(_useState39, 2),
-    proofError = _useState40[0],
-    setProofError = _useState40[1];
-  var _useState41 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    proofPreview = _useState40[0],
+    setProofPreview = _useState40[1];
+  var _useState41 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
     _useState42 = _slicedToArray(_useState41, 2),
-    isSubmittingProof = _useState42[0],
-    setIsSubmittingProof = _useState42[1];
-  var _useState43 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    proofError = _useState42[0],
+    setProofError = _useState42[1];
+  var _useState43 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState44 = _slicedToArray(_useState43, 2),
-    focusedDeliveryId = _useState44[0],
-    setFocusedDeliveryId = _useState44[1];
+    isSubmittingProof = _useState44[0],
+    setIsSubmittingProof = _useState44[1];
   var _useState45 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState46 = _slicedToArray(_useState45, 2),
-    uploadingProof = _useState46[0],
-    setUploadingProof = _useState46[1];
+    focusedDeliveryId = _useState46[0],
+    setFocusedDeliveryId = _useState46[1];
+  var _useState47 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState48 = _slicedToArray(_useState47, 2),
+    uploadingProof = _useState48[0],
+    setUploadingProof = _useState48[1];
 
   // Map and routing state
-  var _useState47 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
-    _useState48 = _slicedToArray(_useState47, 2),
-    roadRoutes = _useState48[0],
-    setRoadRoutes = _useState48[1];
+  var _useState49 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
+    _useState50 = _slicedToArray(_useState49, 2),
+    roadRoutes = _useState50[0],
+    setRoadRoutes = _useState50[1];
   var fileInputRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var mapRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
 
@@ -33011,7 +34056,10 @@ function RiderDashboardV3() {
               active: dashStats.active || 0,
               done: dashStats.done || 0,
               total: dashStats.total || 0,
-              earnings: dashStats.collected || 0
+              earnings: dashStats.collected || 0,
+              // Wave 6 — rider fee earnings + cash still owed for the day
+              todayEarnings: dashStats.today_earnings || 0,
+              cashToRemitToday: dashStats.cash_to_remit_today || 0
             });
             setDeliveries(Array.isArray(my_jobs) ? my_jobs : []);
             setNearbyOrders(Array.isArray(nearby) ? nearby : []);
@@ -33060,6 +34108,29 @@ function RiderDashboardV3() {
     }, _callee6, null, [[0, 2]]);
   })), []);
 
+  // Wave 6 — wallet figures, fetched on-demand when the rider opens the Wallet tab
+  var fetchWallet = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
+    var r, _t6;
+    return _regenerator().w(function (_context7) {
+      while (1) switch (_context7.p = _context7.n) {
+        case 0:
+          _context7.p = 0;
+          _context7.n = 1;
+          return _lib_api__WEBPACK_IMPORTED_MODULE_1__.silentApi.get('/riders/me/wallet');
+        case 1:
+          r = _context7.v;
+          if (isMountedRef.current) setWalletData(r.data.data || {});
+          _context7.n = 3;
+          break;
+        case 2:
+          _context7.p = 2;
+          _t6 = _context7.v;
+        case 3:
+          return _context7.a(2);
+      }
+    }, _callee7, null, [[0, 2]]);
+  })), []);
+
   // Initialize data
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     fetchData(deliveries.length > 0 || nearbyOrders.length > 0);
@@ -33067,6 +34138,9 @@ function RiderDashboardV3() {
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     fetchNotifications(notifications.length > 0);
   }, [fetchNotifications, notifTrigger]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (view === 'wallet') fetchWallet();
+  }, [view, fetchWallet, dashTrigger]);
 
   // Real-time synchronization is now handled by the refreshTrigger logic in the effects above
 
@@ -33107,26 +34181,26 @@ function RiderDashboardV3() {
   }, []);
 
   // Fetch road routes
-  var fetchRoadRoutes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
-    var allOrders, newRoutes, routePromises, _iterator, _step, _loop, _t6;
-    return _regenerator().w(function (_context8) {
-      while (1) switch (_context8.p = _context8.n) {
+  var fetchRoadRoutes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8() {
+    var allOrders, newRoutes, routePromises, _iterator, _step, _loop, _t7;
+    return _regenerator().w(function (_context9) {
+      while (1) switch (_context9.p = _context9.n) {
         case 0:
           if (!(!isMountedRef.current || !riderPosition)) {
-            _context8.n = 1;
+            _context9.n = 1;
             break;
           }
-          return _context8.a(2);
+          return _context9.a(2);
         case 1:
           allOrders = [].concat(_toConsumableArray(deliveries), _toConsumableArray(nearbyOrders));
           newRoutes = {};
           routePromises = [];
           _iterator = _createForOfIteratorHelper(allOrders);
-          _context8.p = 2;
+          _context9.p = 2;
           _loop = /*#__PURE__*/_regenerator().m(function _loop() {
             var order, routeKey, promise;
-            return _regenerator().w(function (_context7) {
-              while (1) switch (_context7.n) {
+            return _regenerator().w(function (_context8) {
+              while (1) switch (_context8.n) {
                 case 0:
                   order = _step.value;
                   if (order.customer_latitude && order.customer_longitude) {
@@ -33141,33 +34215,33 @@ function RiderDashboardV3() {
                     }
                   }
                 case 1:
-                  return _context7.a(2);
+                  return _context8.a(2);
               }
             }, _loop);
           });
           _iterator.s();
         case 3:
           if ((_step = _iterator.n()).done) {
-            _context8.n = 5;
+            _context9.n = 5;
             break;
           }
-          return _context8.d(_regeneratorValues(_loop()), 4);
+          return _context9.d(_regeneratorValues(_loop()), 4);
         case 4:
-          _context8.n = 3;
+          _context9.n = 3;
           break;
         case 5:
-          _context8.n = 7;
+          _context9.n = 7;
           break;
         case 6:
-          _context8.p = 6;
-          _t6 = _context8.v;
-          _iterator.e(_t6);
+          _context9.p = 6;
+          _t7 = _context9.v;
+          _iterator.e(_t7);
         case 7:
-          _context8.p = 7;
+          _context9.p = 7;
           _iterator.f();
-          return _context8.f(7);
+          return _context9.f(7);
         case 8:
-          _context8.n = 9;
+          _context9.n = 9;
           return Promise.all(routePromises);
         case 9:
           if (isMountedRef.current && Object.keys(newRoutes).length > 0) {
@@ -33176,9 +34250,9 @@ function RiderDashboardV3() {
             });
           }
         case 10:
-          return _context8.a(2);
+          return _context9.a(2);
       }
-    }, _callee7, null, [[2, 6, 7, 8]]);
+    }, _callee8, null, [[2, 6, 7, 8]]);
   })), [deliveries, nearbyOrders, riderPosition, roadRoutes, getRoadRoute]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (deliveries.length > 0 || nearbyOrders.length > 0) {
@@ -33198,7 +34272,7 @@ function RiderDashboardV3() {
   var handleMarkNotificationsRead = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
     if (unreadCount > 0) {
       _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post('/riders/me/notifications/read').then(function () {
-        (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_NOTIFICATIONS);
+        (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_NOTIFICATIONS);
         if (isMountedRef.current) {
           setUnreadCount(0);
           setNotifications(function (prev) {
@@ -33215,34 +34289,34 @@ function RiderDashboardV3() {
 
   // Handle self assign
   var handleSelfAssign = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/function () {
-    var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(deliveryId) {
-      var _err$response, _t7;
-      return _regenerator().w(function (_context9) {
-        while (1) switch (_context9.p = _context9.n) {
+    var _ref1 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(deliveryId) {
+      var _err$response, _t8;
+      return _regenerator().w(function (_context0) {
+        while (1) switch (_context0.p = _context0.n) {
           case 0:
             setAssigningOrder(deliveryId);
-            _context9.p = 1;
-            _context9.n = 2;
+            _context0.p = 1;
+            _context0.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/deliveries/".concat(deliveryId, "/self-assign"));
           case 2:
-            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS);
+            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.CUSTOMER_ORDERS);
             window.location.reload();
-            _context9.n = 4;
+            _context0.n = 4;
             break;
           case 3:
-            _context9.p = 3;
-            _t7 = _context9.v;
-            alert(((_err$response = _t7.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to assign order');
+            _context0.p = 3;
+            _t8 = _context0.v;
+            alert(((_err$response = _t8.response) === null || _err$response === void 0 || (_err$response = _err$response.data) === null || _err$response === void 0 ? void 0 : _err$response.message) || 'Failed to assign order');
             if (isMountedRef.current) {
               setAssigningOrder(null);
             }
           case 4:
-            return _context9.a(2);
+            return _context0.a(2);
         }
-      }, _callee8, null, [[1, 3]]);
+      }, _callee9, null, [[1, 3]]);
     }));
     return function (_x5) {
-      return _ref0.apply(this, arguments);
+      return _ref1.apply(this, arguments);
     };
   }(), []);
 
@@ -33251,42 +34325,42 @@ function RiderDashboardV3() {
     setDecliningOrder(deliveryId);
     setShowDeclineModal(true);
   }, []);
-  var confirmDecline = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9() {
-    var _err$response2, _t8;
-    return _regenerator().w(function (_context0) {
-      while (1) switch (_context0.p = _context0.n) {
+  var confirmDecline = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0() {
+    var _err$response2, _t9;
+    return _regenerator().w(function (_context1) {
+      while (1) switch (_context1.p = _context1.n) {
         case 0:
           if (declineNote.trim()) {
-            _context0.n = 1;
+            _context1.n = 1;
             break;
           }
           alert('Please provide a reason for declining');
-          return _context0.a(2);
+          return _context1.a(2);
         case 1:
-          _context0.p = 1;
-          _context0.n = 2;
+          _context1.p = 1;
+          _context1.n = 2;
           return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/deliveries/".concat(decliningOrder, "/decline"), {
             note: declineNote
           });
         case 2:
-          (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS);
-          _context0.n = 3;
+          (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.CUSTOMER_ORDERS);
+          _context1.n = 3;
           return fetchData(true);
         case 3:
           setShowDeclineModal(false);
           setDeclineNote('');
           setDecliningOrder(null);
           alert('Order declined successfully');
-          _context0.n = 5;
+          _context1.n = 5;
           break;
         case 4:
-          _context0.p = 4;
-          _t8 = _context0.v;
-          alert(((_err$response2 = _t8.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to decline order');
+          _context1.p = 4;
+          _t9 = _context1.v;
+          alert(((_err$response2 = _t9.response) === null || _err$response2 === void 0 || (_err$response2 = _err$response2.data) === null || _err$response2 === void 0 ? void 0 : _err$response2.message) || 'Failed to decline order');
         case 5:
-          return _context0.a(2);
+          return _context1.a(2);
       }
-    }, _callee9, null, [[1, 4]]);
+    }, _callee0, null, [[1, 4]]);
   })), [declineNote, decliningOrder, fetchData]);
 
   // Open the proof modal for a given delivery id. Used by the
@@ -33301,18 +34375,25 @@ function RiderDashboardV3() {
 
   // Handle status change
   var handleStatusChange = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/function () {
-    var _ref10 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(deliveryId, newStatus) {
-      var updated, _t9;
-      return _regenerator().w(function (_context1) {
-        while (1) switch (_context1.p = _context1.n) {
+    var _ref11 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(deliveryId, newStatus) {
+      var payload, updated, _t0;
+      return _regenerator().w(function (_context10) {
+        while (1) switch (_context10.p = _context10.n) {
           case 0:
-            _context1.p = 0;
-            _context1.n = 1;
-            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].put("/deliveries/".concat(deliveryId, "/status"), {
+            _context10.p = 0;
+            // Wave 6 — when transitioning to delivered, send rider GPS so the
+            // backend can stamp mark_delivered_lat/lng + geofence_flag.
+            payload = {
               status: newStatus
-            });
+            };
+            if (newStatus === 'delivered' && riderPositionRef.current) {
+              payload.rider_latitude = riderPositionRef.current.lat;
+              payload.rider_longitude = riderPositionRef.current.lng;
+            }
+            _context10.n = 1;
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].put("/deliveries/".concat(deliveryId, "/status"), payload);
           case 1:
-            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS);
+            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.CUSTOMER_ORDERS);
             if (isMountedRef.current) {
               updated = deliveries.map(function (d) {
                 return d.id === deliveryId ? _objectSpread(_objectSpread({}, d), {}, {
@@ -33321,33 +34402,38 @@ function RiderDashboardV3() {
               });
               setDeliveries(updated);
             }
-            _context1.n = 3;
+            _context10.n = 3;
             break;
           case 2:
-            _context1.p = 2;
-            _t9 = _context1.v;
-            console.error('Failed to update status:', _t9);
+            _context10.p = 2;
+            _t0 = _context10.v;
+            console.error('Failed to update status:', _t0);
           case 3:
-            return _context1.a(2);
+            return _context10.a(2);
         }
-      }, _callee0, null, [[0, 2]]);
+      }, _callee1, null, [[0, 2]]);
     }));
     return function (_x6, _x7) {
-      return _ref10.apply(this, arguments);
+      return _ref11.apply(this, arguments);
     };
   }(), [deliveries]);
 
   // Handle photo upload
   var handlePhotoUpload = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/function () {
-    var _ref11 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(deliveryId, file) {
-      var formData, updated, _error$response, _t0;
-      return _regenerator().w(function (_context10) {
-        while (1) switch (_context10.p = _context10.n) {
+    var _ref12 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(deliveryId, file) {
+      var formData, updated, _error$response, _t1;
+      return _regenerator().w(function (_context11) {
+        while (1) switch (_context11.p = _context11.n) {
           case 0:
             formData = new FormData();
             formData.append('photo', file);
-            _context10.p = 1;
-            _context10.n = 2;
+            // Wave 6 — send rider GPS so backend can stamp the geofence flag.
+            if (riderPositionRef.current) {
+              formData.append('rider_latitude', String(riderPositionRef.current.lat));
+              formData.append('rider_longitude', String(riderPositionRef.current.lng));
+            }
+            _context11.p = 1;
+            _context11.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/deliveries/".concat(deliveryId, "/upload-proof"), formData, {
               headers: {
                 'Content-Type': 'multipart/form-data'
@@ -33355,7 +34441,7 @@ function RiderDashboardV3() {
             });
           case 2:
             if (isMountedRef.current) {
-              (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_23__.STALE_KEYS.CUSTOMER_ORDERS);
+              (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.CUSTOMER_ORDERS);
               updated = deliveries.filter(function (d) {
                 return d.id !== deliveryId;
               });
@@ -33373,27 +34459,27 @@ function RiderDashboardV3() {
               setProofPreview(null);
               alert("Delivery confirmed and proof sent!");
             }
-            _context10.n = 4;
+            _context11.n = 4;
             break;
           case 3:
-            _context10.p = 3;
-            _t0 = _context10.v;
-            console.error('Failed to upload proof:', _t0);
-            setProofError(((_error$response = _t0.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || 'Failed to submit proof. Try again.');
+            _context11.p = 3;
+            _t1 = _context11.v;
+            console.error('Failed to upload proof:', _t1);
+            setProofError(((_error$response = _t1.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || 'Failed to submit proof. Try again.');
           case 4:
-            _context10.p = 4;
+            _context11.p = 4;
             if (isMountedRef.current) {
               setIsSubmittingProof(false);
               setUploadingProof(null);
             }
-            return _context10.f(4);
+            return _context11.f(4);
           case 5:
-            return _context10.a(2);
+            return _context11.a(2);
         }
-      }, _callee1, null, [[1, 3, 4, 5]]);
+      }, _callee10, null, [[1, 3, 4, 5]]);
     }));
     return function (_x8, _x9) {
-      return _ref11.apply(this, arguments);
+      return _ref12.apply(this, arguments);
     };
   }(), [deliveries]);
   var handleProofFileChange = function handleProofFileChange(e) {
@@ -33420,34 +34506,34 @@ function RiderDashboardV3() {
     }
     return "https://ui-avatars.com/api/?name=".concat(encodeURIComponent((user === null || user === void 0 ? void 0 : user.name) || 'Rider'), "&background=111827&color=fff&size=48");
   }, [user]);
-  if (loading) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+  if (loading) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
     className: "loading-page",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
       className: "spinner"
     })
   });
   if (user && user.status === 'suspended') {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
       className: "min-h-screen flex items-center justify-center p-8 bg-secondary/30",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
         className: "bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center border-red-500/50",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           className: "text-lg font-black text-gray-900 mb-6 tracking-tighter",
           children: "HRMS"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           className: "mb-4",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_15__["default"], {
             className: "h-16 w-16 mx-auto text-red-500"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h1", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h1", {
           className: "text-xl font-bold text-gray-900 mb-3",
           children: "Account Suspended"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
           className: "text-gray-600 leading-relaxed mb-6 max-w-sm mx-auto",
           children: "Your rider account has been suspended by the management. Please contact support or visit the main office for clarification regarding your account status."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           className: "flex flex-col gap-2",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
             onClick: function onClick() {
               return navigate('/login');
             },
@@ -33459,27 +34545,27 @@ function RiderDashboardV3() {
     });
   }
   if (user && (user.status === 'pending' || user.status === 'interview_set')) {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
       className: "min-h-screen flex items-center justify-center p-8 bg-secondary/30",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
         className: "bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center border-orange-500/50",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           className: "text-lg font-black text-gray-900 mb-6 tracking-tighter",
           children: "HRMS"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           className: "mb-4",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"], {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_18__["default"], {
             className: "h-16 w-16 mx-auto text-orange-500"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h1", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h1", {
           className: "text-xl font-bold text-gray-900 mb-3",
           children: user.status === 'interview_set' ? 'Interview Scheduled' : 'Application Pending'
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
           className: "text-gray-600 leading-relaxed mb-6 max-w-sm mx-auto",
           children: user.status === 'interview_set' ? 'Your interview has been scheduled. Please wait for further instructions from the admin.' : 'Your rider application is under review. Please wait for the admin to schedule an interview or approve your account.'
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           className: "flex flex-col gap-2",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
             onClick: function onClick() {
               return navigate('/login');
             },
@@ -33491,7 +34577,7 @@ function RiderDashboardV3() {
     });
   }
   if (view === 'settings') {
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_RiderSettings__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_RiderSettings__WEBPACK_IMPORTED_MODULE_4__["default"], {
       onBack: function onBack() {
         return setView('dashboard');
       }
@@ -33508,17 +34594,21 @@ function RiderDashboardV3() {
     label: 'Active Deliveries',
     icon: lucide_react__WEBPACK_IMPORTED_MODULE_20__["default"]
   }, {
+    id: 'wallet',
+    label: 'Wallet',
+    icon: lucide_react__WEBPACK_IMPORTED_MODULE_22__["default"]
+  }, {
     id: 'ratings',
     label: 'Ratings',
     icon: lucide_react__WEBPACK_IMPORTED_MODULE_21__["default"]
   }];
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
     style: {
       display: 'flex',
       minHeight: '100vh',
       backgroundColor: '#f3f4f6'
     },
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
       style: {
         width: sidebarOpen ? '260px' : '80px',
         backgroundColor: '#1f2937',
@@ -33529,7 +34619,7 @@ function RiderDashboardV3() {
         zIndex: 1000,
         overflow: 'hidden'
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
         style: {
           padding: '1.5rem',
           borderBottom: '1px solid #374151',
@@ -33538,13 +34628,13 @@ function RiderDashboardV3() {
           justifyContent: sidebarOpen ? 'flex-start' : 'center',
           height: '88px'
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("img", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("img", {
             src: getPhotoUrl(),
             alt: "",
             style: {
@@ -33553,15 +34643,15 @@ function RiderDashboardV3() {
               borderRadius: '10px',
               objectFit: 'cover'
             }
-          }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+          }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
               style: {
                 fontWeight: 700,
                 fontSize: '0.95rem',
                 whiteSpace: 'nowrap'
               },
               children: (user === null || user === void 0 ? void 0 : user.name) || 'Rider'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
               style: {
                 fontSize: '0.75rem',
                 color: '#9ca3af'
@@ -33570,17 +34660,17 @@ function RiderDashboardV3() {
             })]
           })]
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("nav", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("nav", {
         style: {
           padding: '1rem 0',
           display: 'flex',
           flexDirection: 'column'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_shared_SidebarSection__WEBPACK_IMPORTED_MODULE_28__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_shared_SidebarSection__WEBPACK_IMPORTED_MODULE_29__["default"], {
           label: "Main",
           isCollapsed: !sidebarOpen,
           className: "pt-0"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           style: {
             display: 'flex',
             alignItems: 'center',
@@ -33589,7 +34679,7 @@ function RiderDashboardV3() {
             marginBottom: '0.5rem',
             marginTop: !sidebarOpen ? '-4px' : '-34px'
           },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_shared_SidebarToggle__WEBPACK_IMPORTED_MODULE_27__["default"], {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_shared_SidebarToggle__WEBPACK_IMPORTED_MODULE_28__["default"], {
             isCollapsed: !sidebarOpen,
             onToggle: function onToggle() {
               return setSidebarOpen(!sidebarOpen);
@@ -33598,7 +34688,7 @@ function RiderDashboardV3() {
           })
         }), menuItems.map(function (item) {
           var Icon = item.icon;
-          var btn = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("button", {
+          var btn = /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("button", {
             onClick: function onClick() {
               return setView(item.id);
             },
@@ -33622,31 +34712,31 @@ function RiderDashboardV3() {
             onMouseLeave: function onMouseLeave(e) {
               if (view !== item.id) e.target.style.backgroundColor = 'transparent';
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(Icon, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(Icon, {
               size: 20,
               style: {
                 flexShrink: 0
               }
-            }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+            }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
               children: item.label
             })]
           }, item.id);
-          return !sidebarOpen ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_shared_Tooltip__WEBPACK_IMPORTED_MODULE_26__["default"], {
+          return !sidebarOpen ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_shared_Tooltip__WEBPACK_IMPORTED_MODULE_27__["default"], {
             label: item.label,
             position: "right",
             delay: 200,
             className: "w-full",
             children: btn
-          }, item.id) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
+          }, item.id) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
             children: btn
           }, item.id);
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
         style: {
           padding: sidebarOpen ? '1rem 1.5rem' : '1rem 12px',
           marginTop: 'auto'
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("button", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("button", {
           onClick: logout,
           title: !sidebarOpen ? 'Sign Out' : undefined,
           "aria-label": "Sign Out",
@@ -33671,17 +34761,17 @@ function RiderDashboardV3() {
           onMouseLeave: function onMouseLeave(e) {
             return e.target.style.backgroundColor = '#ef4444';
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_19__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_19__["default"], {
             size: 20,
             style: {
               flexShrink: 0
             }
-          }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+          }), sidebarOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
             children: "Sign Out"
           })]
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
       style: {
         flex: 1,
         marginLeft: sidebarOpen ? '260px' : '80px',
@@ -33689,21 +34779,21 @@ function RiderDashboardV3() {
         padding: '2rem',
         position: 'relative'
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
         style: {
           position: 'absolute',
           top: '2rem',
           right: '2rem',
           zIndex: 1001
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             position: 'relative'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_shared_Tooltip__WEBPACK_IMPORTED_MODULE_26__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_shared_Tooltip__WEBPACK_IMPORTED_MODULE_27__["default"], {
             label: "Notifications",
             position: "bottom",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("button", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("button", {
               onClick: function onClick() {
                 return setShowNotifications(!showNotifications);
               },
@@ -33728,10 +34818,10 @@ function RiderDashboardV3() {
               onMouseLeave: function onMouseLeave(e) {
                 return e.currentTarget.style.backgroundColor = '#fff';
               },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
                 size: 20,
                 color: "#4b5563"
-              }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+              }), unreadCount > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
                 style: {
                   position: 'absolute',
                   top: '-4px',
@@ -33751,7 +34841,7 @@ function RiderDashboardV3() {
                 children: unreadCount > 9 ? '9+' : unreadCount
               })]
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_25__["default"], {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_shared_NotificationPanel__WEBPACK_IMPORTED_MODULE_26__["default"], {
             notifications: notifications,
             setNotifications: setNotifications,
             unreadCount: unreadCount,
@@ -33779,8 +34869,8 @@ function RiderDashboardV3() {
             }
           })]
         })
-      }), view === 'dashboard' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h1", {
+      }), view === 'dashboard' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h1", {
           style: {
             fontSize: '2rem',
             fontWeight: 800,
@@ -33788,7 +34878,7 @@ function RiderDashboardV3() {
             color: '#111827'
           },
           children: "Dashboard"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           style: {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -33806,8 +34896,9 @@ function RiderDashboardV3() {
             color: '#10b981',
             bg: '#ecfdf5'
           }, {
-            label: 'Total Earnings',
-            value: formatCurrency(stats.earnings),
+            label: "Today's Earnings",
+            value: formatCurrency(stats.todayEarnings || 0),
+            sub: "Cash to remit today: ".concat(formatCurrency(stats.cashToRemitToday || 0)),
             color: '#f59e0b',
             bg: '#fffbeb'
           }, {
@@ -33816,7 +34907,7 @@ function RiderDashboardV3() {
             color: '#6b7280',
             bg: '#f9fafb'
           }].map(function (stat, idx) {
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
               style: {
                 backgroundColor: '#fff',
                 borderRadius: '16px',
@@ -33824,26 +34915,34 @@ function RiderDashboardV3() {
                 border: '1px solid #e5e7eb',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
               },
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
                 style: {
                   fontSize: '0.875rem',
                   color: '#6b7280',
                   marginBottom: '0.5rem'
                 },
                 children: stat.label
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
                 style: {
                   fontSize: '2rem',
                   fontWeight: 800,
                   color: stat.color
                 },
                 children: stat.value
+              }), stat.sub && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+                style: {
+                  fontSize: '0.75rem',
+                  color: '#6b7280',
+                  marginTop: '0.25rem',
+                  fontWeight: 500
+                },
+                children: stat.sub
               })]
             }, idx);
           })
         })]
-      }), view === 'deliveries' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h1", {
+      }), view === 'deliveries' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h1", {
           style: {
             fontSize: '2rem',
             fontWeight: 800,
@@ -33851,7 +34950,7 @@ function RiderDashboardV3() {
             color: '#111827'
           },
           children: "Active Deliveries"
-        }), deliveries.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        }), deliveries.length === 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             backgroundColor: '#fff',
             borderRadius: '12px',
@@ -33859,26 +34958,26 @@ function RiderDashboardV3() {
             textAlign: 'center',
             border: '1px solid #e5e7eb'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_20__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_20__["default"], {
             size: 48,
             style: {
               color: '#9ca3af',
               margin: '0 auto 1rem'
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("p", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
             style: {
               color: '#6b7280'
             },
             children: "No active deliveries"
           })]
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           style: {
             display: 'grid',
             gap: '1rem'
           },
           children: deliveries.map(function (delivery) {
             var _delivery$distance, _delivery$eta;
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
               style: {
                 backgroundColor: '#fff',
                 borderRadius: '12px',
@@ -33886,24 +34985,24 @@ function RiderDashboardV3() {
                 border: '1px solid #e5e7eb',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
               },
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                 style: {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'start'
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                   style: {
                     flex: 1
                   },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                     style: {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.75rem',
                       marginBottom: '0.5rem'
                     },
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("span", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("span", {
                       style: {
                         fontSize: '0.875rem',
                         fontWeight: 700,
@@ -33913,7 +35012,7 @@ function RiderDashboardV3() {
                         borderRadius: '20px'
                       },
                       children: ["#", delivery.tracking_number]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
                       style: {
                         fontSize: '0.875rem',
                         fontWeight: 600,
@@ -33921,21 +35020,21 @@ function RiderDashboardV3() {
                       },
                       children: riderPosition && delivery.customer_latitude && delivery.customer_longitude ? formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, delivery.customer_latitude, delivery.customer_longitude)) : (_delivery$distance = delivery.distance) !== null && _delivery$distance !== void 0 ? _delivery$distance : '—'
                     })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h3", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h3", {
                     style: {
                       fontSize: '1.125rem',
                       fontWeight: 600,
                       marginBottom: '0.25rem'
                     },
                     children: delivery.customer_name
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("p", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
                     style: {
                       color: '#6b7280',
                       fontSize: '0.875rem',
                       marginBottom: '0.5rem'
                     },
                     children: delivery.customer_address
-                  }), delivery.status === 'delivered' && !delivery.proof_photo && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("p", {
+                  }), delivery.status === 'delivered' && !delivery.proof_photo && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
                     style: {
                       color: '#dc2626',
                       fontSize: '0.75rem',
@@ -33943,7 +35042,7 @@ function RiderDashboardV3() {
                       marginBottom: '0.25rem'
                     },
                     children: "Awaiting proof of delivery upload"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("p", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("p", {
                     style: {
                       color: '#059669',
                       fontSize: '0.875rem',
@@ -33951,12 +35050,12 @@ function RiderDashboardV3() {
                     },
                     children: ["ETA: ", riderPosition && delivery.customer_latitude && delivery.customer_longitude ? formatEta(haversineKm(riderPosition.lat, riderPosition.lng, delivery.customer_latitude, delivery.customer_longitude)) : (_delivery$eta = delivery.eta) !== null && _delivery$eta !== void 0 ? _delivery$eta : '—']
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                   style: {
                     display: 'flex',
                     gap: '0.5rem'
                   },
-                  children: [delivery.status === 'confirmed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+                  children: [delivery.status === 'confirmed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
                     onClick: function onClick() {
                       return handleStatusChange(delivery.id, 'in_progress');
                     },
@@ -33971,8 +35070,8 @@ function RiderDashboardV3() {
                       fontSize: '0.875rem'
                     },
                     children: "Start Delivery"
-                  }), delivery.status === 'in_progress' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.Fragment, {
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+                  }), delivery.status === 'in_progress' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.Fragment, {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
                       onClick: function onClick() {
                         setFocusedDeliveryId(delivery.id);
                         setShowMap(true);
@@ -33988,7 +35087,7 @@ function RiderDashboardV3() {
                         fontSize: '0.875rem'
                       },
                       children: "Location"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
                       onClick: function onClick() {
                         return handleStatusChange(delivery.id, 'delivered');
                       },
@@ -34004,7 +35103,7 @@ function RiderDashboardV3() {
                       },
                       children: "Mark Delivered"
                     })]
-                  }), delivery.status === 'delivered' && !delivery.proof_photo && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+                  }), delivery.status === 'delivered' && !delivery.proof_photo && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
                     onClick: function onClick() {
                       return openProofModal(delivery.id);
                     },
@@ -34024,11 +35123,11 @@ function RiderDashboardV3() {
               })
             }, delivery.id);
           })
-        }), nearbyOrders.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        }), nearbyOrders.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             marginTop: '3rem'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h1", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h1", {
             style: {
               fontSize: '2rem',
               fontWeight: 800,
@@ -34036,7 +35135,7 @@ function RiderDashboardV3() {
               color: '#111827'
             },
             children: "Nearby Orders"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
             style: {
               display: 'grid',
               gap: '1rem'
@@ -34045,7 +35144,7 @@ function RiderDashboardV3() {
               return a.distance_value - b.distance_value;
             }).map(function (order) {
               var _order$distance, _order$sale, _order$sale2;
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
                 style: {
                   backgroundColor: '#fff',
                   borderRadius: '12px',
@@ -34053,24 +35152,24 @@ function RiderDashboardV3() {
                   border: '1px solid #e5e7eb',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                 },
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                   style: {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'start'
                   },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                     style: {
                       flex: 1
                     },
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                       style: {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.75rem',
                         marginBottom: '0.5rem'
                       },
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("span", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("span", {
                         style: {
                           fontSize: '0.875rem',
                           fontWeight: 700,
@@ -34080,7 +35179,7 @@ function RiderDashboardV3() {
                           borderRadius: '20px'
                         },
                         children: ["#", order.tracking_number]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
                         style: {
                           fontSize: '0.875rem',
                           fontWeight: 600,
@@ -34088,28 +35187,28 @@ function RiderDashboardV3() {
                         },
                         children: riderPosition && order.latitude && order.longitude ? "".concat(formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, order.latitude, order.longitude)), " \u2022 ~").concat(formatEta(haversineKm(riderPosition.lat, riderPosition.lng, order.latitude, order.longitude))) : (_order$distance = order.distance) !== null && _order$distance !== void 0 ? _order$distance : '—'
                       })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h3", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h3", {
                       style: {
                         fontSize: '1.125rem',
                         fontWeight: 600,
                         marginBottom: '0.25rem'
                       },
                       children: order.customer_name
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("p", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
                       style: {
                         color: '#6b7280',
                         fontSize: '0.875rem',
                         marginBottom: '0.75rem'
                       },
                       children: order.customer_address
-                    }), ((_order$sale = order.sale) === null || _order$sale === void 0 ? void 0 : _order$sale.items) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                    }), ((_order$sale = order.sale) === null || _order$sale === void 0 ? void 0 : _order$sale.items) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                       style: {
                         backgroundColor: '#f9fafb',
                         padding: '0.75rem',
                         borderRadius: '8px',
                         marginBottom: '1rem'
                       },
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                         style: {
                           fontSize: '0.75rem',
                           fontWeight: 700,
@@ -34118,7 +35217,7 @@ function RiderDashboardV3() {
                           marginBottom: '0.25rem'
                         },
                         children: ["Order Items (", order.sale.items.length, ")"]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("ul", {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("ul", {
                         style: {
                           margin: 0,
                           paddingLeft: '1.25rem',
@@ -34126,27 +35225,27 @@ function RiderDashboardV3() {
                           color: '#4b5563'
                         },
                         children: order.sale.items.map(function (item, idx) {
-                          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("li", {
+                          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("li", {
                             children: (0,_utils_orderItemLabel__WEBPACK_IMPORTED_MODULE_14__.orderItemLabel)(item)
                           }, idx);
                         })
                       })]
                     })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                     style: {
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'flex-end',
                       gap: '1rem'
                     },
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
                       style: {
                         fontSize: '1.25rem',
                         fontWeight: 800,
                         color: '#111827'
                       },
                       children: formatCurrency((_order$sale2 = order.sale) === null || _order$sale2 === void 0 ? void 0 : _order$sale2.total_amount)
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
                       onClick: function onClick() {
                         return handleSelfAssign(order.id);
                       },
@@ -34170,8 +35269,164 @@ function RiderDashboardV3() {
             })
           })]
         })]
-      }), view === 'ratings' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h1", {
+      }), view === 'wallet' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h1", {
+          style: {
+            fontSize: '2rem',
+            fontWeight: 800,
+            marginBottom: '0.5rem',
+            color: '#111827'
+          },
+          children: "Wallet"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("p", {
+          style: {
+            color: '#6b7280',
+            marginBottom: '2rem'
+          },
+          children: ["Earn \u20B1", 30, " per successful delivery. Cash-out is paid manually by admin to your GCash within 24 hours after your day's COD cash is remitted."]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+          style: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '1.5rem',
+            marginBottom: '2rem'
+          },
+          children: [{
+            label: "Today's Earnings",
+            value: formatCurrency(walletData.today_earnings || 0),
+            color: '#f59e0b'
+          }, {
+            label: 'Available',
+            value: formatCurrency(walletData.available || 0),
+            color: '#10b981'
+          }, {
+            label: 'Pending',
+            value: formatCurrency(walletData.pending || 0),
+            color: '#6b7280'
+          }, {
+            label: 'Cash to remit today',
+            value: formatCurrency(walletData.cash_to_remit_today || 0),
+            color: '#3b82f6'
+          }].map(function (c, idx) {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+              style: {
+                backgroundColor: '#fff',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                border: '1px solid #e5e7eb',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              },
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+                style: {
+                  fontSize: '0.875rem',
+                  color: '#6b7280',
+                  marginBottom: '0.5rem'
+                },
+                children: c.label
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+                style: {
+                  fontSize: '2rem',
+                  fontWeight: 800,
+                  color: c.color
+                },
+                children: c.value
+              })]
+            }, idx);
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+          style: {
+            backgroundColor: '#fff',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            marginBottom: '1.5rem'
+          },
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h3", {
+            style: {
+              fontSize: '1.125rem',
+              fontWeight: 700,
+              marginBottom: '0.75rem',
+              color: '#111827'
+            },
+            children: "How cash-out works"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("ol", {
+            style: {
+              margin: 0,
+              paddingLeft: '1.25rem',
+              color: '#4b5563',
+              fontSize: '0.875rem',
+              lineHeight: 1.7
+            },
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("li", {
+              children: "Hand over the day's COD cash to the admin."
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("li", {
+              children: "Admin marks remittance and your eligible balance is paid via GCash."
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("li", {
+              children: "Disputed or geofence-flagged orders go on hold for admin review."
+            })]
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+          style: {
+            backgroundColor: '#fff',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          },
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h3", {
+            style: {
+              fontSize: '1.125rem',
+              fontWeight: 700,
+              marginBottom: '0.75rem',
+              color: '#111827'
+            },
+            children: "Recent payouts"
+          }), walletData.recent_paid && walletData.recent_paid.length > 0 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("ul", {
+            style: {
+              listStyle: 'none',
+              padding: 0,
+              margin: 0
+            },
+            children: walletData.recent_paid.map(function (row) {
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("li", {
+                style: {
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '0.5rem 0',
+                  borderBottom: '1px solid #f3f4f6',
+                  fontSize: '0.875rem'
+                },
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
+                  style: {
+                    color: '#4b5563'
+                  },
+                  children: row.tracking_number || "#".concat(row.id)
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
+                  style: {
+                    color: '#10b981',
+                    fontWeight: 600
+                  },
+                  children: formatCurrency(row.delivery_fee || 0)
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
+                  style: {
+                    color: '#9ca3af'
+                  },
+                  children: row.paid_at ? new Date(row.paid_at).toLocaleDateString() : ''
+                })]
+              }, row.id);
+            })
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
+            style: {
+              color: '#6b7280',
+              fontSize: '0.875rem',
+              margin: 0
+            },
+            children: "No payouts yet."
+          })]
+        })]
+      }), view === 'ratings' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h1", {
           style: {
             fontSize: '2rem',
             fontWeight: 800,
@@ -34179,14 +35434,14 @@ function RiderDashboardV3() {
             color: '#111827'
           },
           children: "Ratings & Reviews"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_RatingStatsCard__WEBPACK_IMPORTED_MODULE_5__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_RatingStatsCard__WEBPACK_IMPORTED_MODULE_5__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
           style: {
             marginTop: '2rem'
           },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_RatingNotificationsPanel__WEBPACK_IMPORTED_MODULE_6__["default"], {})
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_RatingNotificationsPanel__WEBPACK_IMPORTED_MODULE_6__["default"], {})
         })]
       })]
-    }), showMap && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+    }), showMap && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
       style: {
         position: 'fixed',
         top: 0,
@@ -34196,14 +35451,14 @@ function RiderDashboardV3() {
         zIndex: 2000,
         backgroundColor: '#fff'
       },
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
         style: {
           position: 'absolute',
           top: 20,
           left: 20,
           zIndex: 2001
         },
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
           onClick: function onClick() {
             return setShowMap(false);
           },
@@ -34219,7 +35474,7 @@ function RiderDashboardV3() {
           },
           children: "\u2715 Close Map"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
         style: {
           position: 'absolute',
           bottom: 30,
@@ -34235,20 +35490,20 @@ function RiderDashboardV3() {
           flexDirection: 'column',
           gap: '8px'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             display: 'flex',
             alignItems: 'center',
             gap: '8px'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
             style: {
               width: 12,
               height: 12,
               borderRadius: '50%',
               backgroundColor: '#ef4444'
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
             style: {
               fontSize: '12px',
               fontWeight: 600,
@@ -34256,20 +35511,20 @@ function RiderDashboardV3() {
             },
             children: "Rider (You)"
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             display: 'flex',
             alignItems: 'center',
             gap: '8px'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
             style: {
               width: 12,
               height: 12,
               borderRadius: '50%',
               backgroundColor: '#3b82f6'
             }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
             style: {
               fontSize: '12px',
               fontWeight: 600,
@@ -34278,7 +35533,7 @@ function RiderDashboardV3() {
             children: "Customer"
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)(react_leaflet__WEBPACK_IMPORTED_MODULE_7__.MapContainer, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)(react_leaflet__WEBPACK_IMPORTED_MODULE_7__.MapContainer, {
         center: riderPosition ? [riderPosition.lat, riderPosition.lng] : [7.0707, 125.6080],
         zoom: 13,
         style: {
@@ -34286,13 +35541,13 @@ function RiderDashboardV3() {
           width: '100%'
         },
         zoomControl: true,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_11__.TileLayer, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_11__.TileLayer, {
           url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
           attribution: "\xA9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
-        }), riderPosition && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_8__.Marker, {
+        }), riderPosition && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_8__.Marker, {
           position: [riderPosition.lat, riderPosition.lng],
           icon: createRiderIcon(riderPosition.heading),
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_10__.Popup, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_10__.Popup, {
             children: "You are here"
           })
         }), [].concat(_toConsumableArray(deliveries), _toConsumableArray(nearbyOrders)).filter(function (d) {
@@ -34303,22 +35558,22 @@ function RiderDashboardV3() {
           var roadRoute = roadRoutes[routeKey];
           if (!d.customer_latitude || !d.customer_longitude || !riderPosition) return null;
           var positions = roadRoute ? roadRoute.coordinates : [[riderPosition.lat, riderPosition.lng], [d.customer_latitude, d.customer_longitude]];
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_9__.Polyline, {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_9__.Polyline, {
               positions: positions,
               color: roadRoute ? "#10b981" : "#3b82f6",
               weight: 3,
               opacity: 0.8
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_8__.Marker, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_8__.Marker, {
               position: [d.customer_latitude, d.customer_longitude],
               icon: customerIcon,
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_10__.Popup, {
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("strong", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(react_leaflet__WEBPACK_IMPORTED_MODULE_10__.Popup, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("strong", {
                     children: ["Order #", d.tracking_number || d.order_id]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("br", {}), d.customer_address, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("small", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("br", {}), d.customer_address, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("small", {
                     children: ["Distance: ", riderPosition && d.customer_latitude && d.customer_longitude ? formatDistance(haversineKm(riderPosition.lat, riderPosition.lng, d.customer_latitude, d.customer_longitude)) : (_d$distance = d.distance) !== null && _d$distance !== void 0 ? _d$distance : '—']
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("small", {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("small", {
                     children: ["ETA: ", riderPosition && d.customer_latitude && d.customer_longitude ? formatEta(haversineKm(riderPosition.lat, riderPosition.lng, d.customer_latitude, d.customer_longitude)) : (_d$eta = d.eta) !== null && _d$eta !== void 0 ? _d$eta : '—']
                   })]
                 })
@@ -34327,7 +35582,7 @@ function RiderDashboardV3() {
           }, routeKey);
         })]
       })]
-    }), showProofModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+    }), showProofModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
       style: {
         position: 'fixed',
         top: 0,
@@ -34340,7 +35595,7 @@ function RiderDashboardV3() {
         justifyContent: 'center',
         zIndex: 3000
       },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
         style: {
           backgroundColor: '#fff',
           borderRadius: '12px',
@@ -34348,30 +35603,30 @@ function RiderDashboardV3() {
           width: '90%',
           maxWidth: '400px'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h3", {
           style: {
             fontSize: '1.25rem',
             fontWeight: 700,
             marginBottom: '0.5rem'
           },
           children: "Delivery Proof"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("p", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
           style: {
             color: '#6b7280',
             fontSize: '0.875rem',
             marginBottom: '1.5rem'
           },
           children: "Please provide a photo as proof of delivery to mark this order as delivered."
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             marginBottom: '1.5rem'
           },
-          children: [proofPreview ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+          children: [proofPreview ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
             style: {
               position: 'relative',
               marginBottom: '1rem'
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("img", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("img", {
               src: proofPreview,
               alt: "Proof Preview",
               style: {
@@ -34381,7 +35636,7 @@ function RiderDashboardV3() {
                 objectFit: 'contain',
                 backgroundColor: '#f3f4f6'
               }
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
               onClick: function onClick() {
                 setProofFile(null);
                 setProofPreview(null);
@@ -34404,7 +35659,7 @@ function RiderDashboardV3() {
               },
               children: "\u2715"
             })]
-          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("label", {
+          }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("label", {
             style: {
               display: 'flex',
               flexDirection: 'column',
@@ -34418,19 +35673,19 @@ function RiderDashboardV3() {
               color: '#6b7280',
               transition: 'all 0.2s'
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
               style: {
                 fontSize: '2rem',
                 marginBottom: '0.5rem'
               },
               children: "\uD83D\uDCF8"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("span", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
               style: {
                 fontSize: '0.875rem',
                 fontWeight: 500
               },
               children: "Tap to capture or upload photo"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("input", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("input", {
               type: "file",
               accept: "image/*",
               capture: "environment",
@@ -34439,7 +35694,7 @@ function RiderDashboardV3() {
                 display: 'none'
               }
             })]
-          }), proofError && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+          }), proofError && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
             style: {
               color: '#ef4444',
               fontSize: '0.875rem',
@@ -34448,12 +35703,12 @@ function RiderDashboardV3() {
             },
             children: proofError
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             display: 'flex',
             gap: '0.75rem'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
             onClick: function onClick() {
               setShowProofModal(false);
               setSelectedDeliveryToProof(null);
@@ -34473,7 +35728,7 @@ function RiderDashboardV3() {
               cursor: 'pointer'
             },
             children: "Cancel"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
             onClick: submitProof,
             disabled: isSubmittingProof,
             style: {
@@ -34491,7 +35746,7 @@ function RiderDashboardV3() {
           })]
         })]
       })
-    }), showDeclineModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("div", {
+    }), showDeclineModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
       style: {
         position: 'fixed',
         top: 0,
@@ -34504,7 +35759,7 @@ function RiderDashboardV3() {
         justifyContent: 'center',
         zIndex: 3000
       },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
         style: {
           backgroundColor: '#fff',
           borderRadius: '12px',
@@ -34512,14 +35767,14 @@ function RiderDashboardV3() {
           width: '90%',
           maxWidth: '400px'
         },
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("h3", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h3", {
           style: {
             fontSize: '1.25rem',
             fontWeight: 700,
             marginBottom: '1rem'
           },
           children: "Decline Order"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("textarea", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("textarea", {
           value: declineNote,
           onChange: function onChange(e) {
             return setDeclineNote(e.target.value);
@@ -34534,13 +35789,13 @@ function RiderDashboardV3() {
             resize: 'vertical',
             fontSize: '0.875rem'
           }
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
           style: {
             display: 'flex',
             gap: '0.75rem',
             marginTop: '1rem'
           },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
             onClick: function onClick() {
               setShowDeclineModal(false);
               setDeclineNote('');
@@ -34557,7 +35812,7 @@ function RiderDashboardV3() {
               cursor: 'pointer'
             },
             children: "Cancel"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
             onClick: confirmDecline,
             style: {
               flex: 1,
@@ -34573,7 +35828,7 @@ function RiderDashboardV3() {
           })]
         })]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_29__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_24__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)(_shared_ConfirmModal__WEBPACK_IMPORTED_MODULE_25__["default"], {
       modal: confirmModal,
       onClose: closeConfirm
     })]
@@ -53370,10 +54625,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_suppliers_SupplierCatalog__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ./components/suppliers/SupplierCatalog */ "./resources/js/components/suppliers/SupplierCatalog.js");
 /* harmony import */ var _components_admin_Returns__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! ./components/admin/Returns */ "./resources/js/components/admin/Returns.js");
 /* harmony import */ var _components_admin_GCashLogs__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! ./components/admin/GCashLogs */ "./resources/js/components/admin/GCashLogs.js");
-/* harmony import */ var _components_gcash_GCashProofSubmit__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./components/gcash/GCashProofSubmit */ "./resources/js/components/gcash/GCashProofSubmit.js");
-/* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
-/* harmony import */ var _components_shared_PaymentToast__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(/*! ./components/shared/PaymentToast */ "./resources/js/components/shared/PaymentToast.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _components_admin_Payouts__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! ./components/admin/Payouts */ "./resources/js/components/admin/Payouts.js");
+/* harmony import */ var _components_gcash_GCashProofSubmit__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(/*! ./components/gcash/GCashProofSubmit */ "./resources/js/components/gcash/GCashProofSubmit.js");
+/* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
+/* harmony import */ var _components_shared_PaymentToast__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(/*! ./components/shared/PaymentToast */ "./resources/js/components/shared/PaymentToast.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 
 
 
@@ -53442,6 +54698,9 @@ __webpack_require__.r(__webpack_exports__);
 // Admin: GCash Logs
 
 
+// Admin: Rider Cash & Payouts (Wave 6)
+
+
 // Public: GCash Proof Submission
 
 function ProtectedRoute(_ref) {
@@ -53450,38 +54709,38 @@ function ProtectedRoute(_ref) {
   var _useAuth = (0,_context_AuthContext__WEBPACK_IMPORTED_MODULE_4__.useAuth)(),
     user = _useAuth.user,
     loading = _useAuth.loading;
-  if (loading) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)("div", {
+  if (loading) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)("div", {
     className: "loading-page",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)("div", {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)("div", {
       className: "spinner"
     })
   });
 
   // Always redirect to the unified login page regardless of role
   var loginPath = '/login';
-  if (!user) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
+  if (!user) return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
     to: loginPath,
     replace: true
   });
   if (roles && !roles.includes(user.role)) {
     // Redirect based on their ACTUAL role if they hit the wrong area
-    if (user.role === 'admin') return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
+    if (user.role === 'admin') return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
       to: "/dashboard",
       replace: true
     });
-    if (user.role === 'rider') return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
+    if (user.role === 'rider') return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
       to: "/rider",
       replace: true
     });
-    if (user.role === 'customer') return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
+    if (user.role === 'customer') return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
       to: "/shop",
       replace: true
     });
-    if (user.role === 'supplier') return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
+    if (user.role === 'supplier') return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
       to: "/supplier/dashboard",
       replace: true
     });
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
+    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
       to: "/",
       replace: true
     });
@@ -53489,171 +54748,181 @@ function ProtectedRoute(_ref) {
   return children;
 }
 function AppRouter() {
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Routes, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Routes, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_landing_Landing__WEBPACK_IMPORTED_MODULE_15__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_landing_Landing__WEBPACK_IMPORTED_MODULE_15__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/login",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_auth_Login__WEBPACK_IMPORTED_MODULE_9__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_auth_Login__WEBPACK_IMPORTED_MODULE_9__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/register",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_auth_Register__WEBPACK_IMPORTED_MODULE_10__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_auth_Register__WEBPACK_IMPORTED_MODULE_10__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/rider/register",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_auth_RiderRegister__WEBPACK_IMPORTED_MODULE_11__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_auth_RiderRegister__WEBPACK_IMPORTED_MODULE_11__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/verify-email",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_auth_EmailVerification__WEBPACK_IMPORTED_MODULE_12__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_auth_EmailVerification__WEBPACK_IMPORTED_MODULE_12__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/forgot-password",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_auth_ForgotPassword__WEBPACK_IMPORTED_MODULE_13__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_auth_ForgotPassword__WEBPACK_IMPORTED_MODULE_13__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/reset-password",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_auth_ResetPassword__WEBPACK_IMPORTED_MODULE_14__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_auth_ResetPassword__WEBPACK_IMPORTED_MODULE_14__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/submit-proof/:token",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_gcash_GCashProofSubmit__WEBPACK_IMPORTED_MODULE_48__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(ProtectedRoute, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_gcash_GCashProofSubmit__WEBPACK_IMPORTED_MODULE_49__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(ProtectedRoute, {
         roles: ['admin'],
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_layout_AdminLayout__WEBPACK_IMPORTED_MODULE_8__["default"], {})
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_layout_AdminLayout__WEBPACK_IMPORTED_MODULE_8__["default"], {})
       }),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/dashboard",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_dashboard_Dashboard__WEBPACK_IMPORTED_MODULE_16__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_dashboard_Dashboard__WEBPACK_IMPORTED_MODULE_16__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/products",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_products_Products__WEBPACK_IMPORTED_MODULE_17__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_products_Products__WEBPACK_IMPORTED_MODULE_17__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/inventory",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
           tab: "stock"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/inventory/sales",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
           tab: "sales"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/inventory/cancellations",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
           tab: "cancellations"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/inventory/requests",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
           tab: "requests"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/inventory/purchase",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_inventory_Inventory__WEBPACK_IMPORTED_MODULE_18__["default"], {
           tab: "purchase"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/delivery",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_delivery_Delivery__WEBPACK_IMPORTED_MODULE_19__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_delivery_Delivery__WEBPACK_IMPORTED_MODULE_19__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/reports",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_reports_Reports__WEBPACK_IMPORTED_MODULE_20__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_reports_Reports__WEBPACK_IMPORTED_MODULE_20__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/reports/rating-analytics",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_admin_RatingAnalytics__WEBPACK_IMPORTED_MODULE_26__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_admin_RatingAnalytics__WEBPACK_IMPORTED_MODULE_26__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/settings",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_settings_Settings__WEBPACK_IMPORTED_MODULE_21__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_settings_Settings__WEBPACK_IMPORTED_MODULE_21__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/users",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_users_Users__WEBPACK_IMPORTED_MODULE_22__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_users_Users__WEBPACK_IMPORTED_MODULE_22__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/users/customers",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_users_Customers__WEBPACK_IMPORTED_MODULE_23__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_users_Customers__WEBPACK_IMPORTED_MODULE_23__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/users/riders",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_users_Riders__WEBPACK_IMPORTED_MODULE_24__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_users_Riders__WEBPACK_IMPORTED_MODULE_24__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/suppliers",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_suppliers_Suppliers__WEBPACK_IMPORTED_MODULE_25__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_suppliers_Suppliers__WEBPACK_IMPORTED_MODULE_25__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/reviews",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_admin_Reviews__WEBPACK_IMPORTED_MODULE_27__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_admin_Reviews__WEBPACK_IMPORTED_MODULE_27__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier-catalog",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_suppliers_SupplierCatalog__WEBPACK_IMPORTED_MODULE_45__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_suppliers_SupplierCatalog__WEBPACK_IMPORTED_MODULE_45__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/returns",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_admin_Returns__WEBPACK_IMPORTED_MODULE_46__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_admin_Returns__WEBPACK_IMPORTED_MODULE_46__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/gcash-logs",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_admin_GCashLogs__WEBPACK_IMPORTED_MODULE_47__["default"], {})
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_admin_GCashLogs__WEBPACK_IMPORTED_MODULE_47__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        path: "/payouts",
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_admin_Payouts__WEBPACK_IMPORTED_MODULE_48__["default"], {
+          tab: "remittance"
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        path: "/payouts/riders",
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_admin_Payouts__WEBPACK_IMPORTED_MODULE_48__["default"], {
+          tab: "payouts"
+        })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsxs)(ProtectedRoute, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsxs)(ProtectedRoute, {
         roles: ['customer'],
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_customer_portal_CustomerPaymentToastListener__WEBPACK_IMPORTED_MODULE_34__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Outlet, {})]
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_customer_portal_CustomerPaymentToastListener__WEBPACK_IMPORTED_MODULE_34__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Outlet, {})]
       }),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/shop",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_customer_portal_CustomerHome__WEBPACK_IMPORTED_MODULE_28__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_customer_portal_CustomerHome__WEBPACK_IMPORTED_MODULE_28__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/shop/cart",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_customer_portal_CartPage__WEBPACK_IMPORTED_MODULE_30__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_customer_portal_CartPage__WEBPACK_IMPORTED_MODULE_30__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/shop/order",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_customer_portal_CustomerOrder__WEBPACK_IMPORTED_MODULE_29__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_customer_portal_CustomerOrder__WEBPACK_IMPORTED_MODULE_29__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/shop/history",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_customer_portal_OrderHistory__WEBPACK_IMPORTED_MODULE_31__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_customer_portal_OrderHistory__WEBPACK_IMPORTED_MODULE_31__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/shop/settings",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_customer_portal_CustomerSettings__WEBPACK_IMPORTED_MODULE_32__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_customer_portal_CustomerSettings__WEBPACK_IMPORTED_MODULE_32__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/shop/products/:id/reviews",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_customer_portal_ProductReviewsPage__WEBPACK_IMPORTED_MODULE_33__["default"], {})
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_customer_portal_ProductReviewsPage__WEBPACK_IMPORTED_MODULE_33__["default"], {})
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/rider",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(ProtectedRoute, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(ProtectedRoute, {
         roles: ['rider'],
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_rider_RiderDashboardV3__WEBPACK_IMPORTED_MODULE_36__["default"], {})
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_rider_RiderDashboardV3__WEBPACK_IMPORTED_MODULE_36__["default"], {})
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/supplier/register",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_supplier_SupplierRegister__WEBPACK_IMPORTED_MODULE_37__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_supplier_SupplierRegister__WEBPACK_IMPORTED_MODULE_37__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "/supplier/pending-approval",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_supplier_SupplierPendingApproval__WEBPACK_IMPORTED_MODULE_43__["default"], {})
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(ProtectedRoute, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_supplier_SupplierPendingApproval__WEBPACK_IMPORTED_MODULE_43__["default"], {})
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(ProtectedRoute, {
         roles: ['supplier'],
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_layout_SupplierLayout__WEBPACK_IMPORTED_MODULE_42__["default"], {})
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_layout_SupplierLayout__WEBPACK_IMPORTED_MODULE_42__["default"], {})
       }),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier/dashboard",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_supplier_SupplierDashboard__WEBPACK_IMPORTED_MODULE_38__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_supplier_SupplierDashboard__WEBPACK_IMPORTED_MODULE_38__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier/products",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_supplier_SupplierProducts__WEBPACK_IMPORTED_MODULE_40__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_supplier_SupplierProducts__WEBPACK_IMPORTED_MODULE_40__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier/inventory",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_supplier_SupplierInventory__WEBPACK_IMPORTED_MODULE_44__["default"], {})
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_supplier_SupplierInventory__WEBPACK_IMPORTED_MODULE_44__["default"], {})
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier/requests",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_supplier_SupplierOrders__WEBPACK_IMPORTED_MODULE_39__["default"], {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_supplier_SupplierOrders__WEBPACK_IMPORTED_MODULE_39__["default"], {
           mode: "requests"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier/orders",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_supplier_SupplierOrders__WEBPACK_IMPORTED_MODULE_39__["default"], {
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_supplier_SupplierOrders__WEBPACK_IMPORTED_MODULE_39__["default"], {
           mode: "completed"
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
         path: "/supplier/settings",
-        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_supplier_SupplierSettings__WEBPACK_IMPORTED_MODULE_41__["default"], {})
+        element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_supplier_SupplierSettings__WEBPACK_IMPORTED_MODULE_41__["default"], {})
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Route, {
       path: "*",
-      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
+      element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_3__.Navigate, {
         to: "/",
         replace: true
       })
@@ -53666,15 +54935,15 @@ function AppRouter() {
 // ... (imports remain same)
 
 if (document.getElementById('app')) {
-  var root = (0,react_dom_client__WEBPACK_IMPORTED_MODULE_49__.createRoot)(document.getElementById('app'));
-  root.render(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.BrowserRouter, {
+  var root = (0,react_dom_client__WEBPACK_IMPORTED_MODULE_50__.createRoot)(document.getElementById('app'));
+  root.render(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.BrowserRouter, {
     future: {
       v7_startTransition: true,
       v7_relativeSplatPath: true
     },
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_context_AuthContext__WEBPACK_IMPORTED_MODULE_4__.AuthProvider, {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsxs)(_context_ToastContext__WEBPACK_IMPORTED_MODULE_5__.ToastProvider, {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_shared_RealTimeSyncBridge__WEBPACK_IMPORTED_MODULE_6__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(_components_shared_PaymentToast__WEBPACK_IMPORTED_MODULE_50__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_51__.jsx)(AppRouter, {})]
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_context_AuthContext__WEBPACK_IMPORTED_MODULE_4__.AuthProvider, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsxs)(_context_ToastContext__WEBPACK_IMPORTED_MODULE_5__.ToastProvider, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_shared_RealTimeSyncBridge__WEBPACK_IMPORTED_MODULE_6__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(_components_shared_PaymentToast__WEBPACK_IMPORTED_MODULE_51__["default"], {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_52__.jsx)(AppRouter, {})]
       })
     })
   }));
@@ -74705,6 +75974,46 @@ const Users = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("
 
 
 //# sourceMappingURL=users.js.map
+
+
+/***/ },
+
+/***/ "./node_modules/lucide-react/dist/esm/icons/wallet.js"
+/*!************************************************************!*\
+  !*** ./node_modules/lucide-react/dist/esm/icons/wallet.js ***!
+  \************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   __iconNode: () => (/* binding */ __iconNode),
+/* harmony export */   "default": () => (/* binding */ Wallet)
+/* harmony export */ });
+/* harmony import */ var _createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../createLucideIcon.js */ "./node_modules/lucide-react/dist/esm/createLucideIcon.js");
+/**
+ * @license lucide-react v0.577.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+
+
+const __iconNode = [
+  [
+    "path",
+    {
+      d: "M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1",
+      key: "18etb6"
+    }
+  ],
+  ["path", { d: "M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4", key: "xoc0q4" }]
+];
+const Wallet = (0,_createLucideIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])("wallet", __iconNode);
+
+
+//# sourceMappingURL=wallet.js.map
 
 
 /***/ },

@@ -238,6 +238,8 @@ export default function CustomerHome() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifOpen, setNotifOpen] = useState(false);
     const [proofModalUrl, setProofModalUrl] = useState(null);
+    // Wave 6 — delivery confirmation flow
+    const [disputeModal, setDisputeModal] = useState({ open: false, saleId: null, reason: '', submitting: false });
     const notifRef = useRef(null);
 
     // Recommendations
@@ -540,6 +542,38 @@ export default function CustomerHome() {
                                     }).catch(() => {});
                                 }}
                                 renderExtra={(n) => {
+                                    // Wave 6 — "Did you receive your order?" confirmation buttons
+                                    if (n.type === 'delivery_confirmation_request' && n.meta?.requires_action && n.meta?.sale_id) {
+                                        return (
+                                            <div className="mt-2 flex gap-2">
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        try {
+                                                            await api.post(`/sales/${n.meta.sale_id}/customer-confirm-receipt`);
+                                                            api.get('/customer/notifications').then(r => {
+                                                                setNotifications(r.data?.data || []);
+                                                                setUnreadCount(r.data?.unread || 0);
+                                                            }).catch(() => {});
+                                                        } catch (err) {}
+                                                    }}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors"
+                                                >
+                                                    Yes, I received it
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setDisputeModal({ open: true, saleId: n.meta.sale_id, reason: '', submitting: false });
+                                                        setNotifOpen(false);
+                                                    }}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-lg transition-colors border border-gray-300"
+                                                >
+                                                    No, something is wrong
+                                                </button>
+                                            </div>
+                                        );
+                                    }
                                     const proofUrl = n.meta?.proof_url || n.data?.proof_url;
                                     if (!proofUrl) return null;
                                     return (
@@ -726,6 +760,54 @@ export default function CustomerHome() {
             />
 
             <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
+
+            {/* Wave 6 — Dispute Reason Modal */}
+            {disputeModal.open && (
+                <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDisputeModal({ open: false, saleId: null, reason: '', submitting: false })}>
+                    <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="text-lg font-black text-gray-900 mb-1">Tell us what's wrong</h2>
+                        <p className="text-sm text-gray-600 mb-4">We'll hold the rider's payout for this order while admin reviews your report.</p>
+                        <textarea
+                            value={disputeModal.reason}
+                            onChange={(e) => setDisputeModal(d => ({ ...d, reason: e.target.value }))}
+                            placeholder="What's wrong with this delivery?"
+                            maxLength={500}
+                            rows={4}
+                            className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                        />
+                        <div className="text-[11px] text-gray-400 mt-1">{disputeModal.reason.length}/500</div>
+                        <div className="flex gap-2 mt-4">
+                            <button
+                                onClick={() => setDisputeModal({ open: false, saleId: null, reason: '', submitting: false })}
+                                className="flex-1 px-4 py-2 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                                disabled={disputeModal.submitting}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    if (!disputeModal.reason.trim() || disputeModal.submitting) return;
+                                    setDisputeModal(d => ({ ...d, submitting: true }));
+                                    try {
+                                        await api.post(`/sales/${disputeModal.saleId}/customer-dispute-receipt`, { reason: disputeModal.reason.trim() });
+                                        setDisputeModal({ open: false, saleId: null, reason: '', submitting: false });
+                                        api.get('/customer/notifications').then(r => {
+                                            setNotifications(r.data?.data || []);
+                                            setUnreadCount(r.data?.unread || 0);
+                                        }).catch(() => {});
+                                    } catch (err) {
+                                        setDisputeModal(d => ({ ...d, submitting: false }));
+                                    }
+                                }}
+                                disabled={!disputeModal.reason.trim() || disputeModal.submitting}
+                                className="flex-1 px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {disputeModal.submitting ? 'Submitting...' : 'Submit dispute'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Proof View Modal */}
             {proofModalUrl && (

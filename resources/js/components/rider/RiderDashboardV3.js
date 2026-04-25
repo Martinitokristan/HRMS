@@ -20,7 +20,8 @@ import {
     Menu,
     X,
     Clock,
-    XCircle
+    XCircle,
+    Wallet
 } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale, STALE_KEYS } from '../../store/dataStore';
@@ -121,7 +122,8 @@ export default function RiderDashboardV3() {
 
     // State for dashboard data
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({ active: 0, done: 0, total: 0, earnings: 0 });
+    const [stats, setStats] = useState({ active: 0, done: 0, total: 0, earnings: 0, todayEarnings: 0, cashToRemitToday: 0 });
+    const [walletData, setWalletData] = useState({ today_earnings: 0, available: 0, pending: 0, cash_to_remit_today: 0, recent_paid: [] });
     const [deliveries, setDeliveries] = useState([]);
     const [nearbyOrders, setNearbyOrders] = useState([]);
     const [notifications, setNotifications] = useState([]);
@@ -289,7 +291,10 @@ export default function RiderDashboardV3() {
                     active: dashStats.active || 0,
                     done: dashStats.done || 0,
                     total: dashStats.total || 0,
-                    earnings: dashStats.collected || 0
+                    earnings: dashStats.collected || 0,
+                    // Wave 6 — rider fee earnings + cash still owed for the day
+                    todayEarnings: dashStats.today_earnings || 0,
+                    cashToRemitToday: dashStats.cash_to_remit_today || 0,
                 });
                 setDeliveries(Array.isArray(my_jobs) ? my_jobs : []);
                 setNearbyOrders(Array.isArray(nearby) ? nearby : []);
@@ -315,6 +320,16 @@ export default function RiderDashboardV3() {
         }
     }, []);
 
+    // Wave 6 — wallet figures, fetched on-demand when the rider opens the Wallet tab
+    const fetchWallet = useCallback(async () => {
+        try {
+            const r = await silentApi.get('/riders/me/wallet');
+            if (isMountedRef.current) setWalletData(r.data.data || {});
+        } catch (e) {
+            // silent — wallet card will show zeros
+        }
+    }, []);
+
     // Initialize data
     useEffect(() => {
         fetchData(deliveries.length > 0 || nearbyOrders.length > 0);
@@ -323,6 +338,10 @@ export default function RiderDashboardV3() {
     useEffect(() => {
         fetchNotifications(notifications.length > 0);
     }, [fetchNotifications, notifTrigger]);
+
+    useEffect(() => {
+        if (view === 'wallet') fetchWallet();
+    }, [view, fetchWallet, dashTrigger]);
 
     // Real-time synchronization is now handled by the refreshTrigger logic in the effects above
 
@@ -463,7 +482,14 @@ export default function RiderDashboardV3() {
     // Handle status change
     const handleStatusChange = useCallback(async (deliveryId, newStatus) => {
         try {
-            await api.put(`/deliveries/${deliveryId}/status`, { status: newStatus });
+            // Wave 6 — when transitioning to delivered, send rider GPS so the
+            // backend can stamp mark_delivered_lat/lng + geofence_flag.
+            const payload = { status: newStatus };
+            if (newStatus === 'delivered' && riderPositionRef.current) {
+                payload.rider_latitude  = riderPositionRef.current.lat;
+                payload.rider_longitude = riderPositionRef.current.lng;
+            }
+            await api.put(`/deliveries/${deliveryId}/status`, payload);
             markStale(STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS);
             if (isMountedRef.current) {
                 const updated = deliveries.map(d =>
@@ -480,6 +506,11 @@ export default function RiderDashboardV3() {
     const handlePhotoUpload = useCallback(async (deliveryId, file) => {
         const formData = new FormData();
         formData.append('photo', file);
+        // Wave 6 — send rider GPS so backend can stamp the geofence flag.
+        if (riderPositionRef.current) {
+            formData.append('rider_latitude',  String(riderPositionRef.current.lat));
+            formData.append('rider_longitude', String(riderPositionRef.current.lng));
+        }
         try {
             await api.post(`/deliveries/${deliveryId}/upload-proof`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
@@ -591,6 +622,7 @@ export default function RiderDashboardV3() {
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: Home },
         { id: 'deliveries', label: 'Active Deliveries', icon: Package },
+        { id: 'wallet', label: 'Wallet', icon: Wallet },
         { id: 'ratings', label: 'Ratings', icon: Star },
     ];
 
@@ -809,7 +841,7 @@ export default function RiderDashboardV3() {
                             {[
                                 { label: 'Active Orders', value: stats.active || 0, color: '#3b82f6', bg: '#eff6ff' },
                                 { label: 'Completed', value: stats.done || 0, color: '#10b981', bg: '#ecfdf5' },
-                                { label: 'Total Earnings', value: formatCurrency(stats.earnings), color: '#f59e0b', bg: '#fffbeb' },
+                                { label: "Today's Earnings", value: formatCurrency(stats.todayEarnings || 0), sub: `Cash to remit today: ${formatCurrency(stats.cashToRemitToday || 0)}`, color: '#f59e0b', bg: '#fffbeb' },
                                 { label: 'Total Orders', value: stats.total || 0, color: '#6b7280', bg: '#f9fafb' },
                             ].map((stat, idx) => (
                                 <div key={idx} style={{
@@ -825,6 +857,11 @@ export default function RiderDashboardV3() {
                                     <div style={{ fontSize: '2rem', fontWeight: 800, color: stat.color }}>
                                         {stat.value}
                                     </div>
+                                    {stat.sub && (
+                                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem', fontWeight: 500 }}>
+                                            {stat.sub}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -1073,6 +1110,81 @@ export default function RiderDashboardV3() {
                                 </div>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Wallet View — Wave 6 */}
+                {view === 'wallet' && (
+                    <div>
+                        <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem', color: '#111827' }}>
+                            Wallet
+                        </h1>
+                        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
+                            Earn ₱{30} per successful delivery. Cash-out is paid manually by admin to your GCash within 24 hours after your day's COD cash is remitted.
+                        </p>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                            gap: '1.5rem',
+                            marginBottom: '2rem'
+                        }}>
+                            {[
+                                { label: "Today's Earnings",   value: formatCurrency(walletData.today_earnings || 0),     color: '#f59e0b' },
+                                { label: 'Available',          value: formatCurrency(walletData.available || 0),          color: '#10b981' },
+                                { label: 'Pending',            value: formatCurrency(walletData.pending || 0),            color: '#6b7280' },
+                                { label: 'Cash to remit today',value: formatCurrency(walletData.cash_to_remit_today || 0),color: '#3b82f6' },
+                            ].map((c, idx) => (
+                                <div key={idx} style={{
+                                    backgroundColor: '#fff',
+                                    borderRadius: '16px',
+                                    padding: '1.5rem',
+                                    border: '1px solid #e5e7eb',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                                }}>
+                                    <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>{c.label}</div>
+                                    <div style={{ fontSize: '2rem', fontWeight: 800, color: c.color }}>{c.value}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{
+                            backgroundColor: '#fff',
+                            borderRadius: '16px',
+                            padding: '1.5rem',
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                            marginBottom: '1.5rem',
+                        }}>
+                            <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.75rem', color: '#111827' }}>How cash-out works</h3>
+                            <ol style={{ margin: 0, paddingLeft: '1.25rem', color: '#4b5563', fontSize: '0.875rem', lineHeight: 1.7 }}>
+                                <li>Hand over the day's COD cash to the admin.</li>
+                                <li>Admin marks remittance and your eligible balance is paid via GCash.</li>
+                                <li>Disputed or geofence-flagged orders go on hold for admin review.</li>
+                            </ol>
+                        </div>
+
+                        <div style={{
+                            backgroundColor: '#fff',
+                            borderRadius: '16px',
+                            padding: '1.5rem',
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        }}>
+                            <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '0.75rem', color: '#111827' }}>Recent payouts</h3>
+                            {(walletData.recent_paid && walletData.recent_paid.length > 0) ? (
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                    {walletData.recent_paid.map(row => (
+                                        <li key={row.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #f3f4f6', fontSize: '0.875rem' }}>
+                                            <span style={{ color: '#4b5563' }}>{row.tracking_number || `#${row.id}`}</span>
+                                            <span style={{ color: '#10b981', fontWeight: 600 }}>{formatCurrency(row.delivery_fee || 0)}</span>
+                                            <span style={{ color: '#9ca3af' }}>{row.paid_at ? new Date(row.paid_at).toLocaleDateString() : ''}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>No payouts yet.</p>
+                            )}
+                        </div>
                     </div>
                 )}
 

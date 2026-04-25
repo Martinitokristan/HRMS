@@ -179,9 +179,14 @@ class GCashController extends Controller
                     $delivery->forceFill(['status' => 'pending'])->save();
                 }
             } else {
+                // Wave 6 — stamp rider fee. GCash sales have no COD cash to collect.
+                $riderFee = (float) \App\Models\Setting::get('rider_default_delivery_fee', 30);
                 $delivery = Delivery::create([
-                    'sale_id' => $matchingSale->id,
-                    'status' => 'pending',
+                    'sale_id'        => $matchingSale->id,
+                    'status'         => 'pending',
+                    'delivery_fee'   => $riderFee,
+                    'cash_collected' => 0.00,
+                    'payout_status'  => 'pending',
                 ]);
             }
 

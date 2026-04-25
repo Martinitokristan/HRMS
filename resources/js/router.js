@@ -66,6 +66,9 @@ import Returns from './components/admin/Returns';
 // Admin: GCash Logs
 import GCashLogs from './components/admin/GCashLogs';
 
+// Admin: Rider Cash & Payouts (Wave 6)
+import Payouts from './components/admin/Payouts';
+
 // Public: GCash Proof Submission
 import GCashProofSubmit from './components/gcash/GCashProofSubmit';
 
@@ -127,6 +130,8 @@ export default function AppRouter() {
                 <Route path="/supplier-catalog" element={<SupplierCatalog />} />
                 <Route path="/returns" element={<Returns />} />
                 <Route path="/gcash-logs" element={<GCashLogs />} />
+                <Route path="/payouts" element={<Payouts tab="remittance" />} />
+                <Route path="/payouts/riders" element={<Payouts tab="payouts" />} />
             </Route>
 
             {/* Customer Portal */}

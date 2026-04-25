@@ -208,7 +208,11 @@ class DeliveryController extends Controller
             return response()->json(['message' => 'Unauthorized - You can only update your own deliveries'], 403);
         }
 
-        $request->validate(['status' => 'required|in:pending,in_progress,delivered,failed']);
+        $request->validate([
+            'status' => 'required|in:pending,in_progress,delivered,failed',
+            'rider_latitude'  => 'nullable|numeric|between:-90,90',
+            'rider_longitude' => 'nullable|numeric|between:-180,180',
+        ]);
 
         $updates = ['status' => $request->status];
 
@@ -263,6 +267,13 @@ class DeliveryController extends Controller
         }
 
         $delivery->update($updates);
+
+        // Wave 6 — geofence stamp + customer-confirm notification + payout-eligibility check.
+        if ($request->status === 'delivered') {
+            $this->stampGeofence($delivery->fresh(), $request->input('rider_latitude'), $request->input('rider_longitude'));
+            $this->postCustomerConfirmationNotification($delivery->fresh());
+            $this->maybePromoteToEligible($delivery->fresh());
+        }
 
         $riderId = $request->user()->id;
         $customerId = $delivery->sale ? $delivery->sale->customer_id : null;
@@ -483,6 +494,8 @@ class DeliveryController extends Controller
     {
         $request->validate([
             'photo' => 'required|image|mimes:jpeg,png,jpg,webp,heic,heif|max:10240|dimensions:max_width=4000,max_height=4000', // 10MB max, added heic/heif for iPhone
+            'rider_latitude'  => 'nullable|numeric|between:-90,90',
+            'rider_longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $delivery = Delivery::with('sale.items.product')->findOrFail($id);
@@ -565,6 +578,11 @@ class DeliveryController extends Controller
             ]);
         }
 
+        // Wave 6 — geofence stamp + customer-confirm notification + payout-eligibility check.
+        $this->stampGeofence($delivery->fresh(), $request->input('rider_latitude'), $request->input('rider_longitude'));
+        $this->postCustomerConfirmationNotification($delivery->fresh());
+        $this->maybePromoteToEligible($delivery->fresh());
+
         $riderId = $request->user()->id;
         $customerId = $delivery->sale ? $delivery->sale->customer_id : null;
         broadcast(new DataMutated('private-admin', ['admin_deliveries', 'admin_dashboard', 'admin_orders'], 'delivery.proof_uploaded'));
@@ -627,6 +645,158 @@ class DeliveryController extends Controller
         return response()->json([
             'data' => $delivery,
             'status' => 'success',
+        ]);
+    }
+
+    // ============================================================
+    // Wave 6 — payout / anti-fraud helpers
+    // ============================================================
+
+    /**
+     * POST /sales/{id}/customer-confirm-receipt — customer confirms they got the order.
+     */
+    public function customerConfirmReceipt(Request $request, $id)
+    {
+        $sale = \App\Models\Sale::with('delivery')->findOrFail($id);
+        if ((int) $sale->customer_id !== (int) $request->user()->id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+        if (!$sale->delivery) {
+            return response()->json(['message' => 'No delivery to confirm'], 422);
+        }
+        if ($sale->delivery->customer_disputed_at) {
+            return response()->json(['message' => 'Delivery is already disputed'], 422);
+        }
+        if (!$sale->delivery->customer_confirmed_at) {
+            $sale->delivery->update(['customer_confirmed_at' => now()]);
+        }
+        $this->maybePromoteToEligible($sale->delivery->fresh());
+
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * POST /sales/{id}/customer-dispute-receipt — customer reports something wrong.
+     */
+    public function customerDisputeReceipt(Request $request, $id)
+    {
+        $request->validate(['reason' => 'required|string|max:500']);
+        $sale = \App\Models\Sale::with('delivery')->findOrFail($id);
+        if ((int) $sale->customer_id !== (int) $request->user()->id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+        if (!$sale->delivery) {
+            return response()->json(['message' => 'No delivery to dispute'], 422);
+        }
+        $sale->delivery->update([
+            'customer_disputed_at'    => now(),
+            'customer_dispute_reason' => $request->input('reason'),
+            'payout_status'           => 'held',
+        ]);
+
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Promote a delivery from `pending` to `eligible` when all gating checks pass.
+     * Public so other controllers (cash-remittance, customer confirm, sweep) can call it.
+     */
+    public function maybePromoteToEligible(\App\Models\Delivery $d): void
+    {
+        if (!$d) return;
+        if ($d->payout_status === 'paid') return;
+        if ($d->status !== 'delivered') return;
+        if (empty($d->proof_photo)) return;
+        if ($d->customer_disputed_at) { $d->update(['payout_status' => 'held']); return; }
+        if ($d->geofence_flagged)     { $d->update(['payout_status' => 'held']); return; }
+
+        $windowHours = (int) \App\Models\Setting::get('rider_customer_confirm_window_hours', 24);
+        $customerOk = $d->customer_confirmed_at
+            || ($d->delivered_at && $d->delivered_at->lt(now()->subHours($windowHours)));
+        if (!$customerOk) return;
+
+        $sale = $d->sale ?: optional($d->fresh(['sale']))->sale;
+        $codOk = $sale && (strtolower((string) $sale->payment_method) !== 'cod' || $d->cash_remitted_at);
+        if (!$codOk) return;
+
+        $d->update([
+            'payout_status'      => 'eligible',
+            'payout_eligible_at' => now(),
+        ]);
+    }
+
+    /**
+     * Stamp rider GPS, distance to customer, and geofence flag on first delivered transition.
+     */
+    private function stampGeofence(\App\Models\Delivery $delivery, $riderLat, $riderLng): void
+    {
+        if (!is_null($delivery->mark_delivered_lat) || !is_null($delivery->mark_delivered_lng)) {
+            return; // already stamped — write-once
+        }
+        if (is_null($riderLat) || is_null($riderLng)) {
+            return; // rider didn't share GPS; admin can review the missing GPS in Payouts
+        }
+
+        $threshold = (int) \App\Models\Setting::get('rider_geofence_flag_radius_m', 50);
+
+        // Customer coords from the customer profile (preferred) or from the delivery row.
+        $customerLat = optional(optional(optional($delivery->sale)->customer)->customerProfile)->latitude
+            ?? $delivery->latitude;
+        $customerLng = optional(optional(optional($delivery->sale)->customer)->customerProfile)->longitude
+            ?? $delivery->longitude;
+
+        $update = [
+            'mark_delivered_lat' => (float) $riderLat,
+            'mark_delivered_lng' => (float) $riderLng,
+        ];
+
+        if (!is_null($customerLat) && !is_null($customerLng)) {
+            $distanceM = $this->haversineMeters((float) $riderLat, (float) $riderLng, (float) $customerLat, (float) $customerLng);
+            $update['geofence_distance_m'] = (int) round($distanceM);
+            $update['geofence_flagged']    = $distanceM > $threshold;
+        }
+
+        $delivery->update($update);
+    }
+
+    private function haversineMeters(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $R = 6371000;
+        $phi1 = deg2rad($lat1); $phi2 = deg2rad($lat2);
+        $dPhi = deg2rad($lat2 - $lat1); $dLambda = deg2rad($lng2 - $lng1);
+        $a = sin($dPhi / 2) ** 2 + cos($phi1) * cos($phi2) * sin($dLambda / 2) ** 2;
+        return 2 * $R * atan2(sqrt($a), sqrt(1 - $a));
+    }
+
+    /**
+     * Post the "Did you receive your order?" customer notification on first delivered transition.
+     */
+    private function postCustomerConfirmationNotification(\App\Models\Delivery $delivery): void
+    {
+        if (!$delivery->sale || !$delivery->sale->customer_id) return;
+        if ($delivery->customer_confirmed_at || $delivery->customer_disputed_at) return;
+
+        // Avoid spamming if proof is uploaded multiple times — one row per delivery.
+        $exists = CustomerNotification::where('delivery_id', $delivery->id)
+            ->where('type', 'delivery_confirmation_request')
+            ->exists();
+        if ($exists) return;
+
+        $windowHours = (int) \App\Models\Setting::get('rider_customer_confirm_window_hours', 24);
+
+        CustomerNotification::create([
+            'customer_id' => $delivery->sale->customer_id,
+            'delivery_id' => $delivery->id,
+            'type'        => 'delivery_confirmation_request',
+            'title'       => 'Did you receive your order?',
+            'message'     => 'Tap "Yes, I received it" to confirm. If something is wrong, tap "No". We will auto-confirm in ' . $windowHours . ' hours if there is no response.',
+            'meta'        => [
+                'requires_action' => true,
+                'delivery_id'     => $delivery->id,
+                'sale_id'         => $delivery->sale_id,
+                'auto_confirm_at' => now()->addHours($windowHours)->toIso8601String(),
+            ],
+            'is_read'     => false,
         ]);
     }
 }

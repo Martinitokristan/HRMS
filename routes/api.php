@@ -187,6 +187,12 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     // Reviews (admin moderation)
     Route::get('/reviews', [ProductReviewController::class , 'index']);
     Route::delete('/reviews/{id}', [ProductReviewController::class , 'destroy']);
+    // Wave 6 — Cash Remittance + Rider Payouts (admin only)
+    Route::get('/admin/cash-remittance',                                       [\App\Http\Controllers\Admin\CashRemittanceController::class , 'index']);
+    Route::post('/admin/cash-remittance/{rider}/{date}/mark-remitted',         [\App\Http\Controllers\Admin\CashRemittanceController::class , 'markRemitted']);
+    Route::get('/admin/payouts',                                               [\App\Http\Controllers\Admin\RiderPayoutController::class , 'index']);
+    Route::post('/admin/payouts/mark-paid',                                    [\App\Http\Controllers\Admin\RiderPayoutController::class , 'markPaid']);
+    Route::post('/admin/payouts/release-hold',                                 [\App\Http\Controllers\Admin\RiderPayoutController::class , 'releaseHold']);
 });
 
 // =========================================================================
@@ -243,6 +249,9 @@ Route::middleware(['auth.token', 'role:customer'])->group(function () {
     Route::post('/customer/notifications/delete-all', [DeliveryController::class , 'deleteAllNotifications']);
     // Rate delivery
     Route::post('/deliveries/{id}/rate', [DeliveryController::class , 'submitRating']);
+    // Wave 6 — customer confirm / dispute receipt
+    Route::post('/sales/{id}/customer-confirm-receipt', [DeliveryController::class , 'customerConfirmReceipt']);
+    Route::post('/sales/{id}/customer-dispute-receipt', [DeliveryController::class , 'customerDisputeReceipt']);
 });
 
 // =========================================================================
@@ -250,6 +259,7 @@ Route::middleware(['auth.token', 'role:customer'])->group(function () {
 // =========================================================================
 Route::middleware(['auth.token', 'role:rider'])->group(function () {
     Route::get('/riders/me/dashboard', [RiderController::class , 'dashboard']);
+    Route::get('/riders/me/wallet',    [RiderController::class , 'wallet']);
     Route::get('/riders/me/deliveries', [RiderController::class , 'myDeliveries']);
     Route::post('/riders/me/toggle-status', [RiderController::class , 'toggleStatus']);
     Route::post('/riders/me/update-location', [RiderController::class , 'updateLocation']);
