@@ -15,6 +15,7 @@ class Delivery extends Model
         'customer_confirmed_at', 'customer_disputed_at', 'customer_dispute_reason',
         'payout_status', 'payout_eligible_at', 'paid_at', 'paid_by',
         'mark_delivered_lat', 'mark_delivered_lng', 'geofence_distance_m', 'geofence_flagged',
+        'paused_at', 'pause_reason', 'pause_resumes_at',
     ];
 
     protected $casts = [
@@ -34,6 +35,8 @@ class Delivery extends Model
         'mark_delivered_lng' => 'float',
         'geofence_distance_m' => 'integer',
         'geofence_flagged' => 'boolean',
+        'paused_at'        => 'datetime',
+        'pause_resumes_at' => 'datetime',
     ];
 
     public function sale()

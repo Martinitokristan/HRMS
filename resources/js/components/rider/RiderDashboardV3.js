@@ -163,6 +163,13 @@ export default function RiderDashboardV3() {
     const [focusedDeliveryId, setFocusedDeliveryId] = useState(null);
     const [uploadingProof, setUploadingProof] = useState(null);
 
+    // Wave 7 — Pause Delivery state
+    const [pauseTarget,     setPauseTarget]     = useState(null); // delivery row to pause
+    const [pauseReason,     setPauseReason]     = useState('');
+    const [pauseReasonNote, setPauseReasonNote] = useState('');   // for "Other"
+    const [pauseSubmitting, setPauseSubmitting] = useState(false);
+    const [pauseError,      setPauseError]      = useState('');
+
     // Map and routing state
     const [roadRoutes, setRoadRoutes] = useState({});
     const fileInputRef = useRef(null);
@@ -468,6 +475,55 @@ export default function RiderDashboardV3() {
             alert(err.response?.data?.message || 'Failed to decline order');
         }
     }, [declineNote, decliningOrder, fetchData]);
+
+    // Wave 7 — open the Pause Delivery modal for a row.
+    const openPauseModal = useCallback((delivery) => {
+        setPauseTarget(delivery);
+        setPauseReason('');
+        setPauseReasonNote('');
+        setPauseError('');
+    }, []);
+
+    // Wave 7 — submit pause to backend.
+    const submitPause = useCallback(async () => {
+        if (!pauseTarget) return;
+        const reasonText = pauseReason === 'Other'
+            ? (pauseReasonNote || '').trim()
+            : pauseReason;
+        if (!reasonText) {
+            setPauseError('Please choose a reason.');
+            return;
+        }
+        if (reasonText.length > 255) {
+            setPauseError('Reason is too long (max 255 characters).');
+            return;
+        }
+        setPauseSubmitting(true);
+        setPauseError('');
+        try {
+            await api.post(`/deliveries/${pauseTarget.id}/pause`, { reason: reasonText });
+            markStale(STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS);
+            await fetchData(true);
+            setPauseTarget(null);
+            setPauseReason('');
+            setPauseReasonNote('');
+        } catch (err) {
+            setPauseError(err.response?.data?.message || 'Failed to pause delivery. Try again.');
+        } finally {
+            if (isMountedRef.current) setPauseSubmitting(false);
+        }
+    }, [pauseTarget, pauseReason, pauseReasonNote, fetchData]);
+
+    // Wave 7 — resume a paused delivery.
+    const resumeDelivery = useCallback(async (deliveryId) => {
+        try {
+            await api.post(`/deliveries/${deliveryId}/resume`);
+            markStale(STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS);
+            await fetchData(true);
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to resume delivery.');
+        }
+    }, [fetchData]);
 
     // Open the proof modal for a given delivery id. Used by the
     // "Upload Proof" button on delivered-but-not-yet-photographed rows.
@@ -889,12 +945,18 @@ export default function RiderDashboardV3() {
                             </div>
                         ) : (
                             <div style={{ display: 'grid', gap: '1rem' }}>
-                                {deliveries.map(delivery => (
+                                {/* Wave 7 — paused rows sink to the bottom so the rider sees actionable jobs first. */}
+                                {[...deliveries].sort((a, b) => {
+                                    const ap = a.paused_at ? 1 : 0;
+                                    const bp = b.paused_at ? 1 : 0;
+                                    return ap - bp;
+                                }).map(delivery => (
                                     <div key={delivery.id} style={{
                                         backgroundColor: '#fff',
                                         borderRadius: '12px',
                                         padding: '1.5rem',
                                         border: '1px solid #e5e7eb',
+                                        borderLeft: delivery.paused_at ? '4px solid #f59e0b' : '1px solid #e5e7eb',
                                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                                     }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
@@ -937,7 +999,7 @@ export default function RiderDashboardV3() {
                                                         : (delivery.eta ?? '—')}
                                                 </p>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                                                 {delivery.status === 'confirmed' && (
                                                     <button
                                                         onClick={() => handleStatusChange(delivery.id, 'in_progress')}
@@ -955,7 +1017,7 @@ export default function RiderDashboardV3() {
                                                         Start Delivery
                                                     </button>
                                                 )}
-                                                {delivery.status === 'in_progress' && (
+                                                {delivery.status === 'in_progress' && !delivery.paused_at && (
                                                     <>
                                                         <button
                                                             onClick={() => {
@@ -990,7 +1052,41 @@ export default function RiderDashboardV3() {
                                                         >
                                                             Mark Delivered
                                                         </button>
+                                                        {/* Wave 7 — Pause Delivery */}
+                                                        <button
+                                                            onClick={() => openPauseModal(delivery)}
+                                                            style={{
+                                                                padding: '0.5rem 1rem',
+                                                                backgroundColor: '#f3f4f6',
+                                                                color: '#374151',
+                                                                border: '1px solid #d1d5db',
+                                                                borderRadius: '8px',
+                                                                fontWeight: 600,
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.875rem'
+                                                            }}
+                                                        >
+                                                            Pause Delivery
+                                                        </button>
                                                     </>
+                                                )}
+                                                {/* Wave 7 — paused state: only the resume button shows here */}
+                                                {delivery.status === 'in_progress' && delivery.paused_at && (
+                                                    <button
+                                                        onClick={() => resumeDelivery(delivery.id)}
+                                                        style={{
+                                                            padding: '0.5rem 1rem',
+                                                            backgroundColor: '#3b82f6',
+                                                            color: '#fff',
+                                                            border: 'none',
+                                                            borderRadius: '8px',
+                                                            fontWeight: 600,
+                                                            cursor: 'pointer',
+                                                            fontSize: '0.875rem'
+                                                        }}
+                                                    >
+                                                        Resume Delivery
+                                                    </button>
                                                 )}
                                                 {delivery.status === 'delivered' && !delivery.proof_photo && (
                                                     <button
@@ -1011,6 +1107,36 @@ export default function RiderDashboardV3() {
                                                 )}
                                             </div>
                                         </div>
+
+                                        {/* Wave 7 — Paused banner */}
+                                        {delivery.paused_at && (
+                                            <div style={{
+                                                marginTop: '1rem',
+                                                padding: '0.75rem 1rem',
+                                                backgroundColor: '#fffbeb',
+                                                border: '1px solid #fde68a',
+                                                borderRadius: '8px',
+                                                color: '#92400e',
+                                                fontSize: '0.875rem',
+                                                lineHeight: 1.4,
+                                            }}>
+                                                <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>
+                                                    Delivery Paused
+                                                </div>
+                                                <div>
+                                                    <span style={{ fontWeight: 600 }}>Reason:</span> {delivery.pause_reason || '—'}
+                                                </div>
+                                                {delivery.pause_resumes_at && (
+                                                    <div>
+                                                        <span style={{ fontWeight: 600 }}>Expected resume:</span>{' '}
+                                                        {new Date(delivery.pause_resumes_at).toLocaleString([], {
+                                                            month: 'short', day: 'numeric',
+                                                            hour: 'numeric', minute: '2-digit'
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -1308,6 +1434,99 @@ export default function RiderDashboardV3() {
                                 );
                             })}
                     </MapContainer>
+                </div>
+            )}
+
+            {/* Wave 7 — Pause Delivery Modal */}
+            {pauseTarget && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem'
+                }} onClick={() => !pauseSubmitting && setPauseTarget(null)}>
+                    <div style={{
+                        backgroundColor: '#fff', borderRadius: '12px', padding: '1.5rem',
+                        width: '100%', maxWidth: '420px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+                    }} onClick={(e) => e.stopPropagation()}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#111827', marginBottom: '0.25rem' }}>
+                            Pause Delivery
+                        </h2>
+                        <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
+                            Order #{pauseTarget.tracking_number} — Why are you pausing this delivery?
+                        </p>
+
+                        <div style={{ display: 'grid', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                            {['Heavy rain', 'Vehicle issue', 'Customer not reachable', 'Other'].map(opt => (
+                                <label key={opt} style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    padding: '0.625rem 0.75rem',
+                                    border: pauseReason === opt ? '2px solid #f59e0b' : '1px solid #e5e7eb',
+                                    borderRadius: '8px', cursor: 'pointer',
+                                    backgroundColor: pauseReason === opt ? '#fffbeb' : '#fff',
+                                    fontSize: '0.875rem', fontWeight: 600, color: '#374151'
+                                }}>
+                                    <input
+                                        type="radio"
+                                        name="pause_reason"
+                                        value={opt}
+                                        checked={pauseReason === opt}
+                                        onChange={() => setPauseReason(opt)}
+                                        disabled={pauseSubmitting}
+                                    />
+                                    {opt}
+                                </label>
+                            ))}
+                        </div>
+
+                        {pauseReason === 'Other' && (
+                            <textarea
+                                value={pauseReasonNote}
+                                onChange={(e) => setPauseReasonNote(e.target.value)}
+                                maxLength={255}
+                                rows={3}
+                                placeholder="Specify the reason..."
+                                disabled={pauseSubmitting}
+                                style={{
+                                    width: '100%', padding: '0.625rem 0.75rem',
+                                    border: '1px solid #d1d5db', borderRadius: '8px',
+                                    fontSize: '0.875rem', resize: 'none', marginBottom: '0.75rem',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
+                        )}
+
+                        {pauseError && (
+                            <p style={{ color: '#dc2626', fontSize: '0.8125rem', marginBottom: '0.75rem' }}>
+                                {pauseError}
+                            </p>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button
+                                onClick={() => setPauseTarget(null)}
+                                disabled={pauseSubmitting}
+                                style={{
+                                    flex: 1, padding: '0.75rem', backgroundColor: '#f3f4f6',
+                                    color: '#111827', border: 'none', borderRadius: '8px',
+                                    fontWeight: 600, cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={submitPause}
+                                disabled={pauseSubmitting || !pauseReason}
+                                style={{
+                                    flex: 1, padding: '0.75rem', backgroundColor: '#f59e0b',
+                                    color: '#fff', border: 'none', borderRadius: '8px',
+                                    fontWeight: 700, cursor: pauseSubmitting ? 'not-allowed' : 'pointer',
+                                    opacity: (pauseSubmitting || !pauseReason) ? 0.6 : 1
+                                }}
+                            >
+                                {pauseSubmitting ? 'Pausing...' : 'Confirm Pause'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

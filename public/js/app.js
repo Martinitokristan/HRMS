@@ -33840,11 +33840,33 @@ function RiderDashboardV3() {
     uploadingProof = _useState48[0],
     setUploadingProof = _useState48[1];
 
-  // Map and routing state
-  var _useState49 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
+  // Wave 7 — Pause Delivery state
+  var _useState49 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState50 = _slicedToArray(_useState49, 2),
-    roadRoutes = _useState50[0],
-    setRoadRoutes = _useState50[1];
+    pauseTarget = _useState50[0],
+    setPauseTarget = _useState50[1]; // delivery row to pause
+  var _useState51 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState52 = _slicedToArray(_useState51, 2),
+    pauseReason = _useState52[0],
+    setPauseReason = _useState52[1];
+  var _useState53 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState54 = _slicedToArray(_useState53, 2),
+    pauseReasonNote = _useState54[0],
+    setPauseReasonNote = _useState54[1]; // for "Other"
+  var _useState55 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState56 = _slicedToArray(_useState55, 2),
+    pauseSubmitting = _useState56[0],
+    setPauseSubmitting = _useState56[1];
+  var _useState57 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState58 = _slicedToArray(_useState57, 2),
+    pauseError = _useState58[0],
+    setPauseError = _useState58[1];
+
+  // Map and routing state
+  var _useState59 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
+    _useState60 = _slicedToArray(_useState59, 2),
+    roadRoutes = _useState60[0],
+    setRoadRoutes = _useState60[1];
   var fileInputRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var mapRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
 
@@ -34363,6 +34385,103 @@ function RiderDashboardV3() {
     }, _callee0, null, [[1, 4]]);
   })), [declineNote, decliningOrder, fetchData]);
 
+  // Wave 7 — open the Pause Delivery modal for a row.
+  var openPauseModal = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (delivery) {
+    setPauseTarget(delivery);
+    setPauseReason('');
+    setPauseReasonNote('');
+    setPauseError('');
+  }, []);
+
+  // Wave 7 — submit pause to backend.
+  var submitPause = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1() {
+    var reasonText, _err$response3, _t0;
+    return _regenerator().w(function (_context10) {
+      while (1) switch (_context10.p = _context10.n) {
+        case 0:
+          if (pauseTarget) {
+            _context10.n = 1;
+            break;
+          }
+          return _context10.a(2);
+        case 1:
+          reasonText = pauseReason === 'Other' ? (pauseReasonNote || '').trim() : pauseReason;
+          if (reasonText) {
+            _context10.n = 2;
+            break;
+          }
+          setPauseError('Please choose a reason.');
+          return _context10.a(2);
+        case 2:
+          if (!(reasonText.length > 255)) {
+            _context10.n = 3;
+            break;
+          }
+          setPauseError('Reason is too long (max 255 characters).');
+          return _context10.a(2);
+        case 3:
+          setPauseSubmitting(true);
+          setPauseError('');
+          _context10.p = 4;
+          _context10.n = 5;
+          return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/deliveries/".concat(pauseTarget.id, "/pause"), {
+            reason: reasonText
+          });
+        case 5:
+          (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.CUSTOMER_ORDERS);
+          _context10.n = 6;
+          return fetchData(true);
+        case 6:
+          setPauseTarget(null);
+          setPauseReason('');
+          setPauseReasonNote('');
+          _context10.n = 8;
+          break;
+        case 7:
+          _context10.p = 7;
+          _t0 = _context10.v;
+          setPauseError(((_err$response3 = _t0.response) === null || _err$response3 === void 0 || (_err$response3 = _err$response3.data) === null || _err$response3 === void 0 ? void 0 : _err$response3.message) || 'Failed to pause delivery. Try again.');
+        case 8:
+          _context10.p = 8;
+          if (isMountedRef.current) setPauseSubmitting(false);
+          return _context10.f(8);
+        case 9:
+          return _context10.a(2);
+      }
+    }, _callee1, null, [[4, 7, 8, 9]]);
+  })), [pauseTarget, pauseReason, pauseReasonNote, fetchData]);
+
+  // Wave 7 — resume a paused delivery.
+  var resumeDelivery = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/function () {
+    var _ref12 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(deliveryId) {
+      var _err$response4, _t1;
+      return _regenerator().w(function (_context11) {
+        while (1) switch (_context11.p = _context11.n) {
+          case 0:
+            _context11.p = 0;
+            _context11.n = 1;
+            return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/deliveries/".concat(deliveryId, "/resume"));
+          case 1:
+            (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.CUSTOMER_ORDERS);
+            _context11.n = 2;
+            return fetchData(true);
+          case 2:
+            _context11.n = 4;
+            break;
+          case 3:
+            _context11.p = 3;
+            _t1 = _context11.v;
+            alert(((_err$response4 = _t1.response) === null || _err$response4 === void 0 || (_err$response4 = _err$response4.data) === null || _err$response4 === void 0 ? void 0 : _err$response4.message) || 'Failed to resume delivery.');
+          case 4:
+            return _context11.a(2);
+        }
+      }, _callee10, null, [[0, 3]]);
+    }));
+    return function (_x6) {
+      return _ref12.apply(this, arguments);
+    };
+  }(), [fetchData]);
+
   // Open the proof modal for a given delivery id. Used by the
   // "Upload Proof" button on delivered-but-not-yet-photographed rows.
   var openProofModal = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (deliveryId) {
@@ -34375,12 +34494,12 @@ function RiderDashboardV3() {
 
   // Handle status change
   var handleStatusChange = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/function () {
-    var _ref11 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(deliveryId, newStatus) {
-      var payload, updated, _t0;
-      return _regenerator().w(function (_context10) {
-        while (1) switch (_context10.p = _context10.n) {
+    var _ref13 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11(deliveryId, newStatus) {
+      var payload, updated, _t10;
+      return _regenerator().w(function (_context12) {
+        while (1) switch (_context12.p = _context12.n) {
           case 0:
-            _context10.p = 0;
+            _context12.p = 0;
             // Wave 6 — when transitioning to delivered, send rider GPS so the
             // backend can stamp mark_delivered_lat/lng + geofence_flag.
             payload = {
@@ -34390,7 +34509,7 @@ function RiderDashboardV3() {
               payload.rider_latitude = riderPositionRef.current.lat;
               payload.rider_longitude = riderPositionRef.current.lng;
             }
-            _context10.n = 1;
+            _context12.n = 1;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].put("/deliveries/".concat(deliveryId, "/status"), payload);
           case 1:
             (0,_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.markStale)(_store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.RIDER_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.ADMIN_DASHBOARD, _store_dataStore__WEBPACK_IMPORTED_MODULE_24__.STALE_KEYS.CUSTOMER_ORDERS);
@@ -34402,28 +34521,28 @@ function RiderDashboardV3() {
               });
               setDeliveries(updated);
             }
-            _context10.n = 3;
+            _context12.n = 3;
             break;
           case 2:
-            _context10.p = 2;
-            _t0 = _context10.v;
-            console.error('Failed to update status:', _t0);
+            _context12.p = 2;
+            _t10 = _context12.v;
+            console.error('Failed to update status:', _t10);
           case 3:
-            return _context10.a(2);
+            return _context12.a(2);
         }
-      }, _callee1, null, [[0, 2]]);
+      }, _callee11, null, [[0, 2]]);
     }));
-    return function (_x6, _x7) {
-      return _ref11.apply(this, arguments);
+    return function (_x7, _x8) {
+      return _ref13.apply(this, arguments);
     };
   }(), [deliveries]);
 
   // Handle photo upload
   var handlePhotoUpload = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(/*#__PURE__*/function () {
-    var _ref12 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(deliveryId, file) {
-      var formData, updated, _error$response, _t1;
-      return _regenerator().w(function (_context11) {
-        while (1) switch (_context11.p = _context11.n) {
+    var _ref14 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12(deliveryId, file) {
+      var formData, updated, _error$response, _t11;
+      return _regenerator().w(function (_context13) {
+        while (1) switch (_context13.p = _context13.n) {
           case 0:
             formData = new FormData();
             formData.append('photo', file);
@@ -34432,8 +34551,8 @@ function RiderDashboardV3() {
               formData.append('rider_latitude', String(riderPositionRef.current.lat));
               formData.append('rider_longitude', String(riderPositionRef.current.lng));
             }
-            _context11.p = 1;
-            _context11.n = 2;
+            _context13.p = 1;
+            _context13.n = 2;
             return _lib_api__WEBPACK_IMPORTED_MODULE_1__["default"].post("/deliveries/".concat(deliveryId, "/upload-proof"), formData, {
               headers: {
                 'Content-Type': 'multipart/form-data'
@@ -34459,27 +34578,27 @@ function RiderDashboardV3() {
               setProofPreview(null);
               alert("Delivery confirmed and proof sent!");
             }
-            _context11.n = 4;
+            _context13.n = 4;
             break;
           case 3:
-            _context11.p = 3;
-            _t1 = _context11.v;
-            console.error('Failed to upload proof:', _t1);
-            setProofError(((_error$response = _t1.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || 'Failed to submit proof. Try again.');
+            _context13.p = 3;
+            _t11 = _context13.v;
+            console.error('Failed to upload proof:', _t11);
+            setProofError(((_error$response = _t11.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || 'Failed to submit proof. Try again.');
           case 4:
-            _context11.p = 4;
+            _context13.p = 4;
             if (isMountedRef.current) {
               setIsSubmittingProof(false);
               setUploadingProof(null);
             }
-            return _context11.f(4);
+            return _context13.f(4);
           case 5:
-            return _context11.a(2);
+            return _context13.a(2);
         }
-      }, _callee10, null, [[1, 3, 4, 5]]);
+      }, _callee12, null, [[1, 3, 4, 5]]);
     }));
-    return function (_x8, _x9) {
-      return _ref12.apply(this, arguments);
+    return function (_x9, _x0) {
+      return _ref14.apply(this, arguments);
     };
   }(), [deliveries]);
   var handleProofFileChange = function handleProofFileChange(e) {
@@ -34975,17 +35094,22 @@ function RiderDashboardV3() {
             display: 'grid',
             gap: '1rem'
           },
-          children: deliveries.map(function (delivery) {
+          children: _toConsumableArray(deliveries).sort(function (a, b) {
+            var ap = a.paused_at ? 1 : 0;
+            var bp = b.paused_at ? 1 : 0;
+            return ap - bp;
+          }).map(function (delivery) {
             var _delivery$distance, _delivery$eta;
-            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
               style: {
                 backgroundColor: '#fff',
                 borderRadius: '12px',
                 padding: '1.5rem',
                 border: '1px solid #e5e7eb',
+                borderLeft: delivery.paused_at ? '4px solid #f59e0b' : '1px solid #e5e7eb',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
               },
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                 style: {
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -35053,7 +35177,9 @@ function RiderDashboardV3() {
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
                   style: {
                     display: 'flex',
-                    gap: '0.5rem'
+                    gap: '0.5rem',
+                    flexWrap: 'wrap',
+                    justifyContent: 'flex-end'
                   },
                   children: [delivery.status === 'confirmed' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
                     onClick: function onClick() {
@@ -35070,7 +35196,7 @@ function RiderDashboardV3() {
                       fontSize: '0.875rem'
                     },
                     children: "Start Delivery"
-                  }), delivery.status === 'in_progress' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.Fragment, {
+                  }), delivery.status === 'in_progress' && !delivery.paused_at && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.Fragment, {
                     children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
                       onClick: function onClick() {
                         setFocusedDeliveryId(delivery.id);
@@ -35102,7 +35228,37 @@ function RiderDashboardV3() {
                         fontSize: '0.875rem'
                       },
                       children: "Mark Delivered"
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
+                      onClick: function onClick() {
+                        return openPauseModal(delivery);
+                      },
+                      style: {
+                        padding: '0.5rem 1rem',
+                        backgroundColor: '#f3f4f6',
+                        color: '#374151',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        fontSize: '0.875rem'
+                      },
+                      children: "Pause Delivery"
                     })]
+                  }), delivery.status === 'in_progress' && delivery.paused_at && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
+                    onClick: function onClick() {
+                      return resumeDelivery(delivery.id);
+                    },
+                    style: {
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#3b82f6',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: '0.875rem'
+                    },
+                    children: "Resume Delivery"
                   }), delivery.status === 'delivered' && !delivery.proof_photo && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
                     onClick: function onClick() {
                       return openProofModal(delivery.id);
@@ -35120,7 +35276,44 @@ function RiderDashboardV3() {
                     children: "Upload Proof"
                   })]
                 })]
-              })
+              }), delivery.paused_at && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+                style: {
+                  marginTop: '1rem',
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  borderRadius: '8px',
+                  color: '#92400e',
+                  fontSize: '0.875rem',
+                  lineHeight: 1.4
+                },
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+                  style: {
+                    fontWeight: 700,
+                    marginBottom: '0.25rem'
+                  },
+                  children: "Delivery Paused"
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
+                    style: {
+                      fontWeight: 600
+                    },
+                    children: "Reason:"
+                  }), " ", delivery.pause_reason || '—']
+                }), delivery.pause_resumes_at && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("span", {
+                    style: {
+                      fontWeight: 600
+                    },
+                    children: "Expected resume:"
+                  }), ' ', new Date(delivery.pause_resumes_at).toLocaleString([], {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                  })]
+                })]
+              })]
             }, delivery.id);
           })
         }), nearbyOrders.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
@@ -35582,6 +35775,148 @@ function RiderDashboardV3() {
           }, routeKey);
         })]
       })]
+    }), pauseTarget && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+      style: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '1rem'
+      },
+      onClick: function onClick() {
+        return !pauseSubmitting && setPauseTarget(null);
+      },
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+        style: {
+          backgroundColor: '#fff',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          width: '100%',
+          maxWidth: '420px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+        },
+        onClick: function onClick(e) {
+          return e.stopPropagation();
+        },
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("h2", {
+          style: {
+            fontSize: '1.25rem',
+            fontWeight: 800,
+            color: '#111827',
+            marginBottom: '0.25rem'
+          },
+          children: "Pause Delivery"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("p", {
+          style: {
+            fontSize: '0.875rem',
+            color: '#6b7280',
+            marginBottom: '1rem'
+          },
+          children: ["Order #", pauseTarget.tracking_number, " \u2014 Why are you pausing this delivery?"]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
+          style: {
+            display: 'grid',
+            gap: '0.5rem',
+            marginBottom: '0.75rem'
+          },
+          children: ['Heavy rain', 'Vehicle issue', 'Customer not reachable', 'Other'].map(function (opt) {
+            return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("label", {
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.625rem 0.75rem',
+                border: pauseReason === opt ? '2px solid #f59e0b' : '1px solid #e5e7eb',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                backgroundColor: pauseReason === opt ? '#fffbeb' : '#fff',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                color: '#374151'
+              },
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("input", {
+                type: "radio",
+                name: "pause_reason",
+                value: opt,
+                checked: pauseReason === opt,
+                onChange: function onChange() {
+                  return setPauseReason(opt);
+                },
+                disabled: pauseSubmitting
+              }), opt]
+            }, opt);
+          })
+        }), pauseReason === 'Other' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("textarea", {
+          value: pauseReasonNote,
+          onChange: function onChange(e) {
+            return setPauseReasonNote(e.target.value);
+          },
+          maxLength: 255,
+          rows: 3,
+          placeholder: "Specify the reason...",
+          disabled: pauseSubmitting,
+          style: {
+            width: '100%',
+            padding: '0.625rem 0.75rem',
+            border: '1px solid #d1d5db',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            resize: 'none',
+            marginBottom: '0.75rem',
+            fontFamily: 'inherit'
+          }
+        }), pauseError && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("p", {
+          style: {
+            color: '#dc2626',
+            fontSize: '0.8125rem',
+            marginBottom: '0.75rem'
+          },
+          children: pauseError
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsxs)("div", {
+          style: {
+            display: 'flex',
+            gap: '0.75rem'
+          },
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
+            onClick: function onClick() {
+              return setPauseTarget(null);
+            },
+            disabled: pauseSubmitting,
+            style: {
+              flex: 1,
+              padding: '0.75rem',
+              backgroundColor: '#f3f4f6',
+              color: '#111827',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            },
+            children: "Cancel"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("button", {
+            onClick: submitPause,
+            disabled: pauseSubmitting || !pauseReason,
+            style: {
+              flex: 1,
+              padding: '0.75rem',
+              backgroundColor: '#f59e0b',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 700,
+              cursor: pauseSubmitting ? 'not-allowed' : 'pointer',
+              opacity: pauseSubmitting || !pauseReason ? 0.6 : 1
+            },
+            children: pauseSubmitting ? 'Pausing...' : 'Confirm Pause'
+          })]
+        })]
+      })
     }), showProofModal && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_30__.jsx)("div", {
       style: {
         position: 'fixed',

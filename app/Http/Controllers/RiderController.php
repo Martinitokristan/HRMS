@@ -183,7 +183,7 @@ class RiderController extends Controller
         $stats = [
             'total' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->count(),
             'done' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->count(),
-            'active' => Delivery::where('rider_id', $riderId)->whereIn('status', ['pending', 'confirmed', 'in_progress'])->count(),
+            'active' => Delivery::where('rider_id', $riderId)->whereIn('status', ['confirmed', 'in_progress'])->count(),
             'failed' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'failed')->count(),
             'quota' => 10000,
             'collected' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->with('sale')->get()->sum(function ($d) {

@@ -653,6 +653,91 @@ class DeliveryController extends Controller
     // ============================================================
 
     /**
+     * Wave 7 — POST /deliveries/{id}/pause.
+     * The assigned rider pauses an in-progress delivery with a reason.
+     * Notifies the customer.
+     */
+    public function pauseDelivery(Request $request, $id)
+    {
+        $request->validate([
+            'reason'      => 'required|string|max:255',
+            'resumes_at'  => 'nullable|date|after:now',
+        ]);
+
+        $delivery = Delivery::findOrFail($id);
+
+        if ($delivery->rider_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        if ($delivery->status !== 'in_progress') {
+            return response()->json(['message' => 'Only in-progress deliveries can be paused'], 422);
+        }
+        if (!is_null($delivery->paused_at)) {
+            return response()->json(['message' => 'Delivery is already paused'], 422);
+        }
+
+        $delivery->paused_at        = now();
+        $delivery->pause_reason     = $request->input('reason');
+        $delivery->pause_resumes_at = $request->input('resumes_at')
+            ?: now()->addDay()->startOfDay()->addHours(8); // default: tomorrow 8am
+        $delivery->save();
+
+        if ($delivery->sale && $delivery->sale->customer_id) {
+            \App\Models\CustomerNotification::create([
+                'customer_id' => $delivery->sale->customer_id,
+                'type'        => 'delivery_paused',
+                'title'       => 'Your delivery has been paused',
+                'message'     => 'Your delivery is paused. Reason: ' . $delivery->pause_reason
+                                . '. Expected resume: ' . optional($delivery->pause_resumes_at)->format('M j, g:i A') . '.',
+                'meta'        => json_encode([
+                    'delivery_id'      => $delivery->id,
+                    'order_number'     => optional($delivery->sale)->order_number,
+                    'pause_reason'     => $delivery->pause_reason,
+                    'pause_resumes_at' => optional($delivery->pause_resumes_at)->toIso8601String(),
+                ]),
+            ]);
+        }
+
+        return response()->json(['data' => $delivery, 'status' => 'success']);
+    }
+
+    /**
+     * Wave 7 — POST /deliveries/{id}/resume.
+     * The assigned rider resumes a previously paused delivery. Notifies the customer.
+     */
+    public function resumeDelivery(Request $request, $id)
+    {
+        $delivery = Delivery::findOrFail($id);
+
+        if ($delivery->rider_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        if (is_null($delivery->paused_at)) {
+            return response()->json(['message' => 'Delivery is not paused'], 422);
+        }
+
+        $delivery->paused_at        = null;
+        $delivery->pause_reason     = null;
+        $delivery->pause_resumes_at = null;
+        $delivery->save();
+
+        if ($delivery->sale && $delivery->sale->customer_id) {
+            \App\Models\CustomerNotification::create([
+                'customer_id' => $delivery->sale->customer_id,
+                'type'        => 'delivery_resumed',
+                'title'       => 'Your delivery has resumed',
+                'message'     => 'Your rider has resumed your delivery and is on the way.',
+                'meta'        => json_encode([
+                    'delivery_id'  => $delivery->id,
+                    'order_number' => optional($delivery->sale)->order_number,
+                ]),
+            ]);
+        }
+
+        return response()->json(['data' => $delivery, 'status' => 'success']);
+    }
+
+    /**
      * POST /sales/{id}/customer-confirm-receipt — customer confirms they got the order.
      */
     public function customerConfirmReceipt(Request $request, $id)
