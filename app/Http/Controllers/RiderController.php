@@ -293,12 +293,29 @@ class RiderController extends Controller
             ->sortBy(fn($d) => $d->distance_value ?? PHP_INT_MAX)
             ->values();
 
+        $myJobs = $deliveries->filter(function ($d) {
+            if (in_array($d->status, ['pending', 'confirmed', 'in_progress'])) {
+                return true;
+            }
+            // Keep delivered-without-proof in active jobs so the rider can still upload proof.
+            if ($d->status === 'delivered' && empty($d->proof_photo)) {
+                return true;
+            }
+            return false;
+        })->values();
+
+        $completed = $deliveries->filter(function ($d) {
+            if ($d->status === 'failed') return true;
+            if ($d->status === 'delivered' && !empty($d->proof_photo)) return true;
+            return false;
+        })->take(20)->values();
+
         return response()->json([
             'data' => [
                 'stats' => $stats,
                 'nearby' => $nearby,
-                'my_jobs' => $deliveries->whereIn('status', ['pending', 'confirmed', 'in_progress'])->values(),
-                'completed' => $deliveries->whereIn('status', ['delivered', 'failed'])->take(20)->values(),
+                'my_jobs' => $myJobs,
+                'completed' => $completed,
             ],
             'status' => 'success'
         ]);

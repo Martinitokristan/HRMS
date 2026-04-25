@@ -223,3 +223,31 @@ $ grep -rn "image|mimes:" app/ | grep -v "dimensions:max_width=4000,max_height=4
 - After deploy, the admin "Cancel Orders" page defaults to the Pending tab; existing pending requests behave identically.
 - Refund payouts are still **manual** in your GCash workflow — the system tracks status only.
 
+## Rider Proof Recovery Patch — 2026-04-25
+
+### What changed
+
+1. **Delivered orders without a proof photo stay in the rider's active jobs list.**
+   `RiderController::dashboard` now keeps `status='delivered' && proof_photo IS NULL` rows in `my_jobs` and excludes them from `completed`. As soon as a proof photo is uploaded, the row moves to `completed` automatically on the next dashboard refresh.
+
+2. **"Mark Delivered" no longer auto-opens the Submit Proof modal.**
+   The rider taps Mark Delivered when at the door; the order is marked delivered immediately. The Upload Proof button appears on the same delivery card and opens the existing proof modal when the rider is ready. Closing the modal mid-flow is now safe — the row stays visible with the Upload Proof button intact.
+
+3. **Visual cue on delivered-without-proof rows.**
+   Red "Awaiting proof of delivery upload" hint appears on the card so the rider knows which orders need follow-up.
+
+### Files changed
+
+- `app/Http/Controllers/RiderController.php` (`dashboard` method — replaced `whereIn` filters with predicate-based filters that respect `proof_photo` nullability).
+- `resources/js/components/rider/RiderDashboardV3.js`
+  - Added `openProofModal` helper.
+  - Removed auto-open-modal block from `handleStatusChange`.
+  - Added render branch for `status === 'delivered' && !proof_photo` showing "Upload Proof" button.
+  - Added "Awaiting proof of delivery upload" visual hint.
+
+### Operator notes
+
+- No migration. No schema change. No new endpoints.
+- Existing `POST /deliveries/{id}/upload-proof` remains the single proof-upload entry point.
+- Backwards compatible: pre-existing `delivered` orders without `proof_photo` will reappear in the rider's active list after this deploy and can finally be photographed.
+

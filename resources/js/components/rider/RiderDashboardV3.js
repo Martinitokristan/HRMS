@@ -449,6 +449,16 @@ export default function RiderDashboardV3() {
         }
     }, [declineNote, decliningOrder, fetchData]);
 
+    // Open the proof modal for a given delivery id. Used by the
+    // "Upload Proof" button on delivered-but-not-yet-photographed rows.
+    const openProofModal = useCallback((deliveryId) => {
+        setSelectedDeliveryToProof(deliveryId);
+        setProofFile(null);
+        setProofPreview(null);
+        setProofError('');
+        setShowProofModal(true);
+    }, []);
+
     // Handle status change
     const handleStatusChange = useCallback(async (deliveryId, newStatus) => {
         try {
@@ -459,14 +469,6 @@ export default function RiderDashboardV3() {
                     d.id === deliveryId ? { ...d, status: newStatus } : d
                 );
                 setDeliveries(updated);
-                if (newStatus === 'delivered') {
-                    // Instead of instantly clicking file upload, open modal.
-                    setSelectedDeliveryToProof(deliveryId);
-                    setProofFile(null);
-                    setProofPreview(null);
-                    setProofError('');
-                    setShowProofModal(true);
-                }
             }
         } catch (error) {
             console.error('Failed to update status:', error);
@@ -886,6 +888,11 @@ export default function RiderDashboardV3() {
                                                 <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
                                                     {delivery.customer_address}
                                                 </p>
+                                                {delivery.status === 'delivered' && !delivery.proof_photo && (
+                                                    <p style={{ color: '#dc2626', fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                                                        Awaiting proof of delivery upload
+                                                    </p>
+                                                )}
                                                 <p style={{ color: '#059669', fontSize: '0.875rem', fontWeight: 600 }}>
                                                     ETA: {riderPosition && delivery.customer_latitude && delivery.customer_longitude
                                                         ? formatEta(haversineKm(riderPosition.lat, riderPosition.lng, delivery.customer_latitude, delivery.customer_longitude))
@@ -946,7 +953,25 @@ export default function RiderDashboardV3() {
                                                             Mark Delivered
                                                         </button>
                                                     </>
-                                                )}        </div>
+                                                )}
+                                                {delivery.status === 'delivered' && !delivery.proof_photo && (
+                                                    <button
+                                                        onClick={() => openProofModal(delivery.id)}
+                                                        style={{
+                                                            padding: '0.5rem 1rem',
+                                                            backgroundColor: '#10b981',
+                                                            color: '#fff',
+                                                            border: 'none',
+                                                            borderRadius: '8px',
+                                                            fontWeight: 600,
+                                                            cursor: 'pointer',
+                                                            fontSize: '0.875rem'
+                                                        }}
+                                                    >
+                                                        Upload Proof
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
