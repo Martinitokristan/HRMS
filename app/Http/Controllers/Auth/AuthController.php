@@ -40,7 +40,7 @@ class AuthController extends Controller
                 'license_number' => 'required|string',
                 'address' => 'required|string',
                 'valid_id_type' => 'required|string',
-                'valid_id_file' => 'required|file|image|mimes:jpeg,png,jpg|max:5000',
+                'valid_id_file' => 'required|file|image|mimes:jpeg,png,jpg|max:5000|dimensions:max_width=4000,max_height=4000',
                 'id_number' => 'required|string',
                 'emergency_contact' => 'required|string',
             ]);

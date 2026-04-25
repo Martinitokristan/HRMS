@@ -630,7 +630,7 @@ class SaleController extends Controller
         }
 
         $request->validate([
-            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // max 5MB
+            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000', // max 5MB
             'payment_reference' => 'nullable|string|max:50',
         ]);
 
@@ -702,7 +702,7 @@ class SaleController extends Controller
 
         $ordersToday = Sale::whereDate('created_at', $today)->count();
 
-        $lowStockCount = Inventory::whereRaw('current_stock <= reorder_threshold')->count();
+        $lowStockCount = Inventory::where('is_low_stock', 1)->count();
 
         $activeRiders = \App\Models\User::where('role', 'rider')
             ->where('status', 'active')
@@ -715,7 +715,7 @@ class SaleController extends Controller
             ->latest()->limit(10)->get();
 
         $lowStockProducts = Inventory::with(['product.category'])
-            ->whereRaw('current_stock <= reorder_threshold')
+            ->where('is_low_stock', 1)
             ->limit(5)->get();
 
         return response()->json([

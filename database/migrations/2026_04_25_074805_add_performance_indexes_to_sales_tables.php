@@ -54,13 +54,21 @@ class AddPerformanceIndexesToSalesTables extends Migration
     public function down()
     {
         Schema::table('sales', function (Blueprint $table) {
-            $table->dropIndexIfExists('sales_status_created_at_index');
-            $table->dropIndexIfExists('sales_created_at_index');
-            $table->dropIndexIfExists('sales_customer_id_index');
+            if ($this->indexExists('sales', 'sales_status_created_at_index')) {
+                $table->dropIndex('sales_status_created_at_index');
+            }
+            if ($this->indexExists('sales', 'sales_created_at_index')) {
+                $table->dropIndex('sales_created_at_index');
+            }
+            if ($this->indexExists('sales', 'sales_customer_id_index')) {
+                $table->dropIndex('sales_customer_id_index');
+            }
         });
 
         Schema::table('products', function (Blueprint $table) {
-            $table->dropIndexIfExists('products_category_id_index');
+            if ($this->indexExists('products', 'products_category_id_index')) {
+                $table->dropIndex('products_category_id_index');
+            }
         });
     }
 

@@ -242,11 +242,18 @@ class GCashController extends Controller
             return response()->json(['error' => 'Invalid or expired link.'], 404);
         }
 
+        if ($sale->payment_proof_token_used_at !== null) {
+            return response()->json([
+                'message' => 'This proof link has already been used.',
+                'status'  => 'error',
+            ], 410);
+        }
+
         return response()->json([
             'order_number'  => $sale->order_number,
             'total_amount'  => $sale->total_amount,
             'status'        => $sale->status,
-            'customer_name' => $sale->customer->name ?? 'Customer',
+            'customer_name' => optional($sale->customer)->name ?? 'Customer',
             'items'         => $sale->items->map(fn($i) => [
                 'name'     => $i->product->name ?? 'Item',
                 'quantity' => $i->quantity,
@@ -262,7 +269,7 @@ class GCashController extends Controller
     {
         $request->validate([
             'payment_reference' => 'required|string|max:50',
-            'payment_proof'     => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'payment_proof'     => 'required|image|mimes:jpeg,jpg,png,webp|max:5120|dimensions:max_width=4000,max_height=4000',
         ]);
 
         $storedPath = null;
@@ -280,6 +287,11 @@ class GCashController extends Controller
                     return;
                 }
 
+                if ($sale->payment_proof_token_used_at !== null) {
+                    $matched = false;
+                    return;
+                }
+
                 // Only store the file after we confirm the row is still claimable under lock.
                 $storedPath = $request->file('payment_proof')->store('payment_proofs', 'public');
 
@@ -287,7 +299,7 @@ class GCashController extends Controller
                     'payment_reference' => $request->payment_reference,
                     'payment_proof_path' => $storedPath,
                     'status' => 'verifying_payment',
-                    'payment_proof_token' => null,
+                    'payment_proof_token_used_at' => now(),
                 ]);
             });
 

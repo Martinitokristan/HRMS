@@ -14,7 +14,9 @@ class AddRegionToSuppliersTable extends Migration
     public function up()
     {
         Schema::table('suppliers', function (Blueprint $blueprint) {
-            $blueprint->string('region')->nullable()->after('barangay');
+            if (!Schema::hasColumn('suppliers', 'region')) {
+                $blueprint->string('region', 100)->nullable()->after('barangay');
+            }
         });
     }
 
@@ -26,7 +28,9 @@ class AddRegionToSuppliersTable extends Migration
     public function down()
     {
         Schema::table('suppliers', function (Blueprint $blueprint) {
-            $blueprint->dropColumn('region');
+            if (Schema::hasColumn('suppliers', 'region')) {
+                $blueprint->dropColumn('region');
+            }
         });
     }
 }

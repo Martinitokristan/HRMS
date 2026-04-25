@@ -64,7 +64,7 @@ class ReturnController extends Controller
             'items.*.sale_item_id' => 'required|integer',
             'items.*.quantity'     => 'required|integer|min:1',
             'images'         => 'nullable|array|max:5',
-            'images.*'       => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'images.*'       => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
         ]);
 
         $sale = Sale::with('items')->findOrFail($data['sale_id']);
@@ -228,9 +228,6 @@ class ReturnController extends Controller
                 'approved_at'   => now(),
             ]);
 
-            // Update sale status
-            $return->sale->update(['status' => 'returned']);
-
             // Notify customer in-app (gated by setting)
             if (Setting::get('return_approved_notify', '0') === '1') {
                 CustomerNotification::create([
@@ -327,6 +324,8 @@ class ReturnController extends Controller
                 'status'       => 'completed',
                 'completed_at' => now(),
             ]);
+
+            $return->sale->update(['status' => 'returned']);
         });
 
         // Clear server-side report caches so dashboard shows fresh data
@@ -334,10 +333,7 @@ class ReturnController extends Controller
         if ($taggable) {
             Cache::tags(['reports'])->flush();
         } else {
-            foreach ([5, 10, 20, 25, 50] as $l) {
-                Cache::forget("reports:return_rate:{$l}");
-            }
-            Cache::forget('reports:recent_activity');
+            \Log::warning('Report cache not flushed: cache store does not support tags. Configure Redis (CACHE_DRIVER=redis) to enable cache tags.');
         }
 
         // Notify customer

@@ -482,7 +482,7 @@ class DeliveryController extends Controller
     public function uploadProof(Request $request, $id)
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,webp,heic,heif|max:10240', // 10MB max, added heic/heif for iPhone
+            'photo' => 'required|image|mimes:jpeg,png,jpg,webp,heic,heif|max:10240|dimensions:max_width=4000,max_height=4000', // 10MB max, added heic/heif for iPhone
         ]);
 
         $delivery = Delivery::with('sale.items.product')->findOrFail($id);

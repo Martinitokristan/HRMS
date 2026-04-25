@@ -27,6 +27,8 @@ class Supplier extends Authenticatable
         'email_verification_token'
     ];
 
+    protected $guarded = ['id', 'remember_token'];
+
     protected $hidden = [
         'password',
         'remember_token',

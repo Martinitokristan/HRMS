@@ -180,7 +180,7 @@ class InventoryController extends Controller
         return [
             'data' => $responseData,
             'variant_meta' => $variantMeta,
-            'low_stock_count' => Inventory::whereRaw('current_stock <= reorder_threshold')->count(),
+            'low_stock_count' => Inventory::where('is_low_stock', 1)->count(),
             'status' => 'success',
         ];
     }

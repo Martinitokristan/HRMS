@@ -35,7 +35,7 @@ class NewOrderAssigned extends Notification
             'delivery_id' => $this->delivery->id,
             'sale_id' => $this->delivery->sale_id,
             'order_number' => $orderNumber,
-            'customer_name' => $this->delivery->sale->customer->name ?? 'Customer',
+            'customer_name' => optional(optional($this->delivery->sale)->customer)->name ?? 'Customer',
             'customer_address' => $this->delivery->address,
             'title' => 'New Order Assigned',
             'message' => "You have been assigned to deliver {$products} (Order #{$orderNumber}).",

@@ -67,7 +67,7 @@ Route::middleware(['throttle:60,1'])->post('/route', [RouteController::class , '
 Route::middleware(['throttle:30,1'])->post('/gcash/sms-webhook', [GCashController::class, 'smsWebhook']);
 
 // GCash Proof Submission (No Auth - Token-based link from SMS)
-Route::middleware(['throttle:10,1'])->group(function () {
+Route::middleware(['throttle:5,1'])->group(function () {
     Route::get('/gcash/proof/{token}',  [GCashController::class, 'getProofOrder']);
     Route::post('/gcash/proof/{token}', [GCashController::class, 'submitProof']);
 });

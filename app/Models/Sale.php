@@ -9,7 +9,7 @@ class Sale extends Model
     protected $fillable = [
         'order_number', 'customer_id', 'processed_by', 'discount_pct',
         'total_amount', 'payment_method', 'payment_phone_number', 'payment_reference', 'payment_proof_path', 'status', 'notes',
-        'payment_confirmed_at', 'payment_expiry_sms_sent_at', 'payment_proof_token',
+        'payment_confirmed_at', 'payment_expiry_sms_sent_at', 'payment_proof_token', 'payment_proof_token_used_at',
         'cancellation_status', 'cancellation_requested_at', 'cancellation_requested_by',
     ];
 

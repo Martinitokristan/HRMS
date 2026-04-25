@@ -93,9 +93,9 @@ class SupplierProductController extends Controller
             'is_promoted' => 'nullable|boolean',
             'variants' => 'nullable|string',
             'brand_id' => 'nullable|exists:brands,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
             'additional_images' => 'nullable|array',
-            'additional_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'additional_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
         ]);
 
         $product = DB::transaction(function () use ($data, $request, $supplierId) {
@@ -135,7 +135,7 @@ class SupplierProductController extends Controller
                         $variantImage = null;
                         $fileKey = "variant_image_{$index}";
                         if ($request->hasFile($fileKey)) {
-                            $request->validate([$fileKey => 'image|mimes:jpeg,png,jpg,webp|max:5120']);
+                            $request->validate([$fileKey => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000']);
                             $variantImage = $request->file($fileKey)->store('supplier-product-variants', 'public');
                         }
 
@@ -144,7 +144,7 @@ class SupplierProductController extends Controller
                         if ($request->hasFile($extraKey)) {
                             $request->validate([
                                 $extraKey => 'array',
-                                "{$extraKey}.*" => 'image|mimes:jpeg,png,jpg,webp|max:5120'
+                                "{$extraKey}.*" => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000'
                             ]);
                             foreach ($request->file($extraKey) as $file) {
                                 $variantExtras[] = $file->store('supplier-product-variants', 'public');
@@ -205,9 +205,9 @@ class SupplierProductController extends Controller
             'is_promoted' => 'nullable|boolean',
             'variants' => 'nullable|string',
             'brand_id' => 'nullable|exists:brands,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
             'additional_images' => 'nullable|array',
-            'additional_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'additional_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
         ]);
 
         DB::transaction(function () use ($product, $data, $request) {
@@ -259,7 +259,7 @@ class SupplierProductController extends Controller
                     $newImagePath = null;
                     $variantImage = null;
                     if ($request->hasFile($fileKey)) {
-                        $request->validate([$fileKey => 'image|mimes:jpeg,png,jpg,webp|max:5120']);
+                        $request->validate([$fileKey => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000']);
                         $newImagePath = $request->file($fileKey)->store('supplier-product-variants', 'public');
                         $variantImage = $newImagePath;
                     } elseif (!empty($v['existing_image_path'])) {
@@ -280,7 +280,7 @@ class SupplierProductController extends Controller
                     if ($request->hasFile($extraKey)) {
                         $request->validate([
                             $extraKey => 'array',
-                            "{$extraKey}.*" => 'image|mimes:jpeg,png,jpg,webp|max:5120'
+                            "{$extraKey}.*" => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000'
                         ]);
                         foreach ($request->file($extraKey) as $file) {
                             $variantExtras[] = $file->store('supplier-product-variants', 'public');

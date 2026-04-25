@@ -153,7 +153,7 @@ class CustomerController extends Controller
     public function uploadPhoto(Request $request)
     {
         $request->validate([
-            'photo' => 'required|image|max:2048',
+            'photo' => 'required|image|max:2048|dimensions:max_width=4000,max_height=4000',
         ]);
 
         $user = $request->user();

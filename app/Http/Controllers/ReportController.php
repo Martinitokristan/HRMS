@@ -8,6 +8,7 @@ use App\Models\SaleItem;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -34,7 +35,7 @@ class ReportController extends Controller
                 $from = now()->setYear($year)->startOfYear();
                 $to = now()->setYear($year)->endOfYear();
 
-                $rows = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+                $rows = Sale::where('created_at', '>=', $from->copy()->startOfDay())->where('created_at', '<', $to->copy()->addDay()->startOfDay())
                     ->whereIn('status', $allowedStatuses)
                     ->selectRaw('MONTH(created_at) as bucket, SUM(total_amount) as revenue, COUNT(*) as orders')
                     ->groupBy('bucket')
@@ -54,7 +55,7 @@ class ReportController extends Controller
                 $from = now()->setYear($year)->setMonth($month)->startOfMonth();
                 $to = (clone $from)->endOfMonth();
 
-                $rows = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+                $rows = Sale::where('created_at', '>=', $from->copy()->startOfDay())->where('created_at', '<', $to->copy()->addDay()->startOfDay())
                     ->whereIn('status', $allowedStatuses)
                     ->selectRaw('DAY(created_at) as bucket, SUM(total_amount) as revenue, COUNT(*) as orders')
                     ->groupBy('bucket')
@@ -75,7 +76,7 @@ class ReportController extends Controller
                 $from = now()->startOfYear();
                 $to = now()->endOfYear();
 
-                $rows = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+                $rows = Sale::where('created_at', '>=', $from->copy()->startOfDay())->where('created_at', '<', $to->copy()->addDay()->startOfDay())
                     ->whereIn('status', $allowedStatuses)
                     ->selectRaw('MONTH(created_at) as bucket, SUM(total_amount) as revenue, COUNT(*) as orders')
                     ->groupBy('bucket')
@@ -102,7 +103,7 @@ class ReportController extends Controller
                     $to = now()->endOfMonth();
                 }
 
-                $rows = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+                $rows = Sale::where('created_at', '>=', $from->copy()->startOfDay())->where('created_at', '<', $to->copy()->addDay()->startOfDay())
                     ->whereIn('status', $allowedStatuses)
                     ->selectRaw('DATE(created_at) as date, SUM(total_amount) as revenue, COUNT(*) as orders')
                     ->groupBy('date')
@@ -120,7 +121,7 @@ class ReportController extends Controller
             }
         }
 
-        $summaryData = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+        $summaryData = Sale::where('created_at', '>=', $from->copy()->startOfDay())->where('created_at', '<', $to->copy()->addDay()->startOfDay())
             ->selectRaw('
                 COUNT(*) as total_orders,
                 SUM(total_amount) as total_revenue,
@@ -177,7 +178,7 @@ class ReportController extends Controller
             $topProducts = DB::table('sale_items')
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
-                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from->toDateString(), $to->toDateString()])
+                ->where('sales.created_at', '>=', $from->copy()->startOfDay())->where('sales.created_at', '<', $to->copy()->addDay()->startOfDay())
                 ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'returned'])
                 ->select(
                     'products.id',
@@ -242,7 +243,7 @@ class ReportController extends Controller
             $topCategoryIds = DB::table('sale_items')
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
-                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$currentFrom, $currentTo])
+                ->where('sales.created_at', '>=', Carbon::parse($currentFrom)->startOfDay())->where('sales.created_at', '<', Carbon::parse($currentTo)->addDay()->startOfDay())
                 ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
                 ->whereNotNull('products.category_id')
                 ->groupBy('products.category_id')
@@ -267,7 +268,7 @@ class ReportController extends Controller
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
                 ->join('categories', 'products.category_id', '=', 'categories.id')
-                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$currentFrom, $currentTo])
+                ->where('sales.created_at', '>=', Carbon::parse($currentFrom)->startOfDay())->where('sales.created_at', '<', Carbon::parse($currentTo)->addDay()->startOfDay())
                 ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
                 ->whereIn('products.category_id', $topCategoryIds)
                 ->groupBy('categories.id', 'categories.name')
@@ -285,7 +286,7 @@ class ReportController extends Controller
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
                 ->whereIn('products.category_id', $topCategoryIds)
-                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$previousFrom, $previousTo])
+                ->where('sales.created_at', '>=', Carbon::parse($previousFrom)->startOfDay())->where('sales.created_at', '<', Carbon::parse($previousTo)->addDay()->startOfDay())
                 ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
                 ->groupBy('products.category_id')
                 ->select(
@@ -359,7 +360,7 @@ class ReportController extends Controller
                 ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
                 ->join('products', 'sale_items.product_id', '=', 'products.id')
                 ->join('categories', 'products.category_id', '=', 'categories.id')
-                ->whereBetween(DB::raw('DATE(sales.created_at)'), [$from, $to])
+                ->where('sales.created_at', '>=', Carbon::parse($from)->startOfDay())->where('sales.created_at', '<', Carbon::parse($to)->addDay()->startOfDay())
                 ->whereIn('sales.status', ['delivered', 'in_progress', 'pending', 'confirmed', 'out_for_delivery', 'returned'])
                 ->whereNotNull('products.category_id')
                 ->groupBy('categories.id', 'categories.name')
@@ -490,10 +491,10 @@ class ReportController extends Controller
         }
 
         $sales = Sale::with(['customer', 'items.product'])
-            ->whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+            ->where('created_at', '>=', $from->copy()->startOfDay())->where('created_at', '<', $to->copy()->addDay()->startOfDay())
             ->get();
 
-        $summaryData = Sale::whereBetween(DB::raw('DATE(created_at)'), [$from->toDateString(), $to->toDateString()])
+        $summaryData = Sale::where('created_at', '>=', $from->copy()->startOfDay())->where('created_at', '<', $to->copy()->addDay()->startOfDay())
             ->selectRaw('
                 COUNT(*) as total_orders,
                 SUM(total_amount) as total_revenue,
@@ -508,11 +509,22 @@ class ReportController extends Controller
         $avgOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
 
         if ($type === 'csv') {
-            $csv = "Order Number,Customer,Total,Status,Payment Method,Date\n";
+            $handle = fopen('php://temp', 'r+');
+            fputcsv($handle, ['Order Number', 'Customer', 'Total', 'Status', 'Payment Method', 'Date']);
             foreach ($sales as $sale) {
                 $paymentMethod = $sale->payment_method === 'cod' ? 'Cash on Delivery' : $sale->payment_method;
-                $csv .= "\"{$sale->order_number}\",\"{$sale->customer->name}\",{$sale->total_amount},{$sale->status},{$paymentMethod},{$sale->created_at}\n";
+                fputcsv($handle, [
+                    $sale->order_number,
+                    optional($sale->customer)->name ?? 'Guest',
+                    $sale->total_amount,
+                    $sale->status,
+                    $paymentMethod,
+                    (string) $sale->created_at,
+                ]);
             }
+            rewind($handle);
+            $csv = stream_get_contents($handle);
+            fclose($handle);
 
             return response($csv, 200, [
                 'Content-Type' => 'text/csv',
@@ -903,7 +915,7 @@ class ReportController extends Controller
             $html .= '
                     <tr>
                         <td class="order-number">' . $sale->order_number . '</td>
-                        <td>' . ($sale->customer->name ?? 'Guest') . '</td>
+                        <td>' . (optional($sale->customer)->name ?? 'Guest') . '</td>
                         <td class="order-total">PHP ' . number_format($sale->total_amount, 2) . '</td>
                         <td><span class="status-badge badge-' . $badgeClass . '">' . $statusLabel . '</span></td>
                         <td>' . $sale->created_at->format('M d, Y') . '</td>
@@ -1431,14 +1443,14 @@ class ReportController extends Controller
                     'badgeVariant' => $badgeVariant,
                     'icon' => $icon,
                     'title' => "Order #{$sale->order_number}",
-                    'message' => ($sale->customer->name ?? 'A customer') . " - " . number_format($sale->total_amount, 2) . " PHP",
+                    'message' => (optional($sale->customer)->name ?? 'A customer') . " - " . number_format($sale->total_amount, 2) . " PHP",
                     'timestamp' => ($sale->created_at ?? $sale->updated_at ?? now())->toIso8601String(),
                 ];
             }
 
             // 2. Low Stock Alerts (always shown in dashboard live feed)
             $lowStock = Inventory::with('product')
-                ->whereRaw('current_stock <= reorder_threshold')
+                ->where('is_low_stock', 1)
                 ->limit(5)
                 ->get();
 

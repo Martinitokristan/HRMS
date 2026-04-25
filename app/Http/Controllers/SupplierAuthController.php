@@ -184,17 +184,23 @@ class SupplierAuthController extends Controller
     {
         $supplier = $request->user();
 
+        $customMessages = [
+            'name.regex' => 'The name must only contain letters, spaces, dots, or hyphens.',
+            'contact_name.regex' => 'The contact name must only contain letters, spaces, dots, or hyphens.',
+            'phone.regex' => 'Phone number must be exactly 12 digits starting with 63.',
+        ];
+
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:100',
-            'contact_name' => 'sometimes|string|max:100',
-            'phone' => 'sometimes|string|max:20',
-            'address' => 'sometimes|string',
-            'municipality' => 'sometimes|string|max:100',
-            'province' => 'sometimes|string|max:100',
-            'barangay' => 'sometimes|string|max:100',
-            'region' => 'sometimes|string|max:100',
+            'name' => ['sometimes', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
+            'contact_name' => ['sometimes', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
+            'phone' => ['sometimes', 'string', 'regex:/^63\d{10}$/'],
+            'address'      => 'sometimes|nullable|string',
+            'municipality' => 'sometimes|nullable|string|max:100',
+            'province'     => 'sometimes|nullable|string|max:100',
+            'barangay'     => 'sometimes|nullable|string|max:100',
+            'region'       => 'sometimes|nullable|string|max:100',
             'password' => 'sometimes|string|min:8|confirmed',
-        ]);
+        ], $customMessages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -205,9 +211,9 @@ class SupplierAuthController extends Controller
         }
 
         $updateData = $request->only(['name', 'contact_name', 'phone', 'address', 'province', 'barangay', 'region']);
-        
+
         if ($request->has('municipality')) {
-            $updateData['city'] = $request->municipality;
+            $updateData['city'] = (string) $request->input('municipality');
         }
 
         if ($request->has('password')) {
@@ -227,10 +233,14 @@ class SupplierAuthController extends Controller
     {
         $supplier = $request->user();
 
+        $customMessages = [
+            'new_password.regex' => 'Password must contain at least 8 characters, one letter and one number.',
+        ];
+
         $validator = Validator::make($request->all(), [
             'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8|confirmed',
-        ]);
+            'new_password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
+        ], $customMessages);
 
         if ($validator->fails()) {
             return response()->json([

@@ -42,3 +42,5 @@ build_error.log
 
 # Certificates and Guides
 caching_and_silent_reload_guide.md
+
+routes.json
