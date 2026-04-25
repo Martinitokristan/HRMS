@@ -8,6 +8,7 @@ import RatingNotificationsPanel from './RatingNotificationsPanel';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { orderItemLabel } from '../../utils/orderItemLabel';
 import {
     MapPin,
     Settings,
