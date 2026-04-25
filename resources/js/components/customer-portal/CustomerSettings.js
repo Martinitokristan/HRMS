@@ -126,9 +126,9 @@ export default function CustomerSettings() {
                 sex: p?.sex || '',
                 address: p?.address || '',
                 landmark: p?.landmark || '',
-                province: p?.province || '',
-                municipality: p?.municipality || '',
-                barangay: p?.barangay || '',
+                province: p?.province_name || p?.province || '',
+                municipality: p?.city_name || p?.municipality || '',
+                barangay: p?.barangay_name || p?.barangay || '',
                 zip_code: p?.zip_code || '',
             };
             setProfile(newProfile);

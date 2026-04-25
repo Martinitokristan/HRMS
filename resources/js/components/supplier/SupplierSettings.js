@@ -16,6 +16,7 @@ import SupplierBrandSettings from './SupplierBrandSettings';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale, STALE_KEYS } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
+import { PhAddressFields } from '../shared/PhAddressFields';
 
 export default function SupplierSettings() {
     const { user, logout, refreshSettings, refreshCategories } = useAuth();
@@ -30,7 +31,10 @@ export default function SupplierSettings() {
         name: user?.name || '',
         email: user?.email || '',
         phone: user?.phone || '',
-        city: user?.city || '',
+        municipality: user?.municipality || user?.city || '',
+        province: user?.province || '',
+        barangay: user?.barangay || '',
+        region: user?.region || '',
         address: user?.address || ''
     });
 
@@ -46,7 +50,7 @@ export default function SupplierSettings() {
     const [newCat, setNewCat] = useState('');
 
     // State for Confirm Modal
-    const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: () => {}, variant: 'default' });
+    const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: () => { }, variant: 'default' });
 
     const showConfirm = (title, message, onConfirm, variant = 'default') => {
         setConfirmModal({ open: true, title, message, onConfirm, variant });
@@ -80,7 +84,10 @@ export default function SupplierSettings() {
                 name: user.name || '',
                 email: user.email || '',
                 phone: user.phone || '',
-                city: user.city || '',
+                municipality: user.municipality || user.city || '',
+                province: user.province || '',
+                barangay: user.barangay || '',
+                region: user.region || '',
                 address: user.address || ''
             });
         }
@@ -182,9 +189,8 @@ export default function SupplierSettings() {
                         {tabs.filter(t => !t.isSystem).map(tab => (
                             <button
                                 key={tab.id}
-                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                                    activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                                }`}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                    }`}
                                 onClick={() => setActiveTab(tab.id)}
                             >
                                 <tab.Icon className="h-4 w-4 shrink-0" />
@@ -195,9 +201,8 @@ export default function SupplierSettings() {
                         {tabs.filter(t => t.isSystem).map(tab => (
                             <button
                                 key={tab.id}
-                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                                    activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                                }`}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                                    }`}
                                 onClick={() => setActiveTab(tab.id)}
                             >
                                 <tab.Icon className="h-4 w-4 shrink-0" />
@@ -243,14 +248,19 @@ export default function SupplierSettings() {
                                         <Label>Phone Number</Label>
                                         <Input type="tel" value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} />
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label>City</Label>
-                                        <Input type="text" value={profile.city} onChange={e => setProfile({ ...profile, city: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1.5 col-span-1 sm:col-span-2">
-                                        <Label>Business Address</Label>
-                                        <Textarea rows={3} value={profile.address} onChange={e => setProfile({ ...profile, address: e.target.value })} />
-                                    </div>
+                                    <PhAddressFields
+                                        province={profile.province}
+                                        municipality={profile.municipality}
+                                        barangay={profile.barangay}
+                                        region={profile.region}
+                                        address={profile.address}
+                                        onProvinceChange={v => setProfile(p => ({ ...p, province: v, municipality: '', barangay: '' }))}
+                                        onMunicipalityChange={v => setProfile(p => ({ ...p, municipality: v, barangay: '' }))}
+                                        onBarangayChange={v => setProfile(p => ({ ...p, barangay: v }))}
+                                        onRegionChange={v => setProfile(p => ({ ...p, region: v }))}
+                                        onAddressChange={v => setProfile(p => ({ ...p, address: v }))}
+                                        disabled={saving}
+                                    />
                                 </div>
                             </Card>
                             <div className="flex justify-end pt-4">

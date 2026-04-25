@@ -28,7 +28,10 @@ class SupplierAuthController extends Controller
             'email' => 'required|email|unique:suppliers,email',
             'phone' => ['required', 'string', 'regex:/^63\d{10}$/'],
             'address' => 'nullable|string',
-            'city' => 'nullable|string|max:100',
+            'municipality' => 'required|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'barangay' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:100',
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
         ], $customMessages);
 
@@ -48,7 +51,10 @@ class SupplierAuthController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'address' => $request->address,
-            'city' => $request->city,
+            'city' => $request->municipality,
+            'province' => $request->province,
+            'barangay' => $request->barangay,
+            'region' => $request->region,
             'password' => Hash::make($request->password),
             'status' => 'pending',
             'email_verified_at' => null,
@@ -142,7 +148,10 @@ class SupplierAuthController extends Controller
             'email'        => $supplier->email,
             'phone'        => $supplier->phone,
             'address'      => $supplier->address,
-            'city'         => $supplier->city,
+            'municipality' => $supplier->city,
+            'province'     => $supplier->province,
+            'barangay'     => $supplier->barangay,
+            'region'       => $supplier->region,
             'role'         => 'supplier',
             'status'       => $supplier->status,
             'photo'        => null,
@@ -180,7 +189,10 @@ class SupplierAuthController extends Controller
             'contact_name' => 'sometimes|string|max:100',
             'phone' => 'sometimes|string|max:20',
             'address' => 'sometimes|string',
-            'city' => 'sometimes|string|max:100',
+            'municipality' => 'sometimes|string|max:100',
+            'province' => 'sometimes|string|max:100',
+            'barangay' => 'sometimes|string|max:100',
+            'region' => 'sometimes|string|max:100',
             'password' => 'sometimes|string|min:8|confirmed',
         ]);
 
@@ -192,7 +204,11 @@ class SupplierAuthController extends Controller
             ], 422);
         }
 
-        $updateData = $request->only(['name', 'contact_name', 'phone', 'address', 'city']);
+        $updateData = $request->only(['name', 'contact_name', 'phone', 'address', 'province', 'barangay', 'region']);
+        
+        if ($request->has('municipality')) {
+            $updateData['city'] = $request->municipality;
+        }
 
         if ($request->has('password')) {
             $updateData['password'] = Hash::make($request->password);

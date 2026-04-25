@@ -224,13 +224,13 @@ export default function CustomerOrder() {
         api
             .get("/customer/profile")
             .then((res) => {
-                const profile = res.data;
+                const profile = res.data?.data;
                 setCustomerProfile(profile);
-                if (profile?.address) {
+                if (profile?.address || profile?.province_name) {
                     setDeliveryStreet(profile.address || '');
-                    setDeliveryBarangay(profile.barangay || '');
-                    setDeliveryMunicipality(profile.municipality || '');
-                    setDeliveryProvince(profile.province || '');
+                    setDeliveryBarangay(profile.barangay_name || profile.barangay || '');
+                    setDeliveryMunicipality(profile.city_name || profile.municipality || '');
+                    setDeliveryProvince(profile.province_name || profile.province || '');
                     if (profile.latitude && profile.longitude) {
                         setCheckoutPosition([parseFloat(profile.latitude), parseFloat(profile.longitude)]);
                     }

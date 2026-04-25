@@ -2468,6 +2468,12 @@ input, select, textarea {
   --tw-border-opacity: 1;
   border-color: rgb(249 115 22 / var(--tw-border-opacity));
 }
+.border-orange-500\/20{
+  border-color: rgb(249 115 22 / 0.2);
+}
+.border-orange-500\/50{
+  border-color: rgb(249 115 22 / 0.5);
+}
 .border-primary{
   border-color: hsl(var(--primary));
 }
@@ -2501,6 +2507,12 @@ input, select, textarea {
 .border-red-500{
   --tw-border-opacity: 1;
   border-color: rgb(239 68 68 / var(--tw-border-opacity));
+}
+.border-red-500\/20{
+  border-color: rgb(239 68 68 / 0.2);
+}
+.border-red-500\/50{
+  border-color: rgb(239 68 68 / 0.5);
 }
 .border-rose-100{
   --tw-border-opacity: 1;
@@ -2557,18 +2569,6 @@ input, select, textarea {
 .border-yellow-200{
   --tw-border-opacity: 1;
   border-color: rgb(254 240 138 / var(--tw-border-opacity));
-}
-.border-orange-500\/20{
-  border-color: rgb(249 115 22 / 0.2);
-}
-.border-orange-500\/50{
-  border-color: rgb(249 115 22 / 0.5);
-}
-.border-red-500\/20{
-  border-color: rgb(239 68 68 / 0.2);
-}
-.border-red-500\/50{
-  border-color: rgb(239 68 68 / 0.5);
 }
 .border-l-\[\#FF6B35\]{
   --tw-border-opacity: 1;
@@ -3648,9 +3648,6 @@ input, select, textarea {
 }
 .font-extrabold{
   font-weight: 800;
-}
-.font-light{
-  font-weight: 300;
 }
 .font-medium{
   font-weight: 500;
@@ -4981,6 +4978,10 @@ input, select, textarea {
   background-color: rgb(255 247 237 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-orange-500\/5:hover{
+  background-color: rgb(249 115 22 / 0.05);
+}
+
 .hover\:bg-orange-600:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(234 88 12 / var(--tw-bg-opacity));
@@ -5074,10 +5075,6 @@ input, select, textarea {
   background-color: rgb(255 255 255 / 0.06);
 }
 
-.hover\:bg-orange-500\/5:hover{
-  background-color: rgb(249 115 22 / 0.05);
-}
-
 .hover\:text-\[\#111827\]:hover{
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
@@ -5146,11 +5143,6 @@ input, select, textarea {
 .hover\:text-red-600:hover{
   --tw-text-opacity: 1;
   color: rgb(220 38 38 / var(--tw-text-opacity));
-}
-
-.hover\:text-red-700:hover{
-  --tw-text-opacity: 1;
-  color: rgb(185 28 28 / var(--tw-text-opacity));
 }
 
 .hover\:text-sidebar-accent-foreground:hover{

@@ -12,7 +12,9 @@ use App\Models\CustomerNotification;
 use App\Models\Setting;
 use App\Traits\RestoresStock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Cache\TaggableStore;
 
 class ReturnController extends Controller
 {
@@ -217,18 +219,7 @@ class ReturnController extends Controller
         ]);
 
         DB::transaction(function () use ($return, $request) {
-            // Restore stock for returned items (sold count intentionally unchanged)
-            $normalizedItems = $return->items->map(function ($ri) {
-                $variantId = $ri->saleItem ? $ri->saleItem->product_variant_id : null;
-                return [
-                    'product_id' => $ri->product_id,
-                    'product_variant_id' => $variantId,
-                    'quantity' => (int) $ri->quantity_returned,
-                ];
-            })->toArray();
-
-            $this->restoreStockFromReturnItems($normalizedItems);
-
+            // Stock is NOT restored on approve — it is restored when admin marks Complete
             $return->update([
                 'status'        => 'approved',
                 'refund_method' => $request->refund_method,
@@ -256,12 +247,12 @@ class ReturnController extends Controller
         $notifyKeys = Setting::get('return_approved_notify', '0') === '1'
             ? ['customer_returns', 'customer_notifications', 'customer_shop']
             : ['customer_returns', 'customer_shop'];
-        broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_inventory', 'admin_dashboard'], 'return.approved'));
+        broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_dashboard'], 'return.approved'));
         broadcast(new DataMutated("private-customer.{$customerId}", $notifyKeys, 'return.approved'));
 
         return response()->json([
             'data'    => $return->fresh()->load(['sale.customer', 'requestedBy', 'approvedBy']),
-            'message' => 'Return approved. Stock restored and customer notified.',
+            'message' => 'Return approved. Stock will be restored when refund is marked completed.',
             'status'  => 'success',
         ]);
     }
@@ -320,13 +311,13 @@ class ReturnController extends Controller
         }
 
         DB::transaction(function () use ($return) {
-            // Restore stock as fallback (in case it wasn't done during approval)
+            // Primary stock restore — only happens here on Complete
             $normalizedItems = $return->items->map(function ($ri) {
                 $variantId = $ri->saleItem ? $ri->saleItem->product_variant_id : null;
                 return [
-                    'product_id' => $ri->product_id,
+                    'product_id'         => $ri->product_id,
                     'product_variant_id' => $variantId,
-                    'quantity' => (int) $ri->quantity_returned,
+                    'quantity'           => (int) $ri->quantity_returned,
                 ];
             })->toArray();
 
@@ -338,6 +329,17 @@ class ReturnController extends Controller
             ]);
         });
 
+        // Clear server-side report caches so dashboard shows fresh data
+        $taggable = Cache::getStore() instanceof TaggableStore;
+        if ($taggable) {
+            Cache::tags(['reports'])->flush();
+        } else {
+            foreach ([5, 10, 20, 25, 50] as $l) {
+                Cache::forget("reports:return_rate:{$l}");
+            }
+            Cache::forget('reports:recent_activity');
+        }
+
         // Notify customer
         CustomerNotification::create([
             'customer_id' => $return->sale->customer_id,
@@ -348,7 +350,7 @@ class ReturnController extends Controller
         ]);
 
         $customerId = $return->sale->customer_id;
-        broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_dashboard'], 'return.completed'));
+        broadcast(new DataMutated('private-admin', ['admin_returns', 'admin_inventory', 'admin_dashboard'], 'return.completed'));
         broadcast(new DataMutated("private-customer.{$customerId}", ['customer_returns', 'customer_notifications', 'customer_shop'], 'return.completed'));
 
         return response()->json([

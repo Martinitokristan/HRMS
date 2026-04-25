@@ -8,7 +8,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^7.4|8.0",
         "barryvdh/laravel-dompdf": "^2.2",
         "doctrine/dbal": "^2.13",
         "dompdf/dompdf": "^2.0",
@@ -67,8 +67,7 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
-        "platform": {
-        },
+        "platform": {},
         "audit": {
             "block-insecure": false
         }

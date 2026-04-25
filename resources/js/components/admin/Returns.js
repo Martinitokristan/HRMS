@@ -83,7 +83,6 @@ export default function Returns() {
                     search: search || undefined,
                     status: statusFilter !== "all" ? statusFilter : undefined,
                     page,
-                    per_page: 20,
                 },
             });
             setReturns(res.data.data?.data || res.data.data || []);
@@ -116,11 +115,10 @@ export default function Returns() {
             showToast(res.data.message || "Return approved");
             setSelectedReturn(res.data.data);
 
-            // Notify Admin, Customer History, and Inventory (since stock moved)
+            // Notify Admin and Customer — inventory NOT changed yet (stock moves on Complete)
             markStale(
                 STALE_KEYS.ADMIN_RETURNS,
                 STALE_KEYS.CUSTOMER_RETURNS,
-                STALE_KEYS.ADMIN_INVENTORY,
             );
         } catch (err) {
             showToast(
@@ -161,9 +159,11 @@ export default function Returns() {
             const res = await api.post(`/returns/${id}/complete`);
             showToast(res.data.message || "Refund processed");
             setSelectedReturn(res.data.data);
+            // Stock is now restored — mark inventory and dashboard as stale
             markStale(
                 STALE_KEYS.ADMIN_RETURNS,
                 STALE_KEYS.CUSTOMER_RETURNS,
+                STALE_KEYS.ADMIN_INVENTORY,
                 STALE_KEYS.ADMIN_DASHBOARD,
             );
         } catch (err) {
@@ -458,9 +458,9 @@ export default function Returns() {
                                 <CardContent className="space-y-4">
                                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                         <p className="text-sm text-blue-800 font-medium">
-                                            Return approved. Stock has been
-                                            restored. Process the refund to
-                                            complete.
+                                            Return approved. Stock will be
+                                            restored once you click &ldquo;Mark
+                                            Refund Complete&rdquo; below.
                                         </p>
                                     </div>
                                     <div className="text-center">
