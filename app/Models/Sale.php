@@ -11,11 +11,13 @@ class Sale extends Model
         'total_amount', 'payment_method', 'payment_phone_number', 'payment_reference', 'payment_proof_path', 'status', 'notes',
         'payment_confirmed_at', 'payment_expiry_sms_sent_at', 'payment_proof_token', 'payment_proof_token_used_at',
         'cancellation_status', 'cancellation_requested_at', 'cancellation_requested_by',
+        'refund_status', 'refunded_at', 'refunded_by',
     ];
 
     protected $casts = [
         'payment_confirmed_at'      => 'datetime',
         'payment_expiry_sms_sent_at'=> 'datetime',
+        'refunded_at'               => 'datetime',
     ];
 
     public function customer()

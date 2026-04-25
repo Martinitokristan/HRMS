@@ -28,12 +28,29 @@ export default function CustomerPaymentToastListener() {
                     paymentNotis.forEach(n => {
                         if (!seenPaymentIds.current.has(n.id)) {
                             seenPaymentIds.current.add(n.id);
-                            // Extract amount and order number from message
-                            const amountMatch = n.message?.match(/₱([\d,]+\.?\d*)/);
-                            const orderMatch = n.message?.match(/order #(\S+)/);
+
+                            const meta = n.meta && typeof n.meta === 'object' ? n.meta : {};
+
+                            // Prefer structured meta; fall back to regex parse for legacy notifications
+                            let amount = meta.amount;
+                            let orderNumber = meta.order_number;
+                            const items = Array.isArray(meta.items) ? meta.items : undefined;
+
+                            if (amount == null) {
+                                const m = n.message?.match(/₱([\d,]+\.?\d*)/);
+                                if (m) amount = parseFloat(m[1].replace(/,/g, ''));
+                            }
+                            if (!orderNumber) {
+                                const om = n.message?.match(/order #(\S+)/);
+                                if (om) orderNumber = om[1];
+                            }
+
                             PaymentToastContainer.show({
-                                amount: amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : null,
-                                orderNumber: orderMatch ? orderMatch[1] : null,
+                                amount: amount ?? null,
+                                orderNumber: orderNumber ?? null,
+                                items,
+                                // intentionally do NOT pass customerName — keeps the existing customer-side title
+                                // ("Your GCash payment was successfully received") and "From HRMS" fallback.
                             });
                         }
                     });

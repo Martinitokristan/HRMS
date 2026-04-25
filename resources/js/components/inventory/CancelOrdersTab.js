@@ -38,6 +38,7 @@ export default function CancelOrdersTab() {
     const [loading, setLoading] = useState(requests.data.length === 0);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
+    const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'rejected' | 'all'
 
     const [confirmModal, setConfirmModal] = useState({
         show: false,
@@ -65,7 +66,7 @@ export default function CancelOrdersTab() {
         if (!silent) setLoading(true);
         try {
             const res = await api.get("/sales/cancellations", {
-                params: { page, search },
+                params: { page, search, status: activeTab },
             });
             const paginated = res.data.data;
             setRequests({
@@ -83,6 +84,7 @@ export default function CancelOrdersTab() {
 
     useEffect(() => {
         let isMounted = true;
+        setPage(1);
         const debounce = setTimeout(() => {
             if (!isMounted) return;
             fetchRequests(requests.data.length > 0);
@@ -91,7 +93,7 @@ export default function CancelOrdersTab() {
             clearTimeout(debounce);
             isMounted = false;
         };
-    }, [page, search, refreshTrigger]);
+    }, [page, search, refreshTrigger, activeTab]);
 
     const performAction = async (saleId, action) => {
         try {
@@ -136,6 +138,25 @@ export default function CancelOrdersTab() {
         );
     };
 
+    const handleMarkRefunded = (sale) => {
+        showConfirm(
+            "Mark as Refunded",
+            `Confirm that you have sent the GCash refund for order #${sale.order_number}.`,
+            async () => {
+                try {
+                    const res = await api.post(`/sales/${sale.id}/refund/mark`);
+                    showToast(res.data.message || "Refund marked as completed");
+                    markStale(STALE_KEYS.ADMIN_ORDERS, STALE_KEYS.CUSTOMER_ORDERS);
+                    fetchRequests(true);
+                    closeConfirm();
+                } catch (err) {
+                    showToast(err.response?.data?.message || "Failed to mark refund", "error");
+                }
+            },
+            "default",
+        );
+    };
+
     if (loading && requests.data.length === 0) {
         return (
             <div className="h-48 flex items-center justify-center">
@@ -146,6 +167,28 @@ export default function CancelOrdersTab() {
 
     return (
         <Card className="p-6">
+            <div className="flex gap-2 mb-4 border-b">
+                {[
+                    { key: 'pending',  label: 'Pending'  },
+                    { key: 'approved', label: 'Approved' },
+                    { key: 'rejected', label: 'Rejected' },
+                    { key: 'all',      label: 'All'      },
+                ].map(t => (
+                    <button
+                        key={t.key}
+                        type="button"
+                        onClick={() => setActiveTab(t.key)}
+                        className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                            activeTab === t.key
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        {t.label}
+                    </button>
+                ))}
+            </div>
+
             <FilterBar
                 search={search}
                 onSearchChange={setSearch}
@@ -154,7 +197,7 @@ export default function CancelOrdersTab() {
 
             <div className="mt-4 mb-3 flex items-center justify-between">
                 <div className="text-sm text-gray-500">
-                    Total {requests.total} cancellation request(s)
+                    Total {requests.total} record(s)
                 </div>
                 <Pagination
                     page={page}
@@ -173,6 +216,7 @@ export default function CancelOrdersTab() {
                             <TableHead>Items</TableHead>
                             <TableHead>Reason</TableHead>
                             <TableHead>Notes</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead className="text-right">Amount</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -181,10 +225,10 @@ export default function CancelOrdersTab() {
                         {requests.data.length === 0 ? (
                             <TableRow>
                                 <TableCell
-                                    colSpan={7}
+                                    colSpan={8}
                                     className="text-center py-6 text-muted-foreground min-h-[200px]"
                                 >
-                                    No pending cancellation requests found.
+                                    No {activeTab === 'all' ? '' : activeTab} cancellation records found.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -238,6 +282,26 @@ export default function CancelOrdersTab() {
                                             {req.cancellation_request?.notes || "-"}
                                         </p>
                                     </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1">
+                                            <Badge
+                                                variant={
+                                                    req.cancellation_status === 'approved' ? 'default' :
+                                                    req.cancellation_status === 'rejected' ? 'destructive' :
+                                                    'outline'
+                                                }
+                                                className="capitalize w-fit"
+                                            >
+                                                {req.cancellation_status || 'pending'}
+                                            </Badge>
+                                            {req.cancellation_status === 'approved' && req.refund_status === 'pending_refund' && (
+                                                <Badge variant="destructive" className="w-fit">Refund pending</Badge>
+                                            )}
+                                            {req.refund_status === 'refunded' && (
+                                                <Badge variant="default" className="w-fit">Refunded</Badge>
+                                            )}
+                                        </div>
+                                    </TableCell>
                                     <TableCell
                                         className="text-right font-semibold text-primary"
                                     >
@@ -248,26 +312,27 @@ export default function CancelOrdersTab() {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="default"
-                                                onClick={() =>
-                                                    handleApprove(req)
-                                                }
-                                            >
-                                                <Check className="h-4 w-4 mr-1" />
-                                                Approve
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    handleReject(req)
-                                                }
-                                            >
-                                                <X className="h-4 w-4 mr-1" />
-                                                Reject
-                                            </Button>
+                                            {req.cancellation_status === 'pending' && (
+                                                <>
+                                                    <Button size="sm" variant="default" onClick={() => handleApprove(req)}>
+                                                        <Check className="h-4 w-4 mr-1" /> Approve
+                                                    </Button>
+                                                    <Button size="sm" variant="outline" onClick={() => handleReject(req)}>
+                                                        <X className="h-4 w-4 mr-1" /> Reject
+                                                    </Button>
+                                                </>
+                                            )}
+                                            {req.cancellation_status === 'approved' && req.refund_status === 'pending_refund' && (
+                                                <Button size="sm" variant="default" onClick={() => handleMarkRefunded(req)}>
+                                                    Mark as Refunded
+                                                </Button>
+                                            )}
+                                            {req.cancellation_status === 'approved' && req.refund_status !== 'pending_refund' && (
+                                                <span className="text-xs text-muted-foreground">No action</span>
+                                            )}
+                                            {req.cancellation_status === 'rejected' && (
+                                                <span className="text-xs text-muted-foreground">Rejected</span>
+                                            )}
                                         </div>
                                     </TableCell>
                                 </TableRow>

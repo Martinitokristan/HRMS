@@ -109,6 +109,7 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     Route::get('/sales/cancellations', [SaleController::class , 'getCancellationRequests']);
     Route::post('/sales/{id}/cancellation/approve', [SaleController::class , 'approveCancellation']);
     Route::post('/sales/{id}/cancellation/reject', [SaleController::class , 'rejectCancellation']);
+    Route::post('/sales/{id}/refund/mark', [SaleController::class , 'markRefunded']);
     Route::get('/sales', [SaleController::class , 'index']);
     Route::put('/sales/{id}/status', [SaleController::class , 'updateStatus']);
     Route::post('/sales/{id}/return', [SaleController::class , 'processReturn']);

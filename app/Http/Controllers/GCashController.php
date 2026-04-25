@@ -184,6 +184,15 @@ class GCashController extends Controller
             }
 
             // Send notification to customer
+            $matchingSale->loadMissing(['items.product', 'customer']);
+
+            $notificationItems = $matchingSale->items->map(function ($it) {
+                return [
+                    'name' => optional($it->product)->name ?? 'Item',
+                    'quantity' => (float) $it->quantity,
+                ];
+            })->values()->all();
+
             CustomerNotification::create([
                 'customer_id' => $matchingSale->customer_id,
                 'delivery_id' => $delivery ? $delivery->id : null,
@@ -191,6 +200,13 @@ class GCashController extends Controller
                 'message' => "Your GCash payment of ₱" . number_format($amount, 2) . " for order #{$matchingSale->order_number} has been received and confirmed.",
                 'type' => 'payment_confirmed',
                 'is_read' => false,
+                'meta' => [
+                    'amount'        => (float) $amount,
+                    'order_number'  => $matchingSale->order_number,
+                    'customer_name' => optional($matchingSale->customer)->name,
+                    'phone'         => $parsedPhone,
+                    'items'         => $notificationItems,
+                ],
             ]);
 
             // Send notification to admin users about GCash payment

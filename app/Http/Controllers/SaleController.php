@@ -356,13 +356,12 @@ class SaleController extends Controller
             ], 422);
         }
 
-        // Policy:
-        // - Customer + pending: direct cancel
-        // - Customer + confirmed: submit cancellation request
+        // Policy (Option A — strict):
+        // - Customer + pending/confirmed: submit cancellation request (always requires admin approval)
         // - Admin + pending/confirmed: direct cancel
         $isCustomer = !$isAdmin;
 
-        if ($isCustomer && $sale->status === 'confirmed') {
+        if ($isCustomer && in_array($sale->status, ['pending', 'confirmed'])) {
             if ($sale->cancellation_status === 'pending') {
                 return response()->json([
                     'message' => 'Cancellation request is already pending approval.',
@@ -472,16 +471,19 @@ class SaleController extends Controller
 
     public function getCancellationRequests(Request $request)
     {
-        $query = Sale::with(['customer', 'items.product', 'delivery', 'cancellationRequest'])
-            ->where('cancellation_status', 'pending')
+        $status = $request->get('status', 'pending');
+        if (!in_array($status, ['pending', 'approved', 'rejected', 'all'], true)) {
+            $status = 'pending';
+        }
+
+        $query = Sale::with(['customer', 'items.product', 'delivery', 'cancellationRequest', 'cancellation'])
+            ->whereNotNull('cancellation_status')
+            ->when($status !== 'all', fn ($q) => $q->where('cancellation_status', $status))
             ->when($request->search, function ($q) use ($request) {
                 $search = $request->search;
-
                 return $q->where(function ($sq) use ($search) {
                     $sq->where('order_number', 'like', "%{$search}%")
-                        ->orWhereHas('customer', function ($cq) use ($search) {
-                            return $cq->where('name', 'like', "%{$search}%");
-                        });
+                        ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%"));
                 });
             })
             ->latest('cancellation_requested_at');
@@ -515,9 +517,15 @@ class SaleController extends Controller
         DB::transaction(function () use ($sale, $user) {
             $this->restoreStock($sale);
 
+            $refundStatus = 'not_applicable';
+            if ($sale->payment_method === 'gcash' && $sale->payment_confirmed_at !== null) {
+                $refundStatus = 'pending_refund';
+            }
+
             $sale->update([
                 'status' => 'cancelled',
                 'cancellation_status' => 'approved',
+                'refund_status' => $refundStatus,
             ]);
 
             SalesCancellation::updateOrCreate(
@@ -540,12 +548,16 @@ class SaleController extends Controller
                 $sale->delivery->update(['status' => 'failed']);
             }
 
+            $customerMsg = $refundStatus === 'pending_refund'
+                ? "Your cancellation request for order #{$sale->order_number} has been approved. Your GCash payment will be refunded shortly."
+                : "Your cancellation request for order #{$sale->order_number} has been approved.";
+
             \App\Models\CustomerNotification::create([
                 'customer_id' => $sale->customer_id,
                 'delivery_id' => $sale->delivery->id ?? null,
                 'type' => 'cancellation_approved',
                 'title' => 'Cancellation Approved',
-                'message' => "Your cancellation request for order #{$sale->order_number} has been approved.",
+                'message' => $customerMsg,
                 'is_read' => false,
             ]);
         });
@@ -612,6 +624,47 @@ class SaleController extends Controller
         return response()->json([
             'data' => $sale->fresh()->load(['customer', 'items.product', 'delivery']),
             'message' => 'Cancellation request rejected successfully.',
+            'status' => 'success',
+        ]);
+    }
+
+    public function markRefunded(Request $request, $id)
+    {
+        $sale = Sale::findOrFail($id);
+
+        if ($sale->refund_status !== 'pending_refund') {
+            return response()->json([
+                'message' => 'This order is not awaiting a refund.',
+                'status' => 'error',
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        DB::transaction(function () use ($sale, $user) {
+            $sale->update([
+                'refund_status' => 'refunded',
+                'refunded_at' => now(),
+                'refunded_by' => $user ? $user->id : null,
+            ]);
+
+            \App\Models\CustomerNotification::create([
+                'customer_id' => $sale->customer_id,
+                'delivery_id' => $sale->delivery->id ?? null,
+                'type' => 'refund_completed',
+                'title' => 'Refund Completed',
+                'message' => "Your GCash refund for order #{$sale->order_number} has been sent.",
+                'is_read' => false,
+            ]);
+        });
+
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_dashboard'], 'sale.refunded'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_notifications'], 'sale.refunded'));
+
+        return response()->json([
+            'data' => $sale->fresh(),
+            'message' => 'Refund marked as completed.',
             'status' => 'success',
         ]);
     }

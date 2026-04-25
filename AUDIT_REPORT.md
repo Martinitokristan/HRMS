@@ -191,3 +191,35 @@ $ grep -rn "image|mimes:" app/ | grep -v "dimensions:max_width=4000,max_height=4
 
 ### Fix 6 audit
 - Verified no breakage from the `payment_proof_token` behavior change. All six call sites still work correctly. Customer revisiting a used link now gets HTTP 410 (already used) instead of HTTP 404 (not found) — slight UX improvement.
+
+## Cancellation + Refund Patch — 2026-04-25
+
+### What changed
+
+1. **Customer cancellations always require admin approval (Option A).**
+   `SaleController::cancelOrder` no longer direct-cancels for `pending` orders when the requester is a customer. Both `pending` and `confirmed` customer cancellations create a `cancellation_status='pending'` record + a `SalesCancellationRequest` row. Admins retain direct-cancel for any cancellable status. `pending_payment` (unpaid GCash) still rejects cancellation as before — customer must pay first.
+
+2. **GCash refund tracking.**
+   New columns on `sales`: `refund_status` (`none` / `pending_refund` / `refunded` / `not_applicable`), `refunded_at`, `refunded_by`. On approve, paid GCash orders flip to `pending_refund`; everything else gets `not_applicable`. New endpoint `POST /sales/{id}/refund/mark` updates to `refunded` + writes `refunded_at`/`refunded_by` and notifies the customer. New migration `2026_04_25_120000_add_refund_status_to_sales`.
+
+3. **Admin cancellations tab keeps history.**
+   `SaleController::getCancellationRequests` now accepts `status` (`pending` / `approved` / `rejected` / `all`, default `pending`) and eager-loads the `cancellation` relation. The frontend `CancelOrdersTab` got Pending/Approved/Rejected/All sub-tabs, a Status column with cancellation + refund badges, and a per-row "Mark as Refunded" button for paid GCash cancellations. Approved/Rejected rows no longer disappear after action.
+
+4. **Customer GCash payment toast now shows items.**
+   `GCashController` populates `CustomerNotification.meta` with `{amount, order_number, customer_name, phone, items}` on the auto-confirm path (the only path that creates `payment_confirmed` notifications). `CustomerPaymentToastListener.js` reads `n.meta` and falls back to the legacy regex parse when `meta` is missing (so notifications created before this deploy still render an amount + order number). The toast component itself was already item-aware; the bug was upstream.
+
+### Files changed
+- New: `database/migrations/2026_04_25_120000_add_refund_status_to_sales.php`
+- `app/Models/Sale.php` (added `refund_status`/`refunded_at`/`refunded_by` to `$fillable`, `refunded_at` cast; existing `cancellation()` relation reused)
+- `app/Http/Controllers/SaleController.php` (`cancelOrder`, `getCancellationRequests`, `approveCancellation`, new `markRefunded`)
+- `app/Http/Controllers/GCashController.php` (auto-confirm `CustomerNotification` now includes `meta`)
+- `routes/api.php` (new route `POST /sales/{id}/refund/mark`)
+- `resources/js/components/customer-portal/CustomerPaymentToastListener.js`
+- `resources/js/components/inventory/CancelOrdersTab.js`
+
+### Operator notes
+- Run `php artisan migrate --force` on Railway after deploy to apply the new `sales` columns + index.
+- The patch is backwards-compatible with notifications created before the deploy (regex fallback in the listener).
+- After deploy, the admin "Cancel Orders" page defaults to the Pending tab; existing pending requests behave identically.
+- Refund payouts are still **manual** in your GCash workflow — the system tracks status only.
+
