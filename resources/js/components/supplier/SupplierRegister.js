@@ -41,7 +41,7 @@ export default function SupplierRegister() {
         const { name, value } = e.target;
         let newValue = value;
         if (name === 'phone') {
-            newValue = value.replace(/\D/g, '').substring(0, 10);
+            newValue = value.replace(/\D/g, '').substring(0, 11);
         }
         setFormData({ ...formData, [name]: newValue });
         
@@ -103,7 +103,7 @@ export default function SupplierRegister() {
         try {
             const dataToSubmit = {
                 ...formData,
-                phone: `63${formData.phone}`
+                phone: formData.phone
             };
             const response = await api.post('/supplier/auth/register', dataToSubmit);
             setSuccessMsg('Supplier account created successfully! Please check your email to verify your account.');
@@ -275,8 +275,7 @@ export default function SupplierRegister() {
                                     <div className="space-y-1.5">
                                         <Label>Phone Number *</Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-2.5 text-sm text-muted-foreground">+63</span>
-                                            <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="9XXXXXXXXX" className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`} />
+                                            <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="09XXXXXXXXX" className={`${errors.phone ? 'border-red-500' : ''}`} />
                                         </div>
                                         {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
                                     </div>

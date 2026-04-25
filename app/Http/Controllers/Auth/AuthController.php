@@ -22,13 +22,13 @@ class AuthController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
             'email' => 'required|email|unique:users,email',
-            'phone' => ['required', 'string', 'regex:/^63\d{10}$/'],
+            'phone' => ['required', 'string', 'regex:/^09\d{9}$/'],
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
         ];
 
         $customMessages = [
             'name.regex' => 'The name must only contain letters, spaces, dots, or hyphens.',
-            'phone.regex' => 'Phone number must be exactly 12 digits starting with 63.',
+            'phone.regex' => 'Phone number must be 11 digits starting with 09 (e.g. 09171234567).',
             'password.regex' => 'Password must contain at least 8 characters, one letter and one number.',
         ];
 

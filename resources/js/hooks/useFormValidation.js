@@ -24,11 +24,8 @@ export function useFormValidation() {
 
     const validatePhone = (phone) => {
         if (!phone) return 'Phone number is required';
-        if (phone.length !== 10) {
-            return 'Phone number must be exactly 10 digits';
-        }
-        if (!/^\d{10}$/.test(phone)) {
-            return 'Phone number must only contain numbers';
+        if (!/^09\d{9}$/.test(phone)) {
+            return 'Phone number must be 11 digits starting with 09 (e.g. 09171234567)';
         }
         return null;
     };

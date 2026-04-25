@@ -14,12 +14,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, Navigation, Loader2, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, Navigation, Loader2, Download, X } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
 import { STALE_KEYS, markStale } from "../../store/dataStore";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { usePhilippineAddress } from "../../hooks/usePhilippineAddress";
 import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
+import { normalizePhPhone } from "../../utils/phone";
 
 import "leaflet/dist/leaflet.css";
 
@@ -113,7 +114,7 @@ export default function CustomerOrder() {
     // Initialize payment phone number with user's phone
     useEffect(() => {
         if (user?.phone) {
-            setPaymentPhoneNumber(user.phone);
+            setPaymentPhoneNumber(normalizePhPhone(user.phone));
         }
     }, [user]);
 
@@ -397,7 +398,7 @@ export default function CustomerOrder() {
                                     <div className="text-base text-muted-foreground mb-1">Bill To:</div>
                                     <div className="text-lg font-bold">{user?.name}</div>
                                     <div className="text-base text-muted-foreground">{user?.email}</div>
-                                    <div className="text-base text-muted-foreground">{user?.phone}</div>
+                                    <div className="text-base text-muted-foreground">{normalizePhPhone(user?.phone)}</div>
                                 </div>
 
                                 <div className="mb-4">
@@ -771,9 +772,9 @@ export default function CustomerOrder() {
                                     </button>
                                     <button
                                         style={{ width: '100%', marginTop: 8, height: 36, background: 'none', border: 'none', fontSize: 13, color: '#6B7280', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                                        onClick={() => { setGcashModal(false); navigate("/shop"); }}
+                                        onClick={() => { setGcashModal(false); }}
                                     >
-                                        <ArrowLeft className="h-3.5 w-3.5" /> Back to Shop
+                                        <X className="h-3.5 w-3.5" /> Cancel Payment
                                     </button>
                                 </div>
                             </div>

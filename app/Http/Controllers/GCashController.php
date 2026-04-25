@@ -112,10 +112,12 @@ class GCashController extends Controller
                 return ['status' => 'ignored', 'reason' => 'no_sender_phone'];
             }
 
-            // Normalize: try both 09XX and +639XX formats
+            // Normalize: try 09XX, +639XX, and 639XX formats so both pre- and post-
+            // 2026-04-25 normalization rows match.
             $phoneVariants = [
                 $parsedPhone, // 09070574360
                 '+63' . substr($parsedPhone, 1), // +639070574360
+                '63' . substr($parsedPhone, 1),  // 639070574360 (legacy, no plus)
                 str_replace('+63', '0', $parsedPhone), // safety fallback
             ];
 

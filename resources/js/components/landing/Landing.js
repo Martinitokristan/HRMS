@@ -415,96 +415,83 @@ export default function Landing() {
             </header>
 
             {/* ── SECTION 2: EXPLORE BY CATEGORY ── */}
-            <section id="categories" className="py-12 md:py-16 bg-white">
+            <section id="categories" className="py-12 md:py-16">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
                         <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Browse</p>
                         <h2 className="text-2xl md:text-3xl font-black text-gray-900">Explore by Category</h2>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-8">
-                        {/* Mobile: horizontal pills, Desktop: sidebar */}
-                        <div className="md:w-52 shrink-0">
-                            <div className="relative md:block hidden">
-                                <input
-                                    type="text"
-                                    value={categorySearch}
-                                    onChange={e => setCategorySearch(e.target.value)}
-                                    placeholder="Search categories..."
-                                    className="w-full h-10 pl-9 pr-3 rounded-xl border border-gray-200 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent bg-gray-50"
-                                />
-                                <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            </div>
-                            {/* Mobile horizontal pills */}
-                            <div className="md:hidden flex overflow-x-auto gap-2 pb-2 no-scrollbar">
-                                {displayCats.map(cat => (
+                    <div className="space-y-6">
+                        {/* Category pills (horizontal, centered) */}
+                        <div className="flex flex-wrap items-center justify-center gap-2">
+                            {displayCats
+                                .filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase()))
+                                .map(cat => (
                                     <button
                                         key={cat.id}
                                         onClick={() => setActiveCategory(String(cat.id))}
                                         className={cn(
-                                            "shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap",
+                                            "px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap",
                                             activeCategory === String(cat.id)
-                                                ? "bg-orange-500 text-white"
-                                                : "bg-gray-100 text-gray-600"
+                                                ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
+                                                : "bg-gray-100 text-gray-600 hover:bg-orange-50 hover:text-orange-500"
                                         )}
                                     >
                                         {cat.name}
                                     </button>
                                 ))}
-                            </div>
-                            {/* Desktop sidebar */}
-                            <div className="hidden md:flex flex-col gap-0.5 max-h-72 overflow-y-auto pr-1 mt-2">
-                                {displayCats
-                                    .filter(c => c.name.toLowerCase().includes(categorySearch.toLowerCase()))
-                                    .map(cat => (
-                                        <button
-                                            key={cat.id}
-                                            onClick={() => setActiveCategory(String(cat.id))}
-                                            className={cn(
-                                                "text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all",
-                                                activeCategory === String(cat.id)
-                                                    ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
-                                                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-500"
-                                            )}
-                                        >
-                                            {cat.name}
-                                        </button>
-                                    ))}
-                            </div>
-                            <Button variant="outline" className="hidden md:flex mt-1 border-orange-500 text-orange-500 hover:bg-orange-50 font-bold text-sm" onClick={triggerLoginNotice}>
-                                All Categories <ArrowRight className="h-4 w-4" />
+                            <Button
+                                variant="outline"
+                                className="border-orange-500 text-orange-500 hover:bg-orange-50 font-bold text-xs h-8 px-4 rounded-full"
+                                onClick={triggerLoginNotice}
+                            >
+                                All Categories <ArrowRight className="h-3 w-3" />
                             </Button>
                         </div>
-                        {/* Products in selected category */}
-                        <div className="flex-1">
-                            {(categories.length > 0 ? categoryLoading : loading) ? (
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    {[...Array(4)].map((_, i) => (
-                                        <div key={i} className="animate-pulse">
-                                            <div className="aspect-[4/3] bg-gray-200 rounded-xl mb-3" />
-                                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                                            <div className="h-3 bg-gray-100 rounded w-1/2" />
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (categories.length > 0 ? categoryProducts : popularProducts.slice(0, 6)).length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-48 rounded-2xl border-2 border-dashed border-gray-200 text-center">
-                                    <Package className="h-10 w-10 text-gray-200 mb-2" />
-                                    <p className="text-sm text-gray-400 font-medium">No products in this category yet.</p>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    {(categories.length > 0 ? categoryProducts : popularProducts.slice(0, 6)).map(p => (
-                                        <LandingProductCard key={p.id} product={p} onLoginPrompt={triggerLoginNotice} />
-                                    ))}
-                                </div>
-                            )}
+
+                        {/* Centered product grid */}
+                        {(categories.length > 0 ? categoryLoading : loading) ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="animate-pulse">
+                                        <div className="aspect-[4/3] bg-gray-100 rounded-xl mb-3" />
+                                        <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
+                                        <div className="h-3 bg-gray-50 rounded w-1/2" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (categories.length > 0 ? categoryProducts : popularProducts.slice(0, 6)).length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-48 rounded-2xl border-2 border-dashed border-gray-200 text-center max-w-2xl mx-auto">
+                                <Package className="h-10 w-10 text-gray-200 mb-2" />
+                                <p className="text-sm text-gray-400 font-medium">No products in this category yet.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+                                {(categories.length > 0 ? categoryProducts : popularProducts.slice(0, 6)).map(p => (
+                                    <LandingProductCard key={p.id} product={p} onLoginPrompt={triggerLoginNotice} />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Optional category search (mobile + desktop) */}
+                        <div className="max-w-sm mx-auto pt-2">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={categorySearch}
+                                    onChange={e => setCategorySearch(e.target.value)}
+                                    placeholder="Search categories..."
+                                    className="w-full h-9 pl-9 pr-3 rounded-full border border-gray-200 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent bg-white"
+                                />
+                                <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* ── SECTION 3: POPULAR PRODUCTS ── */}
-            <section id="products" className="py-12 md:py-16 bg-gray-50">
+            <section id="products" className="py-12 md:py-16">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
                         <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Top Rated</p>
@@ -539,7 +526,7 @@ export default function Landing() {
             </section>
 
             {/* ── SECTION 4: BEST SELLERS ── */}
-            <section id="deals" className="py-12 md:py-16 bg-white">
+            <section id="deals" className="py-12 md:py-16">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                         <div className="rounded-2xl bg-orange-500 p-8 md:p-12 text-white order-2 md:order-1">

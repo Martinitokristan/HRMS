@@ -51,7 +51,16 @@ class SendGcashConfirmationSms implements ShouldQueue
 
         $customerName = optional($customer)->name ?? 'Valued Customer';
         $itemSummary = $this->sale->items->count() > 0
-            ? $this->sale->items->map(fn($i) => $i->quantity . 'x ' . ($i->product->name ?? 'Item'))->join(', ')
+            ? $this->sale->items->map(function ($i) {
+                $name = $i->product->name ?? 'Item';
+                $variant = collect([
+                    optional(optional($i->productVariant)->sizeValue)->label,
+                    optional(optional($i->productVariant)->colorValue)->label,
+                    optional(optional($i->productVariant)->weightValue)->label,
+                ])->filter()->implode(' / ');
+                $variantSuffix = $variant ? ' (' . $variant . ')' : '';
+                return $i->quantity . 'x ' . $name . $variantSuffix;
+            })->join(', ')
             : "order #{$this->sale->order_number}";
 
         $message = BrevoSmsService::gcashConfirmedMessage($customerName, $this->amount, $itemSummary);

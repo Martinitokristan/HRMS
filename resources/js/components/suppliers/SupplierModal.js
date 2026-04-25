@@ -101,7 +101,7 @@ export default function SupplierModal({ isOpen, onClose, onSave, supplier = null
                                     type="text" 
                                     value={form.phone} 
                                     onChange={e => setForm({...form, phone: e.target.value})} 
-                                    placeholder="0917-000-0000"
+                                    placeholder="09XX-XXX-XXXX"
                                 />
                             </div>
                             <div className="form-group sm:col-span-2">

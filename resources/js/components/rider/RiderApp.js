@@ -302,7 +302,7 @@ export default function RiderApp() {
                                             </div>
                                             <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
                                             <div className="text-xs text-muted-foreground mb-1">{order.address}</div>
-                                            <div className="text-[10px] text-muted-foreground mb-3 line-clamp-1">{order.sale?.items?.map(i => `${i.quantity}x ${i.product?.name}`).join(', ')}</div>
+                                            <div className="text-[10px] text-muted-foreground mb-3 line-clamp-1">{order.sale?.items?.map(i => orderItemLabel(i)).join(', ')}</div>
                                             <div className="flex items-center justify-between">
                                                 <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Truck className="h-3 w-3" /> {order.distance} — 4 min drive</span>
                                                 <Button size="sm" className="h-7 text-xs font-bold" onClick={() => handleAction(order.id, 'assigned', 'Order accepted!')}>ACCEPT →</Button>

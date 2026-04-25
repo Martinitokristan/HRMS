@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../../lib/api';
+import { normalizePhPhone } from '../../utils/phone';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,7 +13,7 @@ const RiderSettings = ({ onBack }) => {
     const { user, setUser, refreshSettings } = useAuth();
     const [profileData, setProfileData] = useState({
         name: user?.name || '',
-        phone: user?.phone || '',
+        phone: normalizePhPhone(user?.phone) || '',
         address: user?.rider_profile?.address || user?.riderProfile?.address || ''
     });
     const [securityData, setSecurityData] = useState({
@@ -132,7 +133,7 @@ const RiderSettings = ({ onBack }) => {
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label htmlFor="phone">Phone Number</Label>
-                                    <Input id="phone" type="text" value={profileData.phone} onChange={e => setProfileData({...profileData, phone: e.target.value})} placeholder="+63 123 456 7890" />
+                                    <Input id="phone" type="text" value={profileData.phone} onChange={e => setProfileData({...profileData, phone: e.target.value})} placeholder="09XX XXX XXXX" />
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label htmlFor="address">Current Address</Label>

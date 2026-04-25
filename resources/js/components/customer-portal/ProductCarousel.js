@@ -256,7 +256,16 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
         );
     };
 
-    var currentTheme = SLIDE_THEMES[slides[index].type];
+    // Guard against `index` pointing past the end of `slides` after the
+    // memo recomputes (e.g. when the products list shrinks or items are filtered out).
+    if (!slides[index]) {
+        if (index !== 0) {
+            // Reset on the next tick to avoid setState-during-render.
+            setTimeout(function () { setIndex(0); setPrevIndex(null); }, 0);
+        }
+        return null;
+    }
+    var currentTheme = SLIDE_THEMES[slides[index].type] || SLIDE_THEMES.top;
 
     return (
         <div className="mb-8">

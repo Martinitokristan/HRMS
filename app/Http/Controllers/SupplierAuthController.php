@@ -18,7 +18,7 @@ class SupplierAuthController extends Controller
         $customMessages = [
             'name.regex' => 'The name must only contain letters, spaces, dots, or hyphens.',
             'contact_name.regex' => 'The contact name must only contain letters, spaces, dots, or hyphens.',
-            'phone.regex' => 'Phone number must be exactly 12 digits starting with 63.',
+            'phone.regex' => 'Phone number must be 11 digits starting with 09 (e.g. 09171234567).',
             'password.regex' => 'Password must contain at least 8 characters, one letter and one number.',
         ];
 
@@ -26,7 +26,7 @@ class SupplierAuthController extends Controller
             'name' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
             'contact_name' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
             'email' => 'required|email|unique:suppliers,email',
-            'phone' => ['required', 'string', 'regex:/^63\d{10}$/'],
+            'phone' => ['required', 'string', 'regex:/^09\d{9}$/'],
             'address' => 'nullable|string',
             'municipality' => 'required|string|max:100',
             'province' => 'nullable|string|max:100',
@@ -187,13 +187,13 @@ class SupplierAuthController extends Controller
         $customMessages = [
             'name.regex' => 'The name must only contain letters, spaces, dots, or hyphens.',
             'contact_name.regex' => 'The contact name must only contain letters, spaces, dots, or hyphens.',
-            'phone.regex' => 'Phone number must be exactly 12 digits starting with 63.',
+            'phone.regex' => 'Phone number must be 11 digits starting with 09 (e.g. 09171234567).',
         ];
 
         $validator = Validator::make($request->all(), [
             'name' => ['sometimes', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
             'contact_name' => ['sometimes', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
-            'phone' => ['sometimes', 'string', 'regex:/^63\d{10}$/'],
+            'phone' => ['sometimes', 'string', 'regex:/^09\d{9}$/'],
             'address'      => 'sometimes|nullable|string',
             'municipality' => 'sometimes|nullable|string|max:100',
             'province'     => 'sometimes|nullable|string|max:100',

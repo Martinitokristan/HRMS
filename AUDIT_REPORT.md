@@ -251,3 +251,42 @@ $ grep -rn "image|mimes:" app/ | grep -v "dimensions:max_width=4000,max_height=4
 - Existing `POST /deliveries/{id}/upload-proof` remains the single proof-upload entry point.
 - Backwards compatible: pre-existing `delivered` orders without `proof_photo` will reappear in the rider's active list after this deploy and can finally be photographed.
 
+## UX Polish Pass — 2026-04-25
+
+### Fix 1 — Phone format normalization (`09XXXXXXXXX`)
+
+- **Backend regex** changed from `^63\d{10}$` to `^09\d{9}$` in `Auth/AuthController::register`, `SupplierAuthController::register`, and `SupplierAuthController::updateProfile`. User-facing message updated.
+- **Frontend `useFormValidation` hook** now validates `^09\d{9}$` (11 digits starting `09`); error text updated.
+- **Registration forms** (`Register.js`, `RiderRegister.js`, `SupplierRegister.js`): removed `+63` prefix `<span>` and `pl-12` left padding; placeholders now `09XXXXXXXXX`; submit no longer prepends `63`.
+- **Display + autofill** uses new `resources/js/utils/phone.js` (`normalizePhPhone`/`isValidPhPhone`). Wired into `CustomerOrder.js` (auto-fill payment phone, summary line), `CustomerSettings.js` (profile load + fallback), `RiderSettings.js` (profile init).
+- **Supplier admin forms** placeholders updated to `09XX-XXX-XXXX`.
+- **GCash SMS webhook** (`GCashController`) phone-variant array now also includes the bare `63XXX` (no `+`) form for the brief transition window when DB rows may exist in either format.
+- **Data migration** `database/migrations/2026_04_25_130000_normalize_phone_numbers_to_local_format.php` converts `639XXXXXXXXX` → `09XXXXXXXXX` on `users.phone`, `suppliers.phone`, `sales.payment_phone_number`. Idempotent (regex-gated). Operator runs `php artisan migrate --force`.
+
+### Fix 2 — QR modal "Back to Shop" → "Cancel Payment"
+
+- `CustomerOrder.js`: the bottom button under "Done, I have Paid!" inside the GCash QR modal now reads **Cancel Payment** with an `<X />` icon. Behavior changed to **only close the modal** (no navigate to `/shop`) per user clarification. The unrelated "Back to Shop" buttons in the post-purchase Order Placed modal and the navigate-back panel were left untouched.
+
+### Fix 3 — Landing page layout polish
+
+- `Landing.js`: removed `bg-white` / `bg-gray-50` from sections `#categories`, `#products`, `#deals`.
+- Section 2 (Categories) now renders a centered horizontal pill row + `All Categories` outline button, then a centered grid (`max-w-5xl mx-auto`), then a small centered category-search input. Sidebar layout removed.
+- Sections 3 & 4 left structurally intact (only background classes removed).
+
+### Fix 4 — Variant indicator across order item displays
+
+- New helper: `resources/js/utils/orderItemLabel.js` — returns `1x Claw Hammer (8 oz)` when a variant is present, `1x Claw Hammer` otherwise.
+- Wired into `OrderHistory.js` (customer order history first-item line), `RiderApp.js` (nearby-orders summary), `RiderDashboardV3.js` (active job items list).
+- **Backend notifications** updated to include variant suffix: `DeliveryController::uploadProof` ("Order Delivered" CustomerNotification), `Notifications/NewOrderAssigned::toArray` (rider new-order title), `Jobs/SendGcashConfirmationSms` (GCash confirmation SMS body). Variant is read via the existing `productVariant` relation on `SaleItem` and the `sizeValue` / `colorValue` / `weightValue` relations on `ProductVariant`, so no schema or eager-load change required.
+- **Admin → supplier Purchase Order** views were intentionally left unchanged — suppliers ship base SKUs.
+
+### Fix 5 — `ProductCarousel` stale-index guard
+
+- `ProductCarousel.js`: replaced the unguarded `var currentTheme = SLIDE_THEMES[slides[index].type];` with a defensive guard that returns `null` and queues `setIndex(0)` on the next tick when `slides[index]` is undefined (occurs after the `slides` memo recomputes to fewer entries than the current index). Also fell back to `SLIDE_THEMES.top` if the type isn't in the map.
+
+### Operator notes
+
+- Run `php artisan migrate --force` on Railway to apply the phone-normalization migration.
+- Frontend uses a defensive `normalizePhPhone()` so users whose phone has not yet been migrated will still see the canonical `09XXXXXXXXX` form in Settings/Order summaries.
+- The GCash SMS matcher accepts `09`, `639`, `+639`, and bare-`9` variants during the transition; once all rows are normalized, it remains a no-op safety net.
+

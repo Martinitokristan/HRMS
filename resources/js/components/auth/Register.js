@@ -155,8 +155,8 @@ export default function Register() {
 
         let newValue = value;
         if (name === 'phone') {
-            // Only allow 10 digits
-            newValue = value.replace(/\D/g, '').substring(0, 10);
+            // Only allow 11 digits starting with 09
+            newValue = value.replace(/\D/g, '').substring(0, 11);
         }
 
         setFormData({ ...formData, [name]: newValue });
@@ -235,7 +235,7 @@ export default function Register() {
         try {
             const dataToSubmit = {
                 ...formData,
-                phone: `63${formData.phone}` // Add the PH country code
+                phone: formData.phone
             };
             await register(dataToSubmit);
             setSuccessMsg('Account created successfully! Please check your email to verify your account.');
@@ -359,8 +359,7 @@ export default function Register() {
                                     <div className="space-y-2">
                                         <Label htmlFor="phone" className="text-base font-medium">Phone Number</Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground font-medium" style={{ pointerEvents: 'none' }}>+63</span>
-                                            <Input id="phone" name="phone" type="tel" value={formData.phone} required onChange={handleChange} placeholder="9XXXXXXXXX" className={`h-12 pl-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
+                                            <Input id="phone" name="phone" type="tel" value={formData.phone} required onChange={handleChange} placeholder="09XXXXXXXXX" className={`h-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
                                         </div>
                                         {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
                                     </div>

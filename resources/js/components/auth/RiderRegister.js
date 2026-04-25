@@ -276,8 +276,7 @@ export default function RiderRegister() {
                                     <div className="space-y-1.5">
                                         <Label className="text-base font-medium">Phone Number *</Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-muted-foreground font-medium" style={{pointerEvents:'none'}}>+63</span>
-                                            <Input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} required placeholder="9XXXXXXXXX" className={`h-12 pl-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
+                                            <Input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} required placeholder="09XXXXXXXXX" className={`h-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
                                         </div>
                                         {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
                                     </div>

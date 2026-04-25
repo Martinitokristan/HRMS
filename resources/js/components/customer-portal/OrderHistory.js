@@ -13,6 +13,7 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
+import { orderItemLabel } from '../../utils/orderItemLabel';
 
 const CANCEL_REASONS = [
     { value: 'changed_mind', label: 'Changed my mind' },
@@ -377,7 +378,7 @@ export default function OrderHistory() {
                                             </div>
                                             <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-bold truncate">
                                                 <span className="truncate">
-                                                    {firstItem ? `${Number(firstItem.quantity)}x ${firstItem.product?.name}` : 'Order Summary'} 
+                                                    {firstItem ? orderItemLabel(firstItem) : 'Order Summary'} 
                                                     {otherItemsCount > 0 ? ` +${otherItemsCount} more` : ''}
                                                 </span>
                                                 <span className="text-gray-300">|</span>

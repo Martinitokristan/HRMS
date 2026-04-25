@@ -915,9 +915,6 @@ input, select, textarea {
 .order-2{
   order: 2;
 }
-.col-span-1{
-  grid-column: span 1 / span 1;
-}
 .col-span-2{
   grid-column: span 2 / span 2;
 }
@@ -962,6 +959,9 @@ input, select, textarea {
 .my-4{
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+.-mb-px{
+  margin-bottom: -1px;
 }
 .-ml-2{
   margin-left: -0.5rem;
@@ -1343,9 +1343,6 @@ input, select, textarea {
 }
 .max-h-64{
   max-height: 16rem;
-}
-.max-h-72{
-  max-height: 18rem;
 }
 .max-h-96{
   max-height: 24rem;
@@ -6364,10 +6361,6 @@ input, select, textarea {
     display: flex;
   }
 
-  .md\:hidden{
-    display: none;
-  }
-
   .md\:h-\[360px\]{
     height: 360px;
   }
@@ -6378,10 +6371,6 @@ input, select, textarea {
 
   .md\:w-48{
     width: 12rem;
-  }
-
-  .md\:w-52{
-    width: 13rem;
   }
 
   .md\:w-56{

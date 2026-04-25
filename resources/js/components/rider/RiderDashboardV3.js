@@ -1034,10 +1034,7 @@ export default function RiderDashboardV3() {
                                                             </div>
                                                             <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#4b5563' }}>
                                                                 {order.sale.items.map((item, idx) => (
-                                                                    <li key={idx}>
-                                                                        {item.quantity}x {item.product?.name}
-                                                                        {item.product_variant_id && item.variants ? ` (${[item.variants.size, item.variants.color, item.variants.weight].filter(Boolean).join('/')})` : ''}
-                                                                    </li>
+                                                                    <li key={idx}>{orderItemLabel(item)}</li>
                                                                 ))}
                                                             </ul>
                                                         </div>

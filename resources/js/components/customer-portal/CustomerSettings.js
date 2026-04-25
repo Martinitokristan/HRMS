@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
+import { normalizePhPhone } from '../../utils/phone';
 import { usePhilippineAddress } from '../../hooks/usePhilippineAddress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -121,7 +122,7 @@ export default function CustomerSettings() {
             const p = profileRes.data?.data;
             const newProfile = {
                 name: user?.name || '',
-                phone: user?.phone || '',
+                phone: normalizePhPhone(user?.phone) || '',
                 age: p?.age || '',
                 sex: p?.sex || '',
                 address: p?.address || '',
@@ -134,7 +135,7 @@ export default function CustomerSettings() {
             setProfile(newProfile);
             setOriginalProfile(newProfile);
         }).catch(() => {
-            const fallback = { name: user?.name || '', phone: user?.phone || '', age: '', sex: '', address: '', landmark: '', province: '', municipality: '', barangay: '', zip_code: '' };
+            const fallback = { name: user?.name || '', phone: normalizePhPhone(user?.phone) || '', age: '', sex: '', address: '', landmark: '', province: '', municipality: '', barangay: '', zip_code: '' };
             setProfile(fallback);
             setOriginalProfile(fallback);
         }).finally(() => setProfileLoading(false));
@@ -359,7 +360,7 @@ export default function CustomerSettings() {
                                             <TextInput value={profile.name} onChange={set('name')} placeholder="Your full name" disabled={profileSaving} />
                                         </FieldGroup>
                                         <FieldGroup label="Phone Number" error={profileErrors.phone?.[0]}>
-                                            <TextInput value={profile.phone} onChange={set('phone')} placeholder="+63 9XX XXX XXXX" disabled={profileSaving} />
+                                            <TextInput value={profile.phone} onChange={set('phone')} placeholder="09XX XXX XXXX" disabled={profileSaving} />
                                         </FieldGroup>
                                         <FieldGroup label="Age" error={profileErrors.age?.[0]}>
                                             <TextInput value={profile.age} onChange={set('age')} placeholder="e.g. 25" type="number" disabled={profileSaving} />

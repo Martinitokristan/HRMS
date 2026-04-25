@@ -131,7 +131,7 @@ export default function SupplierForm({ isOpen, supplier, onSuccess, onCancel }) 
                                 className={inputClass}
                                 value={form.phone}
                                 onChange={e => setForm({ ...form, phone: e.target.value })}
-                                placeholder="0917-000-0000"
+                                placeholder="09XX-XXX-XXXX"
                             />
                         </div>
                         {/* Status */}

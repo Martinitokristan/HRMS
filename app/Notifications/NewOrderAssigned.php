@@ -27,7 +27,13 @@ class NewOrderAssigned extends Notification
         $orderNumber = $this->delivery->sale->order_number ?? $this->delivery->sale_id;
         $products = $this->delivery->sale->items->map(function ($item) {
             $name = $item->product ? $item->product->name : 'Product';
-            return $item->quantity . 'x ' . $name;
+            $variant = collect([
+                optional(optional($item->productVariant)->sizeValue)->label,
+                optional(optional($item->productVariant)->colorValue)->label,
+                optional(optional($item->productVariant)->weightValue)->label,
+            ])->filter()->implode(' / ');
+            $variantSuffix = $variant ? ' (' . $variant . ')' : '';
+            return $item->quantity . 'x ' . $name . $variantSuffix;
         })->implode(', ');
 
         return [
