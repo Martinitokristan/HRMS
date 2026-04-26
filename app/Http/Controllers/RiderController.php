@@ -552,4 +552,73 @@ class RiderController extends Controller
             'status' => 'success',
         ]);
     }
+
+    /**
+     * Wave 8 — GET /riders/me/history
+     * Paginated, read-only delivery history for the authenticated rider.
+     * Returns rows with status delivered or failed, ordered by delivered_at desc.
+     * Optional ?from=YYYY-MM-DD&to=YYYY-MM-DD silently ignored if malformed.
+     */
+    public function history(Request $request)
+    {
+        $riderId = $request->user()->id;
+
+        $page    = (int) $request->query('page', 1);
+        $perPage = min(50, max(5, (int) $request->query('per_page', 20)));
+
+        // Permissive date filter: only honour valid Y-m-d strings, otherwise ignore.
+        $from = $request->query('from');
+        $to   = $request->query('to');
+        $validDate = function ($d) {
+            if (!is_string($d) || $d === '') return false;
+            $parsed = \DateTime::createFromFormat('Y-m-d', $d);
+            return $parsed && $parsed->format('Y-m-d') === $d;
+        };
+        $from = $validDate($from) ? $from : null;
+        $to   = $validDate($to)   ? $to   : null;
+
+        $query = \App\Models\Delivery::where('rider_id', $riderId)
+            ->whereIn('status', ['delivered', 'failed'])
+            ->with([
+                'sale:id,total_amount,payment_method,customer_id,delivery_address,delivery_lat,delivery_lng',
+                'sale.customer:id,name',
+                'sale.items.product:id,name',
+            ])
+            ->orderByDesc('delivered_at')
+            ->orderByDesc('id');
+
+        if ($from) $query->where('delivered_at', '>=', $from . ' 00:00:00');
+        if ($to)   $query->where('delivered_at', '<=', $to   . ' 23:59:59');
+
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $rows = collect($paginator->items())->map(function ($d) {
+            return [
+                'id'                => $d->id,
+                'order_id'          => $d->sale_id,
+                'customer_name'     => optional(optional($d->sale)->customer)->name,
+                'address'           => optional($d->sale)->delivery_address,
+                'amount'            => (float) (optional($d->sale)->total_amount ?? 0),
+                'payment_method'    => optional($d->sale)->payment_method,
+                'status'            => $d->status,
+                'delivered_at'      => $d->delivered_at,
+                'proof_photo_url'   => $d->proof_photo ? asset('storage/' . $d->proof_photo) : null,
+                'delivery_fee'      => (float) ($d->delivery_fee ?? 0),
+                'payout_status'     => $d->payout_status,
+                'geofence_flagged'  => (bool) ($d->geofence_flagged ?? false),
+                'item_count'        => optional(optional($d->sale)->items)->count() ?? 0,
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => $rows,
+            'meta'   => [
+                'current_page' => $paginator->currentPage(),
+                'last_page'    => $paginator->lastPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+            ],
+        ]);
+    }
 }

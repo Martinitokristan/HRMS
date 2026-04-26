@@ -260,6 +260,8 @@ Route::middleware(['auth.token', 'role:customer'])->group(function () {
 Route::middleware(['auth.token', 'role:rider'])->group(function () {
     Route::get('/riders/me/dashboard', [RiderController::class , 'dashboard']);
     Route::get('/riders/me/wallet',    [RiderController::class , 'wallet']);
+    // Wave 8 — paginated, read-only delivery history
+    Route::get('/riders/me/history',   [RiderController::class , 'history']);
     // Wave 7 — pause / resume an in-progress delivery
     Route::post('/deliveries/{id}/pause',  [DeliveryController::class , 'pauseDelivery']);
     Route::post('/deliveries/{id}/resume', [DeliveryController::class , 'resumeDelivery']);

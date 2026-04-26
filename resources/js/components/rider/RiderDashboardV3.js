@@ -21,7 +21,8 @@ import {
     X,
     Clock,
     XCircle,
-    Wallet
+    Wallet,
+    ClipboardList
 } from 'lucide-react';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { markStale, STALE_KEYS } from '../../store/dataStore';
@@ -124,6 +125,10 @@ export default function RiderDashboardV3() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ active: 0, done: 0, total: 0, earnings: 0, todayEarnings: 0, cashToRemitToday: 0 });
     const [walletData, setWalletData] = useState({ today_earnings: 0, available: 0, pending: 0, cash_to_remit_today: 0, recent_paid: [] });
+    // Wave 8 — Delivery History
+    const [historyData, setHistoryData] = useState({ rows: [], meta: { current_page: 1, last_page: 1, total: 0 } });
+    const [historyPage, setHistoryPage] = useState(1);
+    const [historyLoading, setHistoryLoading] = useState(false);
     const [deliveries, setDeliveries] = useState([]);
     const [nearbyOrders, setNearbyOrders] = useState([]);
     const [notifications, setNotifications] = useState([]);
@@ -327,6 +332,24 @@ export default function RiderDashboardV3() {
         }
     }, []);
 
+    // Wave 8 — fetch paginated delivery history when the rider opens the History tab
+    const fetchHistory = useCallback(async () => {
+        setHistoryLoading(true);
+        try {
+            const r = await api.get(`/riders/me/history?page=${historyPage}&per_page=20`);
+            if (isMountedRef.current) {
+                setHistoryData({
+                    rows: r.data.data || [],
+                    meta: r.data.meta || { current_page: 1, last_page: 1, total: 0 },
+                });
+            }
+        } catch (e) {
+            console.error('history fetch failed', e);
+        } finally {
+            if (isMountedRef.current) setHistoryLoading(false);
+        }
+    }, [historyPage]);
+
     // Wave 6 — wallet figures, fetched on-demand when the rider opens the Wallet tab
     const fetchWallet = useCallback(async () => {
         try {
@@ -348,7 +371,8 @@ export default function RiderDashboardV3() {
 
     useEffect(() => {
         if (view === 'wallet') fetchWallet();
-    }, [view, fetchWallet, dashTrigger]);
+        if (view === 'history') fetchHistory();
+    }, [view, fetchWallet, fetchHistory, dashTrigger, historyPage]);
 
     // Real-time synchronization is now handled by the refreshTrigger logic in the effects above
 
@@ -679,6 +703,7 @@ export default function RiderDashboardV3() {
         { id: 'dashboard', label: 'Dashboard', icon: Home },
         { id: 'deliveries', label: 'Active Deliveries', icon: Package },
         { id: 'wallet', label: 'Wallet', icon: Wallet },
+        { id: 'history', label: 'Delivery History', icon: ClipboardList },
         { id: 'ratings', label: 'Ratings', icon: Star },
     ];
 
@@ -1311,6 +1336,183 @@ export default function RiderDashboardV3() {
                                 <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>No payouts yet.</p>
                             )}
                         </div>
+                    </div>
+                )}
+
+                {/* Wave 8 — Delivery History View */}
+                {view === 'history' && (
+                    <div>
+                        <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.25rem', color: '#111827' }}>
+                            Delivery History
+                        </h1>
+                        <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+                            {historyData.meta.total} completed deliver{historyData.meta.total === 1 ? 'y' : 'ies'}
+                        </p>
+
+                        <div style={{
+                            backgroundColor: '#fff',
+                            borderRadius: '12px',
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                            overflow: 'hidden',
+                        }}>
+                            {historyLoading ? (
+                                <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280', fontSize: '0.875rem' }}>
+                                    Loading…
+                                </div>
+                            ) : historyData.rows.length === 0 ? (
+                                <div style={{ padding: '3rem', textAlign: 'center' }}>
+                                    <ClipboardList size={48} style={{ color: '#9ca3af', margin: '0 auto 1rem' }} />
+                                    <p style={{ color: '#6b7280', margin: 0 }}>No completed deliveries yet.</p>
+                                </div>
+                            ) : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                                        <thead style={{ backgroundColor: '#f9fafb' }}>
+                                            <tr>
+                                                {['Date', 'Order #', 'Customer', 'Items', 'Amount', 'Payment', 'Status', 'Payout', 'Proof'].map(h => (
+                                                    <th key={h} style={{
+                                                        padding: '0.75rem 1rem',
+                                                        textAlign: 'left',
+                                                        fontWeight: 700,
+                                                        color: '#374151',
+                                                        fontSize: '0.75rem',
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: '0.05em',
+                                                        borderBottom: '1px solid #e5e7eb',
+                                                        whiteSpace: 'nowrap',
+                                                    }}>{h}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {historyData.rows.map(row => {
+                                                const dt = row.delivered_at ? new Date(row.delivered_at) : null;
+                                                const dtText = dt ? dt.toLocaleString([], {
+                                                    month: 'short', day: 'numeric', year: 'numeric',
+                                                    hour: 'numeric', minute: '2-digit'
+                                                }) : '—';
+
+                                                const statusChip = (() => {
+                                                    const map = {
+                                                        delivered: { bg: '#ecfdf5', fg: '#047857' },
+                                                        failed:    { bg: '#fef2f2', fg: '#b91c1c' },
+                                                    };
+                                                    const c = map[row.status] || { bg: '#f3f4f6', fg: '#374151' };
+                                                    return (
+                                                        <span style={{
+                                                            backgroundColor: c.bg, color: c.fg,
+                                                            padding: '0.125rem 0.5rem', borderRadius: '999px',
+                                                            fontWeight: 700, fontSize: '0.75rem', textTransform: 'capitalize',
+                                                        }}>{row.status}</span>
+                                                    );
+                                                })();
+
+                                                const payoutMap = {
+                                                    paid:     { bg: '#ecfdf5', fg: '#047857' },
+                                                    eligible: { bg: '#eff6ff', fg: '#1d4ed8' },
+                                                    pending:  { bg: '#f3f4f6', fg: '#374151' },
+                                                    held:     { bg: '#fffbeb', fg: '#92400e' },
+                                                    rejected: { bg: '#fef2f2', fg: '#b91c1c' },
+                                                };
+                                                const pc = payoutMap[row.payout_status] || { bg: '#f3f4f6', fg: '#374151' };
+
+                                                return (
+                                                    <tr key={row.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#111827', whiteSpace: 'nowrap' }}>{dtText}</td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#1d4ed8', fontWeight: 600 }}>#{row.order_id}</td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#374151' }}>{row.customer_name || '—'}</td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#6b7280' }}>{row.item_count}</td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#111827', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                                            ₱{Number(row.amount).toFixed(2)}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', color: '#374151', textTransform: 'uppercase', fontWeight: 600 }}>
+                                                            {row.payment_method || '—'}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', whiteSpace: 'nowrap' }}>
+                                                            {statusChip}
+                                                            {row.geofence_flagged && (
+                                                                <span style={{
+                                                                    marginLeft: '0.375rem',
+                                                                    backgroundColor: '#fffbeb', color: '#92400e',
+                                                                    padding: '0.125rem 0.5rem', borderRadius: '999px',
+                                                                    fontWeight: 700, fontSize: '0.75rem',
+                                                                }}>flagged</span>
+                                                            )}
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem', whiteSpace: 'nowrap' }}>
+                                                            <span style={{
+                                                                backgroundColor: pc.bg, color: pc.fg,
+                                                                padding: '0.125rem 0.5rem', borderRadius: '999px',
+                                                                fontWeight: 700, fontSize: '0.75rem', textTransform: 'capitalize',
+                                                            }}>{row.payout_status || '—'}</span>
+                                                        </td>
+                                                        <td style={{ padding: '0.75rem 1rem' }}>
+                                                            {row.proof_photo_url ? (
+                                                                <a href={row.proof_photo_url} target="_blank" rel="noopener noreferrer"
+                                                                   style={{ color: '#1d4ed8', fontWeight: 600, textDecoration: 'none' }}>
+                                                                    View proof
+                                                                </a>
+                                                            ) : (
+                                                                <span style={{ color: '#9ca3af' }}>—</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Pagination */}
+                        {historyData.rows.length > 0 && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280',
+                            }}>
+                                <span>
+                                    Showing page {historyData.meta.current_page} of {historyData.meta.last_page}
+                                </span>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button
+                                        onClick={() => setHistoryPage(historyPage - 1)}
+                                        disabled={historyData.meta.current_page <= 1 || historyLoading}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#fff',
+                                            color: '#374151',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '8px',
+                                            fontWeight: 600,
+                                            cursor: historyData.meta.current_page <= 1 ? 'not-allowed' : 'pointer',
+                                            opacity: historyData.meta.current_page <= 1 ? 0.5 : 1,
+                                            fontSize: '0.875rem',
+                                        }}
+                                    >
+                                        Previous
+                                    </button>
+                                    <button
+                                        onClick={() => setHistoryPage(historyPage + 1)}
+                                        disabled={historyData.meta.current_page >= historyData.meta.last_page || historyLoading}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#3b82f6',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            fontWeight: 600,
+                                            cursor: historyData.meta.current_page >= historyData.meta.last_page ? 'not-allowed' : 'pointer',
+                                            opacity: historyData.meta.current_page >= historyData.meta.last_page ? 0.5 : 1,
+                                            fontSize: '0.875rem',
+                                        }}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
