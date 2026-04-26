@@ -93,27 +93,11 @@ export default function SupplierDashboard() {
 
             const allTotal = posRes.data.data.total || 0;
             const revenue = pos.reduce((s, p) => s + Number(p.total_cost || 0), 0);
-            
-            // Calculate Monthly Revenue Trend (Last 6 Months)
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const trendMap = {};
-            const now = new Date();
-            for (let i = 5; i >= 0; i--) {
-                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
-                trendMap[key] = { label: months[d.getMonth()], value: 0 };
-            }
 
-            // Fill with real data if available in the fetched pool
-            pos.forEach(po => {
-                const poDate = new Date(po.created_at);
-                const key = `${months[poDate.getMonth()]} ${poDate.getFullYear()}`;
-                if (trendMap[key]) {
-                    trendMap[key].value += Number(po.total_cost || 0);
-                }
-            });
-
-            setRevenueTrend(Object.values(trendMap));
+            // NOTE: Revenue trend (chart data) is owned exclusively by fetchRevenueTrend(),
+            // which calls GET /supplier/reports/revenue and respects the year/month dropdowns.
+            // Do not setRevenueTrend(...) here — it would overwrite the correct yearly data
+            // with a stale trailing-6-months computation derived from a partial PO sample.
 
             setStats({
                 pending: pos.filter(p => p.status === 'pending').length,
