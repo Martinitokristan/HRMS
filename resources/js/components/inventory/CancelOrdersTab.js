@@ -304,7 +304,7 @@ export default function CancelOrdersTab() {
                                         </div>
                                     </TableCell>
                                     <TableCell
-                                        className="text-right font-mono font-bold text-foreground"
+                                        className="text-right font-mono text-foreground"
                                     >
                                         {formatPHP(req.total_amount)}
                                     </TableCell>

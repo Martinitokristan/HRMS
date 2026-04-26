@@ -272,7 +272,7 @@ export default function PurchaseTab({ mode = "completed" }) {
                                             {po.supplier?.email}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                                    <TableCell className="px-4 py-3 text-right font-mono text-foreground">
                                         {formatPHP(po.total_cost)}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center text-muted-foreground">
@@ -467,7 +467,7 @@ export default function PurchaseTab({ mode = "completed" }) {
                                                     <TableCell className="px-4 py-3 text-right font-mono text-muted-foreground font-semibold">
                                                         {formatPHP(i.unit_cost)}
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                                                    <TableCell className="px-4 py-3 text-right font-mono text-foreground">
                                                         {formatPHP(i.subtotal)}
                                                     </TableCell>
                                                 </TableRow>

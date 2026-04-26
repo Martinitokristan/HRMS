@@ -243,7 +243,7 @@ export default function GCashLogs() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {log.parsed_amount ? (
-                                                <span className="font-mono font-bold text-foreground">
+                                                <span className="font-mono text-foreground">
                                                     {formatPHP(log.parsed_amount)}
                                                 </span>
                                             ) : (

@@ -194,7 +194,7 @@ export default function Customers() {
                                     <TableCell className="px-4 py-3 font-semibold text-foreground">
                                         {u.sales_count || 0}
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 font-mono font-bold text-foreground">
+                                    <TableCell className="px-4 py-3 font-mono text-foreground">
                                         {formatPHP(u.total_spent)}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-muted-foreground">

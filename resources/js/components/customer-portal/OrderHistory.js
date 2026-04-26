@@ -390,7 +390,7 @@ export default function OrderHistory() {
                                         </div>
 
                                         <div className="text-right ml-4">
-                                            <div className="text-sm font-mono font-bold text-foreground">{formatPHP(order.total_amount)}</div>
+                                            <div className="text-sm font-mono text-foreground">{formatPHP(order.total_amount)}</div>
                                             <div className="text-[10px] font-black text-muted-foreground uppercase">{order.items?.length} {order.items?.length === 1 ? 'Item' : 'Items'}</div>
                                         </div>
 
@@ -515,7 +515,7 @@ export default function OrderHistory() {
                                                 </div>
                                                 <div className="pt-2 flex justify-between items-center text-sm font-black text-foreground">
                                                     <span className="uppercase tracking-[0.2em] text-[10px]">Grand Total</span>
-                                                    <span className="font-mono font-bold text-foreground">{formatPHP(order.total_amount)}</span>
+                                                    <span className="font-mono text-foreground">{formatPHP(order.total_amount)}</span>
                                                 </div>
                                             </div>
 

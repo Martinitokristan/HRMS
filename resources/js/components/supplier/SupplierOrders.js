@@ -365,7 +365,7 @@ export default function SupplierOrders({ mode = "completed" }) {
                                             : 0}{" "}
                                         items
                                     </TableCell>
-                                    <TableCell className="font-mono font-bold text-foreground">
+                                    <TableCell className="font-mono text-foreground">
                                         {formatPHP(order?.total_cost)}
                                     </TableCell>
                                     <TableCell>
@@ -745,7 +745,7 @@ export default function SupplierOrders({ mode = "completed" }) {
                                                               <TableCell className="text-right font-mono">
                                                                   {formatPHP(item?.unit_cost)}
                                                               </TableCell>
-                                                              <TableCell className="text-right font-mono font-bold text-foreground">
+                                                              <TableCell className="text-right font-mono text-foreground">
                                                                   {formatPHP(item?.subtotal)}
                                                               </TableCell>
                                                           </TableRow>

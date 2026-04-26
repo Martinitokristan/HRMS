@@ -349,7 +349,7 @@ export default function Returns() {
                                                             </p>
                                                         )}
                                                     </div>
-                                                    <p className="font-mono font-bold text-sm whitespace-nowrap text-foreground">
+                                                    <p className="font-mono text-sm whitespace-nowrap text-foreground">
                                                         {formatPHP(lineTotal)}
                                                     </p>
                                                 </div>

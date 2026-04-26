@@ -370,7 +370,7 @@ export default function SalesTab() {
                                             <span className="text-xs text-muted-foreground">—</span>
                                         )}
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                                    <TableCell className="px-4 py-3 text-right font-mono text-foreground">
                                         {formatPHP(sale.total_amount)}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">

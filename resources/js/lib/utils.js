@@ -10,6 +10,12 @@ export function cn(...inputs) {
  * so admin / supplier / customer / rider modules stay visually consistent.
  *
  * Output example: ₱30.00
+ *
+ * Styling convention:
+ *   - Repeating-row table cells:   className="font-mono text-right text-foreground"
+ *     (no font-bold — matches Rider Payouts → Paid tab Fee column, the reference)
+ *   - Summary / total / footer rows, cards, and product-grid prices:
+ *     className="font-mono font-bold text-foreground" is fine.
  */
 export const formatPHP = (value) =>
   new Intl.NumberFormat("en-PH", {
