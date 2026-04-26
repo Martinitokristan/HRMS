@@ -580,7 +580,7 @@ class RiderController extends Controller
         $query = \App\Models\Delivery::where('rider_id', $riderId)
             ->whereIn('status', ['delivered', 'failed'])
             ->with([
-                'sale:id,total_amount,payment_method,customer_id,delivery_address,delivery_lat,delivery_lng',
+                'sale:id,total_amount,payment_method,customer_id',
                 'sale.customer:id,name',
                 'sale.items.product:id,name',
             ])
@@ -597,7 +597,7 @@ class RiderController extends Controller
                 'id'                => $d->id,
                 'order_id'          => $d->sale_id,
                 'customer_name'     => optional(optional($d->sale)->customer)->name,
-                'address'           => optional($d->sale)->delivery_address,
+                'address'           => $d->address,
                 'amount'            => (float) (optional($d->sale)->total_amount ?? 0),
                 'payment_method'    => optional($d->sale)->payment_method,
                 'status'            => $d->status,

@@ -493,7 +493,7 @@ class DeliveryController extends Controller
     public function uploadProof(Request $request, $id)
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,webp,heic,heif|max:10240|dimensions:max_width=4000,max_height=4000', // 10MB max, added heic/heif for iPhone
+            'photo' => 'required|image|mimes:jpeg,png,jpg,webp,heic,heif|max:20480',
             'rider_latitude'  => 'nullable|numeric|between:-90,90',
             'rider_longitude' => 'nullable|numeric|between:-180,180',
         ]);
@@ -757,6 +757,17 @@ class DeliveryController extends Controller
         }
         $this->maybePromoteToEligible($sale->delivery->fresh());
 
+        \App\Models\CustomerNotification::where('delivery_id', $sale->delivery->id)
+            ->where('type', 'delivery_confirmation_request')
+            ->get()
+            ->each(function ($n) {
+                $meta = $n->meta ?: [];
+                $meta['requires_action'] = false;
+                $meta['action_taken']    = 'confirmed';
+                $meta['actioned_at']     = now()->toIso8601String();
+                $n->update(['meta' => $meta, 'is_read' => true]);
+            });
+
         return response()->json(['status' => 'success']);
     }
 
@@ -778,6 +789,17 @@ class DeliveryController extends Controller
             'customer_dispute_reason' => $request->input('reason'),
             'payout_status'           => 'held',
         ]);
+
+        \App\Models\CustomerNotification::where('delivery_id', $sale->delivery->id)
+            ->where('type', 'delivery_confirmation_request')
+            ->get()
+            ->each(function ($n) {
+                $meta = $n->meta ?: [];
+                $meta['requires_action'] = false;
+                $meta['action_taken']    = 'disputed';
+                $meta['actioned_at']     = now()->toIso8601String();
+                $n->update(['meta' => $meta, 'is_read' => true]);
+            });
 
         return response()->json(['status' => 'success']);
     }
@@ -874,7 +896,7 @@ class DeliveryController extends Controller
             'delivery_id' => $delivery->id,
             'type'        => 'delivery_confirmation_request',
             'title'       => 'Did you receive your order?',
-            'message'     => 'Tap "Yes, I received it" to confirm. If something is wrong, tap "No". We will auto-confirm in ' . $windowHours . ' hours if there is no response.',
+            'message'     => 'Tap "Yes, I received it" to confirm. If something is wrong, tap "No, something is wrong". We will auto-confirm in ' . $windowHours . ' hours if there is no response.',
             'meta'        => [
                 'requires_action' => true,
                 'delivery_id'     => $delivery->id,

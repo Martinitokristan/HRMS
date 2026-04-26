@@ -551,11 +551,14 @@ export default function CustomerHome() {
                                                         e.stopPropagation();
                                                         try {
                                                             await api.post(`/sales/${n.meta.sale_id}/customer-confirm-receipt`);
-                                                            api.get('/customer/notifications').then(r => {
-                                                                setNotifications(r.data?.data || []);
-                                                                setUnreadCount(r.data?.unread || 0);
-                                                            }).catch(() => {});
-                                                        } catch (err) {}
+                                                            const r = await api.get('/customer/notifications');
+                                                            setNotifications(r.data?.data || []);
+                                                            setUnreadCount(r.data?.unread || 0);
+                                                        } catch (err) {
+                                                            const msg = err?.response?.data?.message || 'Could not confirm receipt. Please try again.';
+                                                            alert(msg);
+                                                            console.error('confirm receipt failed:', err);
+                                                        }
                                                     }}
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors"
                                                 >
@@ -796,6 +799,9 @@ export default function CustomerHome() {
                                             setUnreadCount(r.data?.unread || 0);
                                         }).catch(() => {});
                                     } catch (err) {
+                                        const msg = err?.response?.data?.message || 'Could not submit dispute. Please try again.';
+                                        alert(msg);
+                                        console.error('dispute receipt failed:', err);
                                         setDisputeModal(d => ({ ...d, submitting: false }));
                                     }
                                 }}
