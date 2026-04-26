@@ -54,16 +54,16 @@ const LandingProductCard = ({ product, onLoginPrompt }) => {
 
     return (
         <div
-            className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-gray-200/60 hover:-translate-y-1 max-w-[280px]"
+            className="group bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-gray-200/60 hover:-translate-y-1 w-full"
             onClick={onLoginPrompt}
         >
-            <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 border-b border-gray-100">
+            <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 border-b border-gray-100">
                 {imgSrc ? (
                     <img
                         src={imgSrc}
                         alt={product.name}
                         loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -415,7 +415,7 @@ export default function Landing() {
             </header>
 
             {/* ── SECTION 2: EXPLORE BY CATEGORY ── */}
-            <section id="categories" className="py-12 md:py-16">
+            <section id="categories" className="py-14 md:py-20 bg-white">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
                         <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Browse</p>
@@ -451,7 +451,7 @@ export default function Landing() {
 
                         {/* Centered product grid */}
                         {(categories.length > 0 ? categoryLoading : loading) ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 max-w-5xl mx-auto justify-items-center">
                                 {[...Array(4)].map((_, i) => (
                                     <div key={i} className="animate-pulse">
                                         <div className="aspect-[4/3] bg-gray-100 rounded-xl mb-3" />
@@ -466,7 +466,7 @@ export default function Landing() {
                                 <p className="text-sm text-gray-400 font-medium">No products in this category yet.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 max-w-5xl mx-auto justify-items-center">
                                 {(categories.length > 0 ? categoryProducts : popularProducts.slice(0, 6)).map(p => (
                                     <LandingProductCard key={p.id} product={p} onLoginPrompt={triggerLoginNotice} />
                                 ))}
@@ -491,14 +491,14 @@ export default function Landing() {
             </section>
 
             {/* ── SECTION 3: POPULAR PRODUCTS ── */}
-            <section id="products" className="py-12 md:py-16">
+            <section id="products" className="py-14 md:py-20 bg-gray-50">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
                         <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Top Rated</p>
                         <h2 className="text-2xl md:text-3xl font-black text-gray-900">Popular Products</h2>
                     </div>
                     {loading ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
                             {[...Array(8)].map((_, i) => (
                                 <div key={i} className="animate-pulse">
                                     <div className="aspect-[4/3] bg-gray-200 rounded-2xl mb-3" />
@@ -513,7 +513,7 @@ export default function Landing() {
                             <p className="text-gray-400 font-medium">No products available yet. Check back soon!</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
                             {popularProducts.map(p => <LandingProductCard key={p.id} product={p} onLoginPrompt={triggerLoginNotice} />)}
                         </div>
                     )}
@@ -526,9 +526,9 @@ export default function Landing() {
             </section>
 
             {/* ── SECTION 4: BEST SELLERS ── */}
-            <section id="deals" className="py-12 md:py-16">
+            <section id="deals" className="py-14 md:py-20 bg-white">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                         <div className="rounded-2xl bg-orange-500 p-8 md:p-12 text-white order-2 md:order-1">
                             <p className="text-xs font-bold uppercase tracking-widest text-orange-200 mb-3">Top Selling</p>
                             <h2 className="text-3xl md:text-4xl font-black leading-tight mb-4">Our Best Sellers<br />— Loved by Customers</h2>
@@ -546,7 +546,7 @@ export default function Landing() {
                                 Shop Best Sellers <ArrowRight className="h-4 w-4" />
                             </Button>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 order-1 md:order-2">
+                        <div className="grid grid-cols-2 gap-5 order-1 md:order-2">
                             {(bestSellers.length > 0 ? bestSellers : FILL_PROMOS).map((item, idx) => {
                                 const isReal = bestSellers.length > 0 && idx < bestSellers.length;
                                 if (isReal) {
@@ -557,7 +557,7 @@ export default function Landing() {
                                     return (
                                         <div key={p.id} className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl overflow-hidden aspect-[4/3] cursor-pointer group" onClick={triggerLoginNotice}>
                                             {img
-                                                ? <img src={img} alt={p.name} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-65 transition-opacity" />
+                                                ? <img src={img} alt={p.name} className="absolute inset-0 w-full h-full object-contain p-3 opacity-60 group-hover:opacity-75 transition-opacity duration-500" />
                                                 : <div className="absolute inset-0 flex items-center justify-center"><Icon className="h-12 w-12 text-white/20" /></div>
                                             }
                                             {isOnSale && (
@@ -589,7 +589,7 @@ export default function Landing() {
             </section>
 
             {/* ── SECTION 5: BENEFITS FOR YOUR EXPERIENCE ── */}
-            <section id="benefits" className="py-12 md:py-16 bg-gray-100">
+            <section id="benefits" className="py-14 md:py-20 bg-gray-50">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
                         <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Why Choose Us</p>
@@ -610,7 +610,7 @@ export default function Landing() {
             </section>
 
             {/* ── SECTION 6: CUSTOMER FEEDBACK ── */}
-            <section id="testimonials" className="py-12 md:py-16 bg-white">
+            <section id="testimonials" className="py-14 md:py-20 bg-white">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                     <div className="text-center mb-10">
                         <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-1">Customer Feedback</p>
@@ -657,7 +657,7 @@ export default function Landing() {
             </section>
 
             {/* ── SECTION 7: NEWSLETTER ── */}
-            <section id="newsletter" className="py-12 md:py-16 bg-gray-900">
+            <section id="newsletter" className="py-14 md:py-20 bg-gray-900">
                 <div className="max-w-[1400px] mx-auto px-6 md:px-10 text-center">
                     <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-3">Stay Updated</p>
                     <h2 className="text-2xl md:text-3xl font-black text-white mb-2">Join Our Newsletter</h2>
