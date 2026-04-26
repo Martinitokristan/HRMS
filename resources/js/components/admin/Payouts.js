@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Banknote, Wallet, CheckCircle2, AlertTriangle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Wave 6 — Admin Cash Remittance + Rider Payouts.
@@ -525,16 +526,18 @@ function RiderPayoutsTab() {
 }
 
 export default function Payouts({ tab = 'remittance' }) {
+    const navigate = useNavigate();
+
     return (
         <div className="relative">
             <h2 className="text-xl font-bold text-foreground tracking-tight mb-5">Rider Cash & Payouts</h2>
 
             <Tabs value={tab} className="mb-6 relative z-0">
                 <TabsList>
-                    <TabsTrigger value="remittance" onClick={() => window.history.replaceState(null, '', '/payouts')} className="gap-2">
+                    <TabsTrigger value="remittance" onClick={() => navigate('/payouts')} className="gap-2">
                         <Banknote className="h-4 w-4" /> Cash Remittance
                     </TabsTrigger>
-                    <TabsTrigger value="payouts" onClick={() => window.history.replaceState(null, '', '/payouts/riders')} className="gap-2">
+                    <TabsTrigger value="payouts" onClick={() => navigate('/payouts/riders')} className="gap-2">
                         <Wallet className="h-4 w-4" /> Rider Payouts
                     </TabsTrigger>
                 </TabsList>
