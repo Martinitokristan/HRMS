@@ -9,6 +9,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { orderItemLabel } from '../../utils/orderItemLabel';
+import { formatPHP } from '@/lib/utils';
 import {
     MapPin,
     Settings,
@@ -440,13 +441,8 @@ export default function RiderDashboardV3() {
         }
     }, [fetchRoadRoutes]);
 
-    // Format currency
-    const formatCurrency = useCallback((amount) => {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(amount || 0);
-    }, []);
+    // Format currency (alias of shared formatPHP)
+    const formatCurrency = formatPHP;
 
     // Handle mark notifications read
     const handleMarkNotificationsRead = useCallback(() => {
@@ -1271,7 +1267,7 @@ export default function RiderDashboardV3() {
                             Wallet
                         </h1>
                         <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-                            Earn ₱{30} per successful delivery. Cash-out is paid manually by admin to your GCash within 24 hours after your day's COD cash is remitted.
+                            Earn {formatPHP(30)} per successful delivery. Cash-out is paid manually by admin to your GCash within 24 hours after your day's COD cash is remitted.
                         </p>
                         <div style={{
                             display: 'grid',
@@ -1424,7 +1420,7 @@ export default function RiderDashboardV3() {
                                                         <td style={{ padding: '0.75rem 1rem', color: '#374151' }}>{row.customer_name || '—'}</td>
                                                         <td style={{ padding: '0.75rem 1rem', color: '#6b7280' }}>{row.item_count}</td>
                                                         <td style={{ padding: '0.75rem 1rem', color: '#111827', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                                                            ₱{Number(row.amount).toFixed(2)}
+                                                            {formatPHP(row.amount)}
                                                         </td>
                                                         <td style={{ padding: '0.75rem 1rem', color: '#374151', textTransform: 'uppercase', fontWeight: 600 }}>
                                                             {row.payment_method || '—'}

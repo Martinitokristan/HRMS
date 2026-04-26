@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { formatPHP } from '@/lib/utils';
 
 const PO_STATUS = {
     received:  { bg: 'bg-[#dcfce7]', text: 'text-[#16a34a]' },
@@ -25,7 +26,7 @@ const POStatusBadge = ({ status }) => {
 const fmtDate = (d) => d
     ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
     : '—';
-const fmtMoney = (n) => `₱${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmtMoney = formatPHP;
 
 export default function PoReceiptModal({ po, onClose, settings }) {
     const storeName = settings?.general?.store_name || 'Store';

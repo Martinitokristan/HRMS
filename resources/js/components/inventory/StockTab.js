@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { formatPHP } from "@/lib/utils";
 import {
     Table,
     TableHeader,
@@ -1197,11 +1198,8 @@ export default function StockTab() {
                                 {/* ── Purchase price info ── */}
                                 <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-600">
                                     <span>Cost Price:</span>
-                                    <span className="font-bold text-gray-900">
-                                        ₱
-                                        {Number(
-                                            transferForm.purchase_price || 0,
-                                        ).toFixed(2)}
+                                    <span className="font-mono font-bold text-foreground">
+                                        {formatPHP(transferForm.purchase_price)}
                                     </span>
                                     <span className="ml-auto text-xs text-muted-foreground">
                                         Set retail price ≥ cost to make profit

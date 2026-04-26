@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, AlertTriangle, Upload, ShieldAlert, Loader2 } from 'lucide-react';
+import { formatPHP } from '@/lib/utils';
 
 export default function GCashProofSubmit() {
     const { token } = useParams();
@@ -116,7 +117,7 @@ export default function GCashProofSubmit() {
                     </div>
                     <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-600">Amount Due</span>
-                        <span className="font-bold text-blue-800">₱{Number(order.total_amount).toFixed(2)}</span>
+                        <span className="font-mono font-bold text-foreground">{formatPHP(order.total_amount)}</span>
                     </div>
                     <div className="text-xs text-gray-500 border-t border-blue-200 pt-2">
                         {order.items?.map((item, i) => (

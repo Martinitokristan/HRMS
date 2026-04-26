@@ -3,6 +3,7 @@ import api from "../../lib/api";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatPHP } from "@/lib/utils";
 import {
     CheckCircle,
     XCircle,
@@ -242,11 +243,8 @@ export default function GCashLogs() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {log.parsed_amount ? (
-                                                <span className="font-bold text-slate-800">
-                                                    ₱
-                                                    {parseFloat(
-                                                        log.parsed_amount,
-                                                    ).toFixed(2)}
+                                                <span className="font-mono font-bold text-foreground">
+                                                    {formatPHP(log.parsed_amount)}
                                                 </span>
                                             ) : (
                                                 <span className="text-slate-400 text-xs italic">

@@ -7,7 +7,7 @@ import {
     Paintbrush, Scissors, Settings, Box, Layers, Star, Send, CheckCircle, Menu, ChevronDown
 } from "lucide-react";
 import { GCashIcon } from "@/components/icons/PaymentIcons";
-import { cn } from "@/lib/utils";
+import { cn, formatPHP } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const BENEFITS = [
@@ -567,7 +567,7 @@ export default function Landing() {
                                             )}
                                             <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
                                                 <p className="text-xs font-black text-white line-clamp-1">{p.name}</p>
-                                                <p className="text-xs text-orange-300 font-bold">₱{Number(p.sale_price || p.sell_price || 0).toLocaleString()}</p>
+                                                <p className="text-xs text-orange-300 font-mono font-bold">{formatPHP(p.sale_price || p.sell_price)}</p>
                                             </div>
                                         </div>
                                     );

@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-    PhilippinePeso, ClipboardList, Package, Truck,
+    Wallet, ClipboardList, Package, Truck,
     BarChart3, ArrowRight, Plus, ClipboardCheck, Settings,
     ChevronRight, FileText, AlertTriangle, TrendingUp, Save
 } from 'lucide-react';
+import { formatPHP } from '@/lib/utils';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 import {
@@ -170,7 +171,7 @@ export default function SupplierDashboard() {
     if (loading) return <div className="flex items-center justify-center h-64"><div className="spinner" /></div>;
 
     const statCards = [
-        { label: 'Total Revenue', value: `₱${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, Icon: PhilippinePeso, color: '#10b981', bg: '#ecfdf5' },
+        { label: 'Total Revenue', value: formatPHP(stats.totalRevenue), Icon: Wallet, color: '#10b981', bg: '#ecfdf5' },
         { label: 'Total Orders', value: stats.total, Icon: ClipboardList, color: '#3b82f6', bg: '#eff6ff' },
         { label: 'My Products', value: stats.productCount, Icon: Package, color: '#8b5cf6', bg: '#f5f3ff' },
         { label: 'Pending Delivery', value: stats.approved, Icon: Truck, color: '#f59e0b', bg: '#fffbeb' },
@@ -234,7 +235,7 @@ export default function SupplierDashboard() {
                         {topProducts.length > 0 ? (
                             <BarChart
                                 data={topProducts.map(p => ({ label: p.name, value: Number(p.price) * Number(p.total_stock) }))}
-                                formatValue={(v) => `₱${Number(v).toLocaleString()}`}
+                                formatValue={(v) => formatPHP(v)}
                                 color="#8b5cf6"
                                 hideHeader
                             />
@@ -271,7 +272,7 @@ export default function SupplierDashboard() {
                                         <div className="font-bold text-sm text-primary mb-0.5">{po.po_number}</div>
                                         <div className="text-xs text-muted-foreground font-medium">{new Date(po.created_at).toLocaleDateString()} • {po.items?.length || 0} item{po.items?.length !== 1 ? 's' : ''}</div>
                                     </div>
-                                    <div className="font-extrabold text-base whitespace-nowrap text-foreground">₱{Number(po.total_cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                    <div className="font-mono font-bold text-base whitespace-nowrap text-foreground">{formatPHP(po.total_cost)}</div>
                                     {getStatusBadge(po.status)}
                                 </div>
                             ))}
@@ -334,7 +335,7 @@ export default function SupplierDashboard() {
                         <LineChart 
                             data={revenueTrend}
                             color="#2563eb"
-                            formatValue={(v) => `₱${Number(v).toLocaleString()}`}
+                            formatValue={(v) => formatPHP(v)}
                             title=""
                             hideHeader={true}
                             monthLabel={selectedMonth !== "all" ? months.find(m => m.value === selectedMonth)?.label : ""}

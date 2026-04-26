@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { formatPHP } from "@/lib/utils";
 import {
     Table,
     TableBody,
@@ -364,14 +365,8 @@ export default function SupplierOrders({ mode = "completed" }) {
                                             : 0}{" "}
                                         items
                                     </TableCell>
-                                    <TableCell className="font-bold">
-                                        ₱
-                                        {Number(
-                                            order?.total_cost || 0,
-                                        ).toLocaleString(undefined, {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        })}
+                                    <TableCell className="font-mono font-bold text-foreground">
+                                        {formatPHP(order?.total_cost)}
                                     </TableCell>
                                     <TableCell>
                                         {order.status === "received" ||
@@ -440,12 +435,7 @@ export default function SupplierOrders({ mode = "completed" }) {
                                 items
                             </div>
                             <div className="text-sm text-muted-foreground">
-                                Total: ₱
-                                {Number(
-                                    rejectModal.total_cost || 0,
-                                ).toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                })}
+                                Total: <span className="font-mono font-bold text-foreground">{formatPHP(rejectModal.total_cost)}</span>
                             </div>
                         </div>
 
@@ -752,29 +742,11 @@ export default function SupplierOrders({ mode = "completed" }) {
                                                                       item?.quantity,
                                                                   )}
                                                               </TableCell>
-                                                              <TableCell className="text-right">
-                                                                  ₱
-                                                                  {Number(
-                                                                      item?.unit_cost ||
-                                                                          0,
-                                                                  ).toLocaleString(
-                                                                      undefined,
-                                                                      {
-                                                                          minimumFractionDigits: 2,
-                                                                      },
-                                                                  )}
+                                                              <TableCell className="text-right font-mono">
+                                                                  {formatPHP(item?.unit_cost)}
                                                               </TableCell>
-                                                              <TableCell className="text-right font-bold">
-                                                                  ₱
-                                                                  {Number(
-                                                                      item?.subtotal ||
-                                                                          0,
-                                                                  ).toLocaleString(
-                                                                      undefined,
-                                                                      {
-                                                                          minimumFractionDigits: 2,
-                                                                      },
-                                                                  )}
+                                                              <TableCell className="text-right font-mono font-bold text-foreground">
+                                                                  {formatPHP(item?.subtotal)}
                                                               </TableCell>
                                                           </TableRow>
                                                       ),
@@ -786,13 +758,8 @@ export default function SupplierOrders({ mode = "completed" }) {
                                         <span className="text-sm font-bold text-muted-foreground mr-4">
                                             Grand Total
                                         </span>
-                                        <span className="text-lg font-extrabold text-primary">
-                                            ₱
-                                            {Number(
-                                                selectedOrder?.total_cost || 0,
-                                            ).toLocaleString(undefined, {
-                                                minimumFractionDigits: 2,
-                                            })}
+                                        <span className="text-lg font-mono font-bold text-foreground">
+                                            {formatPHP(selectedOrder?.total_cost)}
                                         </span>
                                     </div>
                                 </Card>

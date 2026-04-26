@@ -337,7 +337,7 @@ export default function PaginatedTable({
           </div>
         ) : (
           <>
-            {pagination && (
+            {pagination && pagination.totalPages > 1 && (
               <div className="mb-4 flex items-center justify-end gap-3">
                 <div className="mr-auto hidden text-sm text-gray-600 md:block">
                   Showing {pagination.from} to {pagination.to} of {pagination.total} entries

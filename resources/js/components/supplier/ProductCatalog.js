@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "sonner";
+import { formatPHP } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -125,13 +126,6 @@ export default function ProductCatalog() {
         return status === "active"
             ? "bg-green-100 text-green-800"
             : "bg-gray-100 text-gray-800";
-    };
-
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat("en-PH", {
-            style: "currency",
-            currency: "PHP",
-        }).format(amount || 0);
     };
 
     return (
@@ -340,8 +334,8 @@ export default function ProductCatalog() {
                                         )}
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <div className="font-bold text-lg">
-                                            {formatCurrency(product.price)}
+                                        <div className="font-mono font-bold text-lg text-foreground">
+                                            {formatPHP(product.price)}
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Barcode className="w-3 h-3" />

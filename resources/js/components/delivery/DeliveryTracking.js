@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { MapPin, Clock, CheckCircle, Package, Truck, Phone, Star } from 'lucide-react';
 import api from '../../lib/api';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
+import { formatPHP } from '@/lib/utils';
 
 export default function DeliveryTracking({ deliveryId }) {
     const { refreshTrigger } = useSilentRefresh('admin_deliveries');
@@ -296,7 +297,7 @@ export default function DeliveryTracking({ deliveryId }) {
                             <Separator />
                             <div className="flex justify-between font-medium">
                                 <span>Total</span>
-                                <span>₱{delivery.sale?.total_amount?.toFixed(2)}</span>
+                                <span className="font-mono font-bold text-foreground">{formatPHP(delivery.sale?.total_amount)}</span>
                             </div>
                         </CardContent>
                     </Card>

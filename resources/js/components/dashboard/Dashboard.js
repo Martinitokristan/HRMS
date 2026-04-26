@@ -6,7 +6,7 @@ import LineChart from "../shared/LineChart";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, formatPHP } from "@/lib/utils";
 import {
     PhilippinePeso,
     ShoppingBag,
@@ -154,13 +154,7 @@ export default function Dashboard() {
         fetchRecentActivity();
     }, [refreshTrigger]);
 
-    const formatCurr = (val) =>
-        new Intl.NumberFormat("en-PH", {
-            style: "currency",
-            currency: "PHP",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(val || 0);
+    const formatCurr = formatPHP;
 
     const chartData = useMemo(() => {
         return chartDataRaw.map((d) => {
@@ -216,7 +210,7 @@ export default function Dashboard() {
                     value={
                         stats?.total_revenue
                             ? formatCurr(stats.total_revenue)
-                            : "₱0"
+                            : formatPHP(0)
                     }
                     trend="Live"
                     trendUp={true}

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { formatPHP } from '@/lib/utils';
 import { 
     MapPin, 
     Clock, 
@@ -152,12 +153,6 @@ export default function RiderDashboard() {
         return colors[status] || 'bg-gray-100 text-gray-800';
     };
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(amount || 0);
-    };
 
     const formatTime = (timestamp) => {
         if (!timestamp) return '';
@@ -206,7 +201,7 @@ export default function RiderDashboard() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
-                                    <p className="text-2xl font-bold">{formatCurrency(dashboard.total_earnings)}</p>
+                                    <p className="text-2xl font-mono font-bold text-foreground">{formatPHP(dashboard.total_earnings)}</p>
                                 </div>
                                 <DollarSign className="h-8 w-8 text-muted-foreground" />
                             </div>
@@ -285,13 +280,13 @@ export default function RiderDashboard() {
                                 {activeDelivery.sale?.items?.map((item) => (
                                     <div key={item.id} className="flex justify-between text-sm">
                                         <span>{item.product?.name} x {item.quantity}</span>
-                                        <span>{formatCurrency(item.price * item.quantity)}</span>
+                                        <span className="font-mono">{formatPHP(item.price * item.quantity)}</span>
                                     </div>
                                 ))}
                             </div>
                             <div className="flex justify-between font-medium mt-2 pt-2 border-t">
                                 <span>Total</span>
-                                <span>{formatCurrency(activeDelivery.sale?.total_amount)}</span>
+                                <span className="font-mono font-bold text-foreground">{formatPHP(activeDelivery.sale?.total_amount)}</span>
                             </div>
                         </div>
 

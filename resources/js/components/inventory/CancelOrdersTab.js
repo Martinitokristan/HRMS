@@ -7,6 +7,7 @@ import ConfirmModal from "../shared/ConfirmModal";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { formatPHP } from "@/lib/utils";
 import {
     Table,
     TableHeader,
@@ -303,12 +304,9 @@ export default function CancelOrdersTab() {
                                         </div>
                                     </TableCell>
                                     <TableCell
-                                        className="text-right font-semibold text-primary"
+                                        className="text-right font-mono font-bold text-foreground"
                                     >
-                                        ₱
-                                        {parseFloat(
-                                            req.total_amount,
-                                        ).toLocaleString()}
+                                        {formatPHP(req.total_amount)}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">

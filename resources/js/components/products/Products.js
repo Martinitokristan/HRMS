@@ -8,6 +8,7 @@ import ProductForm from "./ProductForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { formatPHP } from "@/lib/utils";
 import {
     Table,
     TableHeader,
@@ -371,19 +372,13 @@ export default function Products() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="px-4 py-3 text-right">
-                                            <div className="text-sm text-muted-foreground font-medium">
-                                                ₱
-                                                {Number(
-                                                    p.purchase_price || 0,
-                                                ).toFixed(2)}
+                                            <div className="text-sm font-mono text-muted-foreground font-medium">
+                                                {formatPHP(p.purchase_price)}
                                             </div>
                                         </TableCell>
                                         <TableCell className="px-4 py-3 text-right">
-                                            <div className="text-base font-black text-foreground">
-                                                ₱
-                                                {Number(
-                                                    p.sell_price || 0,
-                                                ).toFixed(2)}
+                                            <div className="text-base font-mono font-bold text-foreground">
+                                                {formatPHP(p.sell_price)}
                                             </div>
                                         </TableCell>
                                         <TableCell className="px-4 py-3 text-center">

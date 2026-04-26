@@ -10,6 +10,7 @@ import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import Tooltip from '../shared/Tooltip';
 import ProductForm from './ProductForm';
+import { formatPHP } from '@/lib/utils';
 
 export default function SupplierInventory() {
     const { refreshTrigger } = useSilentRefresh(STALE_KEYS.SUPPLIER_DASHBOARD);
@@ -149,7 +150,7 @@ export default function SupplierInventory() {
                                                     {p.category_name || p.category?.name || 'Uncategorized'}
                                                 </Badge>
                                             </td>
-                                            <td className="px-5 py-3 text-right font-medium">₱{Number(p.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-5 py-3 text-right font-mono font-medium text-foreground">{formatPHP(p.price)}</td>
                                             <td className="px-5 py-3 text-center">
                                                 <span className={`font-bold text-sm ${isLow ? 'text-red-500' : 'text-foreground'}`}>
                                                     {stock}

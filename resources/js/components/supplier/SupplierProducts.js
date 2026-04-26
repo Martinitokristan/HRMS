@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Package, Database } from "lucide-react";
+import { formatPHP } from "@/lib/utils";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { STALE_KEYS } from "../../store/dataStore";
 
@@ -193,12 +194,8 @@ export default function SupplierProducts() {
                                         </Badge>
                                     </div>
                                     <div className="pt-3 border-t border-border/50">
-                                        <div className="text-xl font-black text-foreground">
-                                            ₱
-                                            {Number(p.price).toLocaleString(
-                                                undefined,
-                                                { minimumFractionDigits: 2 },
-                                            )}
+                                        <div className="text-xl font-mono font-bold text-foreground">
+                                            {formatPHP(p.price)}
                                         </div>
                                     </div>
                                 </div>

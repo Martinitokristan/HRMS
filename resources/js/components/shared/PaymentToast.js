@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { X, CheckCircle } from 'lucide-react';
 import { GCashIcon } from '@/components/icons/PaymentIcons';
+import { formatPHP } from '@/lib/utils';
 
 /**
  * PaymentToast — A premium GCash payment received toast notification.
@@ -233,7 +234,7 @@ function SingleToast({ data, onDone }) {
                             color: '#fff',
                             letterSpacing: '-0.02em',
                         }}>
-                            ₱{typeof amount === 'number' ? amount.toLocaleString('en-PH', { minimumFractionDigits: 2 }) : amount}
+                            {formatPHP(typeof amount === 'number' ? amount : Number(amount) || 0)}
                         </span>
                     </div>
 

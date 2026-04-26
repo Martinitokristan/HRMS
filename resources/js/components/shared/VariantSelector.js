@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Check } from 'lucide-react';
+import { formatPHP } from '@/lib/utils';
 
 /**
  * Modern Variant Selector Component
@@ -216,8 +217,8 @@ export default function VariantSelector({
                         </div>
                     )}
                     {showPrice && currentVariant.price_override && (
-                        <div className="text-lg font-bold text-orange-600">
-                            ₱{parseFloat(currentVariant.price_override).toFixed(2)}
+                        <div className="text-lg font-mono font-bold text-foreground">
+                            {formatPHP(currentVariant.price_override)}
                         </div>
                     )}
                 </div>

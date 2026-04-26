@@ -9,6 +9,7 @@ import { StatusBadge } from "../shared/Badge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { formatPHP } from "@/lib/utils";
 import {
     Table,
     TableHeader,
@@ -271,15 +272,8 @@ export default function PurchaseTab({ mode = "completed" }) {
                                             {po.supplier?.email}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-right font-bold text-destructive">
-                                        ₱
-                                        {Number(po.total_cost).toLocaleString(
-                                            undefined,
-                                            {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            },
-                                        )}
+                                    <TableCell className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                                        {formatPHP(po.total_cost)}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center text-muted-foreground">
                                         {po.items?.length || 0} items
@@ -470,27 +464,11 @@ export default function PurchaseTab({ mode = "completed" }) {
                                                     <TableCell className="px-4 py-3 text-center font-bold text-lg text-foreground">
                                                         {parseInt(i.quantity)}
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3 text-right text-muted-foreground font-semibold">
-                                                        ₱
-                                                        {Number(
-                                                            i.unit_cost,
-                                                        ).toLocaleString(
-                                                            undefined,
-                                                            {
-                                                                minimumFractionDigits: 2,
-                                                            },
-                                                        )}
+                                                    <TableCell className="px-4 py-3 text-right font-mono text-muted-foreground font-semibold">
+                                                        {formatPHP(i.unit_cost)}
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3 text-right font-bold text-foreground">
-                                                        ₱
-                                                        {Number(
-                                                            i.subtotal,
-                                                        ).toLocaleString(
-                                                            undefined,
-                                                            {
-                                                                minimumFractionDigits: 2,
-                                                            },
-                                                        )}
+                                                    <TableCell className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                                                        {formatPHP(i.subtotal)}
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -504,13 +482,8 @@ export default function PurchaseTab({ mode = "completed" }) {
                                             >
                                                 Purchase Order Value:
                                             </TableCell>
-                                            <TableCell className="px-4 py-4 text-right font-black text-xl text-primary">
-                                                ₱
-                                                {Number(
-                                                    viewPo.total_cost,
-                                                ).toLocaleString(undefined, {
-                                                    minimumFractionDigits: 2,
-                                                })}
+                                            <TableCell className="px-4 py-4 text-right font-mono font-bold text-xl text-foreground">
+                                                {formatPHP(viewPo.total_cost)}
                                             </TableCell>
                                         </TableRow>
                                     </TableFooter>

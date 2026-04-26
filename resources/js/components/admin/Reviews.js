@@ -268,9 +268,9 @@ export default function Reviews() {
 
             {/* Data Table */}
             <Card>
-                {!loading && reviews.length > 0 && (
-                    <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <p className="text-sm text-muted-foreground">
+                {!loading && reviews.length > 0 && (pagination.last_page || 1) > 1 && (
+                    <div className="p-4 border-b flex items-center justify-end gap-3">
+                        <p className="mr-auto hidden text-sm text-muted-foreground md:block">
                             Showing page {pagination.current_page} of {pagination.last_page || 1} ({pagination.total} total reviews)
                         </p>
                         <Pagination className="m-0 mx-0">

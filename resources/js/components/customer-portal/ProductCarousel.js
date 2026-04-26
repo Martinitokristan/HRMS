@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Sparkles, Tag, ArrowRight, Star } from 'lucide-react';
 import { getProductSaleInfo } from '../../utils/priceCalculations';
+import { formatPHP } from '@/lib/utils';
 
 // Radial-gradient themes per slide type
 var SLIDE_THEMES = {
@@ -178,8 +179,8 @@ export default function ProductCarousel({ products = [], setSelectedProduct, onA
                     {price > 0 && (
                         <p className="text-white/55 text-[11px] font-semibold tracking-wide mb-4">
                             Starting at{' '}
-                            <span className="text-white/80 font-black">
-                                ₱{price.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            <span className="text-white/80 font-mono font-bold">
+                                {formatPHP(price)}
                             </span>
                             {si && si.isOnSale && si.discountPercent > 0 && (
                                 <span className="ml-2 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider"

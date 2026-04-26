@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useSilentRefresh } from "../../hooks/useSilentRefresh";
 import { STALE_KEYS, markStale } from "../../store/dataStore";
 import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
+import { formatPHP } from "@/lib/utils";
 import {
     RotateCcw,
     Search,
@@ -256,13 +257,8 @@ export default function Returns() {
                                         <span className="text-muted-foreground">
                                             Refund Amount
                                         </span>
-                                        <p className="font-bold text-primary">
-                                            ₱
-                                            {Number(
-                                                r.refund_amount,
-                                            ).toLocaleString(undefined, {
-                                                minimumFractionDigits: 2,
-                                            })}
+                                        <p className="font-mono font-bold text-foreground">
+                                            {formatPHP(r.refund_amount)}
                                         </p>
                                     </div>
                                     <div>
@@ -340,7 +336,7 @@ export default function Returns() {
                                                             )}
                                                         </p>
                                                         <p className="text-xs text-muted-foreground">
-                                                            Qty: {qty} × ₱{unitPrice.toFixed(2)}
+                                                            Qty: {qty} × {formatPHP(unitPrice)}
                                                         </p>
                                                         {item.condition && (
                                                             <p className="text-xs text-muted-foreground">
@@ -353,8 +349,8 @@ export default function Returns() {
                                                             </p>
                                                         )}
                                                     </div>
-                                                    <p className="font-bold text-sm whitespace-nowrap">
-                                                        ₱{lineTotal.toFixed(2)}
+                                                    <p className="font-mono font-bold text-sm whitespace-nowrap text-foreground">
+                                                        {formatPHP(lineTotal)}
                                                     </p>
                                                 </div>
                                             );
@@ -486,13 +482,8 @@ export default function Returns() {
                                         </p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-2xl font-black text-primary">
-                                            ₱
-                                            {Number(
-                                                r.refund_amount,
-                                            ).toLocaleString(undefined, {
-                                                minimumFractionDigits: 2,
-                                            })}
+                                        <p className="text-2xl font-mono font-bold text-foreground">
+                                            {formatPHP(r.refund_amount)}
                                         </p>
                                         <p className="text-xs text-muted-foreground capitalize">
                                             via{" "}
@@ -605,7 +596,7 @@ export default function Returns() {
                                         Refund Completed
                                     </p>
                                     <p className="text-sm text-muted-foreground">
-                                        ₱{Number(r.refund_amount).toFixed(2)}{" "}
+                                        {formatPHP(r.refund_amount)}{" "}
                                         refunded on{" "}
                                         {new Date(
                                             r.completed_at,
@@ -855,13 +846,8 @@ export default function Returns() {
                                             {r.refund_method === "original_payment" && r.sale?.payment_method === "gcash" && <GCashIcon size={14} />}
                                             {r.refund_method === "original_payment" && r.sale?.payment_method === "cod" && <CODIcon size={14} />}
                                             {r.refund_method === "cash" && <CODIcon size={14} />}
-                                            <p className="font-bold text-sm">
-                                                ₱
-                                                {Number(
-                                                    r.refund_amount,
-                                                ).toLocaleString(undefined, {
-                                                    minimumFractionDigits: 2,
-                                                })}
+                                            <p className="font-mono font-bold text-sm text-foreground">
+                                                {formatPHP(r.refund_amount)}
                                             </p>
                                         </div>
                                         <p className="text-xs text-muted-foreground">

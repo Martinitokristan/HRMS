@@ -7,7 +7,8 @@ import L from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, RefreshCw, MapIcon, Smartphone, Phone, Navigation, CheckCircle2, XCircle, PhilippinePeso, Truck, Package, MapPin, Clock } from 'lucide-react';
+import { LogOut, RefreshCw, MapIcon, Smartphone, Phone, Navigation, CheckCircle2, XCircle, Wallet, Truck, Package, MapPin, Clock } from 'lucide-react';
+import { formatPHP } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { orderItemLabel } from '../../utils/orderItemLabel';
 
@@ -266,15 +267,15 @@ export default function RiderApp() {
 
                             <div className="bg-white/10 rounded-xl p-3">
                                 <div className="flex justify-between text-xs font-bold mb-2">
-                                    <span className="flex items-center gap-1"><PhilippinePeso className="h-3 w-3" /> COD QUOTA</span>
-                                    <span>₱{Number(stats.collected).toLocaleString()} / ₱{Number(stats.quota).toLocaleString()}</span>
+                                    <span className="flex items-center gap-1"><Wallet className="h-3 w-3" /> COD QUOTA</span>
+                                    <span className="font-mono">{formatPHP(stats.collected)} / {formatPHP(stats.quota)}</span>
                                 </div>
                                 <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
                                     <div className="h-full bg-green-400 rounded-full transition-all" style={{ width: `${Math.min(100, (stats.collected / (stats.quota || 1)) * 100)}%` }} />
                                 </div>
                                 <div className="flex justify-between text-[10px] text-white/50 mt-1.5">
                                     <span>{Math.round((stats.collected / (stats.quota || 1)) * 100)}% of daily target</span>
-                                    <span>₱{Number((stats.quota || 0) - (stats.collected || 0)).toLocaleString()} remaining</span>
+                                    <span className="font-mono">{formatPHP((stats.quota || 0) - (stats.collected || 0))} remaining</span>
                                 </div>
                             </div>
                         </Card>
@@ -312,7 +313,7 @@ export default function RiderApp() {
                                             <div className="flex items-center justify-between mb-2">
                                                 <span className="text-xs font-bold text-foreground">#{order.sale?.order_number}</span>
                                                 <Badge variant="secondary" className="text-[10px] font-bold">{order.distance} AWAY</Badge>
-                                                <span className="text-sm font-black text-primary">₱{Number(order.sale?.total_amount).toLocaleString()}</span>
+                                                <span className="text-sm font-mono font-bold text-foreground">{formatPHP(order.sale?.total_amount)}</span>
                                             </div>
                                             <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
                                             <div className="text-xs text-muted-foreground mb-1">{order.address}</div>
@@ -340,7 +341,7 @@ export default function RiderApp() {
                                             <div className="flex items-center justify-between mb-2">
                                                 <span className="text-xs font-bold text-foreground">#{order.sale?.order_number}</span>
                                                 <Badge variant="outline" className="text-[10px] capitalize flex items-center gap-1"><Truck className="h-3 w-3" /> {order.status.replace('_', ' ')}</Badge>
-                                                <span className="text-sm font-black text-primary">₱{Number(order.sale?.total_amount).toLocaleString()}</span>
+                                                <span className="text-sm font-mono font-bold text-foreground">{formatPHP(order.sale?.total_amount)}</span>
                                             </div>
                                             <div className="font-bold text-foreground text-sm mb-0.5">{order.sale?.customer?.name}</div>
                                             <div className="text-xs text-muted-foreground mb-3 flex items-center gap-1"><MapPin className="h-3 w-3 shrink-0" /> {order.address}</div>
@@ -378,7 +379,7 @@ export default function RiderApp() {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="text-sm font-bold text-foreground">₱{Number(order.sale?.total_amount).toLocaleString()}</div>
+                                                <div className="text-sm font-mono font-bold text-foreground">{formatPHP(order.sale?.total_amount)}</div>
                                                 <div className="text-[10px] text-muted-foreground">{new Date(order.updated_at).toLocaleDateString().toUpperCase()}</div>
                                             </div>
                                         </Card>
@@ -435,7 +436,7 @@ export default function RiderApp() {
                                 <Popup>
                                     <div className="font-black text-green-700 flex items-center gap-1"><Package className="h-3.5 w-3.5" /> NEW ORDER #{job.sale?.order_number}</div>
                                     <div className="text-xs my-1">{job.address}</div>
-                                    <div className="text-[11px] font-bold text-orange-500">COD: ₱{Number(job.sale?.total_amount).toLocaleString()}</div>
+                                    <div className="text-[11px] font-mono font-bold text-foreground">COD: {formatPHP(job.sale?.total_amount)}</div>
                                 </Popup>
                             </Marker>
                         ))}

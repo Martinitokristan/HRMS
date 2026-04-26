@@ -45,11 +45,7 @@ export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
 
     if (!isOpen) return null;
 
-    const formatCurrency = (val) =>
-        new Intl.NumberFormat("en-PH", {
-            style: "currency",
-            currency: "PHP",
-        }).format(val || 0);
+    const formatCurrency = formatPHP;
     const formatTime = (date) => (date ? new Date(date).toLocaleString() : "-");
 
     return (
@@ -192,9 +188,7 @@ export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
                                                         "Unknown Product"}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    {parseFloat(
-                                                        item.quantity,
-                                                    ).toFixed(0)}
+                                                    {parseInt(item.quantity)}
                                                 </TableCell>
                                                 <TableCell className="text-right font-medium">
                                                     {formatCurrency(

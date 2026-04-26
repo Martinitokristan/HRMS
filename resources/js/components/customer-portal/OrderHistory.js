@@ -13,6 +13,7 @@ import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
 import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
+import { formatPHP } from '@/lib/utils';
 import { orderItemLabel } from '../../utils/orderItemLabel';
 
 const CANCEL_REASONS = [
@@ -389,7 +390,7 @@ export default function OrderHistory() {
                                         </div>
 
                                         <div className="text-right ml-4">
-                                            <div className="text-sm font-black text-foreground">₱{Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                            <div className="text-sm font-mono font-bold text-foreground">{formatPHP(order.total_amount)}</div>
                                             <div className="text-[10px] font-black text-muted-foreground uppercase">{order.items?.length} {order.items?.length === 1 ? 'Item' : 'Items'}</div>
                                         </div>
 
@@ -500,21 +501,21 @@ export default function OrderHistory() {
                                             <div className="mb-8 px-4 space-y-2 border-l-2 border-primary/20 ml-2">
                                                 <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                                                     <span>Subtotal (Net)</span>
-                                                    <span>₱{Number(order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                    <span className="font-mono">{formatPHP(order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0))}</span>
                                                 </div>
                                                 {order.discount_pct > 0 && (
                                                     <div className="flex justify-between items-center text-[10px] font-black text-green-600 uppercase tracking-widest">
                                                         <span>Discount ({order.discount_pct}%)</span>
-                                                        <span>-₱{Number((order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0) * (order.discount_pct / 100)) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                        <span className="font-mono">-{formatPHP(order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0) * (order.discount_pct / 100))}</span>
                                                     </div>
                                                 )}
                                                 <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                                                     <span>Vat (12%)</span>
-                                                    <span>₱{Number(order.total_amount - (order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0) * (1 - (order.discount_pct || 0) / 100))).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                    <span className="font-mono">{formatPHP(order.total_amount - (order.items?.reduce((sum, item) => sum + Number(item.subtotal), 0) * (1 - (order.discount_pct || 0) / 100)))}</span>
                                                 </div>
                                                 <div className="pt-2 flex justify-between items-center text-sm font-black text-foreground">
                                                     <span className="uppercase tracking-[0.2em] text-[10px]">Grand Total</span>
-                                                    <span className="text-primary">₱{Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                    <span className="font-mono font-bold text-foreground">{formatPHP(order.total_amount)}</span>
                                                 </div>
                                             </div>
 

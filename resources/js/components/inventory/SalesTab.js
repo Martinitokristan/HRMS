@@ -9,6 +9,7 @@ import { StatusBadge } from "../shared/Badge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { formatPHP } from "@/lib/utils";
 import {
     Table,
     TableHeader,
@@ -369,8 +370,8 @@ export default function SalesTab() {
                                             <span className="text-xs text-muted-foreground">—</span>
                                         )}
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-right font-bold text-foreground">
-                                        ₱{Number(sale.total_amount).toFixed(2)}
+                                    <TableCell className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                                        {formatPHP(sale.total_amount)}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
                                         <Badge variant="secondary" className="gap-1.5">
@@ -462,11 +463,8 @@ export default function SalesTab() {
                                 </div>
                                 <div className="flex justify-between font-bold text-lg mt-3 pt-3 border-t border-border">
                                     <span>Total:</span>{" "}
-                                    <span className="text-primary">
-                                        ₱
-                                        {Number(viewOrder.total_amount).toFixed(
-                                            2,
-                                        )}
+                                    <span className="font-mono font-bold text-foreground">
+                                        {formatPHP(viewOrder.total_amount)}
                                     </span>
                                 </div>
                             </Card>
@@ -622,17 +620,11 @@ export default function SalesTab() {
                                                     <TableCell className="px-4 py-3 text-center font-bold">
                                                         {parseInt(i.quantity)}
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3 text-right text-muted-foreground">
-                                                        ₱
-                                                        {Number(
-                                                            i.unit_price,
-                                                        ).toFixed(2)}
+                                                    <TableCell className="px-4 py-3 text-right font-mono text-muted-foreground">
+                                                        {formatPHP(i.unit_price)}
                                                     </TableCell>
-                                                    <TableCell className="px-4 py-3 text-right font-semibold text-foreground">
-                                                        ₱
-                                                        {Number(
-                                                            i.subtotal,
-                                                        ).toFixed(2)}
+                                                    <TableCell className="px-4 py-3 text-right font-mono font-semibold text-foreground">
+                                                        {formatPHP(i.subtotal)}
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -717,8 +709,7 @@ function SalesReceiptModal({ order, onClose, settings }) {
                   day: "numeric",
               })
             : "—";
-    const fmtMoney = (n) =>
-        `₱${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const fmtMoney = formatPHP;
 
     const paymentLabel = (order.payment_method || "")
         .replace(/_/g, " ")

@@ -8,6 +8,7 @@ import Modal from "../shared/Modal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { formatPHP } from "@/lib/utils";
 import {
     Table,
     TableHeader,
@@ -331,13 +332,8 @@ export default function SupplierCatalog() {
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <span className="font-bold text-lg text-primary">
-                                        ₱
-                                        {Number(
-                                            p.price || p.purchase_price || 0,
-                                        ).toLocaleString(undefined, {
-                                            minimumFractionDigits: 2,
-                                        })}
+                                    <span className="font-mono font-bold text-lg text-foreground">
+                                        {formatPHP(p.price || p.purchase_price)}
                                     </span>
                                     {(p.min_order_qty || 1) > 1 && (
                                         <span className="text-[11px] text-muted-foreground font-medium">
@@ -502,11 +498,8 @@ export default function SupplierCatalog() {
 
                                     <div className="mb-4 bg-[#FFF9F6] border border-[#FFE7DB] rounded-xl p-4 relative overflow-hidden">
                                         <div className="flex items-baseline gap-2">
-                                            <span className="text-3xl font-black text-[#FF5A1F]">
-                                                ₱
-                                                {Number(
-                                                    currentPrice || 0,
-                                                ).toFixed(2)}
+                                            <span className="text-3xl font-mono font-bold text-foreground">
+                                                {formatPHP(currentPrice)}
                                             </span>
                                         </div>
                                     </div>
@@ -684,7 +677,7 @@ export default function SupplierCatalog() {
                                                 ? "PROCESSING..."
                                                 : isOutOfStock
                                                   ? "OUT OF STOCK"
-                                                  : `Order — ₱${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                                  : `Order — ${formatPHP(subtotal)}`}
                                         </Button>
                                     </div>
                                 </div>

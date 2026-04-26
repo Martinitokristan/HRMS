@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search, X, Package, ClipboardList, LogOut, Bell, Settings, Sparkles } from 'lucide-react';
 import { getProductSaleInfo } from '../../utils/priceCalculations';
 import RatingStars from '../ui/RatingStars';
+import { formatPHP } from '@/lib/utils';
 import { useSilentRefresh } from '../../hooks/useSilentRefresh';
 import { STALE_KEYS, markStale } from '../../store/dataStore';
 import ConfirmModal from '../shared/ConfirmModal';
@@ -159,12 +160,12 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                 {/* Pricing Area - Vertical Tight */}
                 <div className="pt-1.5 pb-0.5">
                     <div className="flex items-end gap-2">
-                        <div className="text-lg font-black text-orange-500 leading-none tracking-tighter">
-                            ₱{saleInfo.isOnSale ? saleInfo.salePrice.toFixed(2) : saleInfo.originalPrice.toFixed(2)}
+                        <div className="text-lg font-mono font-bold text-foreground leading-none tracking-tighter">
+                            {formatPHP(saleInfo.isOnSale ? saleInfo.salePrice : saleInfo.originalPrice)}
                         </div>
                         {saleInfo.isOnSale && (
-                           <span className="text-xs text-gray-400 line-through font-bold leading-none mb-0.5">
-                               ₱{saleInfo.originalPrice.toFixed(2)}
+                           <span className="text-xs text-gray-400 line-through font-mono font-bold leading-none mb-0.5">
+                               {formatPHP(saleInfo.originalPrice)}
                            </span>
                         )}
                     </div>

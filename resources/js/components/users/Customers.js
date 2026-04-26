@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../lib/api";
+import { formatPHP } from "@/lib/utils";
 import FilterBar from "../shared/FilterBar";
 import Pagination from "../shared/Pagination";
 import { StatusBadge } from "../shared/Badge";
@@ -193,8 +194,8 @@ export default function Customers() {
                                     <TableCell className="px-4 py-3 font-semibold text-foreground">
                                         {u.sales_count || 0}
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 font-bold text-primary">
-                                        ₱{Number(u.total_spent || 0).toFixed(2)}
+                                    <TableCell className="px-4 py-3 font-mono font-bold text-foreground">
+                                        {formatPHP(u.total_spent)}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-muted-foreground">
                                         {u.last_order_date

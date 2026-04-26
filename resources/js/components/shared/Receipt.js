@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import ReactToPrint from 'react-to-print';
+import { formatPHP } from '@/lib/utils';
 
 export default function Receipt({ isOpen, onClose, data, type = 'sale' }) {
     const printRef = useRef();
@@ -22,7 +23,7 @@ export default function Receipt({ isOpen, onClose, data, type = 'sale' }) {
         });
     };
 
-    const formatCurrency = (amount) => `₱${Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const formatCurrency = formatPHP;
 
     return (
         <div style={{

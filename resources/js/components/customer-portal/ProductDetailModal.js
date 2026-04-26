@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import RatingStars from '../ui/RatingStars';
 import ProductReviewList from '../ui/ProductReviewList';
 import api, { silentApi } from '../../lib/api';
+import { formatPHP } from '@/lib/utils';
 
 export default function ProductDetailModal({ isOpen, onClose, product, onAddToCart }) {
     const [qty, setQty] = useState(1);
@@ -402,19 +403,19 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                         <div className="mb-4 bg-[#FFF9F6] border border-[#FFE7DB] rounded-xl p-4 relative overflow-hidden">
                             <div className="flex flex-col">
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl font-black text-[#FF5A1F]">
-                                        ₱{displayPrice.toFixed(2)}
+                                    <span className="text-3xl font-mono font-bold text-foreground">
+                                        {formatPHP(displayPrice)}
                                     </span>
                                     {currentSaleInfo.isOnSale && (
-                                        <span className="text-base text-gray-300 line-through font-bold">
-                                            ₱{currentSaleInfo.originalPrice.toFixed(2)}
+                                        <span className="text-base text-gray-300 line-through font-mono font-bold">
+                                            {formatPHP(currentSaleInfo.originalPrice)}
                                         </span>
                                     )}
                                 </div>
                                 {currentSaleInfo.isOnSale && (
                                     <div className="mt-0.5 flex items-center gap-2">
                                         <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full border border-green-100">
-                                            Save ₱{currentSaleInfo.savings.toFixed(2)}
+                                            Save {formatPHP(currentSaleInfo.savings)}
                                         </span>
                                         <span className="text-[9px] text-orange-400 font-bold uppercase tracking-wider">Limited Time Offer</span>
                                     </div>

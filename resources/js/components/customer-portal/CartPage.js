@@ -7,6 +7,7 @@ import ProductDetailModal from './ProductDetailModal';
 import Modal from '../shared/Modal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { formatPHP } from '@/lib/utils';
 import { ArrowLeft, Trash2, ShoppingCart, Minus, Plus, Check, X, Package, ArrowRight } from 'lucide-react';
 import Tooltip from '../shared/Tooltip';
 
@@ -255,8 +256,8 @@ export default function CartPage() {
                                         </Button>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-sm font-medium text-muted-foreground">₱{Number(item.sell_price).toFixed(2)}</div>
-                                        <div className="text-xl font-black text-foreground">₱{(item.sell_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                        <div className="text-sm font-mono font-medium text-muted-foreground">{formatPHP(item.sell_price)}</div>
+                                        <div className="text-xl font-mono font-bold text-foreground">{formatPHP(item.sell_price * item.qty)}</div>
                                     </div>
                                 </div>
                             </div>

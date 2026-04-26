@@ -6,13 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Banknote, Wallet, CheckCircle2, AlertTriangle, Loader2, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { formatPHP } from '@/lib/utils';
 
 /**
  * Wave 6 — Admin Cash Remittance + Rider Payouts.
  * Single-page tabbed UI matching the look-and-feel of CancelOrdersTab.
  */
-
-const peso = (v) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(v || 0));
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
@@ -362,12 +361,12 @@ function CashRemittanceTab() {
                             <tr key={r.rider_id} className="hover:bg-gray-50/50">
                                 <td className="px-4 py-3 font-bold text-foreground">{r.rider_name || `Rider #${r.rider_id}`}</td>
                                 <td className="px-4 py-3 text-right">{r.count}</td>
-                                <td className="px-4 py-3 text-right font-mono">{peso(r.expected)}</td>
-                                <td className="px-4 py-3 text-right font-mono text-green-600">{peso(r.remitted)}</td>
+                                <td className="px-4 py-3 text-right font-mono">{formatPHP(r.expected)}</td>
+                                <td className="px-4 py-3 text-right font-mono text-green-600">{formatPHP(r.remitted)}</td>
                                 <td className="px-4 py-3 text-right font-mono">
                                     {r.outstanding > 0
-                                        ? <span className="text-red-600 font-bold">{peso(r.outstanding)}</span>
-                                        : <span className="text-muted-foreground">{peso(0)}</span>}
+                                        ? <span className="text-red-600 font-bold">{formatPHP(r.outstanding)}</span>
+                                        : <span className="text-muted-foreground">{formatPHP(0)}</span>}
                                 </td>
                                 <td className="px-4 py-3 text-right">
                                     {r.outstanding > 0 ? (
@@ -462,7 +461,7 @@ function RiderPayoutsTab() {
                         <div className="flex items-center justify-between bg-gray-50 px-4 py-3 border-b border-border">
                             <div>
                                 <div className="font-bold text-foreground">{g.rider_name || `Rider #${g.rider_id}`}</div>
-                                <div className="text-xs text-muted-foreground">{g.count} delivery{g.count === 1 ? '' : 's'} • {peso(g.total_fee)}</div>
+                                <div className="text-xs text-muted-foreground">{g.count} delivery{g.count === 1 ? '' : 's'} • {formatPHP(g.total_fee)}</div>
                             </div>
                             {status === 'eligible' && (
                                 <Button
@@ -472,7 +471,7 @@ function RiderPayoutsTab() {
                                     className="gap-1"
                                 >
                                     {busy === `pay-${g.rider_id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Banknote className="h-3.5 w-3.5" />}
-                                    Mark Paid ({peso(g.total_fee)})
+                                    Mark Paid ({formatPHP(g.total_fee)})
                                 </Button>
                             )}
                         </div>
@@ -493,7 +492,7 @@ function RiderPayoutsTab() {
                                         <td className="px-4 py-2 font-mono text-xs">{row.tracking_number || `#${row.id}`}</td>
                                         <td className="px-4 py-2">{row.delivered_at ? new Date(row.delivered_at).toLocaleString() : '—'}</td>
                                         <td className="px-4 py-2 uppercase text-xs">{row.payment_method || '—'}</td>
-                                        <td className="px-4 py-2 text-right font-mono">{peso(row.delivery_fee)}</td>
+                                        <td className="px-4 py-2 text-right font-mono">{formatPHP(row.delivery_fee)}</td>
                                         <td className="px-4 py-2">
                                             <div className="flex gap-1.5">
                                                 {row.geofence_flagged && (

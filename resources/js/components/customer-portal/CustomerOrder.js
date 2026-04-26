@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { formatPHP } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, Trash2, MapPin, Package, Navigation, Loader2, Download, X } from 'lucide-react';
 import { QRCodeCanvas } from "qrcode.react";
@@ -431,16 +432,16 @@ export default function CustomerOrder() {
                                                 {item.brand?.name && <div className="text-sm font-bold text-orange-600 mt-0.5">{item.brand.name}</div>}
                                                 {item.variantString && <div className="text-sm text-muted-foreground mt-0.5 font-medium">[{item.variantString}]</div>}
                                             </div>
-                                            <div className="font-bold text-base text-right whitespace-nowrap">₱{(item.sell_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                            <div className="font-mono font-bold text-base text-right whitespace-nowrap text-foreground">{formatPHP(item.sell_price * item.qty)}</div>
                                         </div>
                                     ))}
                                 </div>
 
                                 <div className="border-t border-border pt-4 mt-4 space-y-2">
-                                    <div className="flex justify-between text-base font-medium py-1"><span className="text-muted-foreground">Subtotal</span><span>₱{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
-                                    <div className="flex justify-between text-base font-black text-xl pt-4 mt-3 border-t-2 border-border">
-                                        <span>Total</span>
-                                        <span className="text-primary">₱{(total * 1.12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <div className="flex justify-between text-base font-medium py-1"><span className="text-muted-foreground">Subtotal</span><span className="font-mono font-bold text-foreground">{formatPHP(total)}</span></div>
+                                    <div className="flex justify-between text-base text-xl pt-4 mt-3 border-t-2 border-border">
+                                        <span className="font-black">Total</span>
+                                        <span className="font-mono font-bold text-foreground">{formatPHP(total * 1.12)}</span>
                                     </div>
                                 </div>
                             </Card>
@@ -702,7 +703,7 @@ export default function CustomerOrder() {
                             {/* Blue header */}
                             <div style={{ background: '#1A6FE8', padding: '12px 20px', textAlign: 'center' }}>
                                 <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
-                                    ₱{parseFloat(gcashAmount || 0).toFixed(2)}
+                                    {formatPHP(gcashAmount)}
                                 </div>
                                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>
                                     Pay this exact amount via GCash
@@ -865,7 +866,7 @@ export default function CustomerOrder() {
                                         {item.brand?.name && <div className="text-sm font-bold text-orange-600 mb-0.5">{item.brand.name}</div>}
                                         {item.variantString && <div className="text-sm font-medium text-primary mb-1">[{item.variantString}]</div>}
                                         <div className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                                            Qty: <span className="font-bold text-foreground">{item.qty}</span> × <span className="font-bold text-foreground">₱{(item.sell_price || 0).toLocaleString()}</span>
+                                            Qty: <span className="font-bold text-foreground">{item.qty}</span> × <span className="font-mono font-bold text-foreground">{formatPHP(item.sell_price)}</span>
                                         </div>
                                         <div className="flex gap-3 mt-1">
                                             {item.product_variants?.length > 0 && (
@@ -874,8 +875,8 @@ export default function CustomerOrder() {
                                             <button type="button" className="text-[11px] text-destructive font-semibold bg-transparent border-none cursor-pointer p-0 hover:underline" onClick={() => removeFromCart(item.cartId)}>Remove</button>
                                         </div>
                                     </div>
-                                    <div className="font-black text-foreground text-base whitespace-nowrap bg-secondary/50 px-2 py-1 rounded">
-                                        ₱{((item.sell_price || 0) * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    <div className="font-mono font-bold text-foreground text-base whitespace-nowrap bg-secondary/50 px-2 py-1 rounded">
+                                        {formatPHP((item.sell_price || 0) * item.qty)}
                                     </div>
                                 </div>
                             ))}
@@ -883,7 +884,7 @@ export default function CustomerOrder() {
 
                         <div className="flex justify-between items-center pt-6 border-t-2 border-border">
                             <span className="text-xl font-black text-foreground">Total</span>
-                            <span className="text-2xl font-black text-primary">₱{(total * 1.12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="text-2xl font-mono font-bold text-foreground">{formatPHP(total * 1.12)}</span>
                         </div>
                         <div className="text-right text-sm font-bold text-muted-foreground/60 mt-1 uppercase tracking-tighter">Includes VAT (12%)</div>
                     </Card>

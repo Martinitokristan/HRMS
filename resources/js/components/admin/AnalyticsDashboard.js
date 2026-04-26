@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { formatPHP } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -96,16 +97,7 @@ export default function AnalyticsDashboard() {
         }
     };
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat("en-PH", {
-            style: "currency",
-            currency: "PHP",
-        }).format(amount);
-    };
-
-    const formatNumber = (num) => {
-        return new Intl.NumberFormat("en-PH").format(num);
-    };
+    const formatNumber = (num) => Number(num || 0).toLocaleString("en-PH");
 
     const getChangeIcon = (value) => {
         return value >= 0 ? ArrowUp : ArrowDown;
@@ -160,10 +152,8 @@ export default function AnalyticsDashboard() {
                                 </p>
                                 <p className="text-2xl font-bold">
                                     {data.sales
-                                        ? formatCurrency(
-                                              data.sales.total_revenue,
-                                          )
-                                        : "₱0"}
+                                        ? formatPHP(data.sales.total_revenue)
+                                        : formatPHP(0)}
                                 </p>
                                 {data.sales?.revenue_change && (
                                     <div
@@ -249,10 +239,8 @@ export default function AnalyticsDashboard() {
                                 </p>
                                 <p className="text-2xl font-bold">
                                     {data.sales
-                                        ? formatCurrency(
-                                              data.sales.average_order_value,
-                                          )
-                                        : "₱0"}
+                                        ? formatPHP(data.sales.average_order_value)
+                                        : formatPHP(0)}
                                 </p>
                                 <div className="flex items-center text-sm text-green-600">
                                     <ArrowUp className="w-3 h-3 mr-1" />
@@ -297,10 +285,8 @@ export default function AnalyticsDashboard() {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="font-medium">
-                                                {formatCurrency(
-                                                    product.total_revenue,
-                                                )}
+                                            <div className="font-mono font-bold text-foreground">
+                                                {formatPHP(product.total_revenue)}
                                             </div>
                                             <div className="text-sm text-muted-foreground">
                                                 Revenue
@@ -438,10 +424,8 @@ export default function AnalyticsDashboard() {
                             </div>
                             <div className="text-2xl font-bold">
                                 {data.profitMargins
-                                    ? formatCurrency(
-                                          data.profitMargins.total_profit,
-                                      )
-                                    : "₱0"}
+                                    ? formatPHP(data.profitMargins.total_profit)
+                                    : formatPHP(0)}
                             </div>
                         </div>
                         <div>
@@ -450,10 +434,8 @@ export default function AnalyticsDashboard() {
                             </div>
                             <div className="text-2xl font-bold text-red-600">
                                 {data.profitMargins
-                                    ? formatCurrency(
-                                          data.profitMargins.operating_expenses,
-                                      )
-                                    : "₱0"}
+                                    ? formatPHP(data.profitMargins.operating_expenses)
+                                    : formatPHP(0)}
                             </div>
                         </div>
                     </div>

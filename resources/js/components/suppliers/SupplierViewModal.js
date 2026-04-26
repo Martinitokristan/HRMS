@@ -3,6 +3,7 @@ import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import { X, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { formatPHP } from '@/lib/utils';
 
 const SUPPLIER_STATUS = {
     active:      { bg: 'bg-[#dcfce7]', text: 'text-[#16a34a]', label: 'Active' },
@@ -210,8 +211,8 @@ export default function SupplierViewModal({ isOpen, onClose, supplierId, onEdit 
                                                                 <td className="px-[10px] py-2 text-[#6b7280] whitespace-nowrap">
                                                                     {new Date(po.created_at).toLocaleDateString()}
                                                                 </td>
-                                                                <td className="px-[10px] py-2 font-semibold text-[#111827] whitespace-nowrap">
-                                                                    ₱{Number(po.total_cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                <td className="px-[10px] py-2 font-mono font-bold text-foreground whitespace-nowrap">
+                                                                    {formatPHP(po.total_cost)}
                                                                 </td>
                                                                 <td className="px-[10px] py-2">
                                                                     <POBadge status={po.status} />
