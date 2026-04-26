@@ -1022,12 +1022,12 @@ class ReportController extends Controller
         // Top performers (5+ ratings, 4.0+ average)
         $topPerformers = $riderRankings->filter(function ($rider) {
             return $rider->total_ratings >= 5 && $rider->average_rating >= 4.0;
-        })->take(10);
+        })->take(20);
 
         // Needs improvement (5+ ratings, below 3.0 average)
         $needsImprovement = $riderRankings->filter(function ($rider) {
             return $rider->total_ratings >= 5 && $rider->average_rating < 3.0;
-        })->take(10);
+        })->take(20);
 
         // Rating trends over time
         $ratingTrends = DB::table('deliveries')

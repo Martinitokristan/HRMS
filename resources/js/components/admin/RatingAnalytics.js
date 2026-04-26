@@ -269,7 +269,7 @@ export default function RatingAnalytics() {
                                 )
                             }
                         ]}
-                        defaultPageSize={10}
+                        defaultPageSize={20}
                         emptyMessage="No rider rankings available"
                     />
                 </TabsContent>
@@ -443,7 +443,7 @@ export default function RatingAnalytics() {
                                 )
                             }
                         ]}
-                        defaultPageSize={10}
+                        defaultPageSize={20}
                         emptyMessage="No customer feedback available"
                     />
                 </TabsContent>
