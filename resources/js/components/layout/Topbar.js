@@ -86,9 +86,33 @@ export default function Topbar({ toggleSidebar, isCollapsed }) {
 
     useEffect(() => {
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 5000);
-        return () => clearInterval(interval);
-    }, []);
+
+        let adminChan = null;
+        let custChan  = null;
+        if (typeof window !== 'undefined' && window.Echo) {
+            const userId = user?.id;
+            const role   = user?.role;
+
+            if (role === 'admin') {
+                adminChan = window.Echo.private('admin');
+                adminChan.listen('.data.mutated', () => fetchNotifications());
+            }
+            if (role === 'customer' && userId) {
+                custChan = window.Echo.private(`customer.${userId}`);
+                custChan.listen('.data.mutated', () => fetchNotifications());
+            }
+        }
+
+        const interval = setInterval(fetchNotifications, 60000);
+
+        return () => {
+            clearInterval(interval);
+            try {
+                if (adminChan && window.Echo) window.Echo.leave('admin');
+                if (custChan  && window.Echo) window.Echo.leave(`customer.${user?.id}`);
+            } catch (_) {}
+        };
+    }, [user?.id, user?.role]);
 
     const handleLogout = async () => {
         await logout();

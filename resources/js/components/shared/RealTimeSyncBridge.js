@@ -55,6 +55,10 @@ let echoInstance = null;
 function buildEcho() {
     window.Pusher = Pusher;
     echoInstance = new Echo(buildEchoConfig());
+    // Wave 9 — expose Echo globally so other components can reuse the same connection
+    if (typeof window !== 'undefined') {
+        window.Echo = echoInstance;
+    }
     return echoInstance;
 }
 
@@ -62,6 +66,10 @@ function destroyEcho() {
     if (echoInstance) {
         try { echoInstance.disconnect(); } catch (_) {}
         echoInstance = null;
+        // Wave 9 — cleanup global Echo reference
+        if (typeof window !== 'undefined' && window.Echo === echoInstance) {
+            window.Echo = null;
+        }
     }
 }
 

@@ -113,9 +113,22 @@ export default function RiderApp() {
 
     useEffect(() => {
         fetchData();
-        const interval = setInterval(fetchData, 30000); // refresh every 30s
-        return () => clearInterval(interval);
-    }, [refresh]);
+
+        let riderChan = null;
+        if (typeof window !== 'undefined' && window.Echo && user?.id) {
+            riderChan = window.Echo.private(`rider.${user.id}`);
+            riderChan.listen('.data.mutated', () => fetchData());
+        }
+
+        const interval = setInterval(fetchData, 120000); // 2-min safety net
+
+        return () => {
+            clearInterval(interval);
+            try {
+                if (riderChan && window.Echo) window.Echo.leave(`rider.${user.id}`);
+            } catch (_) {}
+        };
+    }, [user?.id]);
 
     // Proximity notification: send rider location for active in_progress jobs every 15s
     useEffect(() => {

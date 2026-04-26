@@ -11,6 +11,8 @@ export default function CustomerPaymentToastListener() {
     useEffect(() => {
         if (!user || user.role !== 'customer') return;
 
+        const customerId = user?.id;
+
         const fetchNotifications = async () => {
             try {
                 const r = await api.get('/customer/notifications');
@@ -59,9 +61,22 @@ export default function CustomerPaymentToastListener() {
         };
 
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 5000);
-        return () => clearInterval(interval);
-    }, [user?.id, user?.role]);
+
+        let custChan = null;
+        if (typeof window !== 'undefined' && window.Echo && customerId) {
+            custChan = window.Echo.private(`customer.${customerId}`);
+            custChan.listen('.data.mutated', () => fetchNotifications());
+        }
+
+        const interval = setInterval(fetchNotifications, 60000);
+
+        return () => {
+            clearInterval(interval);
+            try {
+                if (custChan && window.Echo) window.Echo.leave(`customer.${customerId}`);
+            } catch (_) {}
+        };
+    }, [user?.id]);
 
     return <PaymentToastContainer />;
 }

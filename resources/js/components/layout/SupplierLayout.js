@@ -25,7 +25,8 @@ export default function SupplierLayout() {
     const [notiOpen, setNotiOpen] = useState(false);
 
     React.useEffect(() => {
-        
+        const supplierId = user?.id;
+
         // Fetch notifications
         const fetchNotis = () => {
             silentApi.get('/supplier/notifications').then(res => {
@@ -36,9 +37,22 @@ export default function SupplierLayout() {
             }).catch(() => {});
         };
         fetchNotis();
-        const inv = setInterval(fetchNotis, 5000);
-        return () => clearInterval(inv);
-    }, []);
+
+        let supChan = null;
+        if (typeof window !== 'undefined' && window.Echo && supplierId) {
+            supChan = window.Echo.private(`supplier.${supplierId}`);
+            supChan.listen('.data.mutated', () => fetchNotis());
+        }
+
+        const inv = setInterval(fetchNotis, 60000);
+
+        return () => {
+            clearInterval(inv);
+            try {
+                if (supChan && window.Echo) window.Echo.leave(`supplier.${supplierId}`);
+            } catch (_) {}
+        };
+    }, [user?.id]);
 
     const getPageTitle = () => {
         const path = location.pathname;
