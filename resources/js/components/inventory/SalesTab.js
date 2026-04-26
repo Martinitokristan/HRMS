@@ -23,6 +23,13 @@ import ConfirmModal from "../shared/ConfirmModal";
 import { X, AlertTriangle, ShieldAlert } from "lucide-react";
 import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
 
+function variantLabel(v) {
+    if (!v) return '';
+    if (typeof v === 'string') return v;
+    const parts = [v.color, v.size, v.material, v.storage, v.variant_name].filter(Boolean);
+    return parts.length ? parts.join(' / ') : '';
+}
+
 export default function SalesTab() {
     const { showToast } = useToast();
     const { settings } = useAuth();
@@ -277,6 +284,9 @@ export default function SalesTab() {
                             <TableHead className="px-4 text-[11px] font-bold uppercase tracking-wider">
                                 Customer
                             </TableHead>
+                            <TableHead className="px-4 text-[11px] font-bold uppercase tracking-wider">
+                                Items
+                            </TableHead>
                             <TableHead className="px-4 text-[11px] font-bold uppercase tracking-wider text-right">
                                 Total Amount
                             </TableHead>
@@ -295,7 +305,7 @@ export default function SalesTab() {
                         {loading ? (
                             <TableRow>
                                 <TableCell
-                                    colSpan={7}
+                                    colSpan={8}
                                     className="text-center py-10"
                                 >
                                     <div className="spinner mx-auto" />
@@ -304,7 +314,7 @@ export default function SalesTab() {
                         ) : sales.data.length === 0 ? (
                             <TableRow>
                                 <TableCell
-                                    colSpan={7}
+                                    colSpan={8}
                                     className="text-center py-10 text-muted-foreground"
                                 >
                                     No sales orders found
@@ -336,6 +346,28 @@ export default function SalesTab() {
                                         <div className="text-[12px] text-muted-foreground">
                                             {sale.customer?.email}
                                         </div>
+                                    </TableCell>
+                                    <TableCell className="px-4 py-3 max-w-[220px]">
+                                        {Array.isArray(sale.items) && sale.items.length > 0 ? (
+                                            <div className="text-sm">
+                                                <div className="font-medium text-foreground truncate">
+                                                    {sale.items[0].product?.name || 'Unknown product'}
+                                                    {sale.items[0].product_variant && (
+                                                        <span className="text-muted-foreground ml-1">
+                                                            ({variantLabel(sale.items[0].product_variant)})
+                                                        </span>
+                                                    )}
+                                                    <span className="ml-1 text-xs text-muted-foreground">× {sale.items[0].quantity}</span>
+                                                </div>
+                                                {sale.items.length > 1 && (
+                                                    <div className="text-xs text-muted-foreground">
+                                                        +{sale.items.length - 1} more item{sale.items.length - 1 === 1 ? '' : 's'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">—</span>
+                                        )}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-right font-bold text-foreground">
                                         ₱{Number(sale.total_amount).toFixed(2)}

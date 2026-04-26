@@ -131,7 +131,9 @@ class ReportController extends Controller
                 SUM(CASE WHEN status = "in_progress" THEN 1 ELSE 0 END) as in_progress_orders,
                 SUM(CASE WHEN status = "failed" THEN 1 ELSE 0 END) as failed_orders,
                 SUM(CASE WHEN payment_method = "cod" THEN total_amount ELSE 0 END) as cod_revenue,
-                SUM(CASE WHEN payment_method = "cod" THEN 1 ELSE 0 END) as cod_orders
+                SUM(CASE WHEN payment_method = "cod" THEN 1 ELSE 0 END) as cod_orders,
+                SUM(CASE WHEN payment_method = "gcash" THEN total_amount ELSE 0 END) as gcash_revenue,
+                SUM(CASE WHEN payment_method = "gcash" THEN 1 ELSE 0 END) as gcash_orders
             ')->first();
 
         $totalRevenue = $summaryData->total_revenue ?? 0;
@@ -152,6 +154,8 @@ class ReportController extends Controller
                     'returned_orders' => $summaryData->returned_orders ?? 0,
                     'cod_revenue' => $summaryData->cod_revenue ?? 0,
                     'cod_orders' => $summaryData->cod_orders ?? 0,
+                    'gcash_revenue' => $summaryData->gcash_revenue ?? 0,
+                    'gcash_orders' => $summaryData->gcash_orders ?? 0,
                 ]
             ],
             'status' => 'success',

@@ -108,6 +108,8 @@ export default function CustomerOrder() {
     // GCash State
     const [gcashModal, setGcashModal] = useState(false);
     const [gcashAmount, setGcashAmount] = useState(null);
+    const [pendingSaleId, setPendingSaleId] = useState(null);
+    const [cancellingPayment, setCancellingPayment] = useState(false);
     const [gcashBasePayload, setGcashBasePayload] = useState("");
     const [paymentPhoneNumber, setPaymentPhoneNumber] = useState("");
 
@@ -297,11 +299,13 @@ export default function CustomerOrder() {
             });
 
             if (payment === "gcash") {
-                const totalAmt = orderResponse.data.data?.total_amount || orderResponse.data.total_amount;
+                const saleData = orderResponse.data.data || orderResponse.data;
+                const totalAmt = saleData?.total_amount;
+                setPendingSaleId(saleData?.id || null);
                 setGcashAmount(totalAmt);
                 setGcashBasePayload(orderResponse.data.gcash_payload);
                 setGcashModal(true);
-                return; 
+                return;
             }
 
             // Normal COD completion
@@ -771,10 +775,32 @@ export default function CustomerOrder() {
                                         <CheckCircle2 className="h-4 w-4" /> Done, I have Paid!
                                     </button>
                                     <button
-                                        style={{ width: '100%', marginTop: 8, height: 36, background: 'none', border: 'none', fontSize: 13, color: '#6B7280', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                                        onClick={() => { setGcashModal(false); }}
+                                        disabled={cancellingPayment}
+                                        style={{ width: '100%', marginTop: 8, height: 36, background: 'none', border: 'none', fontSize: 13, color: '#6B7280', cursor: cancellingPayment ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: cancellingPayment ? 0.6 : 1 }}
+                                        onClick={async () => {
+                                            if (!pendingSaleId) {
+                                                setGcashModal(false);
+                                                setLoading(false);
+                                                return;
+                                            }
+                                            setCancellingPayment(true);
+                                            try {
+                                                await api.post(`/sales/${pendingSaleId}/cancel-pending-payment`);
+                                                setGcashModal(false);
+                                                setLoading(false);
+                                                setPendingSaleId(null);
+                                                showToast("Payment cancelled. Items returned to stock.", "success");
+                                                markStale(STALE_KEYS.CUSTOMER_ORDERS, STALE_KEYS.CUSTOMER_SHOP, STALE_KEYS.ADMIN_ORDERS, STALE_KEYS.ADMIN_INVENTORY, STALE_KEYS.ADMIN_DASHBOARD);
+                                            } catch (err) {
+                                                const msg = err?.response?.data?.message || "Could not cancel — please try again.";
+                                                alert(msg);
+                                                console.error('cancel pending payment failed:', err);
+                                            } finally {
+                                                setCancellingPayment(false);
+                                            }
+                                        }}
                                     >
-                                        <X className="h-3.5 w-3.5" /> Cancel Payment
+                                        <X className="h-3.5 w-3.5" /> {cancellingPayment ? 'Cancelling…' : 'Cancel Payment'}
                                     </button>
                                 </div>
                             </div>

@@ -342,6 +342,63 @@ class SaleController extends Controller
         ]);
     }
 
+    /**
+     * POST /sales/{id}/cancel-pending-payment
+     *
+     * Cancels a GCash sale that is still in `pending_payment` status (i.e. the
+     * customer tapped Place Order, the GCash modal opened, and they tapped
+     * "Cancel Payment" before sending any SMS proof).
+     *
+     * Restores stock and marks the sale cancelled. Owner-only — no admin path.
+     */
+    public function cancelPendingPayment(Request $request, $id)
+    {
+        $sale = Sale::with(['items', 'delivery'])->findOrFail($id);
+        $user = $request->user();
+
+        if ($sale->customer_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized',
+                'status'  => 'error',
+            ], 403);
+        }
+
+        if ($sale->status !== 'pending_payment') {
+            return response()->json([
+                'message' => 'This order is no longer in pending_payment and cannot be cancelled this way.',
+                'status'  => 'error',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($sale, $user) {
+            $this->restoreStock($sale);
+
+            $sale->update(['status' => 'cancelled']);
+
+            \App\Models\SalesCancellation::create([
+                'sale_id'      => $sale->id,
+                'reason'       => 'changed_mind',
+                'notes'        => 'Cancelled by customer at GCash payment step.',
+                'cancelled_by' => $user->id,
+                'cancelled_at' => now(),
+            ]);
+
+            if ($sale->delivery) {
+                $sale->delivery->update(['status' => 'failed']);
+            }
+        });
+
+        $customerId = $sale->customer_id;
+        broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_inventory', 'admin_dashboard'], 'sale.cancelled'));
+        broadcast(new DataMutated("private-customer.{$customerId}", ['customer_orders', 'customer_shop'], 'sale.cancelled'));
+
+        return response()->json([
+            'data'    => $sale->fresh()->load(['items.product', 'delivery']),
+            'message' => 'Order cancelled successfully. Stock has been restored.',
+            'status'  => 'success',
+        ]);
+    }
+
     public function cancelOrder(Request $request, $id)
     {
         $sale = Sale::with(['items', 'delivery'])->findOrFail($id);

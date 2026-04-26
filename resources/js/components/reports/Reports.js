@@ -471,24 +471,41 @@ export default function Reports() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <Card className="bg-secondary/30 p-4 flex items-center gap-4">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10">
-                                        <Banknote className="h-6 w-6 text-amber-500" />
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-semibold text-foreground">
-                                            Cash on Delivery
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <Card className="bg-secondary/30 p-4 flex items-center gap-4">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10">
+                                            <Banknote className="h-6 w-6 text-amber-500" />
                                         </div>
-                                        <div className="text-sm text-muted-foreground">
-                                            {summary.cod_orders || 0} orders
+                                        <div>
+                                            <div className="text-sm font-semibold text-foreground">
+                                                Cash on Delivery
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">
+                                                {summary.cod_orders || 0} orders
+                                            </div>
+                                            <div className="text-lg font-bold text-primary">
+                                                {formatCurr(summary.cod_revenue || 0)}
+                                            </div>
                                         </div>
-                                        <div className="text-lg font-bold text-primary">
-                                            {formatCurr(
-                                                summary.cod_revenue || 0,
-                                            )}
+                                    </Card>
+
+                                    <Card className="bg-secondary/30 p-4 flex items-center gap-4">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10">
+                                            <CreditCard className="h-6 w-6 text-blue-500" />
                                         </div>
-                                    </div>
-                                </Card>
+                                        <div>
+                                            <div className="text-sm font-semibold text-foreground">
+                                                GCash
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">
+                                                {summary.gcash_orders || 0} orders
+                                            </div>
+                                            <div className="text-lg font-bold text-primary">
+                                                {formatCurr(summary.gcash_revenue || 0)}
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>

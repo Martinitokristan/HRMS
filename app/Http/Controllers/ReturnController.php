@@ -196,8 +196,14 @@ class ReturnController extends Controller
 
     public function show($id)
     {
-        $return = ReturnOrder::with(['sale.customer', 'sale.items.product', 'requestedBy', 'approvedBy'])
-            ->findOrFail($id);
+        $return = ReturnOrder::with([
+            'sale.customer',
+            'sale.items.product',
+            'items.saleItem.product',
+            'items.saleItem.productVariant',
+            'requestedBy',
+            'approvedBy',
+        ])->findOrFail($id);
 
         return response()->json(['data' => $return, 'status' => 'success']);
     }

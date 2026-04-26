@@ -226,6 +226,12 @@ export default function Returns() {
                                         <p className="font-bold">
                                             {r.sale?.order_number}
                                         </p>
+                                        {Array.isArray(r.sale?.items) && r.sale.items.length > 0 && (
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                {r.sale.items[0].product?.name || 'Item'}
+                                                {r.sale.items.length > 1 && ` +${r.sale.items.length - 1} more`}
+                                            </p>
+                                        )}
                                     </div>
                                     <div>
                                         <span className="text-muted-foreground">
@@ -314,30 +320,46 @@ export default function Returns() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
-                                    {(r.items || []).map((item, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="flex justify-between items-center p-3 bg-secondary/30 rounded-lg"
-                                        >
-                                            <div>
-                                                <p className="font-bold text-sm">
-                                                    {item.product_name}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Qty: {item.quantity} x ₱
-                                                    {Number(
-                                                        item.unit_price,
-                                                    ).toFixed(2)}
-                                                </p>
-                                            </div>
-                                            <p className="font-bold text-sm">
-                                                ₱
-                                                {Number(
-                                                    item.refund_amount,
-                                                ).toFixed(2)}
-                                            </p>
-                                        </div>
-                                    ))}
+                                    {(r.items || []).length === 0 ? (
+                                        <p className="text-sm text-muted-foreground text-center py-4">No items recorded for this return.</p>
+                                    ) : (
+                                        (r.items || []).map((item, idx) => {
+                                            const productName = item.sale_item?.product?.name || 'Unknown product';
+                                            const variant     = item.sale_item?.product_variant;
+                                            const variantText = variant ? [variant.color, variant.size, variant.storage, variant.variant_name].filter(Boolean).join(' / ') : '';
+                                            const unitPrice   = Number(item.sale_item?.unit_price || 0);
+                                            const qty         = Number(item.quantity_returned || 0);
+                                            const lineTotal   = unitPrice * qty;
+                                            return (
+                                                <div key={item.id || idx} className="flex justify-between items-start p-3 bg-secondary/30 rounded-lg">
+                                                    <div>
+                                                        <p className="font-bold text-sm">
+                                                            {productName}
+                                                            {variantText && (
+                                                                <span className="text-muted-foreground ml-1 text-xs">({variantText})</span>
+                                                            )}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Qty: {qty} × ₱{unitPrice.toFixed(2)}
+                                                        </p>
+                                                        {item.condition && (
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Condition: {item.condition}
+                                                            </p>
+                                                        )}
+                                                        {item.item_reason && (
+                                                            <p className="text-xs text-muted-foreground italic">
+                                                                "{item.item_reason}"
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <p className="font-bold text-sm whitespace-nowrap">
+                                                        ₱{lineTotal.toFixed(2)}
+                                                    </p>
+                                                </div>
+                                            );
+                                        })
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>

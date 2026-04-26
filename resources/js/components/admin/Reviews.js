@@ -15,10 +15,16 @@ import {
     ThumbsUp,
     ThumbsDown,
     Search,
-    ArrowLeft,
-    ArrowRight,
     Table,
 } from "lucide-react";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
 import { useToast } from "../../context/ToastContext";
 import ConfirmModal from "../shared/ConfirmModal";
 import StatCard from "../shared/StatCard";
@@ -263,35 +269,37 @@ export default function Reviews() {
             {/* Data Table */}
             <Card>
                 {!loading && reviews.length > 0 && (
-                    <div className="p-4 border-b flex items-center justify-end gap-2">
-                        <p className="text-sm text-muted-foreground mr-auto hidden md:block">
-                            Showing page {pagination.current_page} of{" "}
-                            {pagination.last_page || 1} ({pagination.total}{" "}
-                            total reviews)
+                    <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <p className="text-sm text-muted-foreground">
+                            Showing page {pagination.current_page} of {pagination.last_page || 1} ({pagination.total} total reviews)
                         </p>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={pagination.current_page === 1}
-                            onClick={() =>
-                                fetchReviews(pagination.current_page - 1)
-                            }
-                        >
-                            <ArrowLeft className="h-4 w-4 mr-1" /> Prev
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={
-                                pagination.current_page ===
-                                (pagination.last_page || 1)
-                            }
-                            onClick={() =>
-                                fetchReviews(pagination.current_page + 1)
-                            }
-                        >
-                            Next <ArrowRight className="h-4 w-4 ml-1" />
-                        </Button>
+                        <Pagination className="m-0 mx-0">
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (pagination.current_page > 1) fetchReviews(pagination.current_page - 1);
+                                        }}
+                                        aria-disabled={pagination.current_page === 1}
+                                        className={pagination.current_page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                    />
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationLink isActive>{pagination.current_page}</PaginationLink>
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationNext
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (pagination.current_page < (pagination.last_page || 1)) fetchReviews(pagination.current_page + 1);
+                                        }}
+                                        aria-disabled={pagination.current_page === (pagination.last_page || 1)}
+                                        className={pagination.current_page === (pagination.last_page || 1) ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
                     </div>
                 )}
 

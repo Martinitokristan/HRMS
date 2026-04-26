@@ -201,6 +201,7 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
 Route::middleware(['auth.token', 'role:admin,customer'])->group(function () {
     Route::get('/sales/{id}', [SaleController::class , 'show']);
     Route::post('/sales/{id}/cancel', [SaleController::class , 'cancelOrder']);
+    Route::post('/sales/{id}/cancel-pending-payment', [SaleController::class , 'cancelPendingPayment']);
 });
 
 // =========================================================================
