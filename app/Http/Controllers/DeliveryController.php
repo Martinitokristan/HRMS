@@ -61,9 +61,20 @@ class DeliveryController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $delivery = Delivery::with(['sale.customer', 'sale.items.product', 'rider'])->findOrFail($id);
+
+        // Riders can only view deliveries assigned to them. Admins can view any.
+        // Mirrors the ownership pattern already used in updateStatus / uploadProof / declineOrder.
+        $user = $request->user();
+        if ($user && $user->role === 'rider' && (int) $delivery->rider_id !== (int) $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized. You can only view your own deliveries.',
+                'status'  => 'error',
+            ], 403);
+        }
+
         return response()->json(['data' => $delivery, 'status' => 'success']);
     }
 

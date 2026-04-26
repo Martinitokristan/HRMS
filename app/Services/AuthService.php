@@ -26,6 +26,15 @@ class AuthService
                 ]);
             }
 
+            // Defense in depth: pending non-customer accounts must not be able to log in.
+            // Customers auto-activate via email verification. Riders require admin approval.
+            // Admin/manager should NEVER be in `pending` (created internally, already active).
+            if ($user->status === 'pending' && $user->role !== 'customer') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'email' => ['Your account is pending approval. Please wait for an administrator to activate it.'],
+                ]);
+            }
+
             return $user;
         }
 

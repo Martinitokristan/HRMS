@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -19,7 +20,19 @@ class AuthController extends Controller
     {
         $role = $request->get('role', 'customer');
 
+        // Hard allow-list. Public self-registration is ONLY for customer or rider.
+        // Suppliers register via SupplierAuthController. Admin/manager accounts must
+        // be created from inside the system by an existing admin, never from the
+        // public sign-up form.
+        if (!in_array($role, ['customer', 'rider'], true)) {
+            return response()->json([
+                'message' => 'Invalid role. Public registration only accepts customer or rider.',
+                'status'  => 'error',
+            ], 422);
+        }
+
         $rules = [
+            'role' => ['required', 'string', Rule::in(['customer', 'rider'])],
             'name' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
             'email' => 'required|email|unique:users,email',
             'phone' => ['required', 'string', 'regex:/^09\d{9}$/'],
