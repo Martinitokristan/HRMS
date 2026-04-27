@@ -153,11 +153,7 @@ export default function ProductForm({
                                 ),
                             stock: pv.stock || 0,
                             price_override: pv.price_override || "",
-                            barcode:
-                                pv.barcode ||
-                                pv.barcode_suffix ||
-                                product.barcode ||
-                                "No Barcode",
+                            barcode: pv.barcode || (pv.barcode_suffix ? `${product.barcode || ''}${pv.barcode_suffix}` : ''),
                             sale_percentage: pv.sale_percentage || "",
                             imageFile: null,
                             imagePreview: pv.image_path
@@ -302,7 +298,7 @@ export default function ProductForm({
                               row.price_override !== undefined
                                   ? row.price_override
                                   : null,
-                          barcode: row.barcode || null,
+                          barcode: undefined,
                           sale_percentage: row.sale_percentage || 0,
                           existing_image_path: row.existing_image_path || null,
                       };
@@ -899,12 +895,7 @@ export default function ProductForm({
                                                             ).toLocaleString()}
                                                         </td>
                                                         <td className="px-4 py-2 text-xs font-mono text-muted-foreground">
-                                                            {row.barcode ||
-                                                                row._original
-                                                                    ?.barcode ||
-                                                                row._original
-                                                                    ?.barcode_suffix ||
-                                                                "N/A"}
+                                                            {row.barcode || '—'}
                                                         </td>
                                                         <td className="px-4 py-2">
                                                             <div className="relative">

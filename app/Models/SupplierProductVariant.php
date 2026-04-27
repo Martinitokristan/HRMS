@@ -8,7 +8,7 @@ class SupplierProductVariant extends Model
 {
     protected $fillable = [
         'supplier_product_id', 'size', 'color', 'weight',
-        'price_override', 'stock', 'barcode_suffix', 'image_path', 'additional_images',
+        'price_override', 'stock', 'barcode_suffix', 'barcode', 'image_path', 'additional_images',
     ];
 
     protected $casts = [

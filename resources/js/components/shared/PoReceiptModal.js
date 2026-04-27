@@ -109,7 +109,7 @@ export default function PoReceiptModal({ po, onClose, settings }) {
                             <tbody>
                                 {(po.items || []).map((item, idx) => {
                                     const productName = item.product?.name || item.supplier_product?.name || '—';
-                                    const barcode = item.product?.barcode || item.supplier_product?.barcode || null;
+                                    const barcode = item.product_variant?.barcode || item.product?.barcode || item.supplier_product?.barcode || null;
                                     const variantLabel = item.product_variant
                                         ? [item.product_variant.size_value?.label, item.product_variant.color_value?.label, item.product_variant.weight_value?.label].filter(Boolean).join(' / ')
                                         : null;

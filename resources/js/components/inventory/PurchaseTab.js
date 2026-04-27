@@ -430,9 +430,10 @@ export default function PurchaseTab({ mode = "completed" }) {
                                                 i.supplier_product?.name ||
                                                 "Loading Name...";
                                             const barcode =
+                                                i.product_variant?.barcode ||
                                                 i.product?.barcode ||
                                                 i.supplier_product?.barcode ||
-                                                "N/A";
+                                                'N/A';
                                             return (
                                                 <TableRow key={i.id}>
                                                     <TableCell className="px-4 py-3">

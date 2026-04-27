@@ -92,6 +92,7 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
             id: v.id,
             size: v.size || '', color: v.color || '', weight: v.weight || '',
             stock: v.stock || 0, price_override: v.price_override || '',
+            barcode: v.barcode || '',
             existing_image_path: v.image_path || null,
             existing_extra_images: v.additional_images || [],
         }));
@@ -108,7 +109,7 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
         setImagePreview(product.image_path ? `/storage/${product.image_path}` : null);
     };
 
-    const addVariant = () => setVariants(prev => [...prev, { size: '', color: '', weight: '', stock: 0, price_override: '', existing_image_path: null }]);
+    const addVariant = () => setVariants(prev => [...prev, { size: '', color: '', weight: '', stock: 0, price_override: '', barcode: '', existing_image_path: null }]);
     const removeVariant = (idx) => setVariants(prev => prev.filter((_, i) => i !== idx));
     const updateVariant = (idx, field, val) => setVariants(prev => prev.map((v, i) => i === idx ? { ...v, [field]: val } : v));
 
@@ -419,6 +420,10 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
                                                 <div>
                                                     <Label className="text-[10px] mb-1">Price Override (₱)</Label>
                                                     <Input className="h-8 text-sm" type="number" step="0.01" placeholder="Optional" value={v.price_override} onChange={e => updateVariant(idx, 'price_override', e.target.value)} />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-[10px] mb-1">Barcode</Label>
+                                                    <Input className="h-8 text-sm" type="text" placeholder="e.g. 1231" value={v.barcode} onChange={e => updateVariant(idx, 'barcode', e.target.value)} />
                                                 </div>
                                                 <div className="flex items-end">
                                                     <Button variant="destructive" size="sm" className="h-8 w-full" type="button" onClick={() => removeVariant(idx)}>

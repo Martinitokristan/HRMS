@@ -427,9 +427,6 @@ class InventoryController extends Controller
                                 $inv->product_variant_id = $existingVariant->id;
                             } else {
                                 // Create new variant only if it doesn't exist
-                                // Generate unique barcode for variant (different from parent product)
-                                $variantBarcode = $this->generateUniqueBarcode('VAR-'); // Use VAR- prefix for variants
-
                                 $newVariant = \App\Models\ProductVariant::create([
                                     'product_id' => $productId,
                                     'size_value_id' => $sizeValueId,
@@ -437,7 +434,7 @@ class InventoryController extends Controller
                                     'weight_value_id' => $weightValueId,
                                     'stock' => 0,
                                     'price_override' => $priceOverride,
-                                    'barcode' => $variantBarcode, // Use generated unique barcode
+                                    'barcode' => $spVariant->barcode ?: null,
                                     'sale_percentage' => 0,
                                     'image_path' => $spVariant->image_path,
                                     'additional_images' => $spVariant->additional_images,
@@ -498,8 +495,6 @@ class InventoryController extends Controller
                                 $inv->product_variant_id = $existingVariant->id;
                             } else {
                                 // Create new variant only if it doesn't exist
-                                $variantBarcode = $this->generateUniqueBarcode('VAR-');
-
                                 $newVariant = \App\Models\ProductVariant::create([
                                     'product_id' => $productId,
                                     'size_value_id' => $sizeValueId,
@@ -507,7 +502,7 @@ class InventoryController extends Controller
                                     'weight_value_id' => $weightValueId,
                                     'stock' => 0,
                                     'price_override' => $priceOverride,
-                                    'barcode' => $variantBarcode,
+                                    'barcode' => $spVariant->barcode ?: null,
                                     'sale_percentage' => 0,
                                     'image_path' => $spVariant->image_path,
                                     'additional_images' => $spVariant->additional_images,
@@ -722,7 +717,7 @@ class InventoryController extends Controller
                                     'weight_value_id' => $weightValueId,
                                     'stock' => 0,
                                     'price_override' => $priceOverride,
-                                    'barcode_suffix' => $spVariant->barcode_suffix,
+                                    'barcode' => $spVariant->barcode ?: null,
                                     'image_path' => $spVariant->image_path,
                                 ]);
                                 $inv->product_variant_id = $newVariant->id;
@@ -808,6 +803,21 @@ class InventoryController extends Controller
         $importedByProduct = $options['imported_by_product'] ?? null;
         $importedKey = $options['imported_key'] ?? null;
 
+        // Determine barcode: variant's own barcode first, then fallback to parent
+        $rowBarcode = 'N/A';
+        if ($variant instanceof \App\Models\ProductVariant && !empty($variant->barcode)) {
+            $rowBarcode = $variant->barcode;
+        } elseif ($variant instanceof \App\Models\SupplierProductVariant && !empty($variant->barcode)) {
+            $rowBarcode = $variant->barcode;
+        } elseif ($variant instanceof \App\Models\SupplierProductVariant && !empty($variant->barcode_suffix)) {
+            // legacy: combine parent + suffix
+            $rowBarcode = ($sp ? $sp->barcode : '') . $variant->barcode_suffix;
+        } elseif ($product && !empty($product->barcode)) {
+            $rowBarcode = $product->barcode;
+        } elseif ($sp && !empty($sp->barcode)) {
+            $rowBarcode = $sp->barcode;
+        }
+
         return [
             'id' => $id,
             'raw_id' => $inv ? $inv->id : null,
@@ -815,7 +825,7 @@ class InventoryController extends Controller
             'variant_id' => ($variant instanceof \App\Models\ProductVariant) ? $variant->id : null,
             'supplier_product_id' => $sp ? $sp->id : ($inv ? $inv->supplier_product_id : null),
             'supplier_product_variant_id' => $variant && !($variant instanceof \App\Models\ProductVariant) ? $variant->id : null,
-            'barcode' => $product ? $product->barcode : ($sp ? $sp->barcode : 'N/A'),
+            'barcode' => $rowBarcode,
             'name' => $name,
             'supplier' => ($product && $product->supplier) ? $product->supplier->name : (($sp && $sp->supplier) ? $sp->supplier->name : '-'),
             'category' => ($product && $product->category) ? $product->category->name : (($sp && $sp->category) ? $sp->category->name : '-'),

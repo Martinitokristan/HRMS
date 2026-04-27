@@ -151,6 +151,14 @@ class SupplierProductController extends Controller
                             }
                         }
 
+                        // Validate barcode uniqueness at application layer
+                        if (isset($v['barcode']) && $v['barcode'] !== '') {
+                            $existingBarcode = \App\Models\SupplierProductVariant::where('barcode', $v['barcode'])->first();
+                            if ($existingBarcode) {
+                                throw ValidationException::withMessages(['variants' => ['Variant barcode already in use: ' . $v['barcode']]]);
+                            }
+                        }
+
                         $product->variants()->create([
                             'size' => $v['size'] ?? null,
                             'color' => $v['color'] ?? null,
@@ -158,6 +166,7 @@ class SupplierProductController extends Controller
                             'stock' => $v['stock'] ?? 0,
                             'price_override' => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
                             'barcode_suffix' => $v['barcode_suffix'] ?? null,
+                            'barcode' => isset($v['barcode']) && $v['barcode'] !== '' ? $v['barcode'] : null,
                             'image_path' => $variantImage,
                             'additional_images' => $variantExtras,
                         ]);
@@ -287,6 +296,16 @@ class SupplierProductController extends Controller
                         }
                     }
 
+                    // Validate barcode uniqueness at application layer (allow same row to keep its own value)
+                    if (isset($v['barcode']) && $v['barcode'] !== '') {
+                        $existingBarcode = \App\Models\SupplierProductVariant::where('barcode', $v['barcode'])
+                            ->where('id', '!=', $variantId)
+                            ->first();
+                        if ($existingBarcode) {
+                            throw ValidationException::withMessages(['variants' => ['Variant barcode already in use: ' . $v['barcode']]]);
+                        }
+                    }
+
                     $payload = [
                         'supplier_product_id' => $product->id,
                         'size' => $v['size'] ?? null,
@@ -295,6 +314,7 @@ class SupplierProductController extends Controller
                         'stock' => $v['stock'] ?? 0,
                         'price_override' => isset($v['price_override']) && $v['price_override'] !== '' ? $v['price_override'] : null,
                         'barcode_suffix' => $v['barcode_suffix'] ?? null,
+                        'barcode' => isset($v['barcode']) && $v['barcode'] !== '' ? $v['barcode'] : null,
                         'image_path' => $variantImage,
                         'additional_images' => $variantExtras,
                     ];

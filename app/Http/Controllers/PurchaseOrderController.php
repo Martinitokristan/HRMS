@@ -435,7 +435,7 @@ class PurchaseOrderController extends Controller
                                     [
                                         'stock' => 0,
                                         'price_override' => $supplierVariant->price_override,
-                                        'barcode' => $generateUniqueBarcode('VAR-'),
+                                        'barcode' => $supplierVariant->barcode ?: null,
                                         'sale_percentage' => 0,
                                         'image_path' => $supplierVariant->image_path,
                                         'additional_images' => $supplierVariant->additional_images,

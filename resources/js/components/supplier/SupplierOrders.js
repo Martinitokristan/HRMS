@@ -709,13 +709,10 @@ export default function SupplierOrders({ mode = "completed" }) {
                                                                   </div>
                                                                   <div className="text-xs text-muted-foreground">
                                                                       Barcode:{" "}
-                                                                      {item
-                                                                          ?.product
-                                                                          ?.barcode ||
-                                                                          item
-                                                                              ?.supplier_product
-                                                                              ?.barcode ||
-                                                                          "N/A"}
+                                                                      {item.product_variant?.barcode
+                                                                          || item.product?.barcode
+                                                                          || item.supplier_product?.barcode
+                                                                          || 'N/A'}
                                                                   </div>
                                                                   {item.product_variant ? (
                                                                       <div className="text-[11px] text-primary font-semibold mt-0.5">
