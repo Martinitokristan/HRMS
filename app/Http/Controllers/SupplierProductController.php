@@ -159,7 +159,7 @@ class SupplierProductController extends Controller
                             }
                         }
 
-                        $product->variants()->create([
+                        $savedVariant = $product->variants()->create([
                             'size' => $v['size'] ?? null,
                             'color' => $v['color'] ?? null,
                             'weight' => $v['weight'] ?? null,
@@ -170,6 +170,23 @@ class SupplierProductController extends Controller
                             'image_path' => $variantImage,
                             'additional_images' => $variantExtras,
                         ]);
+
+                        // Propagate the supplier-set barcode to any linked admin product_variants rows.
+                        // Linkage is via the inventory table: inventory.supplier_product_variant_id <-> inventory.product_variant_id.
+                        if (!empty($savedVariant) && !empty($savedVariant->barcode)) {
+                            $linkedProductVariantIds = \DB::table('inventory')
+                                ->where('supplier_product_variant_id', $savedVariant->id)
+                                ->whereNotNull('product_variant_id')
+                                ->pluck('product_variant_id')
+                                ->unique()
+                                ->all();
+
+                            if (!empty($linkedProductVariantIds)) {
+                                \DB::table('product_variants')
+                                    ->whereIn('id', $linkedProductVariantIds)
+                                    ->update(['barcode' => $savedVariant->barcode]);
+                            }
+                        }
                     }
                 }
             }
@@ -326,6 +343,23 @@ class SupplierProductController extends Controller
                         $existingVariant->update($payload);
                         $incomingVariantIds[] = $existingVariant->id;
 
+                        // Propagate the supplier-set barcode to any linked admin product_variants rows.
+                        // Linkage is via the inventory table: inventory.supplier_product_variant_id <-> inventory.product_variant_id.
+                        if (!empty($existingVariant) && !empty($existingVariant->barcode)) {
+                            $linkedProductVariantIds = \DB::table('inventory')
+                                ->where('supplier_product_variant_id', $existingVariant->id)
+                                ->whereNotNull('product_variant_id')
+                                ->pluck('product_variant_id')
+                                ->unique()
+                                ->all();
+
+                            if (!empty($linkedProductVariantIds)) {
+                                \DB::table('product_variants')
+                                    ->whereIn('id', $linkedProductVariantIds)
+                                    ->update(['barcode' => $existingVariant->barcode]);
+                            }
+                        }
+
                         // Delete replaced image only.
                         if ($newImagePath && $oldImage && $oldImage !== $newImagePath) {
                             $this->deleteFiles([$oldImage]);
@@ -337,8 +371,25 @@ class SupplierProductController extends Controller
                             $this->deleteFiles($removedExtras);
                         }
                     } else {
-                        $created = $product->variants()->create($payload);
-                        $incomingVariantIds[] = $created->id;
+                        $savedVariant = $product->variants()->create($payload);
+                        $incomingVariantIds[] = $savedVariant->id;
+
+                        // Propagate the supplier-set barcode to any linked admin product_variants rows.
+                        // Linkage is via the inventory table: inventory.supplier_product_variant_id <-> inventory.product_variant_id.
+                        if (!empty($savedVariant) && !empty($savedVariant->barcode)) {
+                            $linkedProductVariantIds = \DB::table('inventory')
+                                ->where('supplier_product_variant_id', $savedVariant->id)
+                                ->whereNotNull('product_variant_id')
+                                ->pluck('product_variant_id')
+                                ->unique()
+                                ->all();
+
+                            if (!empty($linkedProductVariantIds)) {
+                                \DB::table('product_variants')
+                                    ->whereIn('id', $linkedProductVariantIds)
+                                    ->update(['barcode' => $savedVariant->barcode]);
+                            }
+                        }
                     }
                 }
 
