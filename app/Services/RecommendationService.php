@@ -19,6 +19,42 @@ class RecommendationService
     const COLD_START_THRESHOLD = 5;
 
     /**
+     * Attach the same aggregates that ProductController::index attaches so
+     * product cards rendered from recommendations show real sold / rating /
+     * review counts instead of zeros. Every Product query in this service
+     * MUST go through this method.
+     */
+    protected function withProductAggregates($query)
+    {
+        return $query
+            ->with(['category', 'inventory', 'brand', 'productVariants'])
+            ->withCount('approvedReviews as total_reviews')
+            ->withAvg('approvedReviews as average_rating', 'rating')
+            ->addSelect([
+                'sold_count' => \Illuminate\Support\Facades\DB::table('sale_items')
+                    ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+                    ->whereColumn('sale_items.product_id', 'products.id')
+                    ->whereNotNull('sales.was_confirmed_at')
+                    ->selectRaw('COALESCE(SUM(sale_items.quantity), 0)'),
+            ]);
+    }
+
+    /**
+     * Normalise aggregate columns on a collection of products so the JSON
+     * payload has the same shape as ProductController::index (floats / ints,
+     * not nulls or DB strings).
+     */
+    protected function castProductAggregates(\Illuminate\Support\Collection $products): \Illuminate\Support\Collection
+    {
+        return $products->map(function ($p) {
+            $p->average_rating = $p->average_rating !== null ? (float) $p->average_rating : null;
+            $p->sold_count     = (int) ($p->sold_count ?? 0);
+            $p->total_reviews  = (int) ($p->total_reviews ?? 0);
+            return $p;
+        });
+    }
+
+    /**
      * Get personalised recommendations for a user.
      *
      * @param int $userId
@@ -72,25 +108,26 @@ class RecommendationService
             ->pluck('product_id');
 
         if ($trending->isNotEmpty()) {
-            return Product::whereIn('id', $trending)
-                ->where('is_active', true)
-                ->with(['category', 'inventory', 'brand', 'productVariants'])
+            $query = Product::whereIn('id', $trending)->where('is_active', true);
+            $results = $this->withProductAggregates($query)
                 ->get()
                 ->sortBy(function ($p) use ($trending) {
                     return $trending->search($p->id);
                 })
                 ->values();
+            return $this->castProductAggregates($results);
         }
 
         // Day-one fallback: highest sell_price
-        return Product::where('is_active', true)
+        $query = Product::where('is_active', true)
             ->when(count($excludedIds) > 0, function ($q) use ($excludedIds) {
                 $q->whereNotIn('id', $excludedIds);
-            })
-            ->with(['category', 'inventory', 'brand', 'productVariants'])
+            });
+        $results = $this->withProductAggregates($query)
             ->orderByDesc('sell_price')
             ->limit($limit)
             ->get();
+        return $this->castProductAggregates($results);
     }
 
     /**
@@ -145,12 +182,11 @@ class RecommendationService
 
         // 5. Build candidate pool: all active products not excluded and not recently interacted
         $allExcluded = array_unique(array_merge($excludedIds, $recentProductIds));
-        $candidates = Product::where('is_active', true)
+        $candidatesQuery = Product::where('is_active', true)
             ->when(count($allExcluded) > 0, function ($q) use ($allExcluded) {
                 $q->whereNotIn('id', $allExcluded);
-            })
-            ->with(['category', 'inventory', 'brand', 'productVariants'])
-            ->get();
+            });
+        $candidates = $this->withProductAggregates($candidatesQuery)->get();
 
         // 6. Score each candidate
         $scored = [];
@@ -210,7 +246,7 @@ class RecommendationService
             $results = $results->merge($filler)->take($limit);
         }
 
-        return $results;
+        return $this->castProductAggregates(collect($results->values()));
     }
 
     /**
