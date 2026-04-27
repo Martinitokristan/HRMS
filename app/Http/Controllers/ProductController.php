@@ -210,6 +210,15 @@ class ProductController extends Controller
         }
 
         if ($request->has('variants')) {
+            $existingBarcodes = $product->productVariants()->get()
+                ->mapWithKeys(function ($pv) {
+                    $key = ($pv->size_value_id ?? '') . '|'
+                         . ($pv->color_value_id ?? '') . '|'
+                         . ($pv->weight_value_id ?? '');
+                    return [$key => $pv->barcode];
+                })
+                ->toArray();
+
             $product->productVariants()->delete();
             $variants = json_decode($request->variants, true);
             if (is_array($variants)) {
@@ -224,14 +233,23 @@ class ProductController extends Controller
                         // Keep the existing image if no new one is uploaded
                         $imagePath = $v['existing_image_path'];
                     }
+
+                    $key = ($v['size_value_id'] ?? '') . '|'
+                         . ($v['color_value_id'] ?? '') . '|'
+                         . ($v['weight_value_id'] ?? '');
+                    $incomingBarcode = array_key_exists('barcode', $v) && is_string($v['barcode']) && $v['barcode'] !== ''
+                        ? $v['barcode']
+                        : null;
+                    $resolvedBarcode = $incomingBarcode ?? ($existingBarcodes[$key] ?? null);
+
                     $product->productVariants()->create([
                         'size_value_id'   => $v['size_value_id'] ?? null,
                         'color_value_id'  => $v['color_value_id'] ?? null,
                         'weight_value_id' => $v['weight_value_id'] ?? null,
                         'stock'           => $v['stock'] ?? 0,
                         'price_override'  => $priceOverride,
-                        'barcode'         => $v['barcode'] !== '' ? ($v['barcode'] ?? null) : null, // Changed from barcode_suffix
-                        'sale_percentage' => $v['sale_percentage'] ?? 0, // Added sale percentage
+                        'barcode'         => $resolvedBarcode,
+                        'sale_percentage' => $v['sale_percentage'] ?? 0,
                         'image_path'      => $imagePath,
                     ]);
                 }
