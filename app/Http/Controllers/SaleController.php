@@ -269,7 +269,7 @@ class SaleController extends Controller
             }
         });
 
-        if ($newStatus === 'confirmed') {
+        if ($newStatus === 'confirmed' || $newStatus === 'cancelled') {
             try {
                 Cache::tags(['products'])->flush();
             } catch (\BadMethodCallException $e) {
@@ -330,6 +330,12 @@ class SaleController extends Controller
             $sale->update(['status' => 'returned']);
             $this->restoreStock($sale);
         });
+
+        try {
+            Cache::tags(['products'])->flush();
+        } catch (\BadMethodCallException $e) {
+            Cache::flush();
+        }
 
         $customerId = $sale->customer_id;
         broadcast(new DataMutated('private-admin', ['admin_orders', 'admin_inventory', 'admin_dashboard'], 'sale.returned'));
