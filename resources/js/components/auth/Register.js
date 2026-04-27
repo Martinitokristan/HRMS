@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import api from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus, MapPin, Shield, Navigation, Eye, EyeOff, ArrowLeft } from 'lucide-react';
@@ -38,7 +39,17 @@ function MapController({ center, zoom, onMapClick }) {
     return null;
 }
 
+// Keeps the field strictly in the "09XXXXXXXXX" shape. Accepts pastes like
+// "+63 917 123 4567" or "639171234567" and converts them to "09171234567".
+const normalizePhone = (raw) => {
+    let digits = String(raw || '').replace(/\D/g, '');
+    if (digits.startsWith('63')) digits = digits.slice(2);
+    if (digits.length > 0 && !digits.startsWith('0')) digits = '0' + digits;
+    return digits.substring(0, 11);
+};
+
 export default function Register() {
+    const { showToast } = useToast();
     const { register } = useAuth();
     const navigate = useNavigate();
     const { errors, validateName, validatePhone, validatePassword, setError, clearError, clearAllErrors } = useFormValidation();
@@ -155,8 +166,7 @@ export default function Register() {
 
         let newValue = value;
         if (name === 'phone') {
-            // Only allow 11 digits starting with 09
-            newValue = value.replace(/\D/g, '').substring(0, 11);
+            newValue = normalizePhone(value);
         }
 
         setFormData({ ...formData, [name]: newValue });
@@ -240,11 +250,17 @@ export default function Register() {
             await register(dataToSubmit);
             setSuccessMsg('Account created successfully! Please check your email to verify your account.');
         } catch (err) {
-            setError('form', err.response?.data?.message || 'Registration failed.');
+            const serverErrors = err.response?.data?.errors || {};
+            const firstKey = Object.keys(serverErrors)[0];
+            const firstMsg = firstKey ? serverErrors[firstKey][0] : null;
+            const summary = firstMsg
+                || err.response?.data?.message
+                || 'Registration failed.';
+            setError('form', summary);
+            showToast(summary, 'error');
             if (err.response?.data?.errors) {
-                // Set server validation errors
-                Object.keys(err.response.data.errors).forEach(key => {
-                    setError(key, err.response.data.errors[key][0]);
+                Object.keys(serverErrors).forEach(key => {
+                    setError(key, serverErrors[key][0]);
                 });
             }
         } finally {
@@ -359,8 +375,22 @@ export default function Register() {
                                     <div className="space-y-2">
                                         <Label htmlFor="phone" className="text-base font-medium">Phone Number</Label>
                                         <div className="relative">
-                                            <Input id="phone" name="phone" type="tel" value={formData.phone} required onChange={handleChange} placeholder="09XXXXXXXXX" className={`h-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
+                                            <Input
+                                                id="phone"
+                                                name="phone"
+                                                type="tel"
+                                                value={formData.phone}
+                                                required
+                                                onChange={handleChange}
+                                                placeholder="09XXXXXXXXX"
+                                                maxLength={11}
+                                                inputMode="numeric"
+                                                pattern="09[0-9]{9}"
+                                                autoComplete="tel"
+                                                className={`h-12 text-base ${errors.phone ? 'border-red-500' : ''}`}
+                                            />
                                         </div>
+                                        <p className="text-xs text-muted-foreground mt-1">Must be 11 digits starting with 09 (e.g. 09171234567).</p>
                                         {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
                                     </div>
                                 </div>

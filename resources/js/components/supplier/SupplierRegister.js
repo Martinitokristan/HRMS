@@ -13,6 +13,15 @@ import { CheckCircle2, User, Building2, AlertCircle, CheckCircle, Mail, RefreshC
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { PhAddressFields } from '../shared/PhAddressFields';
 
+// Keeps the field strictly in the "09XXXXXXXXX" shape. Accepts pastes like
+// "+63 917 123 4567" or "639171234567" and converts them to "09171234567".
+const normalizePhone = (raw) => {
+    let digits = String(raw || '').replace(/\D/g, '');
+    if (digits.startsWith('63')) digits = digits.slice(2);
+    if (digits.length > 0 && !digits.startsWith('0')) digits = '0' + digits;
+    return digits.substring(0, 11);
+};
+
 export default function SupplierRegister() {
     const [formData, setFormData] = useState({
         name: '',
@@ -41,7 +50,7 @@ export default function SupplierRegister() {
         const { name, value } = e.target;
         let newValue = value;
         if (name === 'phone') {
-            newValue = value.replace(/\D/g, '').substring(0, 11);
+            newValue = normalizePhone(value);
         }
         setFormData({ ...formData, [name]: newValue });
         
@@ -275,8 +284,21 @@ export default function SupplierRegister() {
                                     <div className="space-y-1.5">
                                         <Label>Phone Number *</Label>
                                         <div className="relative">
-                                            <Input name="phone" type="tel" value={formData.phone} onChange={handleChange} required placeholder="09XXXXXXXXX" className={`${errors.phone ? 'border-red-500' : ''}`} />
+                                            <Input
+                                                name="phone"
+                                                type="tel"
+                                                value={formData.phone}
+                                                onChange={handleChange}
+                                                required
+                                                placeholder="09XXXXXXXXX"
+                                                maxLength={11}
+                                                inputMode="numeric"
+                                                pattern="09[0-9]{9}"
+                                                autoComplete="tel"
+                                                className={`${errors.phone ? 'border-red-500' : ''}`}
+                                            />
                                         </div>
+                                        <p className="text-xs text-muted-foreground">Must be 11 digits starting with 09 (e.g. 09171234567).</p>
                                         {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
                                     </div>
                                 </div>

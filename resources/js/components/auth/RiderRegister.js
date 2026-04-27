@@ -13,6 +13,15 @@ import { Mail, RefreshCw, Loader2, CheckCircle, AlertCircle, Upload, Bike, Eye, 
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { PhAddressFields } from '../shared/PhAddressFields';
 
+// Keeps the field strictly in the "09XXXXXXXXX" shape. Accepts pastes like
+// "+63 917 123 4567" or "639171234567" and converts them to "09171234567".
+const normalizePhone = (raw) => {
+    let digits = String(raw || '').replace(/\D/g, '');
+    if (digits.startsWith('63')) digits = digits.slice(2);
+    if (digits.length > 0 && !digits.startsWith('0')) digits = '0' + digits;
+    return digits.substring(0, 11);
+};
+
 export default function RiderRegister() {
     const [form, setForm] = useState({
         name: '',
@@ -47,7 +56,7 @@ export default function RiderRegister() {
     const handleChange = (field, value) => {
         let newValue = value;
         if (field === 'phone') {
-            newValue = value.replace(/\D/g, '').substring(0, 10);
+            newValue = normalizePhone(value);
         }
         setForm({ ...form, [field]: newValue });
         
@@ -118,11 +127,7 @@ export default function RiderRegister() {
 
         const formData = new FormData();
         Object.keys(form).forEach(key => {
-            if (key === 'phone') {
-                formData.append(key, `63${form[key]}`);
-            } else {
-                formData.append(key, form[key]);
-            }
+            formData.append(key, form[key]);
         });
         formData.append('role', 'rider');
         if (idFile) formData.append('valid_id_file', idFile);
@@ -276,8 +281,20 @@ export default function RiderRegister() {
                                     <div className="space-y-1.5">
                                         <Label className="text-base font-medium">Phone Number *</Label>
                                         <div className="relative">
-                                            <Input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} required placeholder="09XXXXXXXXX" className={`h-12 text-base ${errors.phone ? 'border-red-500' : ''}`} />
+                                            <Input
+                                                type="tel"
+                                                value={form.phone}
+                                                onChange={(e) => handleChange('phone', e.target.value)}
+                                                required
+                                                placeholder="09XXXXXXXXX"
+                                                maxLength={11}
+                                                inputMode="numeric"
+                                                pattern="09[0-9]{9}"
+                                                autoComplete="tel"
+                                                className={`h-12 text-base ${errors.phone ? 'border-red-500' : ''}`}
+                                            />
                                         </div>
+                                        <p className="text-xs text-muted-foreground">Must be 11 digits starting with 09 (e.g. 09171234567).</p>
                                         {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
                                     </div>
                                 </div>
