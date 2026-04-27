@@ -69,11 +69,7 @@ class BrandController extends Controller
             $brand->categories()->sync($data['category_ids']);
         }
 
-        try {
-            Cache::tags(['products'])->flush();
-        } catch (\BadMethodCallException $e) {
-            Cache::flush();
-        }
+        \App\Support\ProductCache::bust();
 
         return response()->json(['data' => $brand->load('categories'), 'status' => 'success'], 201);
     }
@@ -103,11 +99,7 @@ class BrandController extends Controller
             $brand->categories()->sync($data['category_ids'] ?? []);
         }
 
-        try {
-            Cache::tags(['products'])->flush();
-        } catch (\BadMethodCallException $e) {
-            Cache::flush();
-        }
+        \App\Support\ProductCache::bust();
 
         return response()->json(['data' => $brand->load('categories'), 'status' => 'success']);
     }
@@ -124,11 +116,7 @@ class BrandController extends Controller
 
         $brand->delete();
 
-        try {
-            Cache::tags(['products'])->flush();
-        } catch (\BadMethodCallException $e) {
-            Cache::flush();
-        }
+        \App\Support\ProductCache::bust();
 
         return response()->json(['message' => 'Brand deleted.', 'status' => 'success']);
     }

@@ -142,6 +142,8 @@ class DeliveryController extends Controller
         $delivery->sale->refresh();
         $delivery->sale->markConfirmedOnce();
 
+        \App\Support\ProductCache::bust();
+
         // Update rider availability
         RiderProfile::where('user_id', $rider->id)->update(['availability' => 'on_delivery']);
 
@@ -248,11 +250,7 @@ class DeliveryController extends Controller
             if ($delivery->sale) {
                 $delivery->sale->update(['status' => 'delivered']);
             }
-            try {
-                Cache::tags(['products'])->flush();
-            } catch (\BadMethodCallException $e) {
-                Cache::forget('products:all');
-            }
+            \App\Support\ProductCache::bust();
             // Free up the rider
             if ($delivery->rider_id) {
                 RiderProfile::where('user_id', $delivery->rider_id)

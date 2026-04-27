@@ -113,11 +113,7 @@ class ProductReviewController extends Controller
 
         \Log::info('ProductReview Store - Created review:', $review->toArray());
 
-        try {
-            Cache::tags(['products'])->flush();
-        } catch (\BadMethodCallException $e) {
-            Cache::flush();
-        }
+        \App\Support\ProductCache::bust();
 
         broadcast(new DataMutated('private-admin', ['admin_reviews', 'admin_dashboard'], 'review.created'));
         broadcast(new DataMutated('shop', ['customer_shop'], 'review.created'));
@@ -150,11 +146,7 @@ class ProductReviewController extends Controller
         $review = ProductReview::findOrFail($id);
         $review->delete();
 
-        try {
-            Cache::tags(['products'])->flush();
-        } catch (\BadMethodCallException $e) {
-            Cache::flush();
-        }
+        \App\Support\ProductCache::bust();
 
         broadcast(new DataMutated('private-admin', ['admin_reviews'], 'review.deleted'));
         broadcast(new DataMutated('shop', ['customer_shop'], 'review.deleted'));

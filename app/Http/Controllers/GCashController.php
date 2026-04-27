@@ -156,11 +156,7 @@ class GCashController extends Controller
             ])->save();
             $matchingSale->markConfirmedOnce();
 
-            try {
-                Cache::tags(['products'])->flush();
-            } catch (\BadMethodCallException $e) {
-                Cache::flush();
-            }
+            \App\Support\ProductCache::bust();
 
             // Create GCash Transaction Log
             GCashTransaction::create([
