@@ -64,9 +64,12 @@ class InventoryController extends Controller
         $products = $pQuery->paginate($perPage);
         $orphans = $wQuery->get();
 
-        // Pre-load sold/imported quantities
+        // Pre-load sold/imported quantities (sold = sale_items from sales that were ever confirmed)
         $productIds = $products->pluck('id')->toArray();
-        $soldByProduct = \App\Models\SaleItem::whereIn('product_id', $productIds)
+        $soldByProduct = \App\Models\SaleItem::whereIn('sale_items.product_id', $productIds)
+            ->whereHas('sale', function ($q) {
+                $q->whereNotNull('was_confirmed_at');
+            })
             ->selectRaw('product_id, product_variant_id, SUM(quantity) as total_sold')
             ->groupBy('product_id', 'product_variant_id')
             ->get()

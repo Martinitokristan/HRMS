@@ -15,6 +15,7 @@ class Sale extends Model
     ];
 
     protected $casts = [
+        'was_confirmed_at'         => 'datetime',
         'payment_confirmed_at'      => 'datetime',
         'payment_expiry_sms_sent_at'=> 'datetime',
         'refunded_at'               => 'datetime',
@@ -60,5 +61,18 @@ class Sale extends Model
     public function isCancelled()
     {
         return $this->cancellation()->exists();
+    }
+
+    /**
+     * Mark this sale as confirmed (sold) for the first time.
+     * Idempotent — safe to call multiple times.
+     */
+    public function markConfirmedOnce(): void
+    {
+        if ($this->was_confirmed_at) {
+            return;
+        }
+        $this->was_confirmed_at = now();
+        $this->save();
     }
 }

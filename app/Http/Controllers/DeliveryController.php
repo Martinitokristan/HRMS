@@ -139,6 +139,8 @@ class DeliveryController extends Controller
 
         // Update sale status to confirmed
         $delivery->sale->update(['status' => 'confirmed']);
+        $delivery->sale->refresh();
+        $delivery->sale->markConfirmedOnce();
 
         // Update rider availability
         RiderProfile::where('user_id', $rider->id)->update(['availability' => 'on_delivery']);

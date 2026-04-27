@@ -131,10 +131,11 @@ class ProductReviewController extends Controller
 
     public function soldCount($productId)
     {
-        // Calculate total sold quantity for this product
+        // Calculate total sold quantity for this product (monotonic — counts every sale
+        // that was ever confirmed, even if later cancelled or returned).
         $totalSold = \App\Models\SaleItem::where('product_id', $productId)
             ->whereHas('sale', function ($query) {
-                $query->whereIn('status', ['confirmed', 'out_for_delivery', 'delivered', 'returned']);
+                $query->whereNotNull('was_confirmed_at');
             })
             ->sum('quantity');
 

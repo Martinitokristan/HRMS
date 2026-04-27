@@ -281,6 +281,38 @@ class SettingsController extends Controller
         return response()->json(['data' => $value, 'status' => 'success']);
     }
 
+    public function updateVariantValue(Request $request, $id)
+    {
+        $value = VariantValue::findOrFail($id);
+
+        $data = $request->validate([
+            'label'       => 'sometimes|required|string|max:100',
+            'hex_code'    => 'nullable|string|max:20',
+            'description' => 'nullable|string|max:255',
+            'category'    => 'nullable',
+        ]);
+
+        // Prevent renaming to a label that already exists for the same attribute type.
+        if (isset($data['label'])) {
+            $exists = VariantValue::where('variant_id', $value->variant_id)
+                ->where('id', '!=', $value->id)
+                ->whereRaw('LOWER(label) = ?', [strtolower($data['label'])])
+                ->exists();
+            if ($exists) {
+                return response()->json([
+                    'message' => 'Another value with this label already exists for this attribute.',
+                    'status'  => 'error',
+                ], 422);
+            }
+        }
+
+        $value->update($data);
+
+        broadcast(new DataMutated('private-admin', ['admin_settings'], 'variant_value.updated'));
+
+        return response()->json(['data' => $value, 'status' => 'success']);
+    }
+
     public function getUnitTypes()
     {
         $unitTypes = UnitType::all();

@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProductDetailModal from './ProductDetailModal';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, Search, X, Package, ClipboardList, LogOut, Bell, Settings, Sparkles } from 'lucide-react';
+import { ShoppingCart, Zap, Search, X, Package, ClipboardList, LogOut, Bell, Settings, Sparkles } from 'lucide-react';
 import { getProductSaleInfo } from '../../utils/priceCalculations';
 import RatingStars from '../ui/RatingStars';
 import { formatPHP } from '@/lib/utils';
@@ -16,7 +16,7 @@ import ProductCarousel from './ProductCarousel';
 import Tooltip from '../shared/Tooltip';
 
 // Product card component (removed memo to allow stock updates)
-const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
+const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => {
     const allVariants = product.product_variants || [];
     const hasVariants = allVariants && allVariants.length > 0;
     const totalVariantStock = allVariants ? allVariants.reduce((s, v) => s + Number(v.available_stock || v.stock || 0), 0) : 0;
@@ -82,6 +82,13 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
             // silent fail
         } finally {
             setAddingToCart(false);
+        }
+    };
+
+    const handleBuyNowClick = (e) => {
+        e.stopPropagation();
+        if (typeof onBuyNow === 'function') {
+            onBuyNow(product);
         }
     };
 
@@ -185,17 +192,31 @@ const ProductCard = ({ product, onAddToCart, setSelectedProduct }) => {
                     </span>
                 </div>
 
-                {/* Interactive Area */}
-                <button
-                    disabled={!inStock || addingToCart}
-                    onClick={handleAddToCart}
-                    className="w-full h-9 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-xl transition-all duration-300 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2 disabled:bg-gray-100 disabled:text-gray-300"
-                >
-                    <ShoppingCart className="w-3.5 h-3.5" />
-                    <span className="text-xs font-semibold">
-                        {addingToCart ? 'Wait...' : 'Add to Cart'}
-                    </span>
-                </button>
+                {/* Interactive Area — Add to Cart + Buy Now */}
+                <div className="flex gap-1.5 w-full">
+                    <button
+                        disabled={!inStock || addingToCart}
+                        onClick={handleAddToCart}
+                        className="flex-1 h-9 bg-white border border-orange-500 text-orange-600 hover:bg-orange-50 active:scale-95 rounded-xl transition-all duration-300 flex items-center justify-center gap-1 disabled:bg-gray-50 disabled:border-gray-200 disabled:text-gray-300 px-1.5"
+                        title="Add to Cart"
+                    >
+                        <ShoppingCart className="w-3.5 h-3.5 shrink-0" />
+                        <span className="text-[11px] font-semibold whitespace-nowrap">
+                            {addingToCart ? 'Wait...' : 'Add to Cart'}
+                        </span>
+                    </button>
+                    <button
+                        disabled={!inStock}
+                        onClick={handleBuyNowClick}
+                        className="flex-1 h-9 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-xl transition-all duration-300 shadow-lg shadow-orange-500/10 flex items-center justify-center gap-1 disabled:bg-gray-100 disabled:text-gray-300 disabled:shadow-none px-1.5"
+                        title="Buy Now"
+                    >
+                        <Zap className="w-3.5 h-3.5 shrink-0" />
+                        <span className="text-[11px] font-semibold whitespace-nowrap">
+                            Buy Now
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -663,6 +684,7 @@ export default function CustomerHome() {
                                     key={'rec-' + p.id}
                                     product={p}
                                     onAddToCart={addToCart}
+                                    onBuyNow={handleBuyNow}
                                     setSelectedProduct={setSelectedProduct}
                                 />
                             ))}
@@ -748,6 +770,7 @@ export default function CustomerHome() {
                                 key={p.id} 
                                 product={p} 
                                 onAddToCart={addToCart} 
+                                onBuyNow={handleBuyNow}
                                 setSelectedProduct={setSelectedProduct}
                             />
                         ))}

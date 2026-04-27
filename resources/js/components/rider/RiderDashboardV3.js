@@ -457,15 +457,16 @@ export default function RiderDashboardV3() {
         }
     }, [unreadCount]);
 
-    // Handle self assign
+    // Handle self assign — soft refresh (do NOT reload the whole page)
     const handleSelfAssign = useCallback(async (deliveryId) => {
         setAssigningOrder(deliveryId);
         try {
             await api.post(`/deliveries/${deliveryId}/self-assign`);
             markStale(STALE_KEYS.RIDER_DASHBOARD, STALE_KEYS.ADMIN_DASHBOARD, STALE_KEYS.CUSTOMER_ORDERS);
-            window.location.reload();
+            await fetchData(true);
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to assign order');
+        } finally {
             if (isMountedRef.current) {
                 setAssigningOrder(null);
             }

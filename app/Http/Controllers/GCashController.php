@@ -154,6 +154,7 @@ class GCashController extends Controller
                 'status' => 'confirmed',
                 'payment_confirmed_at' => now(),
             ])->save();
+            $matchingSale->markConfirmedOnce();
 
             try {
                 Cache::tags(['products'])->flush();

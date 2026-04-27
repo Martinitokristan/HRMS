@@ -36,6 +36,8 @@ export default function SupplierVariantSettings({ initialTab = 'sizes', variantT
     };
 
     const [newVal, setNewVal] = useState({ variant_id: '', label: '', hex_code: '', description: '', category: '' });
+    const [editingVal, setEditingVal] = useState(null); // { id, label, hex_code, description, category }
+    const [editSaving, setEditSaving] = useState(false);
 
     const currentVariantId = variantType ? variantType.id : (activeTab === 'sizes' ? 1 : activeTab === 'colors' ? 2 : activeTab === 'weights' ? 3 : null);
     const currentVariantName = variantType ? variantType.name : (activeTab === 'sizes' ? 'Size' : activeTab === 'colors' ? 'Color' : activeTab === 'weights' ? 'Weight' : 'Variant');
@@ -108,6 +110,40 @@ export default function SupplierVariantSettings({ initialTab = 'sizes', variantT
             () => performDeleteVal(id),
             'destructive'
         );
+    };
+
+    const openEditVal = (v) => {
+        setEditingVal({
+            id: v.id,
+            label: v.label || '',
+            hex_code: v.hex_code || '',
+            description: v.description || '',
+            category: v.category || '',
+        });
+    };
+
+    const handleSaveEditVal = async () => {
+        if (!editingVal?.label.trim()) {
+            showToast('Label cannot be empty', 'error');
+            return;
+        }
+        setEditSaving(true);
+        try {
+            await api.put(`/supplier/variant-values/${editingVal.id}`, {
+                label: editingVal.label.trim(),
+                hex_code: editingVal.hex_code || null,
+                description: editingVal.description || null,
+                category: editingVal.category || null,
+            });
+            showToast('Value updated successfully');
+            markStale(STALE_KEYS.SUPPLIER_SETTINGS);
+            setEditingVal(null);
+            fetchData(true);
+        } catch (e) {
+            showToast(e.response?.data?.message || 'Error updating value', 'error');
+        } finally {
+            setEditSaving(false);
+        }
     };
 
     if (loading) {
@@ -190,6 +226,9 @@ export default function SupplierVariantSettings({ initialTab = 'sizes', variantT
                                     <TableCell className="px-4 py-3 text-muted-foreground">{v.description || '—'}</TableCell>
                                     <TableCell className="px-4 py-3">
                                         <div className="flex gap-1">
+                                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-primary" onClick={() => openEditVal(v)}>
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </Button>
                                             <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => handleDeleteVal(v.id)}>
                                                 <Trash2 className="h-3.5 w-3.5" />
                                             </Button>
@@ -209,6 +248,65 @@ export default function SupplierVariantSettings({ initialTab = 'sizes', variantT
             </Card>
 
             <ConfirmModal modal={confirmModal} onClose={closeConfirm} />
+
+            {editingVal && (
+                <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => !editSaving && setEditingVal(null)}>
+                    <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="text-lg font-bold text-foreground mb-1">Edit {currentVariantName} Value</h2>
+                        <p className="text-sm text-muted-foreground mb-4">Rename or update this value. Products that already use it will keep their link.</p>
+
+                        <div className="space-y-3">
+                            <div className="space-y-1.5">
+                                <Label>Label *</Label>
+                                <Input
+                                    value={editingVal.label}
+                                    onChange={(e) => setEditingVal((s) => ({ ...s, label: e.target.value }))}
+                                />
+                            </div>
+
+                            {isColorType && (
+                                <div className="space-y-1.5">
+                                    <Label>Hex Code</Label>
+                                    <div className="flex gap-2">
+                                        <Input type="color" className="h-9 w-12 p-1 cursor-pointer" value={editingVal.hex_code || '#000000'} onChange={(e) => setEditingVal((s) => ({ ...s, hex_code: e.target.value }))} />
+                                        <Input type="text" className="flex-1" placeholder="#000000" value={editingVal.hex_code} onChange={(e) => setEditingVal((s) => ({ ...s, hex_code: e.target.value }))} />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="space-y-1.5">
+                                <Label>Category / Group</Label>
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    value={editingVal.category || ''}
+                                    onChange={(e) => setEditingVal((s) => ({ ...s, category: e.target.value }))}
+                                >
+                                    <option value="">No Category</option>
+                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label>Description</Label>
+                                <Input
+                                    placeholder="Optional note"
+                                    value={editingVal.description}
+                                    onChange={(e) => setEditingVal((s) => ({ ...s, description: e.target.value }))}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-5">
+                            <Button variant="outline" className="flex-1" onClick={() => setEditingVal(null)} disabled={editSaving}>
+                                Cancel
+                            </Button>
+                            <Button className="flex-1" onClick={handleSaveEditVal} disabled={editSaving}>
+                                {editSaving ? 'Saving...' : 'Save Changes'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

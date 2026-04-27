@@ -111,6 +111,7 @@ export default function Delivery() {
                     params: {
                         search,
                         page,
+                        per_page: 15,
                         status:
                             statusFilter !== "all" ? statusFilter : undefined,
                     },
@@ -436,7 +437,7 @@ export default function Delivery() {
                 )}
             </div>
 
-            {!loading && deliveries.length > 0 && (
+            {!loading && total > 15 && (
                 <div className="flex justify-end mb-3">
                     <Pagination
                         page={page}

@@ -274,6 +274,11 @@ class SaleController extends Controller
         DB::transaction(function () use ($sale, $newStatus) {
             $sale->update(['status' => $newStatus]);
 
+            if ($newStatus === 'confirmed') {
+                $sale->refresh();
+                $sale->markConfirmedOnce();
+            }
+
             if ($newStatus === 'cancelled') {
                 $this->restoreStock($sale);
             }

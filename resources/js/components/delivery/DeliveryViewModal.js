@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
+import { formatPHP } from "@/lib/utils";
 
 export default function DeliveryViewModal({ isOpen, onClose, deliveryId }) {
     const { showToast } = useToast();

@@ -67,14 +67,20 @@ export default function ProductForm({
 
     useEffect(() => {
         fetchCategories();
-        fetchBrands();
+        fetchBrands(form.category_id || null);
         fetchVariantTypes();
         if (editing) {
             setupEditMode(editing);
         } else if (initialCategoryId) {
             setForm((prev) => ({ ...prev, category_id: initialCategoryId }));
         }
-    }, [editing, initialCategoryId]);
+    }, []);
+
+    // Re-fetch brand list whenever the chosen category changes,
+    // so the Brand dropdown shows only brands tagged to that category.
+    useEffect(() => {
+        fetchBrands(form.category_id || null);
+    }, [form.category_id]);
 
     useEffect(() => {
         if (form.category_id) {
@@ -159,9 +165,11 @@ export default function ProductForm({
         }
     };
 
-    const fetchBrands = async () => {
+    const fetchBrands = async (categoryId = null) => {
         try {
-            const res = await api.get("/supplier/brands");
+            const params = {};
+            if (categoryId) params.category_id = categoryId;
+            const res = await api.get("/supplier/brands", { params });
             const data =
                 res.data?.data !== undefined ? res.data.data : res.data;
             setBrands(Array.isArray(data) ? data : []);
@@ -658,7 +666,7 @@ export default function ProductForm({
                                     </select>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label>Brand</Label>
+                                    <Label>Brand {form.category_id ? <span className="text-[10px] text-muted-foreground font-normal">(filtered by category)</span> : null}</Label>
                                     <select
                                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                         value={form.brand_id}
@@ -676,6 +684,9 @@ export default function ProductForm({
                                             </option>
                                         ))}
                                     </select>
+                                    {form.category_id && brands.length === 0 && (
+                                        <p className="text-[11px] text-muted-foreground">No brands tagged to this category yet. Add or edit brands in Settings → Brands.</p>
+                                    )}
                                 </div>
                                 <div className="space-y-1.5 col-span-2">
                                     <Label>Description</Label>

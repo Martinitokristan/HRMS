@@ -165,6 +165,7 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     Route::post('/settings/variant-types', [SettingsController::class , 'saveVariantType']);
     Route::delete('/settings/variant-types/{id}', [SettingsController::class , 'deleteVariantType']);
     Route::post('/settings/variant-values', [SettingsController::class , 'saveVariantValue']);
+    Route::put('/settings/variant-values/{id}', [SettingsController::class , 'updateVariantValue']);
     Route::delete('/settings/variant-values/{id}', [SettingsController::class , 'deleteVariantValue']);
 
     // === Admin: variant attribute TYPES (Add/Rename/Delete from UI) ===
@@ -320,6 +321,7 @@ Route::middleware(['auth.token', 'role:supplier'])->group(function () {
     Route::delete('/supplier/categories/{id}', [CategoryController::class , 'destroy']);
     Route::get('/supplier/variant-values', [SettingsController::class , 'getVariantValues']);
     Route::post('/supplier/variant-values', [SettingsController::class , 'storeVariantValue']);
+    Route::put('/supplier/variant-values/{id}', [SettingsController::class , 'updateVariantValue']);
     Route::delete('/supplier/variant-values/{id}', [SettingsController::class , 'deleteVariantValue']);
 
     // === Supplier: read-only attribute types (so supplier form knows what to render per category) ===
@@ -331,6 +333,7 @@ Route::middleware(['auth.token', 'role:supplier'])->group(function () {
     // Supplier Brands
     Route::get('/supplier/brands', [BrandController::class, 'index']);
     Route::post('/supplier/brands', [BrandController::class, 'store']);
+    Route::put('/supplier/brands/{id}', [BrandController::class, 'update']);
     Route::delete('/supplier/brands/{id}', [BrandController::class, 'destroy']);
     // Supplier Notifications
     Route::get('/supplier/notifications', [SettingsController::class , 'getNotifications']);
