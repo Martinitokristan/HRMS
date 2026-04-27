@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class CheckExpiredGCashPayments extends Command
 {
     protected $signature   = 'gcash:check-expired';
-    protected $description = 'Send expiry SMS to customers whose GCash payment has not been received after 15 minutes';
+    protected $description = 'Send expiry SMS to customers whose GCash payment has not been received after 5 minutes';
 
     public function handle(): void
     {
@@ -27,7 +27,7 @@ class CheckExpiredGCashPayments extends Command
         $expiredOrders = Sale::where('status', 'pending_payment')
             ->where('payment_method', 'gcash')
             ->whereNull('payment_expiry_sms_sent_at')
-            ->where('created_at', '<=', now()->subMinutes(15))
+            ->where('created_at', '<=', now()->subMinutes(5))
             ->with('customer')
             ->get();
 

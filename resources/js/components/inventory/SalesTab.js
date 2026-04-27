@@ -486,7 +486,7 @@ export default function SalesTab() {
                                                         <strong>
                                                             Expiry SMS sent
                                                         </strong>{" "}
-                                                        — The 15-minute window
+                                                        — The 5-minute window
                                                         passed with no automatic
                                                         match. Customer was sent
                                                         a proof submission link.
