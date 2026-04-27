@@ -13,6 +13,7 @@ use App\Models\SalesCancellation;
 use App\Models\SalesCancellationRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\RestoresStock;
