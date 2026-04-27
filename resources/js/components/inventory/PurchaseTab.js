@@ -402,7 +402,7 @@ export default function PurchaseTab({ mode = "completed" }) {
                                     variant="secondary"
                                     className="uppercase"
                                 >
-                                    {viewPo.items?.length || 0} Line Items
+                                    {viewPo.items?.length || 0} Lines
                                 </Badge>
                             </div>
                             <Card className="overflow-hidden">
