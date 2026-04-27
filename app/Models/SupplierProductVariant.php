@@ -19,4 +19,9 @@ class SupplierProductVariant extends Model
     {
         return $this->belongsTo(SupplierProduct::class);
     }
+
+    public function attributes()
+    {
+        return $this->hasMany(\App\Models\SupplierProductVariantAttribute::class);
+    }
 }

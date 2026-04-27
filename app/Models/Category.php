@@ -12,4 +12,9 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function variantTypes()
+    {
+        return $this->hasMany(\App\Models\CategoryVariantType::class);
+    }
 }
