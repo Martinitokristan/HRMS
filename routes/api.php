@@ -166,6 +166,17 @@ Route::middleware(['auth.token', 'role:admin'])->group(function () {
     Route::delete('/settings/variant-types/{id}', [SettingsController::class , 'deleteVariantType']);
     Route::post('/settings/variant-values', [SettingsController::class , 'saveVariantValue']);
     Route::delete('/settings/variant-values/{id}', [SettingsController::class , 'deleteVariantValue']);
+
+    // === Admin: variant attribute TYPES (Add/Rename/Delete from UI) ===
+    Route::get('/admin/variants',                 [SettingsController::class, 'listVariantTypes']);
+    Route::post('/admin/variants',                [SettingsController::class, 'storeVariantType']);
+    Route::put('/admin/variants/{id}',            [SettingsController::class, 'updateVariantType']);
+    Route::delete('/admin/variants/{id}',         [SettingsController::class, 'deleteVariantType']);
+
+    // === Admin: category ↔ attribute type mapping ===
+    Route::get('/admin/category-variant-types',   [SettingsController::class, 'listCategoryVariantTypes']);
+    Route::post('/admin/category-variant-types',  [SettingsController::class, 'storeCategoryVariantType']);
+    Route::delete('/admin/category-variant-types/{id}', [SettingsController::class, 'deleteCategoryVariantType']);
     Route::get('/settings/unit-types', [SettingsController::class , 'getUnitTypes']);
     Route::post('/settings/unit-types', [SettingsController::class , 'saveUnitType']);
     Route::delete('/settings/unit-types/{id}', [SettingsController::class , 'deleteUnitType']);
@@ -310,6 +321,10 @@ Route::middleware(['auth.token', 'role:supplier'])->group(function () {
     Route::get('/supplier/variant-values', [SettingsController::class , 'getVariantValues']);
     Route::post('/supplier/variant-values', [SettingsController::class , 'storeVariantValue']);
     Route::delete('/supplier/variant-values/{id}', [SettingsController::class , 'deleteVariantValue']);
+
+    // === Supplier: read-only attribute types (so supplier form knows what to render per category) ===
+    Route::get('/supplier/variants',              [SettingsController::class, 'listVariantTypes']);
+    Route::get('/supplier/category-variant-types',[SettingsController::class, 'listCategoryVariantTypes']);
     Route::get('/supplier/unit-types', [SettingsController::class , 'getUnitTypes']);
     Route::post('/supplier/unit-types', [SettingsController::class , 'storeUnitType']);
     Route::delete('/supplier/unit-types/{id}', [SettingsController::class , 'deleteUnitType']);

@@ -219,6 +219,16 @@ class ProductController extends Controller
                 })
                 ->toArray();
 
+            $existingAttrs = \DB::table('product_variants as pv')
+                ->leftJoin('product_variant_attributes as pva', 'pva.product_variant_id', '=', 'pv.id')
+                ->where('pv.product_id', $product->id)
+                ->select('pv.id as pv_id', 'pv.size_value_id', 'pv.color_value_id', 'pv.weight_value_id',
+                         'pva.variant_id', 'pva.variant_value_id')
+                ->get()
+                ->groupBy(function ($r) {
+                    return ($r->size_value_id ?? '') . '|' . ($r->color_value_id ?? '') . '|' . ($r->weight_value_id ?? '');
+                });
+
             $product->productVariants()->delete();
             $variants = json_decode($request->variants, true);
             if (is_array($variants)) {
@@ -242,7 +252,7 @@ class ProductController extends Controller
                         : null;
                     $resolvedBarcode = $incomingBarcode ?? ($existingBarcodes[$key] ?? null);
 
-                    $product->productVariants()->create([
+                    $newVariant = $product->productVariants()->create([
                         'size_value_id'   => $v['size_value_id'] ?? null,
                         'color_value_id'  => $v['color_value_id'] ?? null,
                         'weight_value_id' => $v['weight_value_id'] ?? null,
@@ -252,6 +262,27 @@ class ProductController extends Controller
                         'sale_percentage' => $v['sale_percentage'] ?? 0,
                         'image_path'      => $imagePath,
                     ]);
+
+                    if (is_array($v['attributes'] ?? null)) {
+                        foreach ($v['attributes'] as $attr) {
+                            if (empty($attr['variant_id']) || empty($attr['variant_value_id'])) continue;
+                            \App\Models\ProductVariantAttribute::create([
+                                'product_variant_id' => $newVariant->id,
+                                'variant_id'         => (int) $attr['variant_id'],
+                                'variant_value_id'   => (int) $attr['variant_value_id'],
+                            ]);
+                        }
+                    } elseif ($existingAttrs->has($key)) {
+                        foreach ($existingAttrs[$key] as $r) {
+                            if (!$r->variant_id || !$r->variant_value_id) continue;
+                            \App\Models\ProductVariantAttribute::firstOrCreate([
+                                'product_variant_id' => $newVariant->id,
+                                'variant_id'         => (int) $r->variant_id,
+                            ], [
+                                'variant_value_id'   => (int) $r->variant_value_id,
+                            ]);
+                        }
+                    }
                 }
                 // NOTE: Removed syncStockWithVariants() to keep base product and variant stocks independent
             }

@@ -52,7 +52,7 @@ class SupplierProductController extends Controller
 
         $supplierId = $this->resolveSupplierID($request);
 
-        $query = SupplierProduct::with(['category', 'variants', 'brand'])
+        $query = SupplierProduct::with(['category', 'variants.attributes.variant', 'variants.attributes.variantValue', 'brand'])
             ->where('supplier_id', $supplierId)
             ->when($request->search, function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
@@ -171,6 +171,19 @@ class SupplierProductController extends Controller
                             'additional_images' => $variantExtras,
                         ]);
 
+                        // Sync new pivot rows from $v['attributes'] when supplied.
+                        if (!empty($savedVariant) && is_array($v['attributes'] ?? null)) {
+                            \App\Models\SupplierProductVariantAttribute::where('supplier_product_variant_id', $savedVariant->id)->delete();
+                            foreach ($v['attributes'] as $attr) {
+                                if (empty($attr['variant_id']) || empty($attr['variant_value_id'])) continue;
+                                \App\Models\SupplierProductVariantAttribute::create([
+                                    'supplier_product_variant_id' => $savedVariant->id,
+                                    'variant_id'                  => (int) $attr['variant_id'],
+                                    'variant_value_id'            => (int) $attr['variant_value_id'],
+                                ]);
+                            }
+                        }
+
                         // Propagate the supplier-set barcode to any linked admin product_variants rows.
                         // Linkage is via the inventory table: inventory.supplier_product_variant_id <-> inventory.product_variant_id.
                         if (!empty($savedVariant) && !empty($savedVariant->barcode)) {
@@ -203,7 +216,7 @@ class SupplierProductController extends Controller
         }
 
         return response()->json([
-            'data' => $product->load(['category', 'variants']),
+            'data' => $product->load(['category', 'variants.attributes.variant', 'variants.attributes.variantValue']),
             'message' => 'Product created successfully',
             'status' => 'success',
         ], 201);
@@ -343,6 +356,19 @@ class SupplierProductController extends Controller
                         $existingVariant->update($payload);
                         $incomingVariantIds[] = $existingVariant->id;
 
+                        // Sync new pivot rows from $v['attributes'] when supplied.
+                        if (!empty($existingVariant) && is_array($v['attributes'] ?? null)) {
+                            \App\Models\SupplierProductVariantAttribute::where('supplier_product_variant_id', $existingVariant->id)->delete();
+                            foreach ($v['attributes'] as $attr) {
+                                if (empty($attr['variant_id']) || empty($attr['variant_value_id'])) continue;
+                                \App\Models\SupplierProductVariantAttribute::create([
+                                    'supplier_product_variant_id' => $existingVariant->id,
+                                    'variant_id'                  => (int) $attr['variant_id'],
+                                    'variant_value_id'            => (int) $attr['variant_value_id'],
+                                ]);
+                            }
+                        }
+
                         // Propagate the supplier-set barcode to any linked admin product_variants rows.
                         // Linkage is via the inventory table: inventory.supplier_product_variant_id <-> inventory.product_variant_id.
                         if (!empty($existingVariant) && !empty($existingVariant->barcode)) {
@@ -373,6 +399,19 @@ class SupplierProductController extends Controller
                     } else {
                         $savedVariant = $product->variants()->create($payload);
                         $incomingVariantIds[] = $savedVariant->id;
+
+                        // Sync new pivot rows from $v['attributes'] when supplied.
+                        if (!empty($savedVariant) && is_array($v['attributes'] ?? null)) {
+                            \App\Models\SupplierProductVariantAttribute::where('supplier_product_variant_id', $savedVariant->id)->delete();
+                            foreach ($v['attributes'] as $attr) {
+                                if (empty($attr['variant_id']) || empty($attr['variant_value_id'])) continue;
+                                \App\Models\SupplierProductVariantAttribute::create([
+                                    'supplier_product_variant_id' => $savedVariant->id,
+                                    'variant_id'                  => (int) $attr['variant_id'],
+                                    'variant_value_id'            => (int) $attr['variant_value_id'],
+                                ]);
+                            }
+                        }
 
                         // Propagate the supplier-set barcode to any linked admin product_variants rows.
                         // Linkage is via the inventory table: inventory.supplier_product_variant_id <-> inventory.product_variant_id.
@@ -421,7 +460,7 @@ class SupplierProductController extends Controller
         }
 
         return response()->json([
-            'data' => $product->load(['category', 'variants']),
+            'data' => $product->load(['category', 'variants.attributes.variant', 'variants.attributes.variantValue']),
             'message' => 'Product updated successfully',
             'status' => 'success',
         ]);

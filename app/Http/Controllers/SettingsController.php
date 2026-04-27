@@ -119,12 +119,6 @@ class SettingsController extends Controller
         return response()->json(['data' => $type, 'status' => 'success']);
     }
 
-    public function deleteVariantType($id)
-    {
-        Variant::destroy($id);
-        return response()->json(['status' => 'success']);
-    }
-
     public function deleteVariantValue($id)
     {
         VariantValue::destroy($id);
@@ -309,5 +303,84 @@ class SettingsController extends Controller
         broadcast(new DataMutated('private-admin', ['admin_settings'], 'unit_type.created'));
 
         return response()->json(['data' => $unit, 'status' => 'success']);
+    }
+
+    // === Variant Attribute Types (Commit 2) ===
+    public function listVariantTypes()
+    {
+        return response()->json([
+            'data' => \App\Models\Variant::orderBy('id')->get(),
+        ]);
+    }
+
+    public function storeVariantType(Request $request)
+    {
+        $data = $request->validate([
+            'name'        => 'required|string|max:100|unique:variants,name',
+            'description' => 'nullable|string|max:255',
+            'icon'        => 'nullable|string|max:50',
+        ]);
+        return response()->json([
+            'data' => \App\Models\Variant::create(array_merge($data, ['status' => 'active'])),
+        ], 201);
+    }
+
+    public function updateVariantType(Request $request, $id)
+    {
+        $variant = \App\Models\Variant::findOrFail($id);
+        $data = $request->validate([
+            'name'        => 'sometimes|required|string|max:100|unique:variants,name,' . $id,
+            'description' => 'nullable|string|max:255',
+            'icon'        => 'nullable|string|max:50',
+            'status'      => 'sometimes|in:active,draft',
+        ]);
+        $variant->update($data);
+        return response()->json(['data' => $variant]);
+    }
+
+    public function deleteVariantType($id)
+    {
+        // Block delete if any variant currently uses this attribute type.
+        $inUse = \DB::table('product_variant_attributes')->where('variant_id', $id)->exists()
+              || \DB::table('supplier_product_variant_attributes')->where('variant_id', $id)->exists();
+        if ($inUse) {
+            return response()->json([
+                'message' => 'Cannot delete — this attribute type is used by existing variants. Remove or reassign those variants first.',
+            ], 422);
+        }
+        \DB::table('category_variant_types')->where('variant_id', $id)->delete();
+        \DB::table('variant_values')->where('variant_id', $id)->delete();
+        \App\Models\Variant::where('id', $id)->delete();
+        return response()->json(['message' => 'deleted']);
+    }
+
+    public function listCategoryVariantTypes(Request $request)
+    {
+        $q = \App\Models\CategoryVariantType::with('variant')->orderBy('sort_order');
+        if ($request->category_id) {
+            $q->where('category_id', $request->category_id);
+        }
+        return response()->json(['data' => $q->get()]);
+    }
+
+    public function storeCategoryVariantType(Request $request)
+    {
+        $data = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'variant_id'  => 'required|exists:variants,id',
+            'is_required' => 'sometimes|boolean',
+            'sort_order'  => 'sometimes|integer',
+        ]);
+        $row = \App\Models\CategoryVariantType::firstOrCreate(
+            ['category_id' => $data['category_id'], 'variant_id' => $data['variant_id']],
+            ['is_required' => $data['is_required'] ?? false, 'sort_order' => $data['sort_order'] ?? 0]
+        );
+        return response()->json(['data' => $row->load('variant')]);
+    }
+
+    public function deleteCategoryVariantType($id)
+    {
+        \App\Models\CategoryVariantType::where('id', $id)->delete();
+        return response()->json(['message' => 'deleted']);
     }
 }

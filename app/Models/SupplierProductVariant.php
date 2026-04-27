@@ -24,4 +24,12 @@ class SupplierProductVariant extends Model
     {
         return $this->hasMany(\App\Models\SupplierProductVariantAttribute::class);
     }
+
+    public function attributeLabel(): string
+    {
+        return $this->attributes()->with('variantValue')->get()
+            ->pluck('variantValue.label')
+            ->filter()
+            ->implode(' / ');
+    }
 }

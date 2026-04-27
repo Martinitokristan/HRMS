@@ -43,4 +43,12 @@ class ProductVariant extends Model
     {
         return $this->hasMany(\App\Models\ProductVariantAttribute::class);
     }
+
+    public function attributeLabel(): string
+    {
+        return $this->attributes()->with('variantValue')->get()
+            ->pluck('variantValue.label')
+            ->filter()
+            ->implode(' / ');
+    }
 }
