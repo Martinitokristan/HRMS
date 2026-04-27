@@ -195,13 +195,18 @@ class RiderController extends Controller
                 ->where('status', 'delivered')
                 ->whereIn('payout_status', ['eligible', 'paid'])
                 ->sum('delivery_fee'),
-            // Wave 6 — COD cash the rider is still holding for the company today.
-            'cash_to_remit_today' => (float) Delivery::where('rider_id', $riderId)
-                ->whereDate('delivered_at', now()->toDateString())
-                ->where('status', 'delivered')
-                ->whereHas('sale', function ($q) { $q->where('payment_method', 'cod'); })
-                ->whereNull('cash_remitted_at')
-                ->sum('cash_collected'),
+            // Wave 6 — COD cash the rider is still holding for the company today (Manila timezone).
+            'cash_to_remit_today' => (function () use ($riderId) {
+                $manilaToday = now('Asia/Manila');
+                $utcStart = $manilaToday->copy()->startOfDay()->setTimezone('UTC');
+                $utcEnd = $manilaToday->copy()->endOfDay()->setTimezone('UTC');
+                return (float) Delivery::where('rider_id', $riderId)
+                    ->whereBetween('delivered_at', [$utcStart, $utcEnd])
+                    ->where('status', 'delivered')
+                    ->whereHas('sale', function ($q) { $q->where('payment_method', 'cod'); })
+                    ->whereNull('cash_remitted_at')
+                    ->sum('cash_collected');
+            })(),
         ];
 
         // Get rider's current location for distance calculations

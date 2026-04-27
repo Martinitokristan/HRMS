@@ -666,7 +666,14 @@ export default function ProductForm({
                                     </select>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label>Brand {form.category_id ? <span className="text-[10px] text-muted-foreground font-normal">(filtered by category)</span> : null}</Label>
+                                    <Label>
+                                        Brand{" "}
+                                        {form.category_id ? (
+                                            <span className="text-[10px] text-muted-foreground font-normal">
+                                                (filtered by category)
+                                            </span>
+                                        ) : null}
+                                    </Label>
                                     <select
                                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                         value={form.brand_id}
@@ -684,9 +691,14 @@ export default function ProductForm({
                                             </option>
                                         ))}
                                     </select>
-                                    {form.category_id && brands.length === 0 && (
-                                        <p className="text-[11px] text-muted-foreground">No brands tagged to this category yet. Add or edit brands in Settings → Brands.</p>
-                                    )}
+                                    {form.category_id &&
+                                        brands.length === 0 && (
+                                            <p className="text-[11px] text-muted-foreground">
+                                                No brands tagged to this
+                                                category yet. Add or edit brands
+                                                in Settings → Brands.
+                                            </p>
+                                        )}
                                 </div>
                                 <div className="space-y-1.5 col-span-2">
                                     <Label>Description</Label>

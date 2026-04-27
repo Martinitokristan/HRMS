@@ -1,26 +1,55 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import api, { silentApi } from '../../lib/api';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import ProductDetailModal from './ProductDetailModal';
-import { Input } from '@/components/ui/input';
-import { ShoppingCart, Zap, Search, X, Package, ClipboardList, LogOut, Bell, Settings, Sparkles } from 'lucide-react';
-import { getProductSaleInfo } from '../../utils/priceCalculations';
-import RatingStars from '../ui/RatingStars';
-import { formatPHP } from '@/lib/utils';
-import { useSilentRefresh } from '../../hooks/useSilentRefresh';
-import { STALE_KEYS, markStale } from '../../store/dataStore';
-import ConfirmModal from '../shared/ConfirmModal';
-import NotificationPanel from '../shared/NotificationPanel';
-import ProductCarousel from './ProductCarousel';
-import Tooltip from '../shared/Tooltip';
+import React, {
+    useState,
+    useEffect,
+    useRef,
+    useMemo,
+    useCallback,
+} from "react";
+import api, { silentApi } from "../../lib/api";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import ProductDetailModal from "./ProductDetailModal";
+import { Input } from "@/components/ui/input";
+import {
+    ShoppingCart,
+    Zap,
+    Search,
+    X,
+    Package,
+    ClipboardList,
+    LogOut,
+    Bell,
+    Settings,
+    Sparkles,
+} from "lucide-react";
+import { getProductSaleInfo } from "../../utils/priceCalculations";
+import RatingStars from "../ui/RatingStars";
+import { formatPHP } from "@/lib/utils";
+import { useSilentRefresh } from "../../hooks/useSilentRefresh";
+import { STALE_KEYS, markStale } from "../../store/dataStore";
+import ConfirmModal from "../shared/ConfirmModal";
+import NotificationPanel from "../shared/NotificationPanel";
+import ProductCarousel from "./ProductCarousel";
+import Tooltip from "../shared/Tooltip";
 
 // Product card component (removed memo to allow stock updates)
-const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => {
+const ProductCard = ({
+    product,
+    onAddToCart,
+    onBuyNow,
+    setSelectedProduct,
+}) => {
     const allVariants = product.product_variants || [];
     const hasVariants = allVariants && allVariants.length > 0;
-    const totalVariantStock = allVariants ? allVariants.reduce((s, v) => s + Number(v.available_stock || v.stock || 0), 0) : 0;
-    const baseStock = Number(product.available_stock || product.inventory?.current_stock || 0);
+    const totalVariantStock = allVariants
+        ? allVariants.reduce(
+              (s, v) => s + Number(v.available_stock || v.stock || 0),
+              0,
+          )
+        : 0;
+    const baseStock = Number(
+        product.available_stock || product.inventory?.current_stock || 0,
+    );
     const totalStock = baseStock;
     const inStock = totalStock > 0;
     const imgSrc = product.image_path ? `/storage/${product.image_path}` : null;
@@ -31,12 +60,24 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
 
     // Read aggregated data directly from product prop (provided by API index response)
     const averageRating = Number(product.average_rating || 0);
-    const totalReviews  = Number(product.total_reviews  || 0);
-    const soldCount     = Number(product.sold_count     || 0);
+    const totalReviews = Number(product.total_reviews || 0);
+    const soldCount = Number(product.sold_count || 0);
 
     // Get unique sizes and colors for display
-    const sizes = allVariants ? [...new Set(allVariants.map(v => v.size_value?.label).filter(Boolean))] : [];
-    const colors = allVariants ? [...new Set(allVariants.map(v => v.color_value?.label).filter(Boolean))] : [];
+    const sizes = allVariants
+        ? [
+              ...new Set(
+                  allVariants.map((v) => v.size_value?.label).filter(Boolean),
+              ),
+          ]
+        : [];
+    const colors = allVariants
+        ? [
+              ...new Set(
+                  allVariants.map((v) => v.color_value?.label).filter(Boolean),
+              ),
+          ]
+        : [];
 
     const handleAddToCart = async (e) => {
         e.stopPropagation();
@@ -48,14 +89,16 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
 
             if (hasVariants) {
                 // Find the first available variant
-                const availableVariant = allVariants.find(v => (v.available_stock || v.stock || 0) > 0);
+                const availableVariant = allVariants.find(
+                    (v) => (v.available_stock || v.stock || 0) > 0,
+                );
 
                 if (availableVariant) {
                     selectedVariant = availableVariant;
                     selectedVariantOptions = {
-                        size: availableVariant.size_value?.label || '',
-                        color: availableVariant.color_value?.label || '',
-                        weight: availableVariant.weight_value?.label || ''
+                        size: availableVariant.size_value?.label || "",
+                        color: availableVariant.color_value?.label || "",
+                        weight: availableVariant.weight_value?.label || "",
                     };
                 } else {
                     // If no variant has stock, try base product
@@ -63,7 +106,7 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
                         selectedVariant = null;
                         selectedVariantOptions = {};
                     } else {
-                        throw new Error('No stock available');
+                        throw new Error("No stock available");
                     }
                 }
             }
@@ -71,12 +114,14 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
             await onAddToCart(product, {
                 qty: 1,
                 variants: selectedVariantOptions,
-                price: selectedVariant ?
-                    (selectedVariant.price_override || product.sell_price) :
-                    (saleInfo.isOnSale ? saleInfo.salePrice : product.sell_price),
+                price: selectedVariant
+                    ? selectedVariant.price_override || product.sell_price
+                    : saleInfo.isOnSale
+                      ? saleInfo.salePrice
+                      : product.sell_price,
                 saleInfo: saleInfo,
                 variant_id: selectedVariant?.id || null,
-                isUpdate: !!product.cartId
+                isUpdate: !!product.cartId,
             });
         } catch (error) {
             // silent fail
@@ -87,7 +132,7 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
 
     const handleBuyNowClick = (e) => {
         e.stopPropagation();
-        if (typeof onBuyNow === 'function') {
+        if (typeof onBuyNow === "function") {
             onBuyNow(product);
         }
     };
@@ -107,14 +152,14 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
                         loading="lazy"
                         className="w-full h-full object-contain p-3 mix-blend-multiply group-hover:scale-110 transition-transform duration-700 ease-out"
                         onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
+                            e.target.style.display = "none";
+                            e.target.nextSibling.style.display = "flex";
                         }}
                     />
                 ) : null}
                 <div
                     className="w-full h-full flex items-center justify-center bg-gray-50"
-                    style={{ display: imgSrc ? 'none' : 'flex' }}
+                    style={{ display: imgSrc ? "none" : "flex" }}
                 >
                     <Package className="h-10 w-10 text-gray-200" />
                 </div>
@@ -123,7 +168,7 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
                 <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
                     {/* Category Label */}
                     <span className="bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg shadow-orange-500/20">
-                        {product.category?.name || 'Hand Tools'}
+                        {product.category?.name || "Hand Tools"}
                     </span>
 
                     {/* Sale Badge */}
@@ -147,18 +192,25 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
             {/* Content Section */}
             <div className="p-4 space-y-3">
                 <div className="min-h-[60px]">
-                    <h3 className="text-base font-black text-gray-900 mb-1 leading-tight group-hover:text-orange-500 transition-colors line-clamp-1">{product.name}</h3>
+                    <h3 className="text-base font-black text-gray-900 mb-1 leading-tight group-hover:text-orange-500 transition-colors line-clamp-1">
+                        {product.name}
+                    </h3>
                     {product.brand?.name && (
-                        <p className="text-xs text-orange-500 font-semibold mt-0.5 leading-none">{product.brand.name}</p>
+                        <p className="text-xs text-orange-500 font-semibold mt-0.5 leading-none">
+                            {product.brand.name}
+                        </p>
                     )}
                     <p className="text-xs text-gray-500 leading-normal line-clamp-2 font-medium">
-                        {product.description || "Premium quality product designed for durability and high performance in all specific applications."}
+                        {product.description ||
+                            "Premium quality product designed for durability and high performance in all specific applications."}
                     </p>
                 </div>
 
                 {/* Stock Indicator Pill - Mini Spec Modal Style */}
                 <div className="inline-flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100/50">
-                    <span className="text-xs font-semibold text-emerald-600 leading-none">Stock</span>
+                    <span className="text-xs font-semibold text-emerald-600 leading-none">
+                        Stock
+                    </span>
                     <span className="text-xs font-semibold text-gray-900 leading-none">
                         {totalStock} units
                     </span>
@@ -168,12 +220,16 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
                 <div className="pt-1.5 pb-0.5">
                     <div className="flex items-end gap-2">
                         <div className="text-lg font-mono font-bold text-foreground leading-none tracking-tighter">
-                            {formatPHP(saleInfo.isOnSale ? saleInfo.salePrice : saleInfo.originalPrice)}
+                            {formatPHP(
+                                saleInfo.isOnSale
+                                    ? saleInfo.salePrice
+                                    : saleInfo.originalPrice,
+                            )}
                         </div>
                         {saleInfo.isOnSale && (
-                           <span className="text-xs text-gray-400 line-through font-mono font-bold leading-none mb-0.5">
-                               {formatPHP(saleInfo.originalPrice)}
-                           </span>
+                            <span className="text-xs text-gray-400 line-through font-mono font-bold leading-none mb-0.5">
+                                {formatPHP(saleInfo.originalPrice)}
+                            </span>
                         )}
                     </div>
                 </div>
@@ -181,7 +237,12 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
                 {/* Ratings & Sold Summary - Inline Mini */}
                 <div className="flex items-center gap-2 pt-0.5">
                     <div className="flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-100/50">
-                        <RatingStars rating={averageRating} size="sm" color="text-amber-500" showCount={false} />
+                        <RatingStars
+                            rating={averageRating}
+                            size="sm"
+                            color="text-amber-500"
+                            showCount={false}
+                        />
                         <span className="text-xs font-semibold text-amber-700 leading-none">
                             {averageRating.toFixed(1)}
                         </span>
@@ -202,7 +263,7 @@ const ProductCard = ({ product, onAddToCart, onBuyNow, setSelectedProduct }) => 
                     >
                         <ShoppingCart className="w-3.5 h-3.5 shrink-0" />
                         <span className="text-[11px] font-semibold whitespace-nowrap">
-                            {addingToCart ? 'Wait...' : 'Add to Cart'}
+                            {addingToCart ? "Wait..." : "Add to Cart"}
                         </span>
                     </button>
                     <button
@@ -227,8 +288,8 @@ export default function CustomerHome() {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('');
+    const [search, setSearch] = useState("");
+    const [categoryFilter, setCategoryFilter] = useState("");
     const [cart, setCart] = useState([]);
     const [flyingItem, setFlyingItem] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -240,18 +301,24 @@ export default function CustomerHome() {
     const notifRefresh = useSilentRefresh(STALE_KEYS.CUSTOMER_NOTIFICATIONS);
 
     const [confirmModal, setConfirmModal] = useState({
-        show: false, title: '', message: '',
-        onConfirm: null, variant: 'default'
+        show: false,
+        title: "",
+        message: "",
+        onConfirm: null,
+        variant: "default",
     });
-    
-    const showConfirm = (title, message, onConfirm, variant = 'default') => {
+
+    const showConfirm = (title, message, onConfirm, variant = "default") => {
         setConfirmModal({ show: true, title, message, onConfirm, variant });
     };
-    
+
     const closeConfirm = () => {
         setConfirmModal({
-            show: false, title: '', message: '',
-            onConfirm: null, variant: 'default'
+            show: false,
+            title: "",
+            message: "",
+            onConfirm: null,
+            variant: "default",
         });
     };
 
@@ -261,7 +328,12 @@ export default function CustomerHome() {
     const [notifOpen, setNotifOpen] = useState(false);
     const [proofModalUrl, setProofModalUrl] = useState(null);
     // Wave 6 — delivery confirmation flow
-    const [disputeModal, setDisputeModal] = useState({ open: false, saleId: null, reason: '', submitting: false });
+    const [disputeModal, setDisputeModal] = useState({
+        open: false,
+        saleId: null,
+        reason: "",
+        submitting: false,
+    });
     const notifRef = useRef(null);
 
     // Recommendations
@@ -271,16 +343,24 @@ export default function CustomerHome() {
 
     // Load cart from localStorage
     useEffect(() => {
-        const saved = localStorage.getItem('hrms_cart');
-        if (saved) try { setCart(JSON.parse(saved)); } catch (e) { }
+        const saved = localStorage.getItem("hrms_cart");
+        if (saved)
+            try {
+                setCart(JSON.parse(saved));
+            } catch (e) {}
     }, []);
 
-    useEffect(() => { localStorage.setItem('hrms_cart', JSON.stringify(cart)); }, [cart]);
+    useEffect(() => {
+        localStorage.setItem("hrms_cart", JSON.stringify(cart));
+    }, [cart]);
 
     // Listen for storage events (cart)
     const loadCartFromStorage = useCallback(() => {
-        const saved = localStorage.getItem('hrms_cart');
-        if (saved) try { setCart(JSON.parse(saved)); } catch (e) { }
+        const saved = localStorage.getItem("hrms_cart");
+        if (saved)
+            try {
+                setCart(JSON.parse(saved));
+            } catch (e) {}
     }, []);
 
     // Listen for order placement to refresh product list
@@ -288,9 +368,9 @@ export default function CustomerHome() {
         const handleOrderPlaced = () => {
             markStale(STALE_KEYS.CUSTOMER_SHOP);
         };
-        window.addEventListener('orderPlaced', handleOrderPlaced);
+        window.addEventListener("orderPlaced", handleOrderPlaced);
         return () => {
-            window.removeEventListener('orderPlaced', handleOrderPlaced);
+            window.removeEventListener("orderPlaced", handleOrderPlaced);
         };
     }, []);
 
@@ -298,10 +378,19 @@ export default function CustomerHome() {
     useEffect(() => {
         if (flyingItem) {
             const t = setTimeout(() => {
-                const btn = document.getElementById('cart-icon-btn');
-                const badge = document.getElementById('cart-count-badge');
-                if (btn) { btn.classList.add('cart-bump'); setTimeout(() => btn.classList.remove('cart-bump'), 300); }
-                if (badge) { badge.classList.add('badge-pulse'); setTimeout(() => badge.classList.remove('badge-pulse'), 400); }
+                const btn = document.getElementById("cart-icon-btn");
+                const badge = document.getElementById("cart-count-badge");
+                if (btn) {
+                    btn.classList.add("cart-bump");
+                    setTimeout(() => btn.classList.remove("cart-bump"), 300);
+                }
+                if (badge) {
+                    badge.classList.add("badge-pulse");
+                    setTimeout(
+                        () => badge.classList.remove("badge-pulse"),
+                        400,
+                    );
+                }
             }, 600);
             return () => clearTimeout(t);
         }
@@ -317,8 +406,9 @@ export default function CustomerHome() {
                 setNotifOpen(false);
             }
         };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () =>
+            document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     // Fetch products with debouncing
@@ -333,18 +423,21 @@ export default function CustomerHome() {
                 page: 1,
                 per_page: 20,
                 _: Date.now(),
-                v: '1.2',
-                r: Math.random().toString(36).substring(7)
+                v: "1.2",
+                r: Math.random().toString(36).substring(7),
             };
             if (search) params.search = search;
             if (categoryFilter) params.category_id = categoryFilter;
 
-            silentApi.get('/products', { params })
-                .then(r => {
+            silentApi
+                .get("/products", { params })
+                .then((r) => {
                     if (isMounted) {
                         // Data extraction: r.data.data is the paginator object, r.data.data.data is the array
                         const responseData = r.data?.data;
-                        const actualData = Array.isArray(responseData) ? responseData : (responseData?.data || []);
+                        const actualData = Array.isArray(responseData)
+                            ? responseData
+                            : responseData?.data || [];
                         setProducts(actualData);
                     }
                 })
@@ -371,18 +464,20 @@ export default function CustomerHome() {
     // Fetch notifications (optimized - real-time event driven)
     useEffect(() => {
         if (!user) return;
-        api.get('/customer/notifications').then(r => {
-            setNotifications(r.data?.data || []);
-            setUnreadCount(r.data?.unread || 0);
-        }).catch(() => { });
+        api.get("/customer/notifications")
+            .then((r) => {
+                setNotifications(r.data?.data || []);
+                setUnreadCount(r.data?.unread || 0);
+            })
+            .catch(() => {});
     }, [user, notifRefresh.refreshTrigger]);
 
     // Fetch recommendations
     useEffect(() => {
         if (!user) return;
         setRecsLoading(true);
-        api.get('/recommendations', { params: { limit: 8 } })
-            .then(r => setRecommendations(r.data?.data || []))
+        api.get("/recommendations", { params: { limit: 8 } })
+            .then((r) => setRecommendations(r.data?.data || []))
             .catch(() => {})
             .finally(() => setRecsLoading(false));
     }, [user]);
@@ -391,8 +486,8 @@ export default function CustomerHome() {
     useEffect(() => {
         if (!selectedProduct?.id || !user) return;
         const viewStart = Date.now();
-        api.post('/activity', {
-            action: 'view',
+        api.post("/activity", {
+            action: "view",
             product_id: selectedProduct.id,
             category_id: selectedProduct.category_id || null,
         }).catch(() => {});
@@ -400,8 +495,8 @@ export default function CustomerHome() {
         return () => {
             const seconds = Math.round((Date.now() - viewStart) / 1000);
             if (seconds >= 2) {
-                api.post('/activity', {
-                    action: 'view',
+                api.post("/activity", {
+                    action: "view",
                     product_id: selectedProduct.id,
                     category_id: selectedProduct.category_id || null,
                     duration_seconds: seconds,
@@ -415,7 +510,7 @@ export default function CustomerHome() {
         if (!user || !search || search.length < 2) return;
         clearTimeout(searchLogTimerRef.current);
         searchLogTimerRef.current = setTimeout(() => {
-            api.post('/search-log', {
+            api.post("/search-log", {
                 query: search,
                 results_count: products.length,
             }).catch(() => {});
@@ -424,19 +519,22 @@ export default function CustomerHome() {
     }, [search, user]);
 
     // Track category clicks
-    const handleCategoryClick = useCallback((catId) => {
-        setCategoryFilter(catId);
-        if (user && catId) {
-            api.post('/activity', {
-                action: 'category_click',
-                category_id: catId,
-            }).catch(() => {});
-        }
-    }, [user]);
+    const handleCategoryClick = useCallback(
+        (catId) => {
+            setCategoryFilter(catId);
+            if (user && catId) {
+                api.post("/activity", {
+                    action: "category_click",
+                    category_id: catId,
+                }).catch(() => {});
+            }
+        },
+        [user],
+    );
 
     const markRead = () => {
         if (unreadCount > 0) {
-            api.post('/customer/notifications/read').then(() => {
+            api.post("/customer/notifications/read").then(() => {
                 markStale(STALE_KEYS.CUSTOMER_NOTIFICATIONS);
             });
         }
@@ -448,21 +546,62 @@ export default function CustomerHome() {
         const price = options.price || product.sell_price;
         const variant_id = options.variant_id || null;
         const isUpdate = options.isUpdate || false;
-        const variantLabels = Object.values(variants).filter(Boolean).map(v => v.label);
-        const variantString = variantLabels.join(', ');
-        const cartId = variantString ? `${product.id}-${variantString}` : product.id;
+        const variantLabels = Object.values(variants)
+            .filter(Boolean)
+            .map((v) => v.label);
+        const variantString = variantLabels.join(", ");
+        const cartId = variantString
+            ? `${product.id}-${variantString}`
+            : product.id;
 
         // Add to cart without reservation
-        setCart(prev => {
+        setCart((prev) => {
             if (isUpdate && product.cartId !== cartId) {
-                const filtered = prev.filter(i => i.cartId !== product.cartId);
-                const existing = filtered.find(i => i.cartId === cartId);
-                if (existing) return filtered.map(i => i.cartId === cartId ? { ...i, qty: i.qty + qty } : i);
-                return [...filtered, { ...product, sell_price: price, cartId, qty, variantString, selectedVariants: variants, variant_id }];
+                const filtered = prev.filter(
+                    (i) => i.cartId !== product.cartId,
+                );
+                const existing = filtered.find((i) => i.cartId === cartId);
+                if (existing)
+                    return filtered.map((i) =>
+                        i.cartId === cartId ? { ...i, qty: i.qty + qty } : i,
+                    );
+                return [
+                    ...filtered,
+                    {
+                        ...product,
+                        sell_price: price,
+                        cartId,
+                        qty,
+                        variantString,
+                        selectedVariants: variants,
+                        variant_id,
+                    },
+                ];
             }
-            const existing = prev.find(i => i.cartId === cartId);
-            if (existing) return prev.map(i => i.cartId === cartId ? { ...i, qty: isUpdate ? qty : i.qty + qty, selectedVariants: variants, sell_price: price } : i);
-            return [...prev, { ...product, sell_price: price, cartId, qty, variantString, selectedVariants: variants, variant_id }];
+            const existing = prev.find((i) => i.cartId === cartId);
+            if (existing)
+                return prev.map((i) =>
+                    i.cartId === cartId
+                        ? {
+                              ...i,
+                              qty: isUpdate ? qty : i.qty + qty,
+                              selectedVariants: variants,
+                              sell_price: price,
+                          }
+                        : i,
+                );
+            return [
+                ...prev,
+                {
+                    ...product,
+                    sell_price: price,
+                    cartId,
+                    qty,
+                    variantString,
+                    selectedVariants: variants,
+                    variant_id,
+                },
+            ];
         });
 
         // Trigger flying animation
@@ -472,18 +611,47 @@ export default function CustomerHome() {
     };
 
     const handleBuyNow = (product) => {
-        const saleInfo = getProductSaleInfo ? getProductSaleInfo(product) : null;
-        const price = saleInfo && saleInfo.isOnSale ? saleInfo.salePrice : product.sell_price;
+        const saleInfo = getProductSaleInfo
+            ? getProductSaleInfo(product)
+            : null;
+        const price =
+            saleInfo && saleInfo.isOnSale
+                ? saleInfo.salePrice
+                : product.sell_price;
         const cartId = product.id;
-        setCart(prev => {
-            const updated = prev.map(i => ({ ...i, selectedForCheckout: false }));
-            const existing = updated.find(i => i.cartId === cartId);
+        setCart((prev) => {
+            const updated = prev.map((i) => ({
+                ...i,
+                selectedForCheckout: false,
+            }));
+            const existing = updated.find((i) => i.cartId === cartId);
             if (existing) {
-                return updated.map(i => i.cartId === cartId ? { ...i, qty: i.qty + 1, sell_price: price, selectedForCheckout: true } : i);
+                return updated.map((i) =>
+                    i.cartId === cartId
+                        ? {
+                              ...i,
+                              qty: i.qty + 1,
+                              sell_price: price,
+                              selectedForCheckout: true,
+                          }
+                        : i,
+                );
             }
-            return [...updated, { ...product, sell_price: price, cartId, qty: 1, variantString: '', selectedVariants: {}, variant_id: null, selectedForCheckout: true }];
+            return [
+                ...updated,
+                {
+                    ...product,
+                    sell_price: price,
+                    cartId,
+                    qty: 1,
+                    variantString: "",
+                    selectedVariants: {},
+                    variant_id: null,
+                    selectedForCheckout: true,
+                },
+            ];
         });
-        navigate('/shop/order');
+        navigate("/shop/order");
     };
 
     const cartCount = cart.reduce((s, i) => s + i.qty, 0);
@@ -494,23 +662,33 @@ export default function CustomerHome() {
             <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
                 <div className="max-w-[1500px] mx-auto px-6 h-14 flex items-center justify-between gap-6">
                     {/* Logo */}
-                    <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => navigate('/shop')}>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white font-bold text-sm">H</div>
-                        <div className="text-base font-bold text-gray-900">HRMS</div>
+                    <div
+                        className="flex items-center gap-2 cursor-pointer shrink-0"
+                        onClick={() => navigate("/shop")}
+                    >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white font-bold text-sm">
+                            H
+                        </div>
+                        <div className="text-base font-bold text-gray-900">
+                            HRMS
+                        </div>
                     </div>
 
                     {/* Search Bar */}
                     <div className="flex-1 max-w-xl relative group hidden sm:block">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
-                        <Input 
-                            type="text" 
-                            placeholder="Search premium products..." 
+                        <Input
+                            type="text"
+                            placeholder="Search premium products..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full h-10 pl-10 pr-4 bg-gray-50 border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500/20 transition-all text-sm font-medium"
                         />
                         {search && (
-                            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600">
+                            <button
+                                onClick={() => setSearch("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+                            >
                                 <X className="h-full w-full" />
                             </button>
                         )}
@@ -520,10 +698,18 @@ export default function CustomerHome() {
                     <div className="flex items-center gap-2">
                         {/* Cart */}
                         <Tooltip label="My Cart" position="bottom">
-                            <Link to="/shop/cart" id="cart-icon-btn" className="relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl" aria-label="My Cart">
+                            <Link
+                                to="/shop/cart"
+                                id="cart-icon-btn"
+                                className="relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl"
+                                aria-label="My Cart"
+                            >
                                 <ShoppingCart className="h-5 w-5" />
                                 {cartCount > 0 && (
-                                    <span id="cart-count-badge" className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-orange-500 text-white text-xs font-black rounded-full px-1.5 shadow-lg shadow-orange-500/20 ring-2 ring-white">
+                                    <span
+                                        id="cart-count-badge"
+                                        className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-orange-500 text-white text-xs font-black rounded-full px-1.5 shadow-lg shadow-orange-500/20 ring-2 ring-white"
+                                    >
                                         {cartCount}
                                     </span>
                                 )}
@@ -535,7 +721,10 @@ export default function CustomerHome() {
                             <Tooltip label="Notifications" position="bottom">
                                 <button
                                     className="relative h-10 w-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl"
-                                    onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
+                                    onClick={() => {
+                                        setNotifOpen(!notifOpen);
+                                        setProfileOpen(false);
+                                    }}
                                     aria-label="Notifications"
                                 >
                                     <Bell className="h-5 w-5" />
@@ -554,32 +743,64 @@ export default function CustomerHome() {
                                 onClose={() => setNotifOpen(false)}
                                 apiPrefix="/customer/notifications"
                                 markReadUrl="/customer/notifications/read"
-                                renderMessage={(n) => n.data?.message || n.message || 'New notification'}
-                                renderLabel={(n) => n.data?.title || 'HRMS'}
+                                renderMessage={(n) =>
+                                    n.data?.message ||
+                                    n.message ||
+                                    "New notification"
+                                }
+                                renderLabel={(n) => n.data?.title || "HRMS"}
                                 isRead={(n) => !!n.read_at}
                                 onRefresh={() => {
-                                    api.get('/customer/notifications').then(r => {
-                                        setNotifications(r.data?.data || []);
-                                        setUnreadCount(r.data?.unread || 0);
-                                    }).catch(() => {});
+                                    api.get("/customer/notifications")
+                                        .then((r) => {
+                                            setNotifications(
+                                                r.data?.data || [],
+                                            );
+                                            setUnreadCount(r.data?.unread || 0);
+                                        })
+                                        .catch(() => {});
                                 }}
                                 renderExtra={(n) => {
                                     // Wave 6 — "Did you receive your order?" confirmation buttons
-                                    if (n.type === 'delivery_confirmation_request' && n.meta?.requires_action && n.meta?.sale_id) {
+                                    if (
+                                        n.type ===
+                                            "delivery_confirmation_request" &&
+                                        n.meta?.requires_action &&
+                                        n.meta?.sale_id
+                                    ) {
                                         return (
                                             <div className="mt-2 flex gap-2">
                                                 <button
                                                     onClick={async (e) => {
                                                         e.stopPropagation();
                                                         try {
-                                                            await api.post(`/sales/${n.meta.sale_id}/customer-confirm-receipt`);
-                                                            const r = await api.get('/customer/notifications');
-                                                            setNotifications(r.data?.data || []);
-                                                            setUnreadCount(r.data?.unread || 0);
+                                                            await api.post(
+                                                                `/sales/${n.meta.sale_id}/customer-confirm-receipt`,
+                                                            );
+                                                            const r =
+                                                                await api.get(
+                                                                    "/customer/notifications",
+                                                                );
+                                                            setNotifications(
+                                                                r.data?.data ||
+                                                                    [],
+                                                            );
+                                                            setUnreadCount(
+                                                                r.data
+                                                                    ?.unread ||
+                                                                    0,
+                                                            );
                                                         } catch (err) {
-                                                            const msg = err?.response?.data?.message || 'Could not confirm receipt. Please try again.';
+                                                            const msg =
+                                                                err?.response
+                                                                    ?.data
+                                                                    ?.message ||
+                                                                "Could not confirm receipt. Please try again.";
                                                             alert(msg);
-                                                            console.error('confirm receipt failed:', err);
+                                                            console.error(
+                                                                "confirm receipt failed:",
+                                                                err,
+                                                            );
                                                         }
                                                     }}
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors"
@@ -589,7 +810,13 @@ export default function CustomerHome() {
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        setDisputeModal({ open: true, saleId: n.meta.sale_id, reason: '', submitting: false });
+                                                        setDisputeModal({
+                                                            open: true,
+                                                            saleId: n.meta
+                                                                .sale_id,
+                                                            reason: "",
+                                                            submitting: false,
+                                                        });
                                                         setNotifOpen(false);
                                                     }}
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-lg transition-colors border border-gray-300"
@@ -599,11 +826,16 @@ export default function CustomerHome() {
                                             </div>
                                         );
                                     }
-                                    const proofUrl = n.meta?.proof_url || n.data?.proof_url;
+                                    const proofUrl =
+                                        n.meta?.proof_url || n.data?.proof_url;
                                     if (!proofUrl) return null;
                                     return (
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); setProofModalUrl(proofUrl); setNotifOpen(false); }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setProofModalUrl(proofUrl);
+                                                setNotifOpen(false);
+                                            }}
                                             className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-lg transition-colors"
                                         >
                                             View Proof
@@ -615,7 +847,11 @@ export default function CustomerHome() {
 
                         {/* My Orders */}
                         <Tooltip label="My Orders" position="bottom">
-                            <Link to="/shop/history" className="hidden sm:flex items-center gap-1.5 h-10 px-3 text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl text-sm font-semibold" aria-label="My Orders">
+                            <Link
+                                to="/shop/history"
+                                className="hidden sm:flex items-center gap-1.5 h-10 px-3 text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl text-sm font-semibold"
+                                aria-label="My Orders"
+                            >
                                 <ClipboardList className="h-4 w-4" />
                                 <span>My Orders</span>
                             </Link>
@@ -624,34 +860,56 @@ export default function CustomerHome() {
                         {/* User Profile */}
                         <div className="relative ml-1" ref={profileRef}>
                             <Tooltip label="My Profile" position="bottom">
-                                <button 
+                                <button
                                     onClick={() => setProfileOpen(!profileOpen)}
                                     className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
                                     aria-label="My Profile"
                                 >
                                     <div className="h-8 w-8 rounded-lg bg-orange-500 overflow-hidden flex items-center justify-center text-white font-black text-xs shadow-lg shadow-orange-500/10 group-hover:scale-105 transition-transform">
-                                        {user?.photo
-                                            ? <img src={user.photo} alt={user.name} className="h-full w-full object-cover" />
-                                            : user?.name?.charAt(0).toUpperCase()
-                                        }
+                                        {user?.photo ? (
+                                            <img
+                                                src={user.photo}
+                                                alt={user.name}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            user?.name?.charAt(0).toUpperCase()
+                                        )}
                                     </div>
-                                    <span className="text-sm font-bold text-gray-700 hidden lg:block">{user?.name?.split(' ')[0]}</span>
+                                    <span className="text-sm font-bold text-gray-700 hidden lg:block">
+                                        {user?.name?.split(" ")[0]}
+                                    </span>
                                 </button>
                             </Tooltip>
 
                             {profileOpen && (
                                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-gray-100 shadow-2xl overflow-hidden py-1.5 p-1 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <div className="px-4 py-3 border-b border-gray-50 mb-1.5">
-                                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-0.5">Personal Account</p>
-                                        <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
+                                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-0.5">
+                                            Personal Account
+                                        </p>
+                                        <p className="text-sm font-bold text-gray-900 truncate">
+                                            {user?.name}
+                                        </p>
                                     </div>
-                                    <Link to="/shop/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl">
-                                        <Settings className="h-4 w-4" /> Settings
+                                    <Link
+                                        to="/shop/settings"
+                                        className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl"
+                                    >
+                                        <Settings className="h-4 w-4" />{" "}
+                                        Settings
                                     </Link>
-                                    <Link to="/shop/history" className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl">
-                                        <ClipboardList className="h-4 w-4" /> Order History
+                                    <Link
+                                        to="/shop/history"
+                                        className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-orange-500 transition-all rounded-xl"
+                                    >
+                                        <ClipboardList className="h-4 w-4" />{" "}
+                                        Order History
                                     </Link>
-                                    <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-50 transition-all rounded-xl">
+                                    <button
+                                        onClick={logout}
+                                        className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-50 transition-all rounded-xl"
+                                    >
                                         <LogOut className="h-4 w-4" /> Logout
                                     </button>
                                 </div>
@@ -676,12 +934,14 @@ export default function CustomerHome() {
                     <div className="mb-8">
                         <div className="flex items-center gap-2 mb-4">
                             <Sparkles className="h-5 w-5 text-orange-500" />
-                            <h2 className="text-lg font-black text-gray-900">Recommended for You</h2>
+                            <h2 className="text-lg font-black text-gray-900">
+                                Recommended for You
+                            </h2>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                            {recommendations.map(p => (
+                            {recommendations.map((p) => (
                                 <ProductCard
-                                    key={'rec-' + p.id}
+                                    key={"rec-" + p.id}
                                     product={p}
                                     onAddToCart={addToCart}
                                     onBuyNow={handleBuyNow}
@@ -713,23 +973,23 @@ export default function CustomerHome() {
                 <div className="border-b border-gray-200 mb-6">
                     <div className="flex gap-6 overflow-x-auto no-scrollbar">
                         <button
-                            onClick={() => handleCategoryClick('')}
+                            onClick={() => handleCategoryClick("")}
                             className={`pb-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                                 !categoryFilter
-                                    ? 'border-orange-500 text-orange-500'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    ? "border-orange-500 text-orange-500"
+                                    : "border-transparent text-gray-500 hover:text-gray-700"
                             }`}
                         >
                             All Products
                         </button>
-                        {categories.map(cat => (
+                        {categories.map((cat) => (
                             <button
                                 key={cat.id}
                                 onClick={() => handleCategoryClick(cat.id)}
                                 className={`pb-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                                     categoryFilter === cat.id
-                                        ? 'border-orange-500 text-orange-500'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                        ? "border-orange-500 text-orange-500"
+                                        : "border-transparent text-gray-500 hover:text-gray-700"
                                 }`}
                             >
                                 {cat.name}
@@ -740,8 +1000,18 @@ export default function CustomerHome() {
 
                 {/* Catalog Header */}
                 <div className="mb-6">
-                    <h2 className="text-xl font-bold text-gray-900">Product Catalog</h2>
-                    <p className="text-sm text-gray-500">{products.filter(p => !recommendations.some(r => r.id === p.id)).length} items available</p>
+                    <h2 className="text-xl font-bold text-gray-900">
+                        Product Catalog
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                        {
+                            products.filter(
+                                (p) =>
+                                    !recommendations.some((r) => r.id === p.id),
+                            ).length
+                        }{" "}
+                        items available
+                    </p>
                 </div>
 
                 {/* Grid */}
@@ -760,29 +1030,38 @@ export default function CustomerHome() {
                         <div className="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                             <Search className="h-10 w-10 text-gray-200" />
                         </div>
-                        <h3 className="text-xl font-black text-gray-900 mb-2">No products found</h3>
-                        <p className="text-sm text-gray-400 font-medium max-w-xs">Try broadening your search or switching categories.</p>
+                        <h3 className="text-xl font-black text-gray-900 mb-2">
+                            No products found
+                        </h3>
+                        <p className="text-sm text-gray-400 font-medium max-w-xs">
+                            Try broadening your search or switching categories.
+                        </p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        {products.filter(p => !recommendations.some(r => r.id === p.id)).map(p => (
-                            <ProductCard 
-                                key={p.id} 
-                                product={p} 
-                                onAddToCart={addToCart} 
-                                onBuyNow={handleBuyNow}
-                                setSelectedProduct={setSelectedProduct}
-                            />
-                        ))}
+                        {products
+                            .filter(
+                                (p) =>
+                                    !recommendations.some((r) => r.id === p.id),
+                            )
+                            .map((p) => (
+                                <ProductCard
+                                    key={p.id}
+                                    product={p}
+                                    onAddToCart={addToCart}
+                                    onBuyNow={handleBuyNow}
+                                    setSelectedProduct={setSelectedProduct}
+                                />
+                            ))}
                     </div>
                 )}
             </main>
 
             {/* Modals */}
-            <ProductDetailModal 
+            <ProductDetailModal
                 isOpen={!!selectedProduct}
-                product={selectedProduct} 
-                onClose={() => setSelectedProduct(null)} 
+                product={selectedProduct}
+                onClose={() => setSelectedProduct(null)}
                 onAddToCart={addToCart}
             />
 
@@ -790,22 +1069,54 @@ export default function CustomerHome() {
 
             {/* Wave 6 — Dispute Reason Modal */}
             {disputeModal.open && (
-                <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDisputeModal({ open: false, saleId: null, reason: '', submitting: false })}>
-                    <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-lg font-black text-gray-900 mb-1">Tell us what's wrong</h2>
-                        <p className="text-sm text-gray-600 mb-4">We'll hold the rider's payout for this order while admin reviews your report.</p>
+                <div
+                    className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+                    onClick={() =>
+                        setDisputeModal({
+                            open: false,
+                            saleId: null,
+                            reason: "",
+                            submitting: false,
+                        })
+                    }
+                >
+                    <div
+                        className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 className="text-lg font-black text-gray-900 mb-1">
+                            Tell us what's wrong
+                        </h2>
+                        <p className="text-sm text-gray-600 mb-4">
+                            We'll hold the rider's payout for this order while
+                            admin reviews your report.
+                        </p>
                         <textarea
                             value={disputeModal.reason}
-                            onChange={(e) => setDisputeModal(d => ({ ...d, reason: e.target.value }))}
+                            onChange={(e) =>
+                                setDisputeModal((d) => ({
+                                    ...d,
+                                    reason: e.target.value,
+                                }))
+                            }
                             placeholder="What's wrong with this delivery?"
                             maxLength={500}
                             rows={4}
                             className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                         />
-                        <div className="text-[11px] text-gray-400 mt-1">{disputeModal.reason.length}/500</div>
+                        <div className="text-[11px] text-gray-400 mt-1">
+                            {disputeModal.reason.length}/500
+                        </div>
                         <div className="flex gap-2 mt-4">
                             <button
-                                onClick={() => setDisputeModal({ open: false, saleId: null, reason: '', submitting: false })}
+                                onClick={() =>
+                                    setDisputeModal({
+                                        open: false,
+                                        saleId: null,
+                                        reason: "",
+                                        submitting: false,
+                                    })
+                                }
                                 className="flex-1 px-4 py-2 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
                                 disabled={disputeModal.submitting}
                             >
@@ -813,26 +1124,62 @@ export default function CustomerHome() {
                             </button>
                             <button
                                 onClick={async () => {
-                                    if (!disputeModal.reason.trim() || disputeModal.submitting) return;
-                                    setDisputeModal(d => ({ ...d, submitting: true }));
+                                    if (
+                                        !disputeModal.reason.trim() ||
+                                        disputeModal.submitting
+                                    )
+                                        return;
+                                    setDisputeModal((d) => ({
+                                        ...d,
+                                        submitting: true,
+                                    }));
                                     try {
-                                        await api.post(`/sales/${disputeModal.saleId}/customer-dispute-receipt`, { reason: disputeModal.reason.trim() });
-                                        setDisputeModal({ open: false, saleId: null, reason: '', submitting: false });
-                                        api.get('/customer/notifications').then(r => {
-                                            setNotifications(r.data?.data || []);
-                                            setUnreadCount(r.data?.unread || 0);
-                                        }).catch(() => {});
+                                        await api.post(
+                                            `/sales/${disputeModal.saleId}/customer-dispute-receipt`,
+                                            {
+                                                reason: disputeModal.reason.trim(),
+                                            },
+                                        );
+                                        setDisputeModal({
+                                            open: false,
+                                            saleId: null,
+                                            reason: "",
+                                            submitting: false,
+                                        });
+                                        api.get("/customer/notifications")
+                                            .then((r) => {
+                                                setNotifications(
+                                                    r.data?.data || [],
+                                                );
+                                                setUnreadCount(
+                                                    r.data?.unread || 0,
+                                                );
+                                            })
+                                            .catch(() => {});
                                     } catch (err) {
-                                        const msg = err?.response?.data?.message || 'Could not submit dispute. Please try again.';
+                                        const msg =
+                                            err?.response?.data?.message ||
+                                            "Could not submit dispute. Please try again.";
                                         alert(msg);
-                                        console.error('dispute receipt failed:', err);
-                                        setDisputeModal(d => ({ ...d, submitting: false }));
+                                        console.error(
+                                            "dispute receipt failed:",
+                                            err,
+                                        );
+                                        setDisputeModal((d) => ({
+                                            ...d,
+                                            submitting: false,
+                                        }));
                                     }
                                 }}
-                                disabled={!disputeModal.reason.trim() || disputeModal.submitting}
+                                disabled={
+                                    !disputeModal.reason.trim() ||
+                                    disputeModal.submitting
+                                }
                                 className="flex-1 px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {disputeModal.submitting ? 'Submitting...' : 'Submit dispute'}
+                                {disputeModal.submitting
+                                    ? "Submitting..."
+                                    : "Submit dispute"}
                             </button>
                         </div>
                     </div>
@@ -841,15 +1188,18 @@ export default function CustomerHome() {
 
             {/* Proof View Modal */}
             {proofModalUrl && (
-                <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setProofModalUrl(null)}>
+                <div
+                    className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+                    onClick={() => setProofModalUrl(null)}
+                >
                     <div className="relative max-w-4xl w-full h-full flex flex-col items-center justify-center animate-in zoom-in duration-300">
-                         <img 
-                            src={proofModalUrl} 
-                            className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl" 
-                            alt="Proof" 
-                            onClick={e => e.stopPropagation()}
+                        <img
+                            src={proofModalUrl}
+                            className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+                            alt="Proof"
+                            onClick={(e) => e.stopPropagation()}
                         />
-                        <button 
+                        <button
                             className="mt-8 px-8 h-12 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-gray-100"
                             onClick={() => setProofModalUrl(null)}
                         >
