@@ -354,14 +354,14 @@ export default function SalesTab() {
                                     <TableCell className="px-4 py-3 max-w-[220px]">
                                         {Array.isArray(sale.items) && sale.items.length > 0 ? (
                                             <div className="text-sm">
-                                                <div className="font-medium text-foreground truncate" title={`${sale.items[0].product?.name || ''}${sale.items[0].product_variant ? ` (${variantLabel(sale.items[0].product_variant)})` : ''}`}>
+                                                <div className="font-medium text-foreground truncate" title={`${sale.items[0].product?.name || ''}${sale.items[0].product_variant ? ` (${variantLabel(sale.items[0].product_variant)})` : ''} — ${sale.items[0].quantity}${sale.items[0].quantity === 1 ? 'pc' : 'pcs'}`}>
                                                     {sale.items[0].product?.name || 'Unknown product'}
                                                     {sale.items[0].product_variant && (
                                                         <span className="text-muted-foreground ml-1">
                                                             ({variantLabel(sale.items[0].product_variant)})
                                                         </span>
                                                     )}
-                                                    <span className="ml-1 text-xs text-muted-foreground">× {sale.items[0].quantity}</span>
+                                                    <span className="ml-1 text-xs text-muted-foreground">{sale.items[0].quantity}{sale.items[0].quantity === 1 ? 'pc' : 'pcs'}</span>
                                                 </div>
                                                 {sale.items.length > 1 && (
                                                     <div className="text-xs text-muted-foreground">
