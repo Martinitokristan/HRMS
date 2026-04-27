@@ -131,7 +131,11 @@ export default function SalesTab() {
                 status: newStatus,
             });
             showToast(res.data.message || "Status updated");
-            setViewOrder(res.data.data);
+            if (newStatus === "cancelled") {
+                setViewOrder(null);
+            } else {
+                setViewOrder(res.data.data);
+            }
             markStale(
                 STALE_KEYS.ADMIN_ORDERS,
                 STALE_KEYS.ADMIN_DASHBOARD,
@@ -168,7 +172,7 @@ export default function SalesTab() {
         const flow = {
             pending: ["confirmed", "cancelled"],
             pending_payment: ["confirmed", "cancelled"],
-            verifying_payment: ["confirmed", "pending_payment", "cancelled"],
+            verifying_payment: ["confirmed", "cancelled"],
             confirmed: ["cancelled"], // Restricted: Rider must handle the Out for Delivery step
             out_for_delivery: [], // Restricted: Rider must handle the Delivered step
             delivered: [],
@@ -178,17 +182,17 @@ export default function SalesTab() {
         return flow[currentStatus] || [];
     };
 
-    const statusButtonConfig = (status) => {
+    const statusButtonConfig = (status, currentStatus) => {
         const configs = {
             confirmed: {
                 variant: "default",
                 className: "bg-info hover:bg-info/90",
                 label: "Confirm Order",
             },
-            pending_payment: {
-                variant: "outline",
-                className: "text-amber-600 border-amber-300 hover:bg-amber-50",
-                label: "Reject Proof",
+            cancelled: {
+                variant: "destructive",
+                className: "",
+                label: currentStatus === "verifying_payment" ? "Reject Proof & Cancel" : "Cancel Order",
             },
             out_for_delivery: {
                 variant: "default",
@@ -199,11 +203,6 @@ export default function SalesTab() {
                 variant: "default",
                 className: "bg-success hover:bg-success/90",
                 label: "Mark Delivered",
-            },
-            cancelled: {
-                variant: "destructive",
-                className: "",
-                label: "Cancel Order",
             },
         };
         return (
