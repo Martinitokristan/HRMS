@@ -49,6 +49,9 @@ export default function SupplierSettings() {
     const [categories, setCategories] = useState([]);
     const [newCat, setNewCat] = useState('');
 
+    // State for Variant Types
+    const [variantTypes, setVariantTypes] = useState([]);
+
     // State for Confirm Modal
     const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: () => { }, variant: 'default' });
 
@@ -66,9 +69,13 @@ export default function SupplierSettings() {
         { id: 'categories', label: 'Product Categories', Icon: FolderOpen, isSystem: false },
         { id: 'brands', label: 'Brands', Icon: Tag, isSystem: false },
         { id: 'notifications', label: 'Notifications', Icon: Bell, isSystem: false },
-        { id: 'sizes', label: 'Size Config', Icon: Ruler, isSystem: true },
-        { id: 'colors', label: 'Color Palette', Icon: Palette, isSystem: true },
-        { id: 'weights', label: 'Weight Units', Icon: Weight, isSystem: true },
+        ...variantTypes.map(vt => ({
+            id: `variant-${vt.id}`,
+            label: vt.name,
+            Icon: vt.name.toLowerCase().includes('size') ? Ruler : vt.name.toLowerCase().includes('color') ? Palette : vt.name.toLowerCase().includes('weight') ? Weight : Tag,
+            isSystem: true,
+            variantType: vt
+        })),
         { id: 'units', label: 'Unit Types', Icon: RefreshCw, isSystem: true },
     ];
 
@@ -77,6 +84,18 @@ export default function SupplierSettings() {
             fetchCategories();
         }
     }, [activeTab, refreshTrigger]);
+
+    useEffect(() => {
+        const fetchVariantTypes = async () => {
+            try {
+                const res = await api.get('/supplier/variants');
+                setVariantTypes(res.data?.data || []);
+            } catch (err) {
+                console.error('Failed to load variant types', err);
+            }
+        };
+        fetchVariantTypes();
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -378,8 +397,8 @@ export default function SupplierSettings() {
                     </div>
                 )}
 
-                {(activeTab === 'sizes' || activeTab === 'colors' || activeTab === 'weights') && (
-                    <SupplierVariantSettings initialTab={activeTab} />
+                {activeTab.startsWith('variant-') && (
+                    <SupplierVariantSettings initialTab={activeTab} variantType={tabs.find(t => t.id === activeTab)?.variantType} />
                 )}
 
                 {activeTab === 'brands' && (

@@ -19,7 +19,9 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
     // Core states
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
-    const [variantValues, setVariantValues] = useState({ sizes: [], colors: [], weights: [] });
+    const [variantTypes, setVariantTypes] = useState([]);
+    const [categoryVariantTypes, setCategoryVariantTypes] = useState([]);
+    const [variantValues, setVariantValues] = useState({});
 
     // Form logic
     const [form, setForm] = useState({
@@ -41,13 +43,20 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
     useEffect(() => {
         fetchCategories();
         fetchBrands();
-        fetchVariantValues();
+        fetchVariantTypes();
         if (editing) {
             setupEditMode(editing);
         } else if (initialCategoryId) {
             setForm(prev => ({ ...prev, category_id: initialCategoryId }));
         }
     }, [editing, initialCategoryId]);
+
+    useEffect(() => {
+        if (form.category_id) {
+            fetchCategoryVariantTypes(form.category_id);
+            fetchVariantValuesForCategory(form.category_id);
+        }
+    }, [form.category_id]);
 
     const fetchCategories = async () => {
         try {
@@ -63,6 +72,34 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
             const data = res.data?.data !== undefined ? res.data.data : res.data;
             setBrands(Array.isArray(data) ? data : []);
         } catch (e) { console.error(e); }
+    };
+
+    const fetchVariantTypes = async () => {
+        try {
+            const res = await api.get('/supplier/variants');
+            setVariantTypes(res.data?.data || []);
+        } catch (e) { console.error('Failed to load variant types:', e); }
+    };
+
+    const fetchCategoryVariantTypes = async (categoryId) => {
+        try {
+            const res = await api.get('/supplier/category-variant-types', { params: { category_id: categoryId } });
+            setCategoryVariantTypes(res.data?.data || []);
+        } catch (e) { console.error('Failed to load category variant types:', e); }
+    };
+
+    const fetchVariantValuesForCategory = async (categoryId) => {
+        try {
+            const res = await api.get('/supplier/variant-values');
+            const variantData = res.data?.data !== undefined ? res.data.data : (res.data || []);
+            const valuesMap = {};
+            if (Array.isArray(variantData)) {
+                variantData.forEach(vt => {
+                    valuesMap[vt.id] = vt.values || [];
+                });
+            }
+            setVariantValues(valuesMap);
+        } catch (e) { console.error('Failed to load variant values:', e); }
     };
 
     const fetchVariantValues = async () => {
@@ -95,6 +132,7 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
             barcode: v.barcode || '',
             existing_image_path: v.image_path || null,
             existing_extra_images: v.additional_images || [],
+            attributes: v.attributes || [],
         }));
         setVariants(productVariants);
 
@@ -109,9 +147,25 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
         setImagePreview(product.image_path ? `/storage/${product.image_path}` : null);
     };
 
-    const addVariant = () => setVariants(prev => [...prev, { size: '', color: '', weight: '', stock: 0, price_override: '', barcode: '', existing_image_path: null }]);
+    const addVariant = () => {
+        const attributes = categoryVariantTypes.map(cvt => ({
+            variant_id: cvt.variant_id,
+            variant_value_id: ''
+        }));
+        setVariants(prev => [...prev, { size: '', color: '', weight: '', stock: 0, price_override: '', barcode: '', existing_image_path: null, attributes }]);
+    };
     const removeVariant = (idx) => setVariants(prev => prev.filter((_, i) => i !== idx));
     const updateVariant = (idx, field, val) => setVariants(prev => prev.map((v, i) => i === idx ? { ...v, [field]: val } : v));
+    const updateVariantAttribute = (idx, variantId, valueId) => {
+        setVariants(prev => prev.map((v, i) => {
+            if (i !== idx) return v;
+            const attributes = v.attributes || [];
+            const updatedAttrs = attributes.map(a => 
+                a.variant_id === variantId ? { ...a, variant_value_id: valueId } : a
+            );
+            return { ...v, attributes: updatedAttrs };
+        }));
+    };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -211,7 +265,11 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
-        const validVariants = variants.filter(v => v.size?.trim() || v.color?.trim() || v.weight?.trim() || v.stock > 0);
+        const validVariants = variants.filter(v => {
+            const hasAttribute = v.attributes?.some(a => a.variant_value_id);
+            const hasLegacy = v.size?.trim() || v.color?.trim() || v.weight?.trim();
+            return hasAttribute || hasLegacy || v.stock > 0;
+        });
         if (variants.length > 0 && validVariants.length === 0) {
             showToast('Please fill in at least one field for each variant or remove empty variants', 'error');
             return;
@@ -380,39 +438,25 @@ export default function ProductForm({ editing = null, initialCategoryId = null, 
                                                 )}
                                             </div>
                                             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                                <div>
-                                                    <Label className="text-[10px] mb-1">Size</Label>
-                                                    <select
-                                                        className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                                        value={v.size || ""}
-                                                        onChange={e => updateVariant(idx, 'size', e.target.value)}
-                                                    >
-                                                        <option value="">No Size</option>
-                                                        {getFilteredVariantValues('sizes')?.map(val => <option key={val.id} value={val.label}>{val.label}</option>)}
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <Label className="text-[10px] mb-1">Color</Label>
-                                                    <select
-                                                        className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                                        value={v.color || ""}
-                                                        onChange={e => updateVariant(idx, 'color', e.target.value)}
-                                                    >
-                                                        <option value="">No Color</option>
-                                                        {getFilteredVariantValues('colors')?.map(val => <option key={val.id} value={val.label}>{val.label}</option>)}
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <Label className="text-[10px] mb-1">Weight</Label>
-                                                    <select
-                                                        className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                                        value={v.weight || ""}
-                                                        onChange={e => updateVariant(idx, 'weight', e.target.value)}
-                                                    >
-                                                        <option value="">No Weight</option>
-                                                        {getFilteredVariantValues('weights')?.map(val => <option key={val.id} value={val.label}>{val.label}</option>)}
-                                                    </select>
-                                                </div>
+                                                {categoryVariantTypes.map(cvt => {
+                                                    const variantType = variantTypes.find(vt => vt.id === cvt.variant_id);
+                                                    if (!variantType) return null;
+                                                    const currentValue = v.attributes?.find(a => a.variant_id === cvt.variant_id)?.variant_value_id || '';
+                                                    const values = variantValues[cvt.variant_id] || [];
+                                                    return (
+                                                        <div key={cvt.variant_id}>
+                                                            <Label className="text-[10px] mb-1">{variantType.name}</Label>
+                                                            <select
+                                                                className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                                                value={currentValue}
+                                                                onChange={e => updateVariantAttribute(idx, cvt.variant_id, e.target.value)}
+                                                            >
+                                                                <option value="">No {variantType.name}</option>
+                                                                {values.map(val => <option key={val.id} value={val.id}>{val.label}</option>)}
+                                                            </select>
+                                                        </div>
+                                                    );
+                                                })}
                                                 <div>
                                                     <Label className="text-[10px] mb-1">Stock</Label>
                                                     <Input className="h-8 text-sm" type="number" placeholder="0" value={v.stock} onChange={e => updateVariant(idx, 'stock', e.target.value)} />
