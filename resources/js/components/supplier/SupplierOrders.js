@@ -359,11 +359,21 @@ export default function SupplierOrders({ mode = "completed" }) {
                                     <TableCell>
                                         {getStatusBadge(order?.status)}
                                     </TableCell>
-                                    <TableCell>
-                                        {Array.isArray(order?.items)
-                                            ? order.items.length
-                                            : 0}{" "}
-                                        items
+                                    <TableCell className="max-w-[220px]">
+                                        {Array.isArray(order?.items) && order.items.length > 0 ? (
+                                            <div className="text-sm">
+                                                <div className="font-medium text-foreground truncate" title={order.items[0].product?.name || order.items[0].supplier_product?.name || ''}>
+                                                    {order.items[0].product?.name || order.items[0].supplier_product?.name || 'Unknown'}
+                                                </div>
+                                                {order.items.length > 1 && (
+                                                    <div className="text-xs text-muted-foreground">
+                                                        +{order.items.length - 1} more item{order.items.length - 1 === 1 ? '' : 's'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">—</span>
+                                        )}
                                     </TableCell>
                                     <TableCell className="font-mono text-foreground">
                                         {formatPHP(order?.total_cost)}

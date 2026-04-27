@@ -57,9 +57,9 @@ class BrevoEmailService
         $htmlContent = "
             <html>
             <body style='font-family: \"Inter\", Arial, sans-serif; background-color: #f8fafc; padding: 40px; margin: 0;'>
-                <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 48px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+                <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 32px 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
                     <div style='text-align: center; margin-bottom: 32px;'>
-                        <h1 style='color: #0f172a; font-size: 24px; font-weight: 800; margin: 0;'>HRMS <span style='color: #FF6B35;'>PRO</span></h1>
+                        <h1 style='color: #0f172a; font-size: 24px; font-weight: 800; margin: 0;'>HRMS</h1>
                         <p style='color: #64748b; font-size: 14px; margin-top: 4px;'>Hardware Retail Management System</p>
                     </div>
                     
@@ -145,9 +145,9 @@ class BrevoEmailService
         $htmlContent = "
             <html>
             <body style='font-family: \"Inter\", Arial, sans-serif; background-color: #f8fafc; padding: 40px; margin: 0;'>
-                <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 48px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
+                <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 32px 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'>
                     <div style='text-align: center; margin-bottom: 32px;'>
-                        <h1 style='color: #0f172a; font-size: 24px; font-weight: 800; margin: 0;'>HRMS <span style='color: #FF6B35;'>PRO</span></h1>
+                        <h1 style='color: #0f172a; font-size: 24px; font-weight: 800; margin: 0;'>HRMS</h1>
                         <p style='color: #64748b; font-size: 14px; margin-top: 4px;'>Hardware Retail Management System</p>
                     </div>
 

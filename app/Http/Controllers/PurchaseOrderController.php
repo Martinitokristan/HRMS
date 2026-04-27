@@ -23,7 +23,7 @@ class PurchaseOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PurchaseOrder::with(['supplier', 'creator', 'items.product', 'items.supplierProduct'])
+        $query = PurchaseOrder::with(['supplier', 'creator', 'items.product', 'items.supplierProduct', 'items.productVariant.sizeValue', 'items.productVariant.colorValue', 'items.productVariant.weightValue'])
             ->when($request->tab, function ($q) use ($request) {
                 if ($request->tab === 'requests') {
                     return $q->whereIn('status', ['pending', 'pending_supplier', 'accepted']);
@@ -543,7 +543,7 @@ class PurchaseOrderController extends Controller
 
             $supplierId = $this->resolveSupplierID($request);
 
-            $query = PurchaseOrder::with(['supplier', 'creator', 'items.product', 'items.supplierProduct'])
+            $query = PurchaseOrder::with(['supplier', 'creator', 'items.product', 'items.supplierProduct', 'items.productVariant.sizeValue', 'items.productVariant.colorValue', 'items.productVariant.weightValue'])
                 ->where('supplier_id', $supplierId)
                 ->when($request->tab, function ($q) use ($request) {
                     if ($request->tab === 'requests') {
@@ -578,7 +578,7 @@ class PurchaseOrderController extends Controller
     {
         $supplierId = $this->resolveSupplierID(request());
 
-        $po = PurchaseOrder::with(['supplier', 'creator', 'items.product'])
+        $po = PurchaseOrder::with(['supplier', 'creator', 'items.product', 'items.productVariant.sizeValue', 'items.productVariant.colorValue', 'items.productVariant.weightValue'])
             ->where('supplier_id', $supplierId)
             ->findOrFail($id);
 

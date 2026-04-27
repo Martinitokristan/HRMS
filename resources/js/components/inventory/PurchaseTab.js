@@ -275,8 +275,21 @@ export default function PurchaseTab({ mode = "completed" }) {
                                     <TableCell className="px-4 py-3 text-right font-mono text-foreground">
                                         {formatPHP(po.total_cost)}
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-center text-muted-foreground">
-                                        {po.items?.length || 0} items
+                                    <TableCell className="px-4 py-3 max-w-[220px]">
+                                        {Array.isArray(po.items) && po.items.length > 0 ? (
+                                            <div className="text-sm">
+                                                <div className="font-medium text-foreground truncate" title={po.items[0].product?.name || po.items[0].supplier_product?.name || ''}>
+                                                    {po.items[0].product?.name || po.items[0].supplier_product?.name || 'Unknown'}
+                                                </div>
+                                                {po.items.length > 1 && (
+                                                    <div className="text-xs text-muted-foreground">
+                                                        +{po.items.length - 1} more item{po.items.length - 1 === 1 ? '' : 's'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">—</span>
+                                        )}
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-center">
                                         <StatusBadge status={po.status} />

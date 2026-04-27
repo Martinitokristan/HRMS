@@ -93,7 +93,10 @@ class SaleController extends Controller
 
                 // Deduct stock
                 if (!empty($item['product_variant_id'])) {
-                    $variant = \App\Models\ProductVariant::whereKey($item['product_variant_id'])->lockForUpdate()->first();
+                    $variant = \App\Models\ProductVariant::with(['sizeValue', 'colorValue', 'weightValue'])
+                        ->whereKey($item['product_variant_id'])
+                        ->lockForUpdate()
+                        ->first();
                     if (!$variant) {
                         throw ValidationException::withMessages([
                             'items' => ["Insufficient stock for {$product->name}. Available: 0"],
@@ -125,7 +128,13 @@ class SaleController extends Controller
                     // Stock alert checks for variant
                     $newStock = $oldStock - $item['quantity'];
                     $threshold = $variantInventory ? (int) $variantInventory->reorder_threshold : 5;
-                    $productName = $product->name . ' (variant)';
+                    $variantParts = array_filter([
+                        $variant->sizeValue->label ?? null,
+                        $variant->colorValue->label ?? null,
+                        $variant->weightValue->label ?? null,
+                    ]);
+                    $variantSuffix = $variantParts ? ' (' . implode(' / ', $variantParts) . ')' : '';
+                    $productName = $product->name . $variantSuffix;
                     static::checkStockAlerts($productName, $newStock, $threshold);
                 } else {
                     $inv = Inventory::where('product_id', $item['product_id'])

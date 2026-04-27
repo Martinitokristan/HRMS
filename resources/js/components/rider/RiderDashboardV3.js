@@ -1771,7 +1771,7 @@ export default function RiderDashboardV3() {
                                 }}>
                                     <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📸</span>
                                     <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Tap to capture or upload photo</span>
-                                    <input type="file" accept="image/*" capture="environment" onChange={handleProofFileChange} style={{ display: 'none' }} />
+                                    <input type="file" accept="image/*" onChange={handleProofFileChange} style={{ display: 'none' }} />
                                 </label>
                             )}
 

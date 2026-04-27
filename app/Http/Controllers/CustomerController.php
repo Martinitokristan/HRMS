@@ -43,7 +43,7 @@ class CustomerController extends Controller
 
     public function myOrders(Request $request)
     {
-        $orders = Sale::with(['items.product', 'delivery.rider.riderProfile'])
+        $orders = Sale::with(['items.product', 'items.productVariant.sizeValue', 'items.productVariant.colorValue', 'items.productVariant.weightValue', 'delivery.rider.riderProfile'])
             ->where('customer_id', $request->user()->id)
             ->latest()
             ->get()

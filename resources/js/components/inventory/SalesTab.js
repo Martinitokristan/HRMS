@@ -27,7 +27,11 @@ import { GCashIcon, CODIcon } from "@/components/icons/PaymentIcons";
 function variantLabel(v) {
     if (!v) return '';
     if (typeof v === 'string') return v;
-    const parts = [v.color, v.size, v.material, v.storage, v.variant_name].filter(Boolean);
+    const parts = [
+        v.size_value?.label,
+        v.color_value?.label,
+        v.weight_value?.label,
+    ].filter(Boolean);
     return parts.length ? parts.join(' / ') : '';
 }
 
@@ -350,7 +354,7 @@ export default function SalesTab() {
                                     <TableCell className="px-4 py-3 max-w-[220px]">
                                         {Array.isArray(sale.items) && sale.items.length > 0 ? (
                                             <div className="text-sm">
-                                                <div className="font-medium text-foreground truncate">
+                                                <div className="font-medium text-foreground truncate" title={`${sale.items[0].product?.name || ''}${sale.items[0].product_variant ? ` (${variantLabel(sale.items[0].product_variant)})` : ''}`}>
                                                     {sale.items[0].product?.name || 'Unknown product'}
                                                     {sale.items[0].product_variant && (
                                                         <span className="text-muted-foreground ml-1">
@@ -419,7 +423,7 @@ export default function SalesTab() {
                 isOpen={!!viewOrder}
                 onClose={() => setViewOrder(null)}
                 title={`Order ${viewOrder?.order_number}`}
-                size="md"
+                size="lg"
             >
                 {viewOrder && (
                     <div className="space-y-5">
@@ -873,14 +877,14 @@ function SalesReceiptModal({ order, onClose, settings }) {
                                                         {variantLabel}
                                                     </p>
                                                 ) : (
-                                                    item.product?.barcode && (
-                                                        <p className="text-[11px] text-[#9ca3af] font-mono mt-0.5">
-                                                            {
-                                                                item.product
-                                                                    .barcode
-                                                            }
-                                                        </p>
-                                                    )
+                                                    <>
+                                                        <p className="text-[11px] text-[#9ca3af] mt-0.5">Base product</p>
+                                                        {item.product?.barcode && (
+                                                            <p className="text-[11px] text-[#9ca3af] font-mono mt-0.5">
+                                                                {item.product.barcode}
+                                                            </p>
+                                                        )}
+                                                    </>
                                                 )}
                                             </td>
                                             <td className="px-[10px] py-[10px] text-center font-semibold text-[#111827]">
