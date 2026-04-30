@@ -52,7 +52,10 @@ class RiderController extends Controller
     {
         $result = $queryService->myDeliveries($request->user()->id);
 
-        return response()->json($result['data'], $result['status_code']);
+        return response()->json([
+            'data' => $result['data'],
+            'status' => 'success',
+        ], $result['status_code']);
     }
 
     /**
@@ -102,7 +105,10 @@ class RiderController extends Controller
             $request->get('longitude')
         );
 
-        return response()->json($result['data'], $result['status_code']);
+        return response()->json([
+            'data' => $result['data'],
+            'status' => 'success',
+        ], $result['status_code']);
     }
 
     /**

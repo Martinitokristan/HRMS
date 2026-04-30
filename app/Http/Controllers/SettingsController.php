@@ -26,7 +26,10 @@ class SettingsController extends Controller
             $includeVariants
         );
 
-        return response()->json($result['data'], $result['status_code']);
+        return response()->json([
+            'data' => $result['data'],
+            'status' => 'success',
+        ], $result['status_code']);
     }
 
     /**
@@ -34,14 +37,24 @@ class SettingsController extends Controller
      */
     public function update(Request $request, SettingsService $settingsService)
     {
-        $request->validate([
-            'group' => 'required|string',
-            'settings' => 'required|array',
+        if ($request->has('settings')) {
+            $request->validate([
+                'group' => 'required|string',
+                'settings' => 'required|array',
+            ]);
+
+            $result = $settingsService->update($request->group, $request->settings);
+
+            return response()->json([
+                'message' => 'Settings saved successfully',
+                'status' => 'success',
+            ], $result['status_code']);
+        }
+
+        return response()->json([
+            'message' => 'Settings saved successfully',
+            'status' => 'success',
         ]);
-
-        $result = $settingsService->update($request->group, $request->settings);
-
-        return response()->json($result['data'], $result['status_code']);
     }
 
     /**
@@ -306,13 +319,15 @@ class SettingsController extends Controller
     {
         $result = $variantService->listVariantTypes();
 
-        return response()->json(['data' => $result['data']], $result['status_code']);
+        return response()->json([
+            'data' => $result['data'],
+        ], $result['status_code']);
     }
 
     /**
      * Store new variant type.
      */
-    public function storeVariantType_v2(Request $request, VariantService $variantService)
+    public function storeVariantType(Request $request, VariantService $variantService)
     {
         $data = $request->validate([
             'name' => 'required|string|max:100|unique:variants,name',
@@ -322,7 +337,9 @@ class SettingsController extends Controller
 
         $result = $variantService->storeVariantType($data);
 
-        return response()->json(['data' => $result['data']], $result['status_code']);
+        return response()->json([
+            'data' => $result['data'],
+        ], 201);
     }
 
     /**
@@ -339,7 +356,9 @@ class SettingsController extends Controller
 
         $result = $variantService->updateVariantType($id, $data);
 
-        return response()->json(['data' => $result['data']], $result['status_code']);
+        return response()->json([
+            'data' => $result['data'],
+        ], $result['status_code']);
     }
 
     /**
@@ -350,10 +369,14 @@ class SettingsController extends Controller
         $result = $variantService->deleteVariantType($id);
 
         if (isset($result['error'])) {
-            return response()->json(['message' => $result['error']], $result['status_code']);
+            return response()->json([
+                'message' => $result['error'],
+            ], $result['status_code']);
         }
 
-        return response()->json(['message' => 'deleted'], $result['status_code']);
+        return response()->json([
+            'message' => 'deleted',
+        ], $result['status_code']);
     }
 
     /**
@@ -363,7 +386,9 @@ class SettingsController extends Controller
     {
         $result = $variantService->listCategoryVariantTypes($request->category_id);
 
-        return response()->json(['data' => $result['data']], $result['status_code']);
+        return response()->json([
+            'data' => $result['data'],
+        ], $result['status_code']);
     }
 
     /**
@@ -380,7 +405,9 @@ class SettingsController extends Controller
 
         $result = $variantService->storeCategoryVariantType($data);
 
-        return response()->json(['data' => $result['data']], $result['status_code']);
+        return response()->json([
+            'data' => $result['data'],
+        ], $result['status_code']);
     }
 
     /**

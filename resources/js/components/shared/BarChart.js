@@ -23,17 +23,8 @@ const BarChart = ({
     hideHeader: hideHeaderProp = false,
 }) => {
     const hideHeader = hideHeaderProp || !title;
-    const normalizedData = Array.isArray(data)
-        ? data.map((item, idx) => ({
-              label:
-                  item?.label == null || item?.label === ""
-                      ? `Item ${idx + 1}`
-                      : String(item.label),
-              value: Number(item?.value) || 0,
-          }))
-        : [];
 
-    if (normalizedData.length === 0) {
+    if (!data || data.length === 0) {
         return (
             <div className="flex items-center justify-center h-full text-muted-foreground bg-slate-50/50 rounded-xl border border-dashed">
                 <div className="text-center">
@@ -50,20 +41,20 @@ const BarChart = ({
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
 
-    const dataMax = Math.max(...normalizedData.map((d) => d.value), 0);
+    const dataMax = Math.max(...data.map((d) => Number(d.value) || 0), 0);
     const safeMaxValue =
         Math.max(maxValue > 0 ? maxValue : dataMax * 1.1, dataMax * 1.1) || 10;
-    const totalValue = normalizedData.reduce((sum, d) => sum + d.value, 0);
+    const totalValue = data.reduce((sum, d) => sum + Number(d.value), 0);
 
-    const barCount = normalizedData.length;
+    const barCount = data.length;
     const barGapRatio = 0.3; // Space between bars as fraction of bar width
     const totalGapWidth = chartWidth * barGapRatio;
     const availableBarWidth = chartWidth - totalGapWidth;
     const barWidth = availableBarWidth / barCount;
     const gapWidth = totalGapWidth / (barCount + 1);
 
-    const bars = normalizedData.map((item, idx) => {
-        const h = (item.value / safeMaxValue) * chartHeight;
+    const bars = data.map((item, idx) => {
+        const h = (Number(item.value) / safeMaxValue) * chartHeight;
         const x = padding.left + gapWidth + idx * (barWidth + gapWidth);
         const y = padding.top + chartHeight - h;
         return {
@@ -172,9 +163,7 @@ const BarChart = ({
                                     fill="#64748b"
                                     className="font-medium"
                                 >
-                                    {bar.label.length > 12
-                                        ? bar.label.substring(0, 10) + "..."
-                                        : bar.label}
+                                    {bar.label.length > 12 ? bar.label.substring(0, 10) + '...' : bar.label}
                                 </text>
                             )}
                         </g>

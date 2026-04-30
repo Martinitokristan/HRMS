@@ -68,8 +68,6 @@ export default function StockTab() {
     const [expandedProducts, setExpandedProducts] = useState(new Set());
     const [viewVariantItem, setViewVariantItem] = useState(null);
     const [variantPage, setVariantPage] = useState(1);
-    const safeCategories = Array.isArray(categories) ? categories : [];
-    const safeUnitTypes = Array.isArray(unitTypes) ? unitTypes : [];
 
     // Memoize grouped inventory data to prevent unnecessary recalculations
     const groupedInventory = useMemo(() => {
@@ -147,9 +145,7 @@ export default function StockTab() {
                     }
                 }
             } else if (item.is_orphan) {
-                const nameKey = String(item.name || "")
-                    .trim()
-                    .toLowerCase();
+                const nameKey = item.name.trim().toLowerCase();
                 const relatedOrphans = inventory.data.filter(
                     (i) =>
                         i.is_orphan && i.name.trim().toLowerCase() === nameKey,
@@ -236,14 +232,12 @@ export default function StockTab() {
         console.log("🔍 [StockTab] Loading initial settings and suppliers...");
         api.get("/settings")
             .then((res) => {
-                const categoriesData =
-                    res.data?.data?.categories || res.data?.categories || [];
-                const unitTypesData =
-                    res.data?.data?.unitTypes || res.data?.unitTypes || [];
                 setCategories(
-                    Array.isArray(categoriesData) ? categoriesData : [],
+                    res.data?.data?.categories || res.data?.categories || [],
                 );
-                setUnitTypes(Array.isArray(unitTypesData) ? unitTypesData : []);
+                setUnitTypes(
+                    res.data?.data?.unitTypes || res.data?.unitTypes || [],
+                );
             })
             .catch((err) => {
                 console.error("❌ [StockTab] Settings error:", err);
@@ -267,7 +261,7 @@ export default function StockTab() {
 
         const fetch = async () => {
             setLoading(true);
-            const params = { page, search, per_page: 15 };
+            const params = { page, search };
             if (categoryFilter) params.category_id = categoryFilter;
             if (sizeFilter) params.size = sizeFilter;
             if (colorFilter) params.color = colorFilter;
@@ -280,34 +274,10 @@ export default function StockTab() {
                         res.data?.data !== undefined
                             ? res.data.data
                             : res.data || {};
-                    const normalizedRows = (paginated.data || []).map(
-                        (row, idx) => ({
-                            ...row,
-                            id: row.id ?? row.inventory_id ?? `inv-${idx}`,
-                            raw_id:
-                                row.raw_id ??
-                                row.inventory_id ??
-                                row.id ??
-                                null,
-                            name: row.name ?? row.product_name ?? "",
-                            supplier:
-                                row.supplier ??
-                                row.supplier_name ??
-                                "Unknown",
-                            barcode:
-                                row.barcode ?? row.product_barcode ?? "",
-                            category:
-                                row.category ?? row.category_name ?? "",
-                            unit: row.unit ?? row.unit_label ?? "Units",
-                            purchase_price:
-                                Number(row.purchase_price ?? 0) || 0,
-                            sell_price: Number(row.sell_price ?? 0) || 0,
-                        }),
-                    );
                     if (isMounted) {
                         // Store raw data - grouping is handled by useMemo
                         setInventory({
-                            data: normalizedRows,
+                            data: paginated.data || [],
                             total: paginated.total || 0,
                             current_page: paginated.current_page || 1,
                         });
@@ -362,19 +332,9 @@ export default function StockTab() {
 
         setTransferLoading(true);
         try {
-            const resolvedInventoryId =
-                transferModal.item?.raw_id ??
-                transferModal.item?.inventory_id ??
-                transferModal.item?.id;
-
             // Always send product_data so admin edits (name, price, unit, category) are applied
             await api.post("/inventory/transfer", {
-                inventory_id: resolvedInventoryId,
-                product_id: transferModal.item?.product_id ?? null,
-                variant_id:
-                    transferModal.item?.product_variant_id ??
-                    transferModal.item?.variant_id ??
-                    null,
+                inventory_id: transferModal.item.raw_id,
                 quantity: qty,
                 product_data: {
                     name: transferForm.name,
@@ -421,12 +381,8 @@ export default function StockTab() {
                     api.get("/settings/unit-types"),
                 ]);
 
-                const fetchedCategories = Array.isArray(categoriesRes.data?.data)
-                    ? categoriesRes.data.data
-                    : [];
-                const fetchedUnitTypes = Array.isArray(unitTypesRes.data?.data)
-                    ? unitTypesRes.data.data
-                    : [];
+                const fetchedCategories = categoriesRes.data?.data || [];
+                const fetchedUnitTypes = unitTypesRes.data?.data || [];
 
                 // Wait for state to update
                 await new Promise((resolve) => {
@@ -506,22 +462,18 @@ export default function StockTab() {
             // Case 2: Warehouse-Only orphan — fetch supplier product variants via API
             try {
                 // Ensure categories are loaded
-                let fetchedCategories = safeCategories;
-                let fetchedUnitTypes = safeUnitTypes;
+                let fetchedCategories = categories;
+                let fetchedUnitTypes = unitTypes;
 
-                if (safeCategories.length === 0) {
+                if (categories.length === 0) {
                     // Fetch categories from /categories API
                     const [categoriesRes, unitTypesRes] = await Promise.all([
                         api.get("/categories"),
                         api.get("/settings/unit-types"),
                     ]);
 
-                    fetchedCategories = Array.isArray(categoriesRes.data?.data)
-                        ? categoriesRes.data.data
-                        : [];
-                    fetchedUnitTypes = Array.isArray(unitTypesRes.data?.data)
-                        ? unitTypesRes.data.data
-                        : [];
+                    fetchedCategories = categoriesRes.data?.data || [];
+                    fetchedUnitTypes = unitTypesRes.data?.data || [];
 
                     setCategories(fetchedCategories);
                     setUnitTypes(fetchedUnitTypes);
@@ -612,7 +564,7 @@ export default function StockTab() {
                         },
                         options: [
                             { value: "", label: "All Categories" },
-                            ...safeCategories.map((c) => ({
+                            ...categories.map((c) => ({
                                 value: c.id,
                                 label: c.name,
                             })),
@@ -689,7 +641,7 @@ export default function StockTab() {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            groupedInventory.map((item, itemIdx) => {
+                            groupedInventory.map((item) => {
                                 const isExpanded = expandedProducts.has(
                                     item.product_id || item.id,
                                 );
@@ -742,15 +694,8 @@ export default function StockTab() {
                                     : Number(item.current_stock || 0) <=
                                       Number(item.reorder_threshold || 10);
 
-                                const rowKey =
-                                    item?.id ??
-                                    item?.raw_id ??
-                                    (item?.product_id
-                                        ? `product-${item.product_id}`
-                                        : `inv-row-${itemIdx}`);
-
                                 return (
-                                    <React.Fragment key={rowKey}>
+                                    <React.Fragment key={item.id}>
                                         {/* Base Product Row */}
                                         <TableRow
                                             className={
@@ -969,7 +914,7 @@ export default function StockTab() {
                                         <TableBody>
                                             {/* Paginated Variants only — base product info is in the modal header */}
                                             {paginatedVariants.map(
-                                                (variant, variantIdx) => {
+                                                (variant) => {
                                                     const variantParts = [];
                                                     if (
                                                         variant.size &&
@@ -999,12 +944,7 @@ export default function StockTab() {
 
                                                     return (
                                                         <TableRow
-                                                            key={
-                                                                variant?.id ??
-                                                                variant?.raw_id ??
-                                                                variant?.barcode ??
-                                                                `variant-${variantIdx}`
-                                                            }
+                                                            key={variant.id}
                                                             className="hover:bg-secondary/10 transition-colors"
                                                         >
                                                             <TableCell className="px-4 py-4 font-semibold text-foreground pl-10">
@@ -1125,11 +1065,6 @@ export default function StockTab() {
                 {transferModal.item &&
                     (() => {
                         const item = transferModal.item;
-                        const itemName = String(item?.name || "").replace(
-                            " (Warehouse Only)",
-                            "",
-                        );
-                        const itemSupplier = String(item?.supplier || "");
                         const isVariant = item.is_variant;
                         const variantParts = [];
                         if (isVariant) {
@@ -1159,7 +1094,10 @@ export default function StockTab() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold text-foreground text-sm truncate">
-                                                {itemName}
+                                                {item.name.replace(
+                                                    " (Warehouse Only)",
+                                                    "",
+                                                )}
                                             </span>
                                             {isVariant ? (
                                                 <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter">
@@ -1178,8 +1116,8 @@ export default function StockTab() {
                                                 </span>
                                             )}
                                             <span className="text-[10px] text-muted-foreground italic">
-                                                {itemSupplier !== "-"
-                                                    ? itemSupplier
+                                                {item.supplier !== "-"
+                                                    ? item.supplier
                                                     : ""}
                                             </span>
                                         </div>
@@ -1327,12 +1265,9 @@ export default function StockTab() {
                                                 <option value="">
                                                     Select Category
                                                 </option>
-                                                {safeCategories.map((c, idx) => (
+                                                {categories.map((c) => (
                                                     <option
-                                                        key={
-                                                            c?.id ??
-                                                            `category-${idx}-${c?.name ?? "unknown"}`
-                                                        }
+                                                        key={c.id}
                                                         value={c.id}
                                                     >
                                                         {c.name}
@@ -1360,12 +1295,9 @@ export default function StockTab() {
                                                 <option value="">
                                                     Select Unit
                                                 </option>
-                                                {safeUnitTypes.map((u, idx) => (
+                                                {unitTypes.map((u) => (
                                                     <option
-                                                        key={
-                                                            u?.id ??
-                                                            `unit-${idx}-${u?.purchase_unit ?? "unknown"}`
-                                                        }
+                                                        key={u.id}
                                                         value={u.id}
                                                     >
                                                         {u.purchase_unit} /{" "}
