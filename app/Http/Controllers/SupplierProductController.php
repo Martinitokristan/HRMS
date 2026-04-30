@@ -65,17 +65,6 @@ class SupplierProductController extends Controller
             'name' => 'required|string|max:150',
             'barcode' => 'required|string|max:50|unique:supplier_products',
             'description' => 'nullable|string',
-            'category_id' => 'nullable|exists:categories,id',
-            'price' => 'required|numeric|min:0',
-            'min_order_qty' => 'nullable|integer|min:1',
-            'total_stock' => 'nullable|integer|min:0',
-            'base_size' => 'nullable|string|max:50',
-            'is_promoted' => 'nullable|boolean',
-            'variants' => 'nullable|string',
-            'brand_id' => 'nullable|exists:brands,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
-            'additional_images' => 'nullable|array',
-            'additional_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
         ]);
 
         $result = $productService->create($supplierId, $data, $request);
@@ -102,17 +91,6 @@ class SupplierProductController extends Controller
             'name' => 'required|string|max:150',
             'barcode' => 'required|string|max:50|unique:supplier_products,barcode,' . $id,
             'description' => 'nullable|string',
-            'category_id' => 'nullable|exists:categories,id',
-            'price' => 'required|numeric|min:0',
-            'min_order_qty' => 'nullable|integer|min:1',
-            'total_stock' => 'nullable|integer|min:0',
-            'base_size' => 'nullable|string|max:50',
-            'is_promoted' => 'nullable|boolean',
-            'variants' => 'nullable|string',
-            'brand_id' => 'nullable|exists:brands,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
-            'additional_images' => 'nullable|array',
-            'additional_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:max_width=4000,max_height=4000',
         ]);
 
         $result = $productService->update($supplierId, $id, $data, $request);
