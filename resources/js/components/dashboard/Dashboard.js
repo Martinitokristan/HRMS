@@ -77,6 +77,43 @@ export default function Dashboard() {
         { value: "12", label: "December" },
     ];
 
+    const normalizeRecentActivity = (payload) => {
+        if (Array.isArray(payload)) return payload;
+
+        const recentSales = Array.isArray(payload?.recent_sales)
+            ? payload.recent_sales.map((sale) => ({
+                  id: `sale-${sale.id}`,
+                  title: sale.order_number || "New sale",
+                  message: sale.customer?.name
+                      ? `Order from ${sale.customer.name}`
+                      : "A new sale was recorded",
+                  status: sale.status || "Processing",
+                  icon: "ShoppingBag",
+                  timestamp: sale.created_at || new Date().toISOString(),
+              }))
+            : [];
+
+        const recentDeliveries = Array.isArray(payload?.recent_deliveries)
+            ? payload.recent_deliveries.map((delivery) => ({
+                  id: `delivery-${delivery.id}`,
+                  title: delivery.sale?.order_number || "Delivery update",
+                  message: delivery.rider?.name
+                      ? `Delivered by ${delivery.rider.name}`
+                      : "Delivery status updated",
+                  status:
+                      delivery.status === "delivered"
+                          ? "Delivered"
+                          : "In Transit",
+                  icon: delivery.status === "delivered" ? "CheckCircle" : "Bike",
+                  timestamp: delivery.updated_at || new Date().toISOString(),
+              }))
+            : [];
+
+        return [...recentSales, ...recentDeliveries].sort(
+            (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
+        );
+    };
+
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
@@ -107,9 +144,18 @@ export default function Dashboard() {
             const res = await api.get("/reports/yearly-category-revenue", {
                 params: { limit: 10 },
             });
-            setYearlyCategories(res.data?.data?.categories || []);
+            const yearlyPayload = res.data?.data;
+            const categories = Array.isArray(yearlyPayload?.categories)
+                ? yearlyPayload.categories
+                : Array.isArray(yearlyPayload?.data)
+                  ? yearlyPayload.data
+                  : Array.isArray(yearlyPayload)
+                    ? yearlyPayload
+                    : [];
+            setYearlyCategories(categories);
         } catch (err) {
             console.error("Failed to fetch yearly category revenue", err);
+            setYearlyCategories([]);
         }
     };
 
@@ -118,9 +164,16 @@ export default function Dashboard() {
             const res = await api.get("/reports/return-rate-by-category", {
                 params: { limit: 10 },
             });
-            setReturnRateData(res.data?.data || []);
+            const returnPayload = res.data?.data;
+            const returnData = Array.isArray(returnPayload)
+                ? returnPayload
+                : Array.isArray(returnPayload?.data)
+                  ? returnPayload.data
+                  : [];
+            setReturnRateData(returnData);
         } catch (err) {
             console.error("Failed to fetch return rate by category", err);
+            setReturnRateData([]);
         }
     };
 
@@ -128,9 +181,10 @@ export default function Dashboard() {
         setActivityLoading(true);
         try {
             const res = await api.get("/reports/recent-activity");
-            setRecentActivity(res.data?.data || []);
+            setRecentActivity(normalizeRecentActivity(res.data?.data));
         } catch (err) {
             console.error("Failed to fetch recent activity", err);
+            setRecentActivity([]);
         } finally {
             setActivityLoading(false);
         }
@@ -496,9 +550,16 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-grow">
                         <BarChart
-                            data={yearlyCategories.map((c) => ({
-                                label: c.name,
-                                value: c.revenue,
+                            data={(Array.isArray(yearlyCategories)
+                                ? yearlyCategories
+                                : []
+                            ).map((c, idx) => ({
+                                label:
+                                    c?.name ??
+                                    (c?.category_id
+                                        ? `Category ${c.category_id}`
+                                        : `Category ${idx + 1}`),
+                                value: Number(c?.revenue) || 0,
                             }))}
                             formatValue={formatCurr}
                             color="#3b82f6"
@@ -520,9 +581,19 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-grow">
                         <BarChart
-                            data={returnRateData.map((c) => ({
-                                label: c.name,
-                                value: c.return_rate ?? c.return_count ?? 0,
+                            data={(Array.isArray(returnRateData)
+                                ? returnRateData
+                                : []
+                            ).map((c, idx) => ({
+                                label:
+                                    c?.name ??
+                                    (c?.category_id
+                                        ? `Category ${c.category_id}`
+                                        : `Category ${idx + 1}`),
+                                value:
+                                    Number(
+                                        c?.return_rate ?? c?.return_count ?? 0,
+                                    ) || 0,
                             }))}
                             formatValue={(v) => {
                                 const num = parseFloat(Number(v).toFixed(2));

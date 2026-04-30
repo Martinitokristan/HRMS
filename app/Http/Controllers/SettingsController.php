@@ -2,134 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Variant;
-use App\Models\VariantValue;
-use App\Models\Setting;
-use App\Models\UnitConversion;
-use App\Events\DataMutated;
-use App\Models\UnitType;
+use App\Services\Settings\SettingsService;
+use App\Services\Settings\VariantService;
+use App\Services\Settings\UnitConversionService;
+use App\Services\Settings\CategoryService;
+use App\Services\Settings\NotificationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class SettingsController extends Controller
 {
-    public function index(Request $request)
+
+    /**
+     * Get all settings.
+     */
+    public function index(Request $request, SettingsService $settingsService)
     {
-        // Optimized: Cache static data and only return what's requested
-        $cacheKey = 'settings:all';
-        $isTaggable = Cache::getStore() instanceof \Illuminate\Cache\TaggableStore;
-
-        $allSettings = $isTaggable
-            ? Cache::tags(['settings'])->remember($cacheKey, 86400, fn() => Setting::all())
-            : Cache::remember($cacheKey, 86400, fn() => Setting::all());
-
-        $user = $request->user();
-        $isAdmin = $user instanceof \App\Models\User && $user->role === 'admin';
-
-        if (!$isAdmin) {
-            $allSettings = $allSettings->whereNotIn('group', ['security', 'notifications']);
-        }
-
-        $settings = $allSettings->groupBy('group')->map(function ($group) {
-            return $group->pluck('value', 'key');
-        });
-
-        // Only load masterlist data if needed (check for cache headers or specific params)
         $includeMasterlist = $request->get('include_masterlist', false);
+        $includeVariants = $request->get('include_variants', false);
 
-        $response = [
-            'data' => [
-                'settings' => $settings,
-            ],
-            'status' => 'success',
-        ];
+        $result = $settingsService->getAll(
+            $request->user(),
+            $includeMasterlist,
+            $includeVariants
+        );
 
-        if ($includeMasterlist) {
-            // Optimized: Load only essential masterlist data
-            $response['data']['categories'] = Category::all(['id', 'name']);
-            $response['data']['unitTypes'] = UnitType::all(['id', 'purchase_unit', 'sell_unit']);
-
-            // Only load variants if specifically requested
-            if ($request->get('include_variants', false)) {
-                $response['data']['variants'] = Variant::with('values')->get();
-            }
-        }
-
-        return response()->json($response);
+        return response()->json($result['data'], $result['status_code']);
     }
 
-    public function update(Request $request)
+    /**
+     * Update settings.
+     */
+    public function update(Request $request, SettingsService $settingsService)
     {
-        if ($request->has('settings')) {
-            $request->validate([
-                'group' => 'required|string',
-                'settings' => 'required|array',
-            ]);
-
-            foreach ($request->settings as $key => $value) {
-                Setting::set($key, $value, $request->group);
-            }
-        }
-
-        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
-            Cache::tags(['settings'])->flush();
-        } else {
-            Cache::forget('settings:all');
-        }
-
-        // Broadcast payment settings changes for real-time checkout updates
-        if ($request->group === 'payments') {
-            broadcast(new DataMutated('shop', ['customer_shop'], 'payment_settings.updated'));
-        }
-
-        return response()->json([
-            'message' => 'Settings saved successfully',
-            'status' => 'success',
+        $request->validate([
+            'group' => 'required|string',
+            'settings' => 'required|array',
         ]);
+
+        $result = $settingsService->update($request->group, $request->settings);
+
+        return response()->json($result['data'], $result['status_code']);
     }
 
-    // Variant Value CRUD
-    public function saveVariantValue(Request $request)
+    /**
+     * Save variant value (create or update).
+     */
+    public function saveVariantValue(Request $request, VariantService $variantService)
     {
         $request->validate([
             'variant_id' => 'required|exists:variants,id',
             'label' => 'required|string',
         ]);
 
-        $value = VariantValue::updateOrCreate(
-            ['id' => $request->id],
-            $request->only(['variant_id', 'label', 'hex_code', 'description', 'category'])
-        );
+        $result = $variantService->saveVariantValue($request->all());
 
-        return response()->json(['data' => $value, 'status' => 'success']);
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    public function saveVariantType(Request $request)
+    /**
+     * Save variant type (create or update).
+     */
+    public function saveVariantType(Request $request, VariantService $variantService)
     {
-        $request->validate([
-            'name' => 'required|string',
-        ]);
+        $request->validate(['name' => 'required|string']);
 
-        $type = Variant::updateOrCreate(
-            ['id' => $request->id],
-            $request->only(['name', 'description', 'status', 'icon'])
-        );
+        $result = $variantService->saveVariantType($request->all());
 
-        return response()->json(['data' => $type, 'status' => 'success']);
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    public function deleteVariantValue($id)
+    /**
+     * Delete variant value.
+     */
+    public function deleteVariantValue($id, VariantService $variantService)
     {
-        VariantValue::destroy($id);
+        $result = $variantService->deleteVariantValue($id);
 
-        broadcast(new DataMutated('private-admin', ['admin_settings'], 'variant_value.deleted'));
-
-        return response()->json(['status' => 'success']);
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    // Unit Conversion CRUD
-    public function saveUnitConversion(Request $request)
+    /**
+     * Save unit conversion (create or update).
+     */
+    public function saveUnitConversion(Request $request, UnitConversionService $unitService)
     {
         $request->validate([
             'purchase_unit' => 'required|string',
@@ -137,21 +92,25 @@ class SettingsController extends Controller
             'conversion_factor' => 'required|numeric',
         ]);
 
-        $conv = UnitConversion::updateOrCreate(
-            ['id' => $request->id],
-            $request->only(['category_id', 'purchase_unit', 'sell_unit', 'conversion_factor'])
-        );
+        $result = $unitService->saveUnitConversion($request->all());
 
-        return response()->json(['data' => $conv, 'status' => 'success']);
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    public function deleteUnitConversion($id)
+    /**
+     * Delete unit conversion.
+     */
+    public function deleteUnitConversion($id, UnitConversionService $unitService)
     {
-        UnitConversion::destroy($id);
-        return response()->json(['status' => 'success']);
+        $result = $unitService->deleteUnitConversion($id);
+
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    public function saveUnitType(Request $request)
+    /**
+     * Save unit type (create or update).
+     */
+    public function saveUnitType(Request $request, UnitConversionService $unitService)
     {
         $request->validate([
             'purchase_unit' => 'required|string',
@@ -159,170 +118,175 @@ class SettingsController extends Controller
             'multiplier' => 'required|numeric|min:0.01',
         ]);
 
-        $unit = UnitType::updateOrCreate(
-            ['id' => $request->id],
-            $request->only(['purchase_unit', 'sell_unit', 'multiplier'])
-        );
+        $result = $unitService->saveUnitType($request->all());
 
-        return response()->json(['data' => $unit, 'status' => 'success']);
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    public function deleteUnitType($id)
+    /**
+     * Delete unit type.
+     */
+    public function deleteUnitType($id, UnitConversionService $unitService)
     {
-        UnitType::destroy($id);
+        $result = $unitService->deleteUnitType($id);
 
-        broadcast(new DataMutated('private-admin', ['admin_settings'], 'unit_type.deleted'));
-
-        return response()->json(['status' => 'success']);
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    // Category CRUD for Settings
-    public function saveCategory(Request $request)
+    /**
+     * Save category (create or update).
+     */
+    public function saveCategory(Request $request, CategoryService $categoryService)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $request->validate(['name' => 'required|string|max:255']);
 
-        $category = Category::updateOrCreate(
-            ['id' => $request->id],
-            $request->only(['name', 'description'])
-        );
+        $result = $categoryService->saveCategory($request->all());
 
-        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
-            Cache::tags(['categories'])->flush();
-        } else {
-            Cache::forget('categories:all');
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
+    }
+
+    /**
+     * Delete category.
+     */
+    public function deleteCategory($id, CategoryService $categoryService)
+    {
+        $result = $categoryService->deleteCategory($id);
+
+        return response()->json(['status' => 'success', 'message' => 'Category deleted successfully'], $result['status_code']);
+    }
+
+    /**
+     * Get notifications.
+     */
+    public function getNotifications(Request $request, NotificationService $notificationService)
+    {
+        $result = $notificationService->getNotifications($request->user());
+
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
         }
 
-        return response()->json(['data' => $category, 'status' => 'success']);
+        return response()->json(['data' => $result['data']], $result['status_code']);
     }
 
-    public function deleteCategory($id)
+    /**
+     * Mark all notifications as read.
+     */
+    public function markAllNotificationsRead(Request $request, NotificationService $notificationService)
     {
-        Category::destroy($id);
+        $result = $notificationService->markAllAsRead($request->user());
 
-        if (Cache::getStore() instanceof \Illuminate\Cache\TaggableStore) {
-            Cache::tags(['categories'])->flush();
-        } else {
-            Cache::forget('categories:all');
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
         }
 
-        return response()->json(['status' => 'success', 'message' => 'Category deleted successfully']);
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    private function resolveNotifiable(Request $request)
+    /**
+     * Delete single notification.
+     */
+    public function deleteNotification(Request $request, $id, NotificationService $notificationService)
     {
-        $user = $request->user();
+        $result = $notificationService->deleteNotification($request->user(), $id);
 
-        if ($user === null) {
-            abort(401, 'Authentication required.');
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
         }
 
-        if ($user instanceof \App\Models\User && $user->role === 'supplier') {
-            return \App\Models\Supplier::where('email', $user->email)->first() ?? $user;
-        }
-
-        return $user;
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    public function getNotifications(Request $request)
-    {
-        $notifiable = $this->resolveNotifiable($request);
-        $notifications = $notifiable->notifications()->orderBy('created_at', 'desc')->take(30)->get();
-        return response()->json(['data' => $notifications]);
-    }
-
-    public function markAllNotificationsRead(Request $request)
-    {
-        $this->resolveNotifiable($request)->unreadNotifications->markAsRead();
-        return response()->json(['status' => 'success']);
-    }
-
-    public function deleteNotification(Request $request, $id)
-    {
-        $this->resolveNotifiable($request)->notifications()->where('id', $id)->delete();
-        return response()->json(['status' => 'success']);
-    }
-
-    public function deleteBatchNotifications(Request $request)
+    /**
+     * Delete batch of notifications.
+     */
+    public function deleteBatchNotifications(Request $request, NotificationService $notificationService)
     {
         $request->validate(['ids' => 'required|array']);
-        $this->resolveNotifiable($request)->notifications()->whereIn('id', $request->ids)->delete();
-        return response()->json(['status' => 'success']);
+
+        $result = $notificationService->deleteBatch($request->user(), $request->ids);
+
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
+        }
+
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    public function deleteAllNotifications(Request $request)
+    /**
+     * Delete all notifications.
+     */
+    public function deleteAllNotifications(Request $request, NotificationService $notificationService)
     {
-        $this->resolveNotifiable($request)->notifications()->delete();
-        return response()->json(['status' => 'success']);
+        $result = $notificationService->deleteAll($request->user());
+
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
+        }
+
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    // Supplier-specific methods
-    public function getVariantValues()
+    /**
+     * Get all variant values.
+     */
+    public function getVariantValues(VariantService $variantService)
     {
-        $variants = Variant::with('values')->get();
-        return response()->json([
-            'data' => $variants,
-            'status' => 'success',
-        ]);
+        $result = $variantService->getVariantValues();
+
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    public function storeVariantValue(Request $request)
+    /**
+     * Store new variant value.
+     */
+    public function storeVariantValue(Request $request, VariantService $variantService)
     {
         $request->validate([
             'variant_id' => 'required|exists:variants,id',
             'label' => 'required|string',
         ]);
 
-        $value = VariantValue::create($request->only(['variant_id', 'label', 'hex_code', 'description', 'category']));
+        $result = $variantService->storeVariantValue($request->all());
 
-        broadcast(new DataMutated('private-admin', ['admin_settings'], 'variant_value.created'));
-
-        return response()->json(['data' => $value, 'status' => 'success']);
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    public function updateVariantValue(Request $request, $id)
+    /**
+     * Update variant value.
+     */
+    public function updateVariantValue(Request $request, $id, VariantService $variantService)
     {
-        $value = VariantValue::findOrFail($id);
-
         $data = $request->validate([
-            'label'       => 'sometimes|required|string|max:100',
-            'hex_code'    => 'nullable|string|max:20',
+            'label' => 'sometimes|required|string|max:100',
+            'hex_code' => 'nullable|string|max:20',
             'description' => 'nullable|string|max:255',
-            'category'    => 'nullable',
+            'category' => 'nullable',
         ]);
 
-        // Prevent renaming to a label that already exists for the same attribute type.
-        if (isset($data['label'])) {
-            $exists = VariantValue::where('variant_id', $value->variant_id)
-                ->where('id', '!=', $value->id)
-                ->whereRaw('LOWER(label) = ?', [strtolower($data['label'])])
-                ->exists();
-            if ($exists) {
-                return response()->json([
-                    'message' => 'Another value with this label already exists for this attribute.',
-                    'status'  => 'error',
-                ], 422);
-            }
+        $result = $variantService->updateVariantValue($id, $data);
+
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error'], 'status' => 'error'], $result['status_code']);
         }
 
-        $value->update($data);
-
-        broadcast(new DataMutated('private-admin', ['admin_settings'], 'variant_value.updated'));
-
-        return response()->json(['data' => $value, 'status' => 'success']);
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    public function getUnitTypes()
+    /**
+     * Get all unit types.
+     */
+    public function getUnitTypes(UnitConversionService $unitService)
     {
-        $unitTypes = UnitType::all();
-        return response()->json([
-            'data' => $unitTypes,
-            'status' => 'success',
-        ]);
+        $result = $unitService->getUnitTypes();
+
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    public function storeUnitType(Request $request)
+    /**
+     * Store new unit type.
+     */
+    public function storeUnitType(Request $request, UnitConversionService $unitService)
     {
         $request->validate([
             'purchase_unit' => 'required|string',
@@ -330,89 +294,102 @@ class SettingsController extends Controller
             'multiplier' => 'required|numeric|min:0.01',
         ]);
 
-        $unit = UnitType::create($request->only(['purchase_unit', 'sell_unit', 'multiplier']));
+        $result = $unitService->storeUnitType($request->all());
 
-        broadcast(new DataMutated('private-admin', ['admin_settings'], 'unit_type.created'));
-
-        return response()->json(['data' => $unit, 'status' => 'success']);
+        return response()->json(['data' => $result['data'], 'status' => 'success'], $result['status_code']);
     }
 
-    // === Variant Attribute Types (Commit 2) ===
-    public function listVariantTypes()
+    /**
+     * List variant types.
+     */
+    public function listVariantTypes(VariantService $variantService)
     {
-        return response()->json([
-            'data' => \App\Models\Variant::orderBy('id')->get(),
-        ]);
+        $result = $variantService->listVariantTypes();
+
+        return response()->json(['data' => $result['data']], $result['status_code']);
     }
 
-    public function storeVariantType(Request $request)
+    /**
+     * Store new variant type.
+     */
+    public function storeVariantType_v2(Request $request, VariantService $variantService)
     {
         $data = $request->validate([
-            'name'        => 'required|string|max:100|unique:variants,name',
+            'name' => 'required|string|max:100|unique:variants,name',
             'description' => 'nullable|string|max:255',
-            'icon'        => 'nullable|string|max:50',
+            'icon' => 'nullable|string|max:50',
         ]);
-        return response()->json([
-            'data' => \App\Models\Variant::create(array_merge($data, ['status' => 'active'])),
-        ], 201);
+
+        $result = $variantService->storeVariantType($data);
+
+        return response()->json(['data' => $result['data']], $result['status_code']);
     }
 
-    public function updateVariantType(Request $request, $id)
+    /**
+     * Update variant type.
+     */
+    public function updateVariantType(Request $request, $id, VariantService $variantService)
     {
-        $variant = \App\Models\Variant::findOrFail($id);
         $data = $request->validate([
-            'name'        => 'sometimes|required|string|max:100|unique:variants,name,' . $id,
+            'name' => 'sometimes|required|string|max:100|unique:variants,name,' . $id,
             'description' => 'nullable|string|max:255',
-            'icon'        => 'nullable|string|max:50',
-            'status'      => 'sometimes|in:active,draft',
+            'icon' => 'nullable|string|max:50',
+            'status' => 'sometimes|in:active,draft',
         ]);
-        $variant->update($data);
-        return response()->json(['data' => $variant]);
+
+        $result = $variantService->updateVariantType($id, $data);
+
+        return response()->json(['data' => $result['data']], $result['status_code']);
     }
 
-    public function deleteVariantType($id)
+    /**
+     * Delete variant type.
+     */
+    public function deleteVariantType($id, VariantService $variantService)
     {
-        // Block delete if any variant currently uses this attribute type.
-        $inUse = \DB::table('product_variant_attributes')->where('variant_id', $id)->exists()
-              || \DB::table('supplier_product_variant_attributes')->where('variant_id', $id)->exists();
-        if ($inUse) {
-            return response()->json([
-                'message' => 'Cannot delete — this attribute type is used by existing variants. Remove or reassign those variants first.',
-            ], 422);
+        $result = $variantService->deleteVariantType($id);
+
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
         }
-        \DB::table('category_variant_types')->where('variant_id', $id)->delete();
-        \DB::table('variant_values')->where('variant_id', $id)->delete();
-        \App\Models\Variant::where('id', $id)->delete();
-        return response()->json(['message' => 'deleted']);
+
+        return response()->json(['message' => 'deleted'], $result['status_code']);
     }
 
-    public function listCategoryVariantTypes(Request $request)
+    /**
+     * List category variant type mappings.
+     */
+    public function listCategoryVariantTypes(Request $request, VariantService $variantService)
     {
-        $q = \App\Models\CategoryVariantType::with('variant')->orderBy('sort_order');
-        if ($request->category_id) {
-            $q->where('category_id', $request->category_id);
-        }
-        return response()->json(['data' => $q->get()]);
+        $result = $variantService->listCategoryVariantTypes($request->category_id);
+
+        return response()->json(['data' => $result['data']], $result['status_code']);
     }
 
-    public function storeCategoryVariantType(Request $request)
+    /**
+     * Store category variant type mapping.
+     */
+    public function storeCategoryVariantType(Request $request, VariantService $variantService)
     {
         $data = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'variant_id'  => 'required|exists:variants,id',
+            'variant_id' => 'required|exists:variants,id',
             'is_required' => 'sometimes|boolean',
-            'sort_order'  => 'sometimes|integer',
+            'sort_order' => 'sometimes|integer',
         ]);
-        $row = \App\Models\CategoryVariantType::firstOrCreate(
-            ['category_id' => $data['category_id'], 'variant_id' => $data['variant_id']],
-            ['is_required' => $data['is_required'] ?? false, 'sort_order' => $data['sort_order'] ?? 0]
-        );
-        return response()->json(['data' => $row->load('variant')]);
+
+        $result = $variantService->storeCategoryVariantType($data);
+
+        return response()->json(['data' => $result['data']], $result['status_code']);
     }
 
-    public function deleteCategoryVariantType($id)
+    /**
+     * Delete category variant type mapping.
+     */
+    public function deleteCategoryVariantType($id, VariantService $variantService)
     {
-        \App\Models\CategoryVariantType::where('id', $id)->delete();
-        return response()->json(['message' => 'deleted']);
+        $result = $variantService->deleteCategoryVariantType($id);
+
+        return response()->json(['message' => 'deleted'], $result['status_code']);
     }
 }

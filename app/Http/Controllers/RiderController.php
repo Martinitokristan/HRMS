@@ -2,628 +2,322 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\DataMutated;
-use App\Models\Delivery;
-use App\Models\RiderProfile;
-use App\Models\User;
+use App\Services\Riders\RiderQueryService;
+use App\Services\Riders\RiderProfileService;
+use App\Services\Riders\RiderDashboardService;
+use App\Services\Riders\RiderLocationService;
+use App\Services\Riders\RiderWalletService;
+use App\Services\Riders\RiderNotificationService;
+use App\Services\Riders\RiderOnboardingService;
 use Illuminate\Http\Request;
 
 class RiderController extends Controller
 {
-    public function index(Request $request)
+
+    /**
+     * List all riders (admin).
+     */
+    public function index(Request $request, RiderQueryService $queryService)
     {
-        $query = User::where('role', 'rider')
-            ->with(['riderProfile'])
-            ->withCount([
-                'deliveries as total_deliveries_count' => function ($q) {
-                    $q->where('status', 'delivered');
-                }
-            ])
-            ->withCount([
-                'deliveries as active_deliveries_count' => function ($q) {
-                    $q->whereIn('status', ['pending', 'in_progress']);
-                }
-            ])
-            ->when($request->search, function ($q) use ($request) {
-                return $q->where('name', 'like', "%{$request->search}%");
-            })
-            ->when($request->status, function ($q) use ($request) {
-                return $q->where('status', $request->status);
-            })
-            ->latest();
+        $result = $queryService->index(
+            $request->get('search'),
+            $request->get('status'),
+            $request->get('per_page', 20)
+        );
 
         return response()->json([
-            'data' => $query->paginate($request->get('per_page', 20)),
-            'counts' => [
-                'total' => User::where('role', 'rider')->count(),
-                'available' => RiderProfile::where('availability', 'available')->count(),
-                'on_delivery' => RiderProfile::where('availability', 'on_delivery')->count(),
-                'off_duty' => RiderProfile::where('availability', 'off_duty')->count(),
-            ],
+            'data' => $result['data'],
+            'counts' => $result['counts'],
+            'status' => 'success'
+        ], $result['status_code']);
+    }
+
+    /**
+     * Get stats for a specific rider.
+     */
+    public function stats($id, RiderQueryService $queryService)
+    {
+        $result = $queryService->stats($id);
+
+        return response()->json([
+            'data' => $result['data'],
+            'status' => 'success'
+        ], $result['status_code']);
+    }
+
+    /**
+     * Get my deliveries (for authenticated rider).
+     */
+    public function myDeliveries(Request $request, RiderQueryService $queryService)
+    {
+        $result = $queryService->myDeliveries($request->user()->id);
+
+        return response()->json($result['data'], $result['status_code']);
+    }
+
+    /**
+     * Get rating stats for authenticated rider.
+     */
+    public function getRatingStats(Request $request, RiderQueryService $queryService)
+    {
+        $result = $queryService->getRatingStats($request->user()->id);
+
+        return response()->json([
+            'data' => $result['data'],
+            'status' => 'success'
+        ], $result['status_code']);
+    }
+
+    /**
+     * Toggle rider availability (on-duty/off-duty).
+     */
+    public function toggleStatus(Request $request, RiderProfileService $profileService)
+    {
+        $result = $profileService->toggleStatus($request->user()->id);
+
+        return response()->json(['status' => 'success'], $result['status_code']);
+    }
+
+    /**
+     * Get all available riders.
+     */
+    public function availableRiders(RiderQueryService $queryService)
+    {
+        $result = $queryService->availableRiders();
+
+        return response()->json([
+            'data' => $result['data'],
+            'status' => 'success'
+        ], $result['status_code']);
+    }
+
+    /**
+     * Get rider dashboard with deliveries and nearby jobs.
+     */
+    public function dashboard(Request $request, RiderDashboardService $dashboardService)
+    {
+        $result = $dashboardService->getDashboard(
+            $request->user()->id,
+            $request->get('latitude'),
+            $request->get('longitude')
+        );
+
+        return response()->json($result['data'], $result['status_code']);
+    }
+
+    /**
+     * Schedule interview for rider (admin).
+     */
+    public function scheduleInterview(Request $request, $id, RiderOnboardingService $onboardingService)
+    {
+        $data = $request->validate(['interview_at' => 'required|date']);
+
+        $result = $onboardingService->scheduleInterview($id, $data['interview_at']);
+
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
+        }
+
+        return response()->json([
             'status' => 'success',
-        ]);
+            'message' => 'Interview scheduled successfully.'
+        ], $result['status_code']);
     }
 
-    public function stats($id)
+    /**
+     * Approve rider from onboarding (admin).
+     */
+    public function approveRider($id, RiderProfileService $profileService)
     {
-        $user = User::with('riderProfile')->findOrFail($id);
-        $profile = $user->riderProfile;
+        $result = $profileService->approveRider($id);
 
-        $completedDeliveries = Delivery::where('rider_id', $id)->where('status', 'delivered')->count();
-        $activeOrders = Delivery::where('rider_id', $id)->where('status', 'in_progress')->count();
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
+        }
 
         return response()->json([
-            'data' => [
-                'user' => $user,
-                'profile' => $profile,
-                'completed_deliveries' => $completedDeliveries,
-                'active_orders' => $activeOrders,
-                'on_time_rate' => $profile ? $profile->on_time_rate : 0,
-            ],
             'status' => 'success',
-        ]);
+            'message' => 'Rider hired and activated!'
+        ], $result['status_code']);
     }
 
-    public function myDeliveries(Request $request)
+    /**
+     * Update rider profile.
+     */
+    public function updateProfile(Request $request, RiderProfileService $profileService)
     {
-        $deliveries = Delivery::with(['sale.customer', 'sale.items.product'])
-            ->where('rider_id', $request->user()->id)
-            ->latest()
-            ->get();
-        return response()->json(['data' => $deliveries, 'status' => 'success']);
-    }
-
-    public function getRatingStats(Request $request)
-    {
-        $riderId = $request->user()->id;
-
-        \Log::info('Fetching rating stats for rider: ' . $riderId);
-
-        $ratings = Delivery::where('rider_id', $riderId)
-            ->whereNotNull('rating')
-            ->get(['rating', 'rating_comment', 'rated_at']);
-
-        \Log::info('Found ratings count: ' . $ratings->count());
-
-        $averageRating = $ratings->avg('rating') ? round($ratings->avg('rating'), 2) : 0;
-        $totalRatings = $ratings->count();
-        $ratingDistribution = $ratings->countBy('rating');
-        $recentRating = $ratings->last()->rating ?? null;
-        $recentComment = $ratings->last()->rating_comment ?? null;
-        $recentDate = $ratings->last()->rated_at ?? null;
-
-        // Calculate rating percentages
-        $ratingPercentages = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $count = $ratingDistribution[$i] ?? 0;
-            $ratingPercentages[$i] = $totalRatings > 0 ? round(($count / $totalRatings) * 100, 1) : 0;
-        }
-
-        $ratingStats = [
-            'average_rating' => $averageRating,
-            'total_ratings' => $totalRatings,
-            'rating_distribution' => $ratingDistribution,
-            'recent_rating' => $recentRating,
-            'recent_comment' => $recentComment,
-            'recent_date' => $recentDate,
-            'rating_percentages' => $ratingPercentages,
-        ];
-
-        return response()->json([
-            'data' => $ratingStats,
-            'status' => 'success'
-        ]);
-    }
-
-    public function toggleStatus(Request $request)
-    {
-        $profile = RiderProfile::where('user_id', $request->user()->id)->first();
-        if ($profile) {
-            $profile->availability = $profile->availability === 'off_duty' ? 'available' : 'off_duty';
-            $profile->save();
-        }
-        return response()->json(['status' => 'success']);
-    }
-    public function availableRiders()
-    {
-        $riders = User::where('role', 'rider')
-            // Remove manual off_duty check as per request ("always online if logged in")
-            ->with('riderProfile')
-            ->withCount([
-                'deliveries as active_deliveries_count' => function ($q) {
-                    $q->whereIn('status', ['pending', 'in_progress']);
-                }
-            ])
-            ->get();
-
-        return response()->json([
-            'data' => $riders,
-            'status' => 'success'
-        ]);
-    }
-
-    public function dashboard(Request $request)
-    {
-        $riderId = $request->user()->id;
-        $today = now()->startOfDay();
-
-        \Log::debug('Rider dashboard call. User: ' . $riderId . '. Params: ' . json_encode($request->all()));
-
-        // Update rider's current location if provided
-        if ($request->has('latitude') && $request->has('longitude')) {
-            \Log::debug("Updating rider {$riderId} location: " . $request->latitude . ", " . $request->longitude);
-            $profile = RiderProfile::where('user_id', $riderId)->first();
-            if ($profile) {
-                $profile->current_latitude = (float) $request->latitude;
-                $profile->current_longitude = (float) $request->longitude;
-                $profile->save();
-                \Log::debug("Rider profile saved for user {$riderId}");
-
-                // Broadcast location update to all active deliveries
-                $activeDeliveries = \App\Models\Delivery::where('rider_id', $riderId)
-                    ->whereIn('status', ['confirmed', 'in_progress'])
-                    ->with('sale')
-                    ->get();
-
-                foreach ($activeDeliveries as $delivery) {
-                    if ($delivery->sale && $delivery->sale->customer_id) {
-                        broadcast(new \App\Events\RiderLocationUpdated(
-                            $delivery->sale->customer_id,
-                            $riderId,
-                            $request->latitude,
-                            $request->longitude,
-                            $request->heading ?? 0,
-                            $delivery->tracking_number
-                        ));
-                    }
-                }
-            }
-        }
-
-        $stats = [
-            'total' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->count(),
-            'done' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->count(),
-            'active' => Delivery::where('rider_id', $riderId)->whereIn('status', ['confirmed', 'in_progress'])->count(),
-            'failed' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'failed')->count(),
-            'quota' => 10000,
-            'collected' => Delivery::where('rider_id', $riderId)->where('created_at', '>=', $today)->where('status', 'delivered')->with('sale')->get()->sum(function ($d) {
-                return optional($d->sale)->payment_method === 'cod' ? $d->sale->total_amount : 0;
-            }),
-            // Wave 6 — rider fee earnings (₱30 × today's delivered+eligible/paid rows).
-            'today_earnings' => (float) Delivery::where('rider_id', $riderId)
-                ->where('created_at', '>=', $today)
-                ->where('status', 'delivered')
-                ->whereIn('payout_status', ['eligible', 'paid'])
-                ->sum('delivery_fee'),
-            // Wave 6 — COD cash the rider is still holding for the company today (Manila timezone).
-            'cash_to_remit_today' => (function () use ($riderId) {
-                $manilaToday = now('Asia/Manila');
-                $utcStart = $manilaToday->copy()->startOfDay()->setTimezone('UTC');
-                $utcEnd = $manilaToday->copy()->endOfDay()->setTimezone('UTC');
-                return (float) Delivery::where('rider_id', $riderId)
-                    ->whereBetween('delivered_at', [$utcStart, $utcEnd])
-                    ->where('status', 'delivered')
-                    ->whereHas('sale', function ($q) { $q->where('payment_method', 'cod'); })
-                    ->whereNull('cash_remitted_at')
-                    ->sum('cash_collected');
-            })(),
-        ];
-
-        // Get rider's current location for distance calculations
-        // If the request includes GPS coords (sent by frontend on every dashboard fetch), use and persist them
-        $riderProfile = RiderProfile::where('user_id', $riderId)->first();
-        if ($request->filled('latitude') && $request->filled('longitude') && $riderProfile) {
-            $riderProfile->current_latitude = (float) $request->latitude;
-            $riderProfile->current_longitude = (float) $request->longitude;
-            $riderProfile->save();
-        }
-        $riderLat = $riderProfile->current_latitude ?? null;
-        $riderLon = $riderProfile->current_longitude ?? null;
-        $riderHasGps = $riderLat !== null && $riderLon !== null;
-
-        $distanceCalculator = app(\App\Services\DistanceCalculator::class);
-
-        $deliveries = Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
-            ->where('rider_id', $riderId)
-            ->latest()
-            ->get()
-            ->map(function ($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
-                if (!$d->sale || !$d->sale->customer) {
-                    $d->customer_name = 'Unknown Customer';
-                    $d->customer_address = $d->address ?? 'No Address Provided';
-                    $d->customer_latitude = null;
-                    $d->customer_longitude = null;
-                    $d->distance = null;
-                    $d->distance_value = null;
-                    $d->eta = null;
-                    return $d;
-                }
-
-                // Retrieve customer profile
-                $profile = optional($d->sale->customer)->customerProfile;
-
-                // Bind customer name and address directly for easy frontend access
-                $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
-                $d->customer_address = $d->address ?? 'No Address Provided';
-
-                $d->customer_latitude = optional($profile)->latitude ?? null;
-                $d->customer_longitude = optional($profile)->longitude ?? null;
-
-                // Only calculate distance if both rider and customer have real GPS coordinates
-                if ($riderHasGps && $d->customer_latitude !== null && $d->customer_longitude !== null) {
-                    $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $d->customer_latitude, $d->customer_longitude);
-                    $d->distance = $distanceCalculator->formatDistance($distanceKm);
-                    $d->distance_value = $distanceKm;
-                    $eta = $distanceCalculator->calculateETA($distanceKm);
-                    $d->eta = $eta['text'];
-                } else {
-                    $d->distance = null;
-                    $d->distance_value = null;
-                    $d->eta = null;
-                }
-
-                return $d;
-            });
-
-        $nearby = Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
-            ->whereNull('rider_id')
-            ->where('status', 'pending')
-            ->latest()
-            ->get()
-            ->map(function ($d) use ($riderLat, $riderLon, $riderHasGps, $distanceCalculator) {
-                if (!$d->sale || !$d->sale->customer) {
-                    $d->customer_name = 'Unknown Customer';
-                    $d->customer_address = $d->address ?? 'No Address Provided';
-                    $d->latitude = null;
-                    $d->longitude = null;
-                    $d->distance = null;
-                    $d->distance_value = null;
-                    $d->eta = null;
-                    return $d;
-                }
-
-                $profile = optional($d->sale->customer)->customerProfile;
-
-                $d->customer_name = optional($d->sale->customer)->name ?? 'Unknown Customer';
-                $d->customer_address = $d->address ?? 'No Address Provided';
-
-                $customerLat = optional($profile)->latitude ?? null;
-                $customerLon = optional($profile)->longitude ?? null;
-
-                $d->latitude = $customerLat;
-                $d->longitude = $customerLon;
-
-                // Only calculate distance if both rider and customer have real GPS coordinates
-                if ($riderHasGps && $customerLat !== null && $customerLon !== null) {
-                    $distanceKm = $distanceCalculator->calculateDistance($riderLat, $riderLon, $customerLat, $customerLon);
-                    $d->distance = $distanceCalculator->formatDistance($distanceKm);
-                    $d->distance_value = $distanceKm;
-                    $eta = $distanceCalculator->calculateETA($distanceKm);
-                    $d->eta = $eta['text'];
-                } else {
-                    $d->distance = null;
-                    $d->distance_value = null;
-                    $d->eta = null;
-                }
-
-                return $d;
-            })
-            ->sortBy(fn($d) => $d->distance_value ?? PHP_INT_MAX)
-            ->values();
-
-        $myJobs = $deliveries->filter(function ($d) {
-            if (in_array($d->status, ['pending', 'confirmed', 'in_progress'])) {
-                return true;
-            }
-            // Keep delivered-without-proof in active jobs so the rider can still upload proof.
-            if ($d->status === 'delivered' && empty($d->proof_photo)) {
-                return true;
-            }
-            return false;
-        })->values();
-
-        $completed = $deliveries->filter(function ($d) {
-            if ($d->status === 'failed') return true;
-            if ($d->status === 'delivered' && !empty($d->proof_photo)) return true;
-            return false;
-        })->take(20)->values();
-
-        return response()->json([
-            'data' => [
-                'stats' => $stats,
-                'nearby' => $nearby,
-                'my_jobs' => $myJobs,
-                'completed' => $completed,
-            ],
-            'status' => 'success'
-        ]);
-    }
-
-    public function scheduleInterview(Request $request, $id)
-    {
-        $request->validate(['interview_at' => 'required|date']);
-        $user = User::findOrFail($id);
-        $user->update(['status' => 'interview_set']);
-        $user->riderProfile()->update(['interview_at' => $request->interview_at]);
-
-        // TODO: Send email notification to the rider
-
-        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'rider.interview_scheduled'));
-        broadcast(new DataMutated("private-rider.{$user->id}", ['rider_dashboard', 'rider_notifications'], 'rider.interview_scheduled'));
-
-        return response()->json(['status' => 'success', 'message' => 'Interview scheduled successfully.']);
-    }
-
-    public function approveRider($id)
-    {
-        $user = User::findOrFail($id);
-        $user->update(['status' => 'active']);
-
-        broadcast(new DataMutated('private-admin', ['admin_users', 'admin_riders'], 'rider.approved'));
-        broadcast(new DataMutated("private-rider.{$user->id}", ['rider_dashboard', 'rider_notifications'], 'rider.approved'));
-
-        return response()->json(['status' => 'success', 'message' => 'Rider hired and activated!']);
-    }
-    public function updateProfile(Request $request)
-    {
-        $user = $request->user();
-        $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'sometimes|nullable|string|email|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
         ]);
 
-        // Update user-level fields
-        $userFields = array_filter(
-            $request->only(['name', 'email', 'phone']),
-            function($v) { return $v !== null; }
-        );
-        if (!empty($userFields)) {
-            $user->update($userFields);
-        }
+        $result = $profileService->updateProfile($request->user()->id, $data);
 
-        // Update rider profile with name, email, and address
-        $profileData = array_filter(
-            $request->only(['name', 'email', 'address']),
-            function($v) { return $v !== null; }
-        );
-        $user->riderProfile()->updateOrCreate(
-            ['user_id' => $user->id],
-            $profileData
-        );
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
+        }
 
         return response()->json([
             'status' => 'success',
             'message' => 'Profile updated successfully',
-            'user' => $user->load('riderProfile')
-        ]);
+            'user' => $result['data']
+        ], $result['status_code']);
     }
 
-    public function updatePhoto(Request $request)
+    /**
+     * Update rider profile photo.
+     */
+    public function updatePhoto(Request $request, RiderProfileService $profileService)
     {
         $request->validate([
             'photo' => 'required|image|max:2048|dimensions:max_width=4000,max_height=4000',
         ]);
 
-        $user = $request->user();
-        $path = $request->file('photo')->store('profile-photos', 'public');
+        $result = $profileService->updatePhoto($request->user()->id, $request->file('photo'));
 
-        $user->update(['photo' => $path]);
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
+        }
 
         return response()->json([
             'status' => 'success',
             'message' => 'Photo updated successfully',
-            'photo_url' => asset('storage/' . $path),
-            'user' => $user->load('riderProfile')
-        ]);
+            'photo_url' => $result['data']['photo_url'],
+            'user' => $result['data']['user']
+        ], $result['status_code']);
     }
 
-    public function updateSecurity(Request $request)
+    /**
+     * Update rider password/security.
+     */
+    public function updateSecurity(Request $request, RiderProfileService $profileService)
     {
         $request->validate([
             'current_password' => 'required|current_password',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $request->user()->update([
-            'password' => bcrypt($request->password)
-        ]);
+        $result = $profileService->updateSecurity($request->user()->id, $request->password);
+
+        if (isset($result['error'])) {
+            return response()->json(['message' => $result['error']], $result['status_code']);
+        }
 
         return response()->json([
             'status' => 'success',
             'message' => 'Password changed successfully'
-        ]);
+        ], $result['status_code']);
     }
 
-    public function getNotifications(Request $request)
+    /**
+     * Get notifications for rider.
+     */
+    public function getNotifications(Request $request, RiderNotificationService $notificationService)
     {
-        $notifications = $request->user()->notifications()->latest()->limit(50)->get();
+        $result = $notificationService->getNotifications($request->user());
+
         return response()->json([
             'status' => 'success',
-            'data' => $notifications,
-            'unread_count' => $request->user()->unreadNotifications()->count()
-        ]);
+            'data' => $result['data'],
+            'unread_count' => $result['unread_count']
+        ], $result['status_code']);
     }
 
-    public function markNotificationsRead(Request $request)
+    /**
+     * Mark all notifications as read.
+     */
+    public function markNotificationsRead(Request $request, RiderNotificationService $notificationService)
     {
-        $request->user()->unreadNotifications->markAsRead();
-        return response()->json(['status' => 'success']);
+        $result = $notificationService->markAllAsRead($request->user());
+
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    public function deleteNotification(Request $request, $id)
+    /**
+     * Delete a single notification.
+     */
+    public function deleteNotification(Request $request, $id, RiderNotificationService $notificationService)
     {
-        $request->user()->notifications()->where('id', $id)->delete();
-        return response()->json(['status' => 'success']);
+        $result = $notificationService->deleteNotification($request->user(), $id);
+
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    public function deleteBatchNotifications(Request $request)
+    /**
+     * Delete multiple notifications.
+     */
+    public function deleteBatchNotifications(Request $request, RiderNotificationService $notificationService)
     {
         $request->validate(['ids' => 'required|array']);
-        $request->user()->notifications()->whereIn('id', $request->ids)->delete();
-        return response()->json(['status' => 'success']);
+
+        $result = $notificationService->deleteBatch($request->user(), $request->ids);
+
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    public function deleteAllNotifications(Request $request)
+    /**
+     * Delete all notifications.
+     */
+    public function deleteAllNotifications(Request $request, RiderNotificationService $notificationService)
     {
-        $request->user()->notifications()->delete();
-        return response()->json(['status' => 'success']);
+        $result = $notificationService->deleteAll($request->user());
+
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
-    public function updateLocation(Request $request)
+    /**
+     * Update rider location.
+     */
+    public function updateLocation(Request $request, RiderLocationService $locationService)
     {
-        $request->validate([
+        $data = $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'broadcast' => 'boolean'
         ]);
 
-        $riderId = $request->user()->id;
-        $profile = RiderProfile::where('user_id', $riderId)->first();
+        $result = $locationService->updateLocation(
+            $request->user()->id,
+            $data['latitude'],
+            $data['longitude'],
+            $request->boolean('broadcast')
+        );
 
-        if ($profile) {
-            $profile->current_latitude = $request->latitude;
-            $profile->current_longitude = $request->longitude;
-            $profile->save();
-        }
-
-        // Real-time broadcasting if enabled
-        if ($request->boolean('broadcast')) {
-            // Broadcast to all active deliveries for this rider
-            $activeDeliveries = \App\Models\Delivery::where('rider_id', $riderId)
-                ->whereIn('status', ['pending', 'in_progress'])
-                ->with('sale.customer')
-                ->get();
-
-            foreach ($activeDeliveries as $delivery) {
-                // Broadcast to customer's channel
-                broadcast(new \App\Events\RiderLocationUpdated(
-                    $delivery->sale->customer_id,
-                    $riderId,
-                    $request->latitude,
-                    $request->longitude,
-                    $delivery->tracking_number
-                ));
-            }
-        }
-
-        return response()->json(['status' => 'success']);
+        return response()->json(['status' => 'success'], $result['status_code']);
     }
 
     /**
-     * GET /riders/me/wallet — Wave 6 rider wallet figures.
+     * Get rider wallet and earnings.
      */
-    public function wallet(Request $request)
+    public function wallet(Request $request, RiderWalletService $walletService)
     {
-        $riderId = $request->user()->id;
-        $today = now()->startOfDay();
-
-        $todayEarnings = (float) Delivery::where('rider_id', $riderId)
-            ->where('status', 'delivered')
-            ->where('created_at', '>=', $today)
-            ->whereIn('payout_status', ['eligible', 'paid'])
-            ->sum('delivery_fee');
-
-        $available = (float) Delivery::where('rider_id', $riderId)
-            ->where('payout_status', 'eligible')
-            ->sum('delivery_fee');
-
-        $pending = (float) Delivery::where('rider_id', $riderId)
-            ->whereIn('payout_status', ['pending', 'held'])
-            ->sum('delivery_fee');
-
-        $cashToRemitToday = (float) Delivery::where('rider_id', $riderId)
-            ->where('status', 'delivered')
-            ->whereDate('delivered_at', now()->toDateString())
-            ->whereHas('sale', function ($q) { $q->where('payment_method', 'cod'); })
-            ->whereNull('cash_remitted_at')
-            ->sum('cash_collected');
-
-        $recentPaid = Delivery::where('rider_id', $riderId)
-            ->where('payout_status', 'paid')
-            ->orderByDesc('paid_at')
-            ->limit(10)
-            ->get(['id', 'tracking_number', 'delivery_fee', 'paid_at']);
+        $result = $walletService->getWallet($request->user()->id);
 
         return response()->json([
-            'data' => [
-                'today_earnings'      => $todayEarnings,
-                'available'           => $available,
-                'pending'             => $pending,
-                'cash_to_remit_today' => $cashToRemitToday,
-                'recent_paid'         => $recentPaid,
-            ],
-            'status' => 'success',
-        ]);
+            'data' => $result['data'],
+            'status' => 'success'
+        ], $result['status_code']);
     }
 
     /**
-     * Wave 8 — GET /riders/me/history
-     * Paginated, read-only delivery history for the authenticated rider.
-     * Returns rows with status delivered or failed, ordered by delivered_at desc.
-     * Optional ?from=YYYY-MM-DD&to=YYYY-MM-DD silently ignored if malformed.
+     * Get rider delivery history.
      */
-    public function history(Request $request)
+    public function history(Request $request, RiderWalletService $walletService)
     {
-        $riderId = $request->user()->id;
-
-        $page    = (int) $request->query('page', 1);
-        $perPage = min(50, max(5, (int) $request->query('per_page', 20)));
-
-        // Permissive date filter: only honour valid Y-m-d strings, otherwise ignore.
-        $from = $request->query('from');
-        $to   = $request->query('to');
-        $validDate = function ($d) {
-            if (!is_string($d) || $d === '') return false;
-            $parsed = \DateTime::createFromFormat('Y-m-d', $d);
-            return $parsed && $parsed->format('Y-m-d') === $d;
-        };
-        $from = $validDate($from) ? $from : null;
-        $to   = $validDate($to)   ? $to   : null;
-
-        $query = \App\Models\Delivery::where('rider_id', $riderId)
-            ->whereIn('status', ['delivered', 'failed'])
-            ->with([
-                'sale:id,total_amount,payment_method,customer_id',
-                'sale.customer:id,name',
-                'sale.items.product:id,name',
-            ])
-            ->orderByDesc('delivered_at')
-            ->orderByDesc('id');
-
-        if ($from) $query->where('delivered_at', '>=', $from . ' 00:00:00');
-        if ($to)   $query->where('delivered_at', '<=', $to   . ' 23:59:59');
-
-        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
-
-        $rows = collect($paginator->items())->map(function ($d) {
-            return [
-                'id'                => $d->id,
-                'order_id'          => $d->sale_id,
-                'customer_name'     => optional(optional($d->sale)->customer)->name,
-                'address'           => $d->address,
-                'amount'            => (float) (optional($d->sale)->total_amount ?? 0),
-                'payment_method'    => optional($d->sale)->payment_method,
-                'status'            => $d->status,
-                'delivered_at'      => $d->delivered_at,
-                'proof_photo_url'   => $d->proof_photo ? asset('storage/' . $d->proof_photo) : null,
-                'delivery_fee'      => (float) ($d->delivery_fee ?? 0),
-                'payout_status'     => $d->payout_status,
-                'geofence_flagged'  => (bool) ($d->geofence_flagged ?? false),
-                'item_count'        => optional(optional($d->sale)->items)->count() ?? 0,
-            ];
-        });
+        $result = $walletService->getHistory(
+            $request->user()->id,
+            $request->get('page', 1),
+            $request->get('per_page', 20),
+            $request->get('from'),
+            $request->get('to')
+        );
 
         return response()->json([
             'status' => 'success',
-            'data'   => $rows,
-            'meta'   => [
-                'current_page' => $paginator->currentPage(),
-                'last_page'    => $paginator->lastPage(),
-                'per_page'     => $paginator->perPage(),
-                'total'        => $paginator->total(),
-            ],
-        ]);
+            'data' => $result['data'],
+            'meta' => $result['meta']
+        ], $result['status_code']);
     }
 }

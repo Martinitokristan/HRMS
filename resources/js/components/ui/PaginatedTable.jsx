@@ -41,6 +41,56 @@ export default function PaginatedTable({
     fetchData();
   }, [currentPage, pageSize, search]);
 
+  const normalizeResponse = (payload) => {
+    const body = payload || {};
+    const nested = body?.data && typeof body.data === 'object' ? body.data : null;
+
+    const rows = Array.isArray(body?.data)
+      ? body.data
+      : Array.isArray(nested?.data)
+        ? nested.data
+        : Array.isArray(body?.rows)
+          ? body.rows
+          : [];
+
+    const total =
+      body?.total ??
+      nested?.total ??
+      rows.length;
+    const perPage =
+      body?.per_page ??
+      nested?.per_page ??
+      pageSize;
+    const current =
+      body?.current_page ??
+      nested?.current_page ??
+      currentPage;
+    const last =
+      body?.last_page ??
+      nested?.last_page ??
+      Math.max(1, Math.ceil((total || 0) / (perPage || 1)));
+    const from =
+      body?.from ??
+      nested?.from ??
+      (rows.length > 0 ? (current - 1) * perPage + 1 : 0);
+    const to =
+      body?.to ??
+      nested?.to ??
+      (rows.length > 0 ? from + rows.length - 1 : 0);
+
+    return {
+      rows,
+      pagination: {
+        currentPage: current,
+        totalPages: last,
+        total,
+        perPage,
+        from,
+        to,
+      },
+    };
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -51,17 +101,9 @@ export default function PaginatedTable({
       });
 
       const response = await api.get(apiEndpoint, { params });
-      const result = response.data;
-      
-      setData(result.data || []);
-      setPagination({
-        currentPage: result.current_page || 1,
-        totalPages: result.last_page || 1,
-        total: result.total || 0,
-        perPage: result.per_page || pageSize,
-        from: result.from || 0,
-        to: result.to || 0,
-      });
+      const normalized = normalizeResponse(response.data);
+      setData(normalized.rows);
+      setPagination(normalized.pagination);
     } catch (error) {
       console.error('Failed to fetch data:', error);
       setData([]);
