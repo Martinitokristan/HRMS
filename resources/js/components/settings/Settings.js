@@ -14,6 +14,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 
 const TABS = [
     { id: 'general', label: 'General', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+    { id: 'logistics', label: 'Logistics', icon: 'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1m-6 0a1 1 0 001-1' },
     { id: 'notifications', label: 'Notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     { id: 'payments', label: 'Payments', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
     { id: 'security', label: 'Security', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002-2zm10-10V7a4 4 0 00-8 0v4h8z' }
@@ -184,10 +185,6 @@ export default function Settings() {
                                 <Label>Tax Rate (%)</Label>
                                 <Input type="number" value={settings.general?.tax_rate || '12'} onChange={e => handleChange('tax_rate', e.target.value)} />
                             </div>
-                            <div className="space-y-2">
-                                <Label>Delivery Fee (PHP)</Label>
-                                <Input type="number" value={settings.general?.rider_default_delivery_fee || '30'} onChange={e => handleChange('rider_default_delivery_fee', e.target.value)} />
-                            </div>
                             <div className="space-y-2 md:col-span-2">
                                 <Label>Complete Store Address</Label>
                                 <Textarea rows={3} value={settings.general?.store_address || ''} onChange={e => handleChange('store_address', e.target.value)} />
@@ -195,6 +192,41 @@ export default function Settings() {
                         </div>
                         <div className="flex justify-end pt-4 border-t border-border">
                             <Button onClick={handleSaveSettings} disabled={saving}>Save Changes</Button>
+                        </div>
+                    </>
+                )}
+
+                {/* ── LOGISTICS ── */}
+                {activeTab === 'logistics' && (
+                    <>
+                        <div className="mb-6">
+                            <h2 className="text-lg font-bold text-foreground">Logistics Settings</h2>
+                            <p className="text-sm text-muted-foreground">Manage delivery fees and rider payouts</p>
+                        </div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Rider Fees</div>
+                        <Card className="p-5 mb-6">
+                            <div className="space-y-4">
+                                <div className="space-y-2 max-w-sm">
+                                    <Label className="text-sm font-semibold">Standard Delivery Fee (per Order)</Label>
+                                    <div className="flex gap-3">
+                                        <div className="relative flex-1">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">₱</span>
+                                            <Input 
+                                                type="number" 
+                                                className="pl-7"
+                                                value={settings.logistics?.rider_default_delivery_fee || '30'} 
+                                                onChange={e => handleChange('rider_default_delivery_fee', e.target.value)} 
+                                            />
+                                        </div>
+                                    </div>
+                                    <p className="text-[12px] text-muted-foreground">
+                                        This is the fixed amount the company pays to riders for every successful delivery parcel.
+                                    </p>
+                                </div>
+                            </div>
+                        </Card>
+                        <div className="flex justify-end pt-4 border-t border-border">
+                            <Button onClick={handleSaveSettings} disabled={saving}>Save Logistics Settings</Button>
                         </div>
                     </>
                 )}

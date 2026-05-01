@@ -130,7 +130,10 @@ export default function RiderDashboardV3() {
         refreshSettings();
     }, []);
 
-    const deliveryFee = settings?.settings?.general?.rider_default_delivery_fee || settings?.general?.rider_default_delivery_fee || 30;
+    const deliveryFee = settings?.settings?.logistics?.rider_default_delivery_fee || 
+                        settings?.logistics?.rider_default_delivery_fee || 
+                        settings?.settings?.general?.rider_default_delivery_fee || 
+                        settings?.general?.rider_default_delivery_fee || 30;
     const { refreshTrigger: dashTrigger } = useSilentRefresh(
         STALE_KEYS.RIDER_DASHBOARD,
     );
