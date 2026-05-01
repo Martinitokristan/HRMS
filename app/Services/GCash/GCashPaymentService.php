@@ -82,10 +82,24 @@ class GCashPaymentService
 
             $phoneVariants = [
                 $parsedPhone,
-                '+63' . substr($parsedPhone, 1),
-                '63' . substr($parsedPhone, 1),
-                str_replace('+63', '0', $parsedPhone),
             ];
+            
+            // Add robust variants
+            if (str_starts_with($parsedPhone, '0')) {
+                $phoneVariants[] = '+63' . substr($parsedPhone, 1);
+                $phoneVariants[] = '63' . substr($parsedPhone, 1);
+            } elseif (str_starts_with($parsedPhone, '+63')) {
+                $phoneVariants[] = '0' . substr($parsedPhone, 3);
+                $phoneVariants[] = '63' . substr($parsedPhone, 3);
+            } elseif (str_starts_with($parsedPhone, '63')) {
+                $phoneVariants[] = '0' . substr($parsedPhone, 2);
+                $phoneVariants[] = '+63' . substr($parsedPhone, 2);
+            }
+
+            // Filter out any invalid strings generated
+            $phoneVariants = array_unique(array_filter($phoneVariants, function ($val) {
+                return strlen($val) >= 10;
+            }));
 
             $matchingSale = Sale::where('status', 'pending_payment')
                 ->where('payment_method', 'gcash')
