@@ -107,7 +107,7 @@ class GCashPaymentService
                 ->where(function ($q) use ($phoneVariants) {
                     $q->whereIn('payment_phone_number', $phoneVariants);
                 })
-                ->orderBy('created_at', 'asc')
+                ->orderBy('created_at', 'desc') // Change from 'asc' to 'desc' to prioritize the newest order
                 ->lockForUpdate()
                 ->first();
 
