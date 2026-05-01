@@ -43,7 +43,7 @@ class UserController extends Controller
         $request->validate([
             'name'  => 'required|string|max:100',
             'email' => "required|email|unique:users,email,{$id}",
-            'phone' => 'nullable|string|max:20',
+            'phone' => "nullable|string|max:20|unique:users,phone,{$id}",
             'role'  => 'required|in:admin,customer,rider',
         ]);
 

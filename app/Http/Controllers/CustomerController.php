@@ -108,8 +108,8 @@ class CustomerController extends Controller
         $request->validate([
             // User information
             'name'           => 'sometimes|nullable|string|max:255',
-            'email'          => 'sometimes|nullable|string|email|max:255',
-            'phone'          => 'sometimes|nullable|string|max:20',
+            'email'          => 'sometimes|nullable|string|email|max:255|unique:users,email,' . $user->id,
+            'phone'          => 'sometimes|nullable|string|max:20|unique:users,phone,' . $user->id,
             // Personal information
             'age'            => 'nullable|integer|min:1|max:150',
             'sex'            => 'nullable|string|in:male,female,other',

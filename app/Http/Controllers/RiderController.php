@@ -160,14 +160,15 @@ class RiderController extends Controller
      */
     public function updateProfile(Request $request, RiderProfileService $profileService)
     {
+        $user = $request->user();
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'sometimes|nullable|string|email|max:255',
-            'phone' => 'nullable|string|max:20',
+            'email' => 'sometimes|nullable|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20|unique:users,phone,' . $user->id,
             'address' => 'nullable|string|max:500',
         ]);
 
-        $result = $profileService->updateProfile($request->user()->id, $data);
+        $result = $profileService->updateProfile($user->id, $data);
 
         if (isset($result['error'])) {
             return response()->json(['message' => $result['error']], $result['status_code']);

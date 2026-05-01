@@ -354,14 +354,14 @@ export default function SalesTab() {
                                     <TableCell className="px-4 py-3 max-w-[220px]">
                                         {Array.isArray(sale.items) && sale.items.length > 0 ? (
                                             <div className="text-sm">
-                                                <div className="font-medium text-foreground truncate" title={`${sale.items[0].product?.name || ''}${sale.items[0].product_variant ? ` (${variantLabel(sale.items[0].product_variant)})` : ''} — ${sale.items[0].quantity}${sale.items[0].quantity === 1 ? 'pc' : 'pcs'}`}>
+                                                <div className="font-medium text-foreground truncate" title={`${sale.items[0].product?.name || ''}${sale.items[0].product_variant ? ` (${variantLabel(sale.items[0].product_variant)})` : ''} — ${Math.round(sale.items[0].quantity)}pcs`}>
                                                     {sale.items[0].product?.name || 'Unknown product'}
                                                     {sale.items[0].product_variant && (
                                                         <span className="text-muted-foreground ml-1">
                                                             ({variantLabel(sale.items[0].product_variant)})
                                                         </span>
                                                     )}
-                                                    <span className="ml-1 text-xs text-muted-foreground">{sale.items[0].quantity}{sale.items[0].quantity === 1 ? 'pc' : 'pcs'}</span>
+                                                    <span className="ml-1 text-xs text-muted-foreground">{Math.round(sale.items[0].quantity)}pcs</span>
                                                 </div>
                                                 {sale.items.length > 1 && (
                                                     <div className="text-xs text-muted-foreground">
@@ -621,7 +621,7 @@ export default function SalesTab() {
                                                         )}
                                                     </TableCell>
                                                     <TableCell className="px-4 py-3 text-center font-bold">
-                                                        {parseInt(i.quantity)}
+                                                        {Math.round(i.quantity)}pcs
                                                     </TableCell>
                                                     <TableCell className="px-4 py-3 text-right font-mono text-muted-foreground">
                                                         {formatPHP(i.unit_price)}

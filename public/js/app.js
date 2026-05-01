@@ -25807,13 +25807,13 @@ function SalesTab() {
                   className: "text-sm",
                   children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
                     className: "font-medium text-foreground truncate",
-                    title: "".concat(((_sale$items$0$product = sale.items[0].product) === null || _sale$items$0$product === void 0 ? void 0 : _sale$items$0$product.name) || '').concat(sale.items[0].product_variant ? " (".concat(variantLabel(sale.items[0].product_variant), ")") : '', " \u2014 ").concat(sale.items[0].quantity).concat(sale.items[0].quantity === 1 ? 'pc' : 'pcs'),
+                    title: "".concat(((_sale$items$0$product = sale.items[0].product) === null || _sale$items$0$product === void 0 ? void 0 : _sale$items$0$product.name) || '').concat(sale.items[0].product_variant ? " (".concat(variantLabel(sale.items[0].product_variant), ")") : '', " \u2014 ").concat(Math.round(sale.items[0].quantity), "pcs"),
                     children: [((_sale$items$0$product2 = sale.items[0].product) === null || _sale$items$0$product2 === void 0 ? void 0 : _sale$items$0$product2.name) || 'Unknown product', sale.items[0].product_variant && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("span", {
                       className: "text-muted-foreground ml-1",
                       children: ["(", variantLabel(sale.items[0].product_variant), ")"]
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("span", {
                       className: "ml-1 text-xs text-muted-foreground",
-                      children: [sale.items[0].quantity, sale.items[0].quantity === 1 ? 'pc' : 'pcs']
+                      children: [Math.round(sale.items[0].quantity), "pcs"]
                     })]
                   }), sale.items.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
                     className: "text-xs text-muted-foreground",
@@ -26031,9 +26031,9 @@ function SalesTab() {
                         className: "text-[11px] text-muted-foreground mt-0.5",
                         children: ["Base product \xB7", " ", (_i$product2 = i.product) === null || _i$product2 === void 0 ? void 0 : _i$product2.barcode]
                       })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                       className: "px-4 py-3 text-center font-bold",
-                      children: parseInt(i.quantity)
+                      children: [Math.round(i.quantity), "pcs"]
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_table__WEBPACK_IMPORTED_MODULE_12__.TableCell, {
                       className: "px-4 py-3 text-right font-mono text-muted-foreground",
                       children: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_11__.formatPHP)(i.unit_price)

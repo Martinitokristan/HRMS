@@ -35,13 +35,14 @@ class AuthController extends Controller
             'role' => ['required', 'string', Rule::in(['customer', 'rider'])],
             'name' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.-]+$/'],
             'email' => 'required|email|unique:users,email',
-            'phone' => ['required', 'string', 'regex:/^09\d{9}$/'],
+            'phone' => ['required', 'string', 'regex:/^09\d{9}$/', 'unique:users,phone'],
             'password' => ['required', 'string', 'min:8', 'confirmed', 'regex:/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/'],
         ];
 
         $customMessages = [
             'name.regex' => 'The name must only contain letters, spaces, dots, or hyphens.',
             'phone.regex' => 'Phone number must be 11 digits starting with 09 (e.g. 09171234567).',
+            'phone.unique' => 'This phone number is already registered.',
             'password.regex' => 'Password must contain at least 8 characters, one letter and one number.',
         ];
 
