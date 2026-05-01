@@ -41,7 +41,7 @@ class GCashPaymentReceived extends Notification implements \Illuminate\Contracts
         $this->sale->loadMissing('items.product');
         $items = $this->sale->items->map(fn($i) => [
             'name'     => $i->product->name ?? 'Item',
-            'quantity' => $i->quantity,
+            'quantity' => (int) $i->quantity,
         ])->values()->toArray();
 
         return [

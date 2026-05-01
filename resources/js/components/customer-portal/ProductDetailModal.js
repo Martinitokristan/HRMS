@@ -397,7 +397,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                                 ) : (
                                     <>
                                         <CheckCircle2 className="w-4 h-4" />
-                                        In Stock <span className="text-gray-900 ml-1">{Math.round(currentStock)} units</span>
+                                        In Stock <span className="text-gray-900 ml-1">{Math.round(currentStock)} pcs</span>
                                     </>
                                 )}
                             </div>
@@ -513,9 +513,24 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                                     >
                                         <Minus className="w-4 h-4" />
                                     </button>
-                                    <div className="w-10 text-center font-black text-gray-900">
-                                        {qty}
-                                    </div>
+                                    <input
+                                        type="number"
+                                        value={qty}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            if (!isNaN(val)) {
+                                                setQty(Math.min(currentStock, Math.max(1, val)));
+                                            } else if (e.target.value === '') {
+                                                setQty('');
+                                            }
+                                        }}
+                                        onBlur={() => {
+                                            if (qty === '' || qty < 1) {
+                                                setQty(1);
+                                            }
+                                        }}
+                                        className="w-12 text-center font-black text-gray-900 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    />
                                     <button
                                         onClick={() => setQty(q => Math.min(q + 1, currentStock))}
                                         className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-400 rounded-full"

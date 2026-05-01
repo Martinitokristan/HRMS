@@ -168,7 +168,7 @@ class GCashPaymentService
             $notificationItems = $matchingSale->items->map(function ($it) {
                 return [
                     'name' => optional($it->product)->name ?? 'Item',
-                    'quantity' => (float) $it->quantity,
+                    'quantity' => (int) $it->quantity,
                 ];
             })->values()->all();
 

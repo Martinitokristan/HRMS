@@ -14453,7 +14453,7 @@ function CartPage() {
 
           // Stock validation
           if (delta > 0 && item.available_stock !== undefined && newQty > item.available_stock) {
-            showToast("Insufficient stock. Only ".concat(item.available_stock, " units available."), 'error');
+            showToast("Insufficient stock. Only ".concat(Math.round(item.available_stock), " pcs available."), 'error');
             return item;
           }
           return _objectSpread(_objectSpread({}, item), {}, {
@@ -14501,7 +14501,7 @@ function CartPage() {
       if (existing) {
         var totalQty = existing.qty + qty;
         if (available_stock !== undefined && totalQty > available_stock) {
-          showToast("Cannot add more. Only ".concat(available_stock, " units available."), 'error');
+          showToast("Cannot add more. Only ".concat(Math.round(available_stock), " pcs available."), 'error');
           return filtered.map(function (i) {
             return i.cartId === newCartId ? _objectSpread(_objectSpread({}, i), {}, {
               qty: available_stock,
@@ -14558,7 +14558,7 @@ function CartPage() {
             var totalQty = i.qty + item.qty;
             var finalQty = Math.min(totalQty, available_stock);
             if (totalQty > available_stock) {
-              showToast("Combined quantity adjusted to available stock (".concat(available_stock, ")"), 'warning');
+              showToast("Combined quantity adjusted to available stock (".concat(Math.round(available_stock), " pcs)"), 'warning');
             }
             return _objectSpread(_objectSpread({}, i), {}, {
               qty: finalQty,
@@ -16758,7 +16758,7 @@ function CustomerOrder() {
                       className: "flex-1",
                       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_36__.jsxs)("span", {
                         className: "font-extrabold text-base",
-                        children: [item.qty, "x"]
+                        children: [Math.round(item.qty), "x"]
                       }), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_36__.jsx)("span", {
                         className: "text-base font-semibold",
                         children: item.name
@@ -21503,7 +21503,7 @@ function ProductDetailModal(_ref) {
                   className: "w-4 h-4"
                 }), "In Stock ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsxs)("span", {
                   className: "text-gray-900 ml-1",
-                  children: [Math.round(currentStock), " units"]
+                  children: [Math.round(currentStock), " pcs"]
                 })]
               })
             })
@@ -21615,9 +21615,23 @@ function ProductDetailModal(_ref) {
                   children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
                     className: "w-4 h-4"
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("div", {
-                  className: "w-10 text-center font-black text-gray-900",
-                  children: qty
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("input", {
+                  type: "number",
+                  value: qty,
+                  onChange: function onChange(e) {
+                    var val = parseInt(e.target.value);
+                    if (!isNaN(val)) {
+                      setQty(Math.min(currentStock, Math.max(1, val)));
+                    } else if (e.target.value === '') {
+                      setQty('');
+                    }
+                  },
+                  onBlur: function onBlur() {
+                    if (qty === '' || qty < 1) {
+                      setQty(1);
+                    }
+                  },
+                  className: "w-12 text-center font-black text-gray-900 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_17__.jsx)("button", {
                   onClick: function onClick() {
                     return setQty(function (q) {
@@ -39666,13 +39680,12 @@ function SingleToast(_ref) {
   var formatQty = function formatQty(qty) {
     var n = typeof qty === 'number' ? qty : parseFloat(qty);
     if (Number.isNaN(n)) return 1;
-    return Number.isInteger(n) ? n : n;
+    return Math.round(n);
   };
   var itemSummary = Array.isArray(items) && items.length > 0 ? items.map(function (i) {
     var _ref2, _i$quantity;
     var q = formatQty((_ref2 = (_i$quantity = i.quantity) !== null && _i$quantity !== void 0 ? _i$quantity : i.qty) !== null && _ref2 !== void 0 ? _ref2 : 1);
-    var unit = q === 1 ? 'pc' : 'pcs';
-    return "".concat(q).concat(unit, " ").concat(i.name || i.product_name || 'Item');
+    return "".concat(q, "pcs ").concat(i.name || i.product_name || 'Item');
   }).join(', ') : null;
   var totalPcs = Array.isArray(items) ? items.reduce(function (sum, i) {
     var _ref3, _i$quantity2;
@@ -49276,7 +49289,7 @@ function SupplierCatalog() {
                     className: "w-3.5 h-3.5"
                   }), "In Stock", " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("span", {
                     className: "text-gray-900 ml-1",
-                    children: [currentStock, " units"]
+                    children: [Math.round(currentStock), " pcs"]
                   })]
                 })
               })
@@ -49307,7 +49320,7 @@ function SupplierCatalog() {
                   children: "Min Order"
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("span", {
                   className: "font-bold text-gray-700",
-                  children: [viewProduct.min_order_qty || 1, " ", "units"]
+                  children: [viewProduct.min_order_qty || 1, " ", "pcs"]
                 })]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsxs)("div", {
                 className: "flex justify-between items-center text-xs text-right",
@@ -49384,9 +49397,23 @@ function SupplierCatalog() {
                     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)(lucide_react__WEBPACK_IMPORTED_MODULE_16__["default"], {
                       className: "w-3.5 h-3.5"
                     })
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("div", {
-                    className: "w-10 text-center font-bold text-gray-900 border-x border-gray-100 text-sm",
-                    children: orderQty
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("input", {
+                    type: "number",
+                    value: orderQty,
+                    onChange: function onChange(e) {
+                      var val = parseInt(e.target.value);
+                      if (!isNaN(val)) {
+                        setOrderQty(Math.min(currentStock, Math.max(viewProduct.min_order_qty || 1, val)));
+                      } else if (e.target.value === '') {
+                        setOrderQty('');
+                      }
+                    },
+                    onBlur: function onBlur() {
+                      if (orderQty === '' || orderQty < (viewProduct.min_order_qty || 1)) {
+                        setOrderQty(viewProduct.min_order_qty || 1);
+                      }
+                    },
+                    className: "w-12 text-center font-bold text-gray-900 border-x border-gray-100 text-sm bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_22__.jsx)("button", {
                     onClick: function onClick() {
                       return setOrderQty(function (q) {

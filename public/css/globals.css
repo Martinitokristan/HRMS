@@ -488,6 +488,18 @@ a {
     color: inherit;
   }
 
+/* Hide number input spinners globally */
+
+input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
 ul, ol {
     list-style: none;
   }
@@ -4689,6 +4701,11 @@ input, select, textarea {
 .\[--cell-size\:2rem\]{
   --cell-size: 2rem;
 }
+.\[appearance\:textfield\]{
+  -webkit-appearance: textfield;
+     -moz-appearance: textfield;
+          appearance: textfield;
+}
 
 @media print {
   .sidebar, .topbar, .sidebar-toggle, .toast-container {
@@ -6785,6 +6802,16 @@ input, select, textarea {
 .\[\&\+div\]\:text-xs+div{
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.\[\&\:\:-webkit-inner-spin-button\]\:appearance-none::-webkit-inner-spin-button{
+  -webkit-appearance: none;
+          appearance: none;
+}
+
+.\[\&\:\:-webkit-outer-spin-button\]\:appearance-none::-webkit-outer-spin-button{
+  -webkit-appearance: none;
+          appearance: none;
 }
 
 .\[\&\:first-child\[data-selected\=true\]_button\]\:rounded-l-md:first-child[data-selected=true] button{

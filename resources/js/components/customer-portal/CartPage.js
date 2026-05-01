@@ -52,7 +52,7 @@ export default function CartPage() {
                     
                     // Stock validation
                     if (delta > 0 && item.available_stock !== undefined && newQty > item.available_stock) {
-                        showToast(`Insufficient stock. Only ${item.available_stock} units available.`, 'error');
+                        showToast(`Insufficient stock. Only ${Math.round(item.available_stock)} pcs available.`, 'error');
                         return item;
                     }
                     
@@ -95,7 +95,7 @@ export default function CartPage() {
             if (existing) {
                 const totalQty = existing.qty + qty;
                 if (available_stock !== undefined && totalQty > available_stock) {
-                    showToast(`Cannot add more. Only ${available_stock} units available.`, 'error');
+                    showToast(`Cannot add more. Only ${Math.round(available_stock)} pcs available.`, 'error');
                     return filtered.map(i => i.cartId === newCartId ? { ...i, qty: available_stock, available_stock } : i);
                 }
                 return filtered.map(i => i.cartId === newCartId ? { ...i, qty: totalQty, available_stock } : i);
@@ -134,7 +134,7 @@ export default function CartPage() {
                         const totalQty = i.qty + item.qty;
                         const finalQty = Math.min(totalQty, available_stock);
                         if (totalQty > available_stock) {
-                            showToast(`Combined quantity adjusted to available stock (${available_stock})`, 'warning');
+                            showToast(`Combined quantity adjusted to available stock (${Math.round(available_stock)} pcs)`, 'warning');
                         }
                         return { ...i, qty: finalQty, available_stock };
                     }

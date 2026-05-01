@@ -26,8 +26,8 @@ class PurchaseOrderRequest extends Notification
     {
         $products = $this->po->items->map(function ($item) {
             $name = $item->supplierProduct ? $item->supplierProduct->name : ($item->product ? $item->product->name : 'Product');
-            $qty = floatval($item->quantity);
-            return $qty . 'x ' . $name;
+            $qty = intval($item->quantity);
+            return $qty . 'pcs ' . $name;
         })->implode(', ');
 
         return [

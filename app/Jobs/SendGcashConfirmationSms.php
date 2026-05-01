@@ -59,7 +59,7 @@ class SendGcashConfirmationSms implements ShouldQueue
                     optional(optional($i->productVariant)->weightValue)->label,
                 ])->filter()->implode(' / ');
                 $variantSuffix = $variant ? ' (' . $variant . ')' : '';
-                return $i->quantity . 'x ' . $name . $variantSuffix;
+                return intval($i->quantity) . 'pcs ' . $name . $variantSuffix;
             })->join(', ')
             : "order #{$this->sale->order_number}";
 

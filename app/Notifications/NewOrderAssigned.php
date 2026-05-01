@@ -33,7 +33,7 @@ class NewOrderAssigned extends Notification
                 optional(optional($item->productVariant)->weightValue)->label,
             ])->filter()->implode(' / ');
             $variantSuffix = $variant ? ' (' . $variant . ')' : '';
-            return $item->quantity . 'x ' . $name . $variantSuffix;
+            return intval($item->quantity) . 'pcs ' . $name . $variantSuffix;
         })->implode(', ');
 
         return [

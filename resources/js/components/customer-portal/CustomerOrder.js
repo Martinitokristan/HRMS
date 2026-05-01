@@ -428,7 +428,7 @@ export default function CustomerOrder() {
                                                 ) : <Package className="h-6 w-6 opacity-30 text-muted-foreground" />}
                                             </div>
                                             <div className="flex-1">
-                                                <span className="font-extrabold text-base">{item.qty}x</span> <span className="text-base font-semibold">{item.name}</span>
+                                                <span className="font-extrabold text-base">{Math.round(item.qty)}x</span> <span className="text-base font-semibold">{item.name}</span>
                                                 {item.brand?.name && <div className="text-sm font-bold text-orange-600 mt-0.5">{item.brand.name}</div>}
                                                 {item.variantString && <div className="text-sm text-muted-foreground mt-0.5 font-medium">[{item.variantString}]</div>}
                                             </div>

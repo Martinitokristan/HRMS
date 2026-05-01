@@ -489,7 +489,7 @@ export default function SupplierCatalog() {
                                                     <CheckCircle2 className="w-3.5 h-3.5" />
                                                     In Stock{" "}
                                                     <span className="text-gray-900 ml-1">
-                                                        {currentStock} units
+                                                        {Math.round(currentStock)} pcs
                                                     </span>
                                                 </>
                                             )}
@@ -521,7 +521,7 @@ export default function SupplierCatalog() {
                                             </span>
                                             <span className="font-bold text-gray-700">
                                                 {viewProduct.min_order_qty || 1}{" "}
-                                                units
+                                                pcs
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs text-right">
@@ -641,9 +641,24 @@ export default function SupplierCatalog() {
                                                 >
                                                     <Minus className="w-3.5 h-3.5" />
                                                 </button>
-                                                <div className="w-10 text-center font-bold text-gray-900 border-x border-gray-100 text-sm">
-                                                    {orderQty}
-                                                </div>
+                                                <input
+                                                    type="number"
+                                                    value={orderQty}
+                                                    onChange={(e) => {
+                                                        const val = parseInt(e.target.value);
+                                                        if (!isNaN(val)) {
+                                                            setOrderQty(Math.min(currentStock, Math.max(viewProduct.min_order_qty || 1, val)));
+                                                        } else if (e.target.value === '') {
+                                                            setOrderQty('');
+                                                        }
+                                                    }}
+                                                    onBlur={() => {
+                                                        if (orderQty === '' || orderQty < (viewProduct.min_order_qty || 1)) {
+                                                            setOrderQty(viewProduct.min_order_qty || 1);
+                                                        }
+                                                    }}
+                                                    className="w-12 text-center font-bold text-gray-900 border-x border-gray-100 text-sm bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                />
                                                 <button
                                                     onClick={() =>
                                                         setOrderQty((q) =>

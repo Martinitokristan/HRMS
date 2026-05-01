@@ -86,15 +86,14 @@ function SingleToast({ data, onDone }) {
     const formatQty = (qty) => {
         const n = typeof qty === 'number' ? qty : parseFloat(qty);
         if (Number.isNaN(n)) return 1;
-        return Number.isInteger(n) ? n : n;
+        return Math.round(n);
     };
 
     const itemSummary = Array.isArray(items) && items.length > 0
         ? items
             .map((i) => {
                 const q = formatQty(i.quantity ?? i.qty ?? 1);
-                const unit = q === 1 ? 'pc' : 'pcs';
-                return `${q}${unit} ${i.name || i.product_name || 'Item'}`;
+                return `${q}pcs ${i.name || i.product_name || 'Item'}`;
             })
             .join(', ')
         : null;

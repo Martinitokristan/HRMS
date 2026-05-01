@@ -34,7 +34,7 @@ class StockAlert extends Notification implements \Illuminate\Contracts\Queue\Sho
             return [
                 'type'    => 'out_of_stock',
                 'title'   => '🚨 Out of Stock',
-                'message' => "{$this->productName} is now out of stock (0 units remaining).",
+                'message' => "{$this->productName} is now out of stock (0 pcs remaining).",
                 'product_name'      => $this->productName,
                 'current_stock'     => $this->currentStock,
                 'reorder_threshold' => $this->reorderThreshold,
@@ -44,7 +44,7 @@ class StockAlert extends Notification implements \Illuminate\Contracts\Queue\Sho
         return [
             'type'    => 'low_stock',
             'title'   => '⚠️ Low Stock Alert',
-            'message' => "{$this->productName} is running low — {$this->currentStock} unit(s) left (threshold: {$this->reorderThreshold}).",
+            'message' => "{$this->productName} is running low — {$this->currentStock} pcs left (threshold: {$this->reorderThreshold} pcs).",
             'product_name'      => $this->productName,
             'current_stock'     => $this->currentStock,
             'reorder_threshold' => $this->reorderThreshold,
