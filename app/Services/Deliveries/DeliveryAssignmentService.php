@@ -53,7 +53,14 @@ class DeliveryAssignmentService
         // Strictly scope the query to unassigned, pending deliveries to prevent IDOR
         $delivery = Delivery::where('status', 'pending')
             ->whereNull('rider_id')
-            ->findOrFail($deliveryId);
+            ->find($deliveryId);
+
+        if (!$delivery) {
+            return [
+                'error' => 'Delivery not found or not available for assignment',
+                'status_code' => 404,
+            ];
+        }
 
         DB::transaction(function () use ($delivery, $rider) {
             // Assign the rider

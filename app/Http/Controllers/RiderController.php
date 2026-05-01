@@ -105,6 +105,14 @@ class RiderController extends Controller
             $request->get('longitude')
         );
 
+        if (isset($result['error'])) {
+            return response()->json([
+                'error' => $result['error'],
+                'message' => $result['message'] ?? 'Failed to load dashboard',
+                'status' => 'error'
+            ], $result['status_code']);
+        }
+
         return response()->json([
             'data' => $result['data'],
             'status' => 'success',

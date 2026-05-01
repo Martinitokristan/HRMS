@@ -12,81 +12,89 @@ class RiderDashboardService
      */
     public function getDashboard($riderId, $latitude = null, $longitude = null)
     {
-        $today = now()->startOfDay();
+        try {
+            $today = now()->startOfDay();
 
-        if (!is_null($latitude) && !is_null($longitude)) {
-            $profile = RiderProfile::where('user_id', $riderId)->first();
-            if ($profile) {
-                $profile->current_latitude = (float) $latitude;
-                $profile->current_longitude = (float) $longitude;
-                $profile->save();
+            if (!is_null($latitude) && !is_null($longitude)) {
+                $profile = RiderProfile::where('user_id', $riderId)->first();
+                if ($profile) {
+                    $profile->current_latitude = (float) $latitude;
+                    $profile->current_longitude = (float) $longitude;
+                    $profile->save();
 
-                $activeDeliveries = Delivery::where('rider_id', $riderId)
-                    ->whereIn('status', ['confirmed', 'in_progress'])
-                    ->with('sale')
-                    ->get();
+                    $activeDeliveries = Delivery::where('rider_id', $riderId)
+                        ->whereIn('status', ['confirmed', 'in_progress'])
+                        ->with('sale')
+                        ->get();
 
-                foreach ($activeDeliveries as $delivery) {
-                    if ($delivery->sale && $delivery->sale->customer_id) {
-                        broadcast(new \App\Events\RiderLocationUpdated(
-                            $delivery->sale->customer_id,
-                            $riderId,
-                            $latitude,
-                            $longitude,
-                            $delivery->tracking_number ?? 0
-                        ));
+                    foreach ($activeDeliveries as $delivery) {
+                        if ($delivery->sale && $delivery->sale->customer_id) {
+                            broadcast(new \App\Events\RiderLocationUpdated(
+                                $delivery->sale->customer_id,
+                                $riderId,
+                                $latitude,
+                                $longitude,
+                                $delivery->tracking_number ?? 0
+                            ));
+                        }
                     }
                 }
             }
+
+            $stats = $this->buildDashboardStats($riderId, $today);
+            $riderProfile = RiderProfile::where('user_id', $riderId)->first();
+            $riderLat = $riderProfile->current_latitude ?? null;
+            $riderLon = $riderProfile->current_longitude ?? null;
+            $riderHasGps = $riderLat !== null && $riderLon !== null;
+
+            $distanceCalculator = app(\App\Services\DistanceCalculator::class);
+
+            $deliveries = $this->enrichDeliveries(
+                Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
+                    ->where('rider_id', $riderId)
+                    ->latest()
+                    ->get(),
+                $riderLat,
+                $riderLon,
+                $riderHasGps,
+                $distanceCalculator,
+                true
+            );
+
+            $nearby = $this->enrichDeliveries(
+                Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
+                    ->whereNull('rider_id')
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->get(),
+                $riderLat,
+                $riderLon,
+                $riderHasGps,
+                $distanceCalculator,
+                false
+            )
+                ->sortBy(fn($d) => $d['distance_value'] ?? PHP_INT_MAX)
+                ->values();
+
+            $myJobs = $this->filterMyJobs($deliveries);
+            $completed = $this->filterCompleted($deliveries);
+
+            return [
+                'data' => [
+                    'stats' => $stats,
+                    'nearby' => $nearby,
+                    'my_jobs' => $myJobs,
+                    'completed' => $completed,
+                ],
+                'status_code' => 200,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'error' => 'Failed to load dashboard',
+                'message' => $e->getMessage(),
+                'status_code' => 500,
+            ];
         }
-
-        $stats = $this->buildDashboardStats($riderId, $today);
-        $riderProfile = RiderProfile::where('user_id', $riderId)->first();
-        $riderLat = $riderProfile->current_latitude ?? null;
-        $riderLon = $riderProfile->current_longitude ?? null;
-        $riderHasGps = $riderLat !== null && $riderLon !== null;
-
-        $distanceCalculator = app(\App\Services\DistanceCalculator::class);
-
-        $deliveries = $this->enrichDeliveries(
-            Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
-                ->where('rider_id', $riderId)
-                ->latest()
-                ->get(),
-            $riderLat,
-            $riderLon,
-            $riderHasGps,
-            $distanceCalculator,
-            true
-        );
-
-        $nearby = $this->enrichDeliveries(
-            Delivery::with(['sale.customer.customerProfile', 'sale.items.product'])
-                ->whereNull('rider_id')
-                ->where('status', 'pending')
-                ->latest()
-                ->get(),
-            $riderLat,
-            $riderLon,
-            $riderHasGps,
-            $distanceCalculator,
-            false
-        )
-            ->sortBy(fn($d) => $d['distance_value'] ?? PHP_INT_MAX)
-            ->values();
-
-        $myJobs = $this->filterMyJobs($deliveries);
-        $completed = $this->filterCompleted($deliveries);
-
-        return [
-            'data' => [
-                'stats' => $stats,
-                'nearby' => $nearby,
-                'my_jobs' => $myJobs,
-                'completed' => $completed,
-            ],
-            'status_code' => 200,
-        ];
     }
 
     /**
