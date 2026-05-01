@@ -15,8 +15,9 @@ class CustomerController extends Controller
         $currentMonth = now()->startOfMonth();
 
         $query = User::where('role', 'customer')
-            ->withCount(['sales'])
-            ->withSum('sales', 'total_amount')
+            ->with(['profile'])
+            ->withCount(['sales as orders_count'])
+            ->withSum('sales as total_spent', 'total_amount')
             ->when($request->status, function($q) use ($request) {
                 return $q->where('status', $request->status);
             })
@@ -26,18 +27,26 @@ class CustomerController extends Controller
             })
             ->latest();
 
+        $customers = $query->get()->map(function ($customer) {
+            $data = $customer->toArray();
+            $data['photo'] = $customer->photo ? asset('storage/' . $customer->photo) : null;
+            $data['profile'] = $customer->profile ? $customer->profile->toArray() : null;
+            return $data;
+        })->toArray();
+
+        $activeThisMonth = User::where('role', 'customer')
+            ->whereHas('sales', function($q) use ($currentMonth) {
+                return $q->where('created_at', '>=', $currentMonth);
+            })
+            ->count();
+
+        $suspendedCount = User::where('role', 'customer')->where('status', 'suspended')->count();
+
         return response()->json([
-            'data'   => $query->paginate($request->get('per_page', 20)),
-            'counts' => [
-                'total'         => User::where('role', 'customer')->count(),
-                'active_month'  => User::where('role', 'customer')
-                    ->whereHas('sales', function($q) use ($currentMonth) {
-                        return $q->where('created_at', '>=', $currentMonth);
-                    })
-                    ->count(),
-                'suspended'     => User::where('role', 'customer')->where('status', 'suspended')->count(),
-            ],
-            'status' => 'success',
+            'data'             => $customers,
+            'active_this_month'=> $activeThisMonth,
+            'suspended_count'  => $suspendedCount,
+            'status'           => 'success',
         ]);
     }
 
@@ -48,11 +57,14 @@ class CustomerController extends Controller
             ->latest()
             ->get()
             ->map(function ($order) {
-                $order->has_return = ReturnOrder::where('sale_id', $order->id)
+                $arr = $order->toArray();
+                $arr['has_return'] = ReturnOrder::where('sale_id', $order->id)
                     ->whereIn('status', ['pending', 'approved', 'completed'])
                     ->exists();
-                return $order;
-            });
+                return $arr;
+            })
+            ->values()
+            ->toArray();
         return response()->json(['data' => $orders, 'status' => 'success']);
     }
 

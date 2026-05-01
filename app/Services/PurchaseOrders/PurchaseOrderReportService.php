@@ -32,7 +32,7 @@ class PurchaseOrderReportService
                 )
                 ->groupBy('label_num')
                 ->orderBy('label_num')
-                ->get();
+                ->get()->toArray();
 
             $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             $formatted = [];
@@ -54,7 +54,7 @@ class PurchaseOrderReportService
                 )
                 ->groupBy('label_num')
                 ->orderBy('label_num')
-                ->get();
+                ->get()->toArray();
 
             $formatted = [];
             $daysInMonth = $from->daysInMonth;

@@ -179,7 +179,7 @@ class SettingsController extends Controller
             return response()->json(['message' => $result['error']], $result['status_code']);
         }
 
-        return response()->json(['data' => $result['data']], $result['status_code']);
+        return response()->json($result);
     }
 
     /**
@@ -193,7 +193,7 @@ class SettingsController extends Controller
             return response()->json(['message' => $result['error']], $result['status_code']);
         }
 
-        return response()->json(['status' => 'success'], $result['status_code']);
+        return response()->json($result);
     }
 
     /**
@@ -207,7 +207,7 @@ class SettingsController extends Controller
             return response()->json(['message' => $result['error']], $result['status_code']);
         }
 
-        return response()->json(['status' => 'success'], $result['status_code']);
+        return response()->json($result);
     }
 
     /**
@@ -223,7 +223,7 @@ class SettingsController extends Controller
             return response()->json(['message' => $result['error']], $result['status_code']);
         }
 
-        return response()->json(['status' => 'success'], $result['status_code']);
+        return response()->json($result);
     }
 
     /**
@@ -237,7 +237,7 @@ class SettingsController extends Controller
             return response()->json(['message' => $result['error']], $result['status_code']);
         }
 
-        return response()->json(['status' => 'success'], $result['status_code']);
+        return response()->json($result);
     }
 
     /**

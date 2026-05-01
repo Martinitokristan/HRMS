@@ -17,7 +17,9 @@ class InventoryAdjustmentService
      */
     public function adjust($data, $user)
     {
-        DB::transaction(function () use ($data, $user) {
+        $inventory = null;
+
+        DB::transaction(function () use ($data, $user, &$inventory) {
             if ($data['variant_id']) {
                 $variant = ProductVariant::findOrFail($data['variant_id']);
                 if ($data['type'] === 'add') {
@@ -53,11 +55,15 @@ class InventoryAdjustmentService
 
         if (Cache::getStore() instanceof TaggableStore) {
             Cache::tags(['inventory'])->flush();
+        } else {
+            // For non-taggable stores (file, database), increment version to invalidate all inventory cache
+            Cache::increment('inventory:version');
         }
 
         return [
             'status_code' => 200,
             'message' => 'Stock adjusted successfully',
+            'inventory' => $inventory,
         ];
     }
 }

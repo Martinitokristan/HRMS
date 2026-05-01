@@ -27,18 +27,18 @@ class SettingsService
 
         $settings = $allSettings->groupBy('group')->map(function ($group) {
             return $group->pluck('value', 'key');
-        });
+        })->toArray();
 
         $response = [
             'settings' => $settings,
         ];
 
         if ($includeMasterlist) {
-            $response['categories'] = \App\Models\Category::all(['id', 'name']);
-            $response['unitTypes'] = \App\Models\UnitType::all(['id', 'purchase_unit', 'sell_unit']);
+            $response['categories'] = \App\Models\Category::all(['id', 'name'])->toArray();
+            $response['unitTypes'] = \App\Models\UnitType::all(['id', 'purchase_unit', 'sell_unit'])->toArray();
 
             if ($includeVariants) {
-                $response['variants'] = \App\Models\Variant::with('values')->get();
+                $response['variants'] = \App\Models\Variant::with('values')->get()->toArray();
             }
         }
 

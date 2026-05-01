@@ -22,7 +22,6 @@ class ReportService
         $monthParam = $request->get('month');
         $from = now()->startOfYear();
         $to = now()->endOfYear();
-        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $isDashboardCalendarFilter = $request->filled('year') || $request->filled('month');
 
         if ($isDashboardCalendarFilter) {
@@ -37,23 +36,36 @@ class ReportService
                 $rows = Sale::where('created_at', '>=', $from->copy()->startOfDay())
                     ->where('created_at', '<', $to->copy()->addDay()->startOfDay())
                     ->whereIn('status', $this->allowedStatuses)
-                    ->selectRaw('MONTH(created_at) as bucket, SUM(total_amount) as revenue, COUNT(*) as orders')
-                    ->groupBy('bucket')
-                    ->orderBy('bucket')
-                    ->get();
+                    ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total_sales, COUNT(*) as order_count, AVG(total_amount) as average_order_value')
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get()
+                    ->map(fn($row) => [
+                        'label'               => $row->date,
+                        'value'               => round($row->total_sales, 2),
+                        'date'                => $row->date,
+                        'orders'              => (int) $row->order_count,
+                        'total_sales'         => $row->total_sales,
+                        'order_count'         => (int) $row->order_count,
+                        'average_order_value' => round($row->average_order_value, 2),
+                    ])
+                    ->values()
+                    ->toArray();
 
-                $chartData = collect(array_fill(1, 12, 0));
-                foreach ($rows as $row) {
-                    $chartData[$row->bucket] = (int) $row->revenue;
-                }
+                $totalRevenue = array_sum(array_column($rows, 'total_sales'));
+                $totalOrders = array_sum(array_column($rows, 'order_count'));
+                $avgOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
 
                 return [
-                    'chart_labels' => $months,
-                    'chart_data' => array_values($chartData->toArray()),
-                    'period_label' => $year,
-                    'total_revenue' => $rows->sum('revenue'),
-                    'total_orders' => $rows->sum('orders'),
-                    'status_code' => 200,
+                    'data' => [
+                        'chart_data' => $rows,
+                    ],
+                    'summary' => [
+                        'total_revenue' => round($totalRevenue, 2),
+                        'total_orders' => $totalOrders,
+                        'avg_order_value' => round($avgOrderValue, 2),
+                    ],
+                    'status' => 'success',
                 ];
             } else {
                 $from = now()->setYear($year)->setMonth($month)->startOfMonth();
@@ -62,35 +74,50 @@ class ReportService
                 $rows = Sale::where('created_at', '>=', $from->copy()->startOfDay())
                     ->where('created_at', '<', $to->copy()->addDay()->startOfDay())
                     ->whereIn('status', $this->allowedStatuses)
-                    ->selectRaw('DAY(created_at) as bucket, SUM(total_amount) as revenue, COUNT(*) as orders')
-                    ->groupBy('bucket')
-                    ->orderBy('bucket')
-                    ->get();
+                    ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total_sales, COUNT(*) as order_count, AVG(total_amount) as average_order_value')
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get()
+                    ->map(fn($row) => [
+                        'label'               => $row->date,
+                        'value'               => round($row->total_sales, 2),
+                        'date'                => $row->date,
+                        'orders'              => (int) $row->order_count,
+                        'total_sales'         => $row->total_sales,
+                        'order_count'         => (int) $row->order_count,
+                        'average_order_value' => round($row->average_order_value, 2),
+                    ])
+                    ->values()
+                    ->toArray();
 
-                $daysInMonth = $to->daysInMonth;
-                $chartData = collect(array_fill(1, $daysInMonth, 0));
-                foreach ($rows as $row) {
-                    $chartData[$row->bucket] = (int) $row->revenue;
-                }
+                $totalRevenue = array_sum(array_column($rows, 'total_sales'));
+                $totalOrders = array_sum(array_column($rows, 'order_count'));
+                $avgOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
 
                 return [
-                    'chart_labels' => array_keys($chartData->toArray()),
-                    'chart_data' => array_values($chartData->toArray()),
-                    'period_label' => $to->format('F Y'),
-                    'total_revenue' => $rows->sum('revenue'),
-                    'total_orders' => $rows->sum('orders'),
-                    'status_code' => 200,
+                    'data' => [
+                        'chart_data' => $rows,
+                    ],
+                    'summary' => [
+                        'total_revenue' => round($totalRevenue, 2),
+                        'total_orders' => $totalOrders,
+                        'avg_order_value' => round($avgOrderValue, 2),
+                    ],
+                    'status' => 'success',
                 ];
             }
         }
 
         return [
-            'chart_labels' => [],
-            'chart_data' => [],
-            'period_label' => 'N/A',
-            'total_revenue' => 0,
-            'total_orders' => 0,
-            'status_code' => 200,
+            'data' => [
+                'chart_data' => [],
+            ],
+            'summary' => [
+                'total_revenue' => 0,
+                'total_orders' => 0,
+                'avg_order_value' => 0,
+            ],
+            'status' => 'success',
         ];
     }
 
@@ -108,11 +135,11 @@ class ReportService
             ->groupBy('product_id')
             ->orderByDesc('total_sold')
             ->limit($limit)
-            ->get();
+            ->get()->toArray();
 
         return [
             'data' => $topProducts,
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -139,12 +166,12 @@ class ReportService
             $query->where('products.category_id', $categoryId);
         }
 
-        $data = $query->orderByDesc('revenue')->get();
+        $data = $query->orderByDesc('revenue')->get()->toArray();
 
         return [
             'data' => $data,
             'period_label' => $this->getPeriodLabel($period),
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -154,28 +181,35 @@ class ReportService
     public function getYearlyCategoryRevenue($request)
     {
         $year = $request->get('year', now()->year);
+        $limit = $request->get('limit', 10);
 
         $from = Carbon::create($year, 1, 1)->startOfYear();
         $to = Carbon::create($year, 12, 31)->endOfYear();
 
-        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
         $data = Sale::join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
             ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
             ->where('sales.created_at', '>=', $from)
             ->where('sales.created_at', '<=', $to)
             ->whereIn('sales.status', $this->allowedStatuses)
-            ->selectRaw('products.category_id, MONTH(sales.created_at) as month, SUM(sale_items.quantity * sale_items.unit_price) as revenue')
-            ->groupBy('products.category_id', 'month')
-            ->orderBy('products.category_id')
-            ->orderBy('month')
-            ->get();
+            ->selectRaw('categories.id as category_id, categories.name as name, SUM(sale_items.quantity * sale_items.unit_price) as revenue')
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('revenue')
+            ->limit($limit)
+            ->get()
+            ->map(fn($row) => [
+                'name' => $row->name,
+                'revenue' => round($row->revenue, 2),
+                'category_id' => $row->category_id,
+            ])
+            ->values()
+            ->toArray();
 
         return [
-            'data' => $data,
-            'months' => $months,
-            'year' => $year,
-            'status_code' => 200,
+            'data' => [
+                'categories' => $data,
+            ],
+            'status' => 'success',
         ];
     }
 
@@ -190,21 +224,23 @@ class ReportService
 
         $returnedCount = Sale::join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
             ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
             ->where('sales.created_at', '>=', $from)
             ->where('sales.created_at', '<=', $to)
             ->where('sales.status', 'returned')
-            ->selectRaw('products.category_id, COUNT(*) as count')
-            ->groupBy('products.category_id')
+            ->selectRaw('products.category_id, categories.name as category_name, COUNT(*) as count')
+            ->groupBy('products.category_id', 'categories.name')
             ->get()
             ->keyBy('category_id');
 
         $totalCount = Sale::join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
             ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
             ->where('sales.created_at', '>=', $from)
             ->where('sales.created_at', '<=', $to)
             ->whereIn('sales.status', $this->allowedStatuses)
-            ->selectRaw('products.category_id, COUNT(*) as count')
-            ->groupBy('products.category_id')
+            ->selectRaw('products.category_id, categories.name as category_name, COUNT(*) as count')
+            ->groupBy('products.category_id', 'categories.name')
             ->get()
             ->keyBy('category_id');
 
@@ -217,16 +253,17 @@ class ReportService
 
             return [
                 'category_id' => $categoryId,
+                'name' => $item->category_name ?? 'Uncategorized',
                 'total_orders' => $total,
                 'returned_orders' => $returned,
                 'return_rate' => round($rate, 2),
             ];
-        });
+        })->values()->toArray();
 
         return [
             'data' => $data,
             'period_label' => $this->getPeriodLabel($period),
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -235,13 +272,22 @@ class ReportService
      */
     public function getInventoryReport($request)
     {
-        $inventory = Inventory::with('product')->get();
+        $inventoryQueryService = new \App\Services\Inventory\InventoryQueryService();
+        $inventoryData = $inventoryQueryService->getList($request);
+
+        $inventoryArray = $inventoryData['data'] ?? [];
+        $totalItems = count($inventoryArray);
+        $lowStockCount = $inventoryData['low_stock_count'] ?? 0;
+        $totalValue = collect($inventoryArray)->sum(function ($item) {
+            return ($item['current_stock'] ?? 0) * ($item['sell_price'] ?? 0);
+        });
 
         return [
-            'data' => $inventory,
-            'total_items' => $inventory->count(),
-            'low_stock_count' => $inventory->where('is_low_stock', true)->count(),
-            'status_code' => 200,
+            'data' => $inventoryArray,
+            'total_items' => $totalItems,
+            'low_stock_count' => $lowStockCount,
+            'total_value' => round($totalValue, 2),
+            'status' => 'success',
         ];
     }
 
@@ -259,16 +305,16 @@ class ReportService
             ->where('rated_at', '>=', $from)
             ->where('rated_at', '<=', $to)
             ->orderByDesc('rated_at')
-            ->get();
+            ->get()->toArray();
 
-        $totalRatings = $ratings->count();
-        $averageRating = $totalRatings > 0 ? round($ratings->avg('rating'), 2) : 0;
+        $totalRatings = count($ratings);
+        $averageRating = $totalRatings > 0 ? round(collect($ratings)->avg('rating'), 2) : 0;
 
         $distribution = [
             1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0,
         ];
         foreach ($ratings as $entry) {
-            $star = (int) round($entry->rating);
+            $star = (int) round($entry['rating']);
             if (isset($distribution[$star])) {
                 $distribution[$star]++;
             }
@@ -281,52 +327,56 @@ class ReportService
                 : 0;
         }
 
-        $byRider = $ratings
+        $byRider = collect($ratings)
             ->groupBy('rider_id')
             ->map(function ($items) {
-                $total = $items->count();
-                $avg = round($items->avg('rating'), 2);
-                $positive = $items->where('rating', '>=', 4)->count();
-                $first = $items->first();
+                $total = count($items);
+                $avg = round(collect($items)->avg('rating'), 2);
+                $positive = collect($items)->where('rating', '>=', 4)->count();
+                $first = $items[0];
 
                 return [
-                    'rider_id' => $first->rider_id,
-                    'rider_name' => optional($first->rider)->name ?? 'Unknown Rider',
+                    'rider_id' => $first['rider_id'],
+                    'rider_name' => $first['rider']['name'] ?? 'Unknown Rider',
                     'average_rating' => $avg,
                     'total_ratings' => $total,
                     'positive_rate' => $total > 0 ? round(($positive / $total) * 100, 2) : 0,
                 ];
             })
-            ->values();
+            ->values()
+            ->toArray();
 
-        $topPerformers = $byRider
+        $topPerformers = collect($byRider)
             ->where('average_rating', '>=', 4.0)
             ->where('total_ratings', '>=', 5)
             ->sortByDesc('average_rating')
             ->values()
             ->take(10)
-            ->values();
+            ->values()
+            ->toArray();
 
-        $needsImprovement = $byRider
+        $needsImprovement = collect($byRider)
             ->where('average_rating', '<', 3.0)
             ->sortBy('average_rating')
             ->values()
             ->take(10)
-            ->values();
+            ->values()
+            ->toArray();
 
-        $ratingTrends = $ratings
+        $ratingTrends = collect($ratings)
             ->groupBy(function ($item) {
-                return optional($item->rated_at)->format('Y-m-d');
+                return $item['rated_at'] ? date('Y-m-d', strtotime($item['rated_at'])) : null;
             })
             ->map(function ($items, $date) {
                 return [
                     'date' => $date,
-                    'average_rating' => round($items->avg('rating'), 2),
-                    'count' => $items->count(),
+                    'average_rating' => round(collect($items)->avg('rating'), 2),
+                    'count' => count($items),
                 ];
             })
             ->sortBy('date')
-            ->values();
+            ->values()
+            ->toArray();
 
         return [
             'date_range' => [
@@ -343,7 +393,7 @@ class ReportService
             'top_performers' => $topPerformers,
             'needs_improvement' => $needsImprovement,
             'rating_trends' => $ratingTrends,
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -374,12 +424,13 @@ class ReportService
             })
             ->sortByDesc('average_rating')
             ->take($limit)
-            ->values();
+            ->values()
+            ->toArray();
 
         return [
             'data' => $rows,
-            'total' => $rows->count(),
-            'status_code' => 200,
+            'total' => count($rows),
+            'status' => 'success',
         ];
     }
 
@@ -412,7 +463,7 @@ class ReportService
         return [
             'data' => $rows,
             'total' => $rows->count(),
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -434,7 +485,7 @@ class ReportService
         return [
             'data' => $topCustomers,
             'period_label' => 'Last 3 Months',
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -469,7 +520,7 @@ class ReportService
             'profit_margin_percent' => round($margin, 2),
             'units_sold' => $salesData->units_sold ?? 0,
             'period_label' => $this->getPeriodLabel($period),
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -481,18 +532,44 @@ class ReportService
         $recentSales = Sale::with('customer')
             ->orderByDesc('created_at')
             ->limit(20)
-            ->get();
+            ->get()
+            ->map(function ($sale) {
+                return [
+                    'id' => 'sale-' . $sale->id,
+                    'type' => 'sale',
+                    'title' => 'New Order #' . $sale->order_number,
+                    'message' => $sale->customer->name . ' placed an order',
+                    'timestamp' => $sale->created_at,
+                    'status' => 'Processing',
+                    'icon' => 'ShoppingBag',
+                ];
+            })->toArray();
 
         $recentDeliveries = \App\Models\Delivery::with('sale', 'rider')
             ->where('status', 'delivered')
             ->orderByDesc('updated_at')
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(function ($delivery) {
+                return [
+                    'id' => 'delivery-' . $delivery->id,
+                    'type' => 'delivery',
+                    'title' => 'Order Delivered',
+                    'message' => 'Order #' . optional($delivery->sale)->order_number . ' delivered by ' . optional($delivery->rider)->name,
+                    'timestamp' => $delivery->updated_at,
+                    'status' => 'Delivered',
+                    'icon' => 'CheckCircle',
+                ];
+            })->toArray();
+
+        $activities = array_merge($recentSales, $recentDeliveries);
+        usort($activities, function ($a, $b) {
+            return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+        });
 
         return [
-            'recent_sales' => $recentSales,
-            'recent_deliveries' => $recentDeliveries,
-            'status_code' => 200,
+            'data' => array_slice($activities, 0, 20),
+            'status' => 'success',
         ];
     }
 
@@ -526,7 +603,7 @@ class ReportService
         return [
             'data' => $inventory,
             'forecast_days' => $days,
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 

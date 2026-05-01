@@ -149,7 +149,11 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'message' => 'Registration successful! Please check your email to verify your account.',
+            'message' => 'Customer account created successfully. Please check your email for verification.',
+            'data' => [
+                'user'                 => $user->load('customerProfile'),
+                'requires_verification'=> true,
+            ],
             'status' => 'success',
         ], 201);
     }

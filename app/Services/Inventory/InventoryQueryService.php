@@ -17,7 +17,8 @@ class InventoryQueryService
      */
     public function getList($request)
     {
-        $cacheKey = 'inventory:' . md5(json_encode($request->only(['search', 'category_id', 'supplier_id', 'page', 'per_page'])));
+        $version = Cache::get('inventory:version', 1);
+        $cacheKey = 'inventory:v' . $version . ':' . md5(json_encode($request->only(['search', 'category_id', 'supplier_id', 'page', 'per_page'])));
 
         $taggable = Cache::getStore() instanceof TaggableStore;
         $cached = ($taggable ? Cache::tags(['inventory']) : Cache::store())->remember($cacheKey, 300, function () use ($request) {
@@ -177,16 +178,13 @@ class InventoryQueryService
         }
 
         $variantMeta = [
-            'sizes' => VariantValue::whereHas('variant', fn($q) => $q->where('name', 'Size'))->pluck('label')->unique()->values(),
-            'colors' => VariantValue::whereHas('variant', fn($q) => $q->where('name', 'Color'))->pluck('label')->unique()->values(),
-            'weights' => VariantValue::whereHas('variant', fn($q) => $q->where('name', 'Weight'))->pluck('label')->unique()->values(),
+            'sizes' => VariantValue::whereHas('variant', fn($q) => $q->where('name', 'Size'))->pluck('label')->unique()->values()->toArray(),
+            'colors' => VariantValue::whereHas('variant', fn($q) => $q->where('name', 'Color'))->pluck('label')->unique()->values()->toArray(),
+            'weights' => VariantValue::whereHas('variant', fn($q) => $q->where('name', 'Weight'))->pluck('label')->unique()->values()->toArray(),
         ];
 
-        $responseData = $products->toArray();
-        $responseData['data'] = $flattened;
-
         return [
-            'data' => $responseData,
+            'data' => $flattened,
             'variant_meta' => $variantMeta,
             'low_stock_count' => Inventory::where('is_low_stock', 1)->count(),
             'status' => 'success',
@@ -204,6 +202,8 @@ class InventoryQueryService
         $importedByProduct = $options['imported_by_product'] ?? [];
         $product = $options['product'] ?? null;
         $isOrphan = $options['is_orphan'] ?? false;
+        $isVariant = $options['is_variant'] ?? false;
+        $isBaseOfVariants = $options['is_base_of_variants'] ?? false;
 
         $sizeLabel = '';
         $colorLabel = '';
@@ -213,25 +213,70 @@ class InventoryQueryService
             $colorLabel = $variant->color_value ? $variant->color_value->label : '';
             $weightLabel = $variant->weight_value ? $variant->weight_value->label : '';
         }
-        $variantLabel = $variant ? "$sizeLabel $colorLabel $weightLabel" : '';
+
+        // Determine ID prefix and value
+        if ($isOrphan) {
+            $id = "o-{$inv->id}";
+        } elseif ($isVariant) {
+            $id = "v-{$variant->id}";
+        } else {
+            $id = "p-{$product->id}";
+        }
+
+        // Get barcode
+        $barcode = $product ? $product->barcode : ($sp ? $sp->barcode : null);
+
+        // Get name
+        $name = $product ? $product->name : ($sp ? $sp->name : 'Unknown');
+
+        // Get supplier (string only)
+        $supplier = $sp && $sp->supplier ? $sp->supplier->name : '-';
+
+        // Get category (string only)
+        $category = $product && $product->category ? $product->category->name : ($sp && $sp->category ? $sp->category->name : '-');
+        $categoryId = $product && $product->category ? $product->category->id : ($sp && $sp->category ? $sp->category->id : null);
+
+        // Get unit
+        $unit = $product && $product->unitType ? $product->unitType->sell_unit : 'pcs';
+
+        // Get prices
+        $purchasePrice = $product ? $product->purchase_price : null;
+        $sellPrice = $product ? $product->sell_price : null;
+
+        // Get description
+        $description = $product ? $product->description : null;
+
+        // Get sold/imported counts
+        $totalSold = $soldKey && isset($soldByProduct[$soldKey]) ? (int) $soldByProduct[$soldKey]->total_sold : 0;
+        $totalImported = $importedKey && isset($importedByProduct[$importedKey]) ? (int) $importedByProduct[$importedKey]->total_imported : 0;
 
         return [
-            'inventory_id' => $inv ? $inv->id : null,
-            'product_id' => $product ? $product->id : ($inv ? $inv->product_id : null),
-            'product_name' => $product ? $product->name : ($sp ? $sp->name : 'Unknown'),
-            'variant_id' => $variant ? $variant->id : null,
-            'variant_label' => trim($variantLabel),
-            'warehouse_stock' => $inv ? $inv->warehouse_stock : 0,
-            'current_stock' => $inv ? $inv->current_stock : 0,
-            'is_low_stock' => $inv ? $inv->is_low_stock : false,
-            'reorder_threshold' => $inv ? $inv->reorder_threshold : 10,
-            'is_orphan' => $isOrphan,
-            'is_base_of_variants' => $options['is_base_of_variants'] ?? false,
-            'is_variant' => $options['is_variant'] ?? false,
-            'supplier_id' => $sp ? $sp->supplier_id : null,
-            'supplier_name' => $sp && $sp->supplier ? $sp->supplier->name : 'Unknown',
-            'total_sold' => $soldKey && isset($soldByProduct[$soldKey]) ? (int) $soldByProduct[$soldKey]->total_sold : 0,
-            'total_imported' => $importedKey && isset($importedByProduct[$importedKey]) ? (int) $importedByProduct[$importedKey]->total_imported : 0,
+            'id'                          => $id,
+            'raw_id'                      => $inv ? $inv->id : null,
+            'product_id'                  => $product ? $product->id : ($inv ? $inv->product_id : null),
+            'variant_id'                  => $variant ? $variant->id : null,
+            'supplier_product_id'         => $sp ? $sp->id : null,
+            'supplier_product_variant_id' => $variant ? $variant->id : null,
+            'barcode'                     => $barcode,
+            'name'                        => $name,
+            'supplier'                    => $supplier,
+            'category'                    => $category,
+            'category_id'                 => $categoryId,
+            'unit'                        => $unit,
+            'current_stock'               => $inv ? $inv->current_stock : 0,
+            'warehouse_stock'             => $inv ? $inv->warehouse_stock : 0,
+            'reorder_threshold'           => $inv ? $inv->reorder_threshold : 10,
+            'purchase_price'              => $purchasePrice,
+            'sell_price'                  => $sellPrice,
+            'description'                 => $description,
+            'size'                        => $sizeLabel ?: '-',
+            'color'                       => $colorLabel ?: '-',
+            'weight'                      => $weightLabel ?: '-',
+            'is_variant'                  => $isVariant,
+            'is_orphan'                   => $isOrphan,
+            'is_base_of_variants'         => $isBaseOfVariants,
+            'total_sold'                  => $totalSold,
+            'total_imported'              => $totalImported,
         ];
     }
 }

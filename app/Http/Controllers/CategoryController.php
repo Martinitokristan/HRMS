@@ -14,8 +14,8 @@ class CategoryController extends Controller
     {
         $taggable = Cache::getStore() instanceof TaggableStore;
         $data = $taggable
-            ? Cache::tags(['categories'])->remember('categories:all', 86400, fn() => Category::all())
-            : Cache::remember('categories:all', 86400, fn() => Category::all());
+            ? Cache::tags(['categories'])->remember('categories:all', 86400, fn() => Category::all()->toArray())
+            : Cache::remember('categories:all', 86400, fn() => Category::all()->toArray());
 
         return response()->json(['data' => $data, 'status' => 'success']);
     }

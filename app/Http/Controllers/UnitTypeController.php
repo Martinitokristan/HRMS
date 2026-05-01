@@ -10,7 +10,7 @@ class UnitTypeController extends Controller
     public function index()
     {
         return response()->json([
-            'data'   => UnitType::all(),
+            'data'   => UnitType::all()->toArray(),
             'status' => 'success',
         ]);
     }

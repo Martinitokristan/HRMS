@@ -14,9 +14,7 @@ class ReportController extends Controller
      */
     public function sales(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getSalesReport($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getSalesReport($request));
     }
 
     /**
@@ -24,9 +22,7 @@ class ReportController extends Controller
      */
     public function topProducts(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getTopProducts($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getTopProducts($request));
     }
 
     /**
@@ -34,9 +30,7 @@ class ReportController extends Controller
      */
     public function categorySales(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getCategorySales($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getCategorySales($request));
     }
 
     /**
@@ -44,9 +38,7 @@ class ReportController extends Controller
      */
     public function yearlyCategoryRevenue(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getYearlyCategoryRevenue($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getYearlyCategoryRevenue($request));
     }
 
     /**
@@ -54,9 +46,7 @@ class ReportController extends Controller
      */
     public function returnRateByCategory(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getReturnRateByCategory($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getReturnRateByCategory($request));
     }
 
     /**
@@ -64,9 +54,7 @@ class ReportController extends Controller
      */
     public function inventory(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getInventoryReport($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getInventoryReport($request));
     }
 
     /**
@@ -103,9 +91,7 @@ class ReportController extends Controller
      */
     public function ratingAnalytics(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getRatingAnalytics($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getRatingAnalytics($request));
     }
 
     /**
@@ -113,9 +99,7 @@ class ReportController extends Controller
      */
     public function ratingAnalyticsRankings(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getRatingAnalyticsRankings($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getRatingAnalyticsRankings($request));
     }
 
     /**
@@ -123,9 +107,7 @@ class ReportController extends Controller
      */
     public function ratingAnalyticsFeedback(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getRatingAnalyticsFeedback($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getRatingAnalyticsFeedback($request));
     }
 
     /**
@@ -133,9 +115,7 @@ class ReportController extends Controller
      */
     public function customerBehavior(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getCustomerBehavior($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getCustomerBehavior($request));
     }
 
     /**
@@ -143,9 +123,7 @@ class ReportController extends Controller
      */
     public function inventoryForecast(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getInventoryForecast($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getInventoryForecast($request));
     }
 
     /**
@@ -153,9 +131,7 @@ class ReportController extends Controller
      */
     public function profitMargins(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getProfitMargins($request);
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getProfitMargins($request));
     }
 
     /**
@@ -163,8 +139,6 @@ class ReportController extends Controller
      */
     public function recentActivity(Request $request, ReportService $reportService)
     {
-        $data = $reportService->getRecentActivity();
-
-        return response()->json(['data' => $data, 'status' => 'success']);
+        return response()->json($reportService->getRecentActivity());
     }
 }

@@ -76,11 +76,11 @@ class SaleQueryService
             ->count();
 
         $recentOrders = Sale::with(['customer', 'items'])
-            ->latest()->limit(10)->get();
+            ->latest()->limit(10)->get()->toArray();
 
         $lowStockProducts = \App\Models\Inventory::with(['product.category'])
             ->where('is_low_stock', 1)
-            ->limit(5)->get();
+            ->limit(5)->get()->toArray();
 
         return [
             'total_revenue' => $totalRevenue,

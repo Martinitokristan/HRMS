@@ -22,7 +22,7 @@ class ReturnController extends Controller
 
     public function index(Request $request)
     {
-        $query = ReturnOrder::with(['sale.customer', 'sale.items.product', 'requestedBy', 'approvedBy'])
+        $query = ReturnOrder::with(['sale.customer', 'sale.items.product', 'requestedBy', 'approvedBy', 'images'])
             ->when($request->status && $request->status !== 'all', function ($q) use ($request) {
                 return $q->where('status', $request->status);
             })
@@ -37,7 +37,11 @@ class ReturnController extends Controller
             })
             ->latest();
 
-        $returns = $query->paginate($request->get('per_page', 20));
+        $returns = $query->get()->map(function ($return) {
+            $arr = $return->toArray();
+            $arr['customer_id'] = $return->sale->customer_id ?? null;
+            return $arr;
+        })->toArray();
 
         $stats = [
             'total'     => ReturnOrder::count(),
@@ -339,7 +343,8 @@ class ReturnController extends Controller
         if ($taggable) {
             Cache::tags(['reports'])->flush();
         } else {
-            \Log::warning('Report cache not flushed: cache store does not support tags. Configure Redis (CACHE_DRIVER=redis) to enable cache tags.');
+            // For non-taggable stores, increment version to invalidate report cache
+            Cache::increment('reports:version');
         }
 
         // Notify customer

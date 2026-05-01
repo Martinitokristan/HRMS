@@ -16,7 +16,7 @@ class VariantService
     public function getVariantValues()
     {
         return [
-            'data' => Variant::with('values')->get(),
+            'data' => Variant::with('values')->get()->toArray(),
             'status_code' => 200,
         ];
     }
@@ -113,7 +113,7 @@ class VariantService
     public function listVariantTypes()
     {
         return [
-            'data' => Variant::orderBy('id')->get(),
+            'data' => Variant::orderBy('id')->get()->toArray(),
             'status_code' => 200,
         ];
     }
@@ -213,7 +213,7 @@ class VariantService
         }
 
         return [
-            'data' => $q->get(),
+            'data' => $q->get()->toArray(),
             'status_code' => 200,
         ];
     }

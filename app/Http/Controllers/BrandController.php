@@ -45,7 +45,7 @@ class BrandController extends Controller
 
         $brands = $query->get();
 
-        return response()->json(['data' => $brands, 'status' => 'success']);
+        return response()->json(['data' => $brands->toArray(), 'status' => 'success']);
     }
 
     public function store(Request $request)
@@ -135,6 +135,6 @@ class BrandController extends Controller
 
         $brands = $query->get();
 
-        return response()->json(['data' => $brands, 'status' => 'success']);
+        return response()->json(['data' => $brands->toArray(), 'status' => 'success']);
     }
 }

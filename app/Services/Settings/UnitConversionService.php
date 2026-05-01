@@ -14,7 +14,7 @@ class UnitConversionService
     public function getUnitTypes()
     {
         return [
-            'data' => UnitType::all(),
+            'data' => UnitType::all()->toArray(),
             'status_code' => 200,
         ];
     }

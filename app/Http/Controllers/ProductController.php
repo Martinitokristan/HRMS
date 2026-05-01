@@ -326,24 +326,24 @@ class ProductController extends Controller
 
         if ($topIds->isEmpty()) {
             $products = Product::with(['category', 'inventory', 'brand', 'approvedReviews'])
+                ->withCount('saleItems as sold_count')
+                ->withSum('saleItems as total_revenue', 'subtotal')
                 ->where('is_active', true)
                 ->latest()
                 ->limit($limit)
-                ->get();
+                ->get()
+                ->toArray();
         } else {
             $products = Product::with(['category', 'inventory', 'brand', 'approvedReviews'])
+                ->withCount('saleItems as sold_count')
+                ->withSum('saleItems as total_revenue', 'subtotal')
                 ->where('is_active', true)
                 ->whereIn('id', $topIds)
                 ->get()
                 ->sortBy(fn($p) => array_search($p->id, $topIds->toArray()))
-                ->values();
+                ->values()
+                ->toArray();
         }
-
-        $products->transform(function ($product) {
-            $product->average_rating = $product->averageRating();
-            $product->total_reviews  = $product->totalReviews();
-            return $product;
-        });
 
         return response()->json([
             'data'   => $products,

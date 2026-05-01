@@ -174,6 +174,9 @@ class InventoryTransferService
 
             if (Cache::getStore() instanceof TaggableStore) {
                 Cache::tags(['inventory', 'products'])->flush();
+            } else {
+                Cache::increment('inventory:version');
+                \App\Support\ProductCache::bust();
             }
             broadcast(new DataMutated('private-admin', ['admin_inventory'], 'inventory.transferred'));
             broadcast(new DataMutated('shop', ['customer_shop'], 'inventory.transferred'));
@@ -313,6 +316,9 @@ class InventoryTransferService
 
             if (Cache::getStore() instanceof TaggableStore) {
                 Cache::tags(['inventory', 'products'])->flush();
+            } else {
+                Cache::increment('inventory:version');
+                \App\Support\ProductCache::bust();
             }
             broadcast(new DataMutated('private-admin', ['admin_inventory'], 'inventory.transferred_multiple'));
             broadcast(new DataMutated('shop', ['customer_shop'], 'inventory.transferred_multiple'));

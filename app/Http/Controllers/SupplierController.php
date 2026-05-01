@@ -25,7 +25,7 @@ class SupplierController extends Controller
         }
 
         if ($request->no_pagination) {
-            $suppliers = $query->withCount(['products', 'purchaseOrders'])->get();
+            $suppliers = $query->withCount(['products', 'purchaseOrders'])->get()->toArray();
             return response()->json([
                 'data'   => $suppliers,
                 'status' => 'success',

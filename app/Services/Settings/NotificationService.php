@@ -36,10 +36,12 @@ class NotificationService
         }
 
         $notifications = $notifiable->notifications()->orderBy('created_at', 'desc')->take(30)->get();
+        $unreadCount = $notifiable->unreadNotifications()->count();
 
         return [
-            'data' => $notifications,
-            'status_code' => 200,
+            'data' => $notifications->toArray(),
+            'unread_count' => $unreadCount,
+            'status' => 'success',
         ];
     }
 
@@ -57,7 +59,7 @@ class NotificationService
         $notifiable->unreadNotifications->markAsRead();
 
         return [
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -75,7 +77,7 @@ class NotificationService
         $notifiable->notifications()->where('id', $notificationId)->delete();
 
         return [
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -93,7 +95,7 @@ class NotificationService
         $notifiable->notifications()->whereIn('id', $ids)->delete();
 
         return [
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -111,7 +113,7 @@ class NotificationService
         $notifiable->notifications()->delete();
 
         return [
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 }

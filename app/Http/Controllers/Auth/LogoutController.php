@@ -25,6 +25,6 @@ class LogoutController extends Controller
         }
 
         $cleared = cookie('auth_token', '', -1, '/', null, app()->environment('production'), true, false, 'lax');
-        return response()->json(null, 204)->withCookie($cleared);
+        return response()->json(['status' => 'success'])->withCookie($cleared);
     }
 }

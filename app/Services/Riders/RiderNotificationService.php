@@ -12,9 +12,9 @@ class RiderNotificationService
         $notifications = $user->notifications()->latest()->limit(50)->get();
 
         return [
-            'data' => $notifications,
-            'unread_count' => $user->unreadNotifications()->count(),
-            'status_code' => 200,
+            'data'         => $notifications->toArray(),
+            'unread_count' => $notifications->whereNull('read_at')->count(),
+            'status'       => 'success',
         ];
     }
 
@@ -26,7 +26,7 @@ class RiderNotificationService
         $user->unreadNotifications->markAsRead();
 
         return [
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -38,7 +38,7 @@ class RiderNotificationService
         $user->notifications()->where('id', $notificationId)->delete();
 
         return [
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -50,7 +50,7 @@ class RiderNotificationService
         $user->notifications()->whereIn('id', $ids)->delete();
 
         return [
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 
@@ -62,7 +62,7 @@ class RiderNotificationService
         $user->notifications()->delete();
 
         return [
-            'status_code' => 200,
+            'status' => 'success',
         ];
     }
 }
