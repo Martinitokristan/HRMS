@@ -224,10 +224,9 @@ export default function RiderDashboardV3() {
 
     // Request Screen Wake Lock
     const requestWakeLock = useCallback(async () => {
-        if ("wakeLock" in navigator) {
+        if ("wakeLock" in navigator && !wakeLockRef.current) {
             try {
-                wakeLockRef.current =
-                    await navigator.wakeLock.request("screen");
+                wakeLockRef.current = await navigator.wakeLock.request("screen");
                 console.log("Screen Wake Lock is active");
             } catch (err) {
                 console.error(`Wake Lock error: ${err.name}, ${err.message}`);
