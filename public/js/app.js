@@ -14450,6 +14450,12 @@ function CartPage() {
       var updated = prev.map(function (item) {
         if (item.cartId === cartId) {
           var newQty = Math.max(1, item.qty + delta);
+
+          // Stock validation
+          if (delta > 0 && item.available_stock !== undefined && newQty > item.available_stock) {
+            showToast("Insufficient stock. Only ".concat(item.available_stock, " units available."), 'error');
+            return item;
+          }
           return _objectSpread(_objectSpread({}, item), {}, {
             qty: newQty
           });
@@ -14477,6 +14483,7 @@ function CartPage() {
     var variants = options.variants || {};
     var price = options.price || product.sell_price;
     var variant_id = options.variant_id || null;
+    var available_stock = options.available_stock;
     var variantLabels = Object.values(variants).filter(Boolean).map(function (v) {
       return v.label;
     });
@@ -14492,9 +14499,20 @@ function CartPage() {
         return i.cartId === newCartId;
       });
       if (existing) {
+        var totalQty = existing.qty + qty;
+        if (available_stock !== undefined && totalQty > available_stock) {
+          showToast("Cannot add more. Only ".concat(available_stock, " units available."), 'error');
+          return filtered.map(function (i) {
+            return i.cartId === newCartId ? _objectSpread(_objectSpread({}, i), {}, {
+              qty: available_stock,
+              available_stock: available_stock
+            }) : i;
+          });
+        }
         return filtered.map(function (i) {
           return i.cartId === newCartId ? _objectSpread(_objectSpread({}, i), {}, {
-            qty: i.qty + qty
+            qty: totalQty,
+            available_stock: available_stock
           }) : i;
         });
       }
@@ -14504,7 +14522,8 @@ function CartPage() {
         qty: qty,
         variantString: variantString,
         selectedVariants: variants,
-        variant_id: variant_id
+        variant_id: variant_id,
+        available_stock: available_stock
       })]);
     });
     setSelectedProduct(null);
@@ -14512,7 +14531,8 @@ function CartPage() {
   };
   var switchVariant = function switchVariant(item, newVariant) {
     // Check if new variant is in stock
-    if ((newVariant.stock || 0) <= 0) {
+    var available_stock = newVariant.stock || 0;
+    if (available_stock <= 0) {
       showToast('This variant is out of stock', 'error');
       return;
     }
@@ -14534,9 +14554,18 @@ function CartPage() {
           return i.cartId !== item.cartId;
         });
         return filtered.map(function (i) {
-          return i.cartId === newCartId ? _objectSpread(_objectSpread({}, i), {}, {
-            qty: i.qty + item.qty
-          }) : i;
+          if (i.cartId === newCartId) {
+            var totalQty = i.qty + item.qty;
+            var finalQty = Math.min(totalQty, available_stock);
+            if (totalQty > available_stock) {
+              showToast("Combined quantity adjusted to available stock (".concat(available_stock, ")"), 'warning');
+            }
+            return _objectSpread(_objectSpread({}, i), {}, {
+              qty: finalQty,
+              available_stock: available_stock
+            });
+          }
+          return i;
         });
       }
 
@@ -14547,6 +14576,8 @@ function CartPage() {
           variant_id: newVariant.id,
           variantString: variantString,
           sell_price: newPrice,
+          available_stock: available_stock,
+          qty: Math.min(i.qty, available_stock),
           selectedVariants: {
             Size: newVariant.size_value,
             Color: newVariant.color_value,
@@ -16754,6 +16785,15 @@ function CustomerOrder() {
                   }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_36__.jsx)("span", {
                     className: "font-mono font-bold text-foreground",
                     children: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.formatPHP)(total)
+                  })]
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_36__.jsxs)("div", {
+                  className: "flex justify-between text-base font-medium py-1",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_36__.jsx)("span", {
+                    className: "text-muted-foreground",
+                    children: "VAT (12%)"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_36__.jsx)("span", {
+                    className: "font-mono font-bold text-foreground",
+                    children: (0,_lib_utils__WEBPACK_IMPORTED_MODULE_17__.formatPHP)(total * 0.12)
                   })]
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_36__.jsxs)("div", {
                   className: "flex justify-between text-base text-xl pt-4 mt-3 border-t-2 border-border",
@@ -21349,13 +21389,16 @@ function ProductDetailModal(_ref) {
     var currentStock = hasVariants ? selectedVariant ? Number(selectedVariant.stock || 0) : Number(baseStock || 0) : Number(baseStock || 0);
     var isOutOfStock = currentStock <= 0;
     var subtotal = displayPrice * qty;
-    var canAdd = !isOutOfStock && (!hasVariants || selectedVariant || baseStock > 0);
+    var canAdd = !isOutOfStock && (!hasVariants || selectedVariant || baseStock > 0) && qty <= currentStock;
     var handleVariantChange = function handleVariantChange(variant, options) {
       if ((selectedVariant === null || selectedVariant === void 0 ? void 0 : selectedVariant.id) !== (variant === null || variant === void 0 ? void 0 : variant.id)) {
         setActiveGalleryImage(null);
       }
       setSelectedVariant(variant.id === 'base' ? null : variant);
       setSelectedOptions(options);
+      // Reset quantity to 1 if it exceeds new variant stock
+      var newStock = Number(variant.stock || 0);
+      if (qty > newStock) setQty(1);
     };
     var handleAddToCart = function handleAddToCart() {
       if (!canAdd) return;
@@ -21365,7 +21408,8 @@ function ProductDetailModal(_ref) {
         price: displayPrice,
         saleInfo: currentSaleInfo,
         variant_id: selectedVariant === null || selectedVariant === void 0 ? void 0 : selectedVariant.id,
-        isUpdate: !!product.cartId
+        isUpdate: !!product.cartId,
+        available_stock: currentStock
       });
       onClose();
     };
@@ -33952,10 +33996,17 @@ var customerIcon = leaflet__WEBPACK_IMPORTED_MODULE_12___default().divIcon({
   className: "map-marker-container"
 });
 function RiderDashboardV3() {
+  var _settings$settings, _settings$logistics, _settings$settings2, _settings$general;
   var _useAuth = (0,_context_AuthContext__WEBPACK_IMPORTED_MODULE_2__.useAuth)(),
     user = _useAuth.user,
-    logout = _useAuth.logout;
+    logout = _useAuth.logout,
+    settings = _useAuth.settings,
+    refreshSettings = _useAuth.refreshSettings;
   var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_3__.useNavigate)();
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    refreshSettings();
+  }, []);
+  var deliveryFee = (settings === null || settings === void 0 || (_settings$settings = settings.settings) === null || _settings$settings === void 0 || (_settings$settings = _settings$settings.logistics) === null || _settings$settings === void 0 ? void 0 : _settings$settings.rider_default_delivery_fee) || (settings === null || settings === void 0 || (_settings$logistics = settings.logistics) === null || _settings$logistics === void 0 ? void 0 : _settings$logistics.rider_default_delivery_fee) || (settings === null || settings === void 0 || (_settings$settings2 = settings.settings) === null || _settings$settings2 === void 0 || (_settings$settings2 = _settings$settings2.general) === null || _settings$settings2 === void 0 ? void 0 : _settings$settings2.rider_default_delivery_fee) || (settings === null || settings === void 0 || (_settings$general = settings.general) === null || _settings$general === void 0 ? void 0 : _settings$general.rider_default_delivery_fee) || 30;
   var _useSilentRefresh = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_25__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_26__.STALE_KEYS.RIDER_DASHBOARD),
     dashTrigger = _useSilentRefresh.refreshTrigger;
   var _useSilentRefresh2 = (0,_hooks_useSilentRefresh__WEBPACK_IMPORTED_MODULE_25__.useSilentRefresh)(_store_dataStore__WEBPACK_IMPORTED_MODULE_26__.STALE_KEYS.RIDER_NOTIFICATIONS),
@@ -34167,7 +34218,7 @@ function RiderDashboardV3() {
     return _regenerator().w(function (_context) {
       while (1) switch (_context.p = _context.n) {
         case 0:
-          if (!("wakeLock" in navigator)) {
+          if (!("wakeLock" in navigator && !wakeLockRef.current)) {
             _context.n = 4;
             break;
           }
@@ -35805,7 +35856,7 @@ function RiderDashboardV3() {
             color: "#6b7280",
             marginBottom: "2rem"
           },
-          children: ["Earn ", (0,_lib_utils__WEBPACK_IMPORTED_MODULE_15__.formatPHP)(30), " per successful delivery. Cash-out is paid manually by admin to your GCash within 24 hours after your day's COD cash is remitted."]
+          children: ["Earn ", (0,_lib_utils__WEBPACK_IMPORTED_MODULE_15__.formatPHP)(deliveryFee), " per successful delivery. Cash-out is paid manually by admin to your GCash within 24 hours after your day's COD cash is remitted."]
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_32__.jsx)("div", {
           style: {
             display: "grid",
@@ -37311,6 +37362,10 @@ var TABS = [{
   label: 'General',
   icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
 }, {
+  id: 'logistics',
+  label: 'Logistics',
+  icon: 'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1m-6 0a1 1 0 001-1'
+}, {
   id: 'notifications',
   label: 'Notifications',
   icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'
@@ -37324,7 +37379,7 @@ var TABS = [{
   icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002-2zm10-10V7a4 4 0 00-8 0v4h8z'
 }];
 function Settings() {
-  var _settings$general, _settings$general2, _settings$general3, _settings$general4, _settings$general5, _settings$general6, _settings$notificatio3, _settings$payments2, _settings$security, _settings$security2;
+  var _settings$general, _settings$general2, _settings$general3, _settings$general4, _settings$general5, _settings$general6, _settings$logistics, _settings$notificatio3, _settings$payments2, _settings$security, _settings$security2;
   var _useToast = (0,_context_ToastContext__WEBPACK_IMPORTED_MODULE_2__.useToast)(),
     showToast = _useToast.showToast;
   var _useAuth = (0,_context_AuthContext__WEBPACK_IMPORTED_MODULE_3__.useAuth)(),
@@ -37698,6 +37753,58 @@ function Settings() {
             onClick: handleSaveSettings,
             disabled: saving,
             children: "Save Changes"
+          })
+        })]
+      }), activeTab === 'logistics' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.Fragment, {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+          className: "mb-6",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("h2", {
+            className: "text-lg font-bold text-foreground",
+            children: "Logistics Settings"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
+            className: "text-sm text-muted-foreground",
+            children: "Manage delivery fees and rider payouts"
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+          className: "text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3",
+          children: "Rider Fees"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_card__WEBPACK_IMPORTED_MODULE_5__.Card, {
+          className: "p-5 mb-6",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+            className: "space-y-4",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+              className: "space-y-2 max-w-sm",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_label__WEBPACK_IMPORTED_MODULE_7__.Label, {
+                className: "text-sm font-semibold",
+                children: "Standard Delivery Fee (per Order)"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+                className: "flex gap-3",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
+                  className: "relative flex-1",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("span", {
+                    className: "absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm",
+                    children: "\u20B1"
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_input__WEBPACK_IMPORTED_MODULE_6__.Input, {
+                    type: "number",
+                    className: "pl-7",
+                    value: ((_settings$logistics = settings.logistics) === null || _settings$logistics === void 0 ? void 0 : _settings$logistics.rider_default_delivery_fee) || '30',
+                    onChange: function onChange(e) {
+                      return handleChange('rider_default_delivery_fee', e.target.value);
+                    }
+                  })]
+                })
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("p", {
+                className: "text-[12px] text-muted-foreground",
+                children: "This is the fixed amount the company pays to riders for every successful delivery parcel."
+              })]
+            })
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)("div", {
+          className: "flex justify-end pt-4 border-t border-border",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsx)(_components_ui_button__WEBPACK_IMPORTED_MODULE_4__.Button, {
+            onClick: handleSaveSettings,
+            disabled: saving,
+            children: "Save Logistics Settings"
           })
         })]
       }), activeTab === 'notifications' && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_20__.jsxs)("div", {
