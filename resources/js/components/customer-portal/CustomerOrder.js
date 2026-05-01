@@ -439,6 +439,7 @@ export default function CustomerOrder() {
 
                                 <div className="border-t border-border pt-4 mt-4 space-y-2">
                                     <div className="flex justify-between text-base font-medium py-1"><span className="text-muted-foreground">Subtotal</span><span className="font-mono font-bold text-foreground">{formatPHP(total)}</span></div>
+                                    <div className="flex justify-between text-base font-medium py-1"><span className="text-muted-foreground">VAT (12%)</span><span className="font-mono font-bold text-foreground">{formatPHP(total * 0.12)}</span></div>
                                     <div className="flex justify-between text-base text-xl pt-4 mt-3 border-t-2 border-border">
                                         <span className="font-black">Total</span>
                                         <span className="font-mono font-bold text-foreground">{formatPHP(total * 1.12)}</span>

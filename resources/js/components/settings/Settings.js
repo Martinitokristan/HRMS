@@ -184,6 +184,10 @@ export default function Settings() {
                                 <Label>Tax Rate (%)</Label>
                                 <Input type="number" value={settings.general?.tax_rate || '12'} onChange={e => handleChange('tax_rate', e.target.value)} />
                             </div>
+                            <div className="space-y-2">
+                                <Label>Delivery Fee (PHP)</Label>
+                                <Input type="number" value={settings.general?.rider_default_delivery_fee || '30'} onChange={e => handleChange('rider_default_delivery_fee', e.target.value)} />
+                            </div>
                             <div className="space-y-2 md:col-span-2">
                                 <Label>Complete Store Address</Label>
                                 <Textarea rows={3} value={settings.general?.store_address || ''} onChange={e => handleChange('store_address', e.target.value)} />

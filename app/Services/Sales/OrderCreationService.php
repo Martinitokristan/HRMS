@@ -55,6 +55,9 @@ class OrderCreationService
             // Include 12% VAT in total
             $totalWithVat = round($subtotal * 1.12, 2);
 
+            // Get dynamic delivery fee from settings for Rider Payout (Company pays this)
+            $riderFee = (float) Setting::get('rider_default_delivery_fee', 30);
+
             $status = $data['payment_method'] === 'gcash' ? 'pending_payment' : 'pending';
 
             $sale = Sale::create([
@@ -84,7 +87,6 @@ class OrderCreationService
 
             // Wave 6 — stamp rider fee + COD cash at delivery creation. Rider can never
             // edit these. delivery_fee comes from Setting, cash_collected only set on COD.
-            $riderFee = (float) Setting::get('rider_default_delivery_fee', 30);
             $cashCollected = (($data['payment_method'] ?? null) === 'cod')
                 ? (float) ($sale->total_amount ?? 0)
                 : 0.00;

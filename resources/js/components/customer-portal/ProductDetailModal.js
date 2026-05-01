@@ -262,7 +262,7 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
 
         const isOutOfStock = currentStock <= 0;
         const subtotal = displayPrice * qty;
-        const canAdd = !isOutOfStock && (!hasVariants || selectedVariant || baseStock > 0);
+        const canAdd = !isOutOfStock && (!hasVariants || selectedVariant || baseStock > 0) && qty <= currentStock;
 
         const handleVariantChange = (variant, options) => {
             if (selectedVariant?.id !== variant?.id) {
@@ -270,6 +270,9 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
             }
             setSelectedVariant(variant.id === 'base' ? null : variant);
             setSelectedOptions(options);
+            // Reset quantity to 1 if it exceeds new variant stock
+            const newStock = Number(variant.stock || 0);
+            if (qty > newStock) setQty(1);
         };
 
         const handleAddToCart = () => {
@@ -280,7 +283,8 @@ export default function ProductDetailModal({ isOpen, onClose, product, onAddToCa
                 price: displayPrice,
                 saleInfo: currentSaleInfo,
                 variant_id: selectedVariant?.id,
-                isUpdate: !!product.cartId
+                isUpdate: !!product.cartId,
+                available_stock: currentStock
             });
             onClose();
         };

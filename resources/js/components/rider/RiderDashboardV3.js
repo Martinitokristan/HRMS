@@ -123,8 +123,14 @@ const customerIcon = L.divIcon({
 });
 
 export default function RiderDashboardV3() {
-    const { user, logout } = useAuth();
+    const { user, logout, settings, refreshSettings } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        refreshSettings();
+    }, []);
+
+    const deliveryFee = settings?.settings?.general?.rider_default_delivery_fee || settings?.general?.rider_default_delivery_fee || 30;
     const { refreshTrigger: dashTrigger } = useSilentRefresh(
         STALE_KEYS.RIDER_DASHBOARD,
     );
@@ -1956,7 +1962,7 @@ export default function RiderDashboardV3() {
                             Wallet
                         </h1>
                         <p style={{ color: "#6b7280", marginBottom: "2rem" }}>
-                            Earn {formatPHP(30)} per successful delivery.
+                            Earn {formatPHP(deliveryFee)} per successful delivery.
                             Cash-out is paid manually by admin to your GCash
                             within 24 hours after your day's COD cash is
                             remitted.

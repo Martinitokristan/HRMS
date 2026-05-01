@@ -49,6 +49,13 @@ export default function CartPage() {
             const updated = prev.map(item => {
                 if (item.cartId === cartId) {
                     const newQty = Math.max(1, item.qty + delta);
+                    
+                    // Stock validation
+                    if (delta > 0 && item.available_stock !== undefined && newQty > item.available_stock) {
+                        showToast(`Insufficient stock. Only ${item.available_stock} units available.`, 'error');
+                        return item;
+                    }
+                    
                     return { ...item, qty: newQty };
                 }
                 return item;
@@ -73,6 +80,7 @@ export default function CartPage() {
         const variants = options.variants || {};
         const price = options.price || product.sell_price;
         const variant_id = options.variant_id || null;
+        const available_stock = options.available_stock;
 
         const variantLabels = Object.values(variants)
             .filter(Boolean)
@@ -85,9 +93,14 @@ export default function CartPage() {
             const filtered = prev.filter(i => i.cartId !== product.cartId);
             const existing = filtered.find(i => i.cartId === newCartId);
             if (existing) {
-                return filtered.map(i => i.cartId === newCartId ? { ...i, qty: i.qty + qty } : i);
+                const totalQty = existing.qty + qty;
+                if (available_stock !== undefined && totalQty > available_stock) {
+                    showToast(`Cannot add more. Only ${available_stock} units available.`, 'error');
+                    return filtered.map(i => i.cartId === newCartId ? { ...i, qty: available_stock, available_stock } : i);
+                }
+                return filtered.map(i => i.cartId === newCartId ? { ...i, qty: totalQty, available_stock } : i);
             }
-            return [...filtered, { ...product, sell_price: price, cartId: newCartId, qty, variantString, selectedVariants: variants, variant_id }];
+            return [...filtered, { ...product, sell_price: price, cartId: newCartId, qty, variantString, selectedVariants: variants, variant_id, available_stock }];
         });
         setSelectedProduct(null);
         showToast('Item updated', 'success');
@@ -95,7 +108,8 @@ export default function CartPage() {
 
     const switchVariant = (item, newVariant) => {
         // Check if new variant is in stock
-        if ((newVariant.stock || 0) <= 0) {
+        const available_stock = newVariant.stock || 0;
+        if (available_stock <= 0) {
             showToast('This variant is out of stock', 'error');
             return;
         }
@@ -115,11 +129,17 @@ export default function CartPage() {
             if (existing) {
                 // Merge quantities
                 const filtered = prev.filter(i => i.cartId !== item.cartId);
-                return filtered.map(i => 
-                    i.cartId === newCartId 
-                        ? { ...i, qty: i.qty + item.qty }
-                        : i
-                );
+                return filtered.map(i => {
+                    if (i.cartId === newCartId) {
+                        const totalQty = i.qty + item.qty;
+                        const finalQty = Math.min(totalQty, available_stock);
+                        if (totalQty > available_stock) {
+                            showToast(`Combined quantity adjusted to available stock (${available_stock})`, 'warning');
+                        }
+                        return { ...i, qty: finalQty, available_stock };
+                    }
+                    return i;
+                });
             }
             
             // Update to new variant
@@ -131,6 +151,8 @@ export default function CartPage() {
                         variant_id: newVariant.id,
                         variantString,
                         sell_price: newPrice,
+                        available_stock,
+                        qty: Math.min(i.qty, available_stock),
                         selectedVariants: {
                             Size: newVariant.size_value,
                             Color: newVariant.color_value,
