@@ -17,8 +17,7 @@ class InventoryQueryService
      */
     public function getList($request)
     {
-        $version = Cache::get('inventory:version', 1);
-        $cacheKey = 'inventory:v' . $version . ':' . md5(json_encode($request->only(['search', 'category_id', 'supplier_id', 'page', 'per_page'])));
+        $cacheKey = 'inventory:' . md5(json_encode($request->only(['search', 'category_id', 'supplier_id', 'page', 'per_page'])));
 
         $taggable = Cache::getStore() instanceof TaggableStore;
         $cached = ($taggable ? Cache::tags(['inventory']) : Cache::store())->remember($cacheKey, 300, function () use ($request) {
@@ -183,8 +182,11 @@ class InventoryQueryService
             'weights' => VariantValue::whereHas('variant', fn($q) => $q->where('name', 'Weight'))->pluck('label')->unique()->values()->toArray(),
         ];
 
+        $responseData = $products->toArray();
+        $responseData['data'] = $flattened;
+
         return [
-            'data' => $flattened,
+            'data' => $responseData,
             'variant_meta' => $variantMeta,
             'low_stock_count' => Inventory::where('is_low_stock', 1)->count(),
             'status' => 'success',

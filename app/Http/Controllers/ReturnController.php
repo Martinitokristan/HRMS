@@ -342,9 +342,6 @@ class ReturnController extends Controller
         $taggable = Cache::getStore() instanceof TaggableStore;
         if ($taggable) {
             Cache::tags(['reports'])->flush();
-        } else {
-            // For non-taggable stores, increment version to invalidate report cache
-            Cache::increment('reports:version');
         }
 
         // Notify customer

@@ -55,9 +55,6 @@ class InventoryAdjustmentService
 
         if (Cache::getStore() instanceof TaggableStore) {
             Cache::tags(['inventory'])->flush();
-        } else {
-            // For non-taggable stores (file, database), increment version to invalidate all inventory cache
-            Cache::increment('inventory:version');
         }
 
         return [

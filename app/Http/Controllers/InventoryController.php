@@ -114,28 +114,4 @@ class InventoryController extends Controller
             'status' => 'success',
         ]);
     }
-
-    public function testInventoryState($productId)
-    {
-        $inventory = Inventory::where('product_id', $productId)->first();
-
-        if (!$inventory) {
-            return response()->json([
-                'message' => 'Inventory not found',
-                'status' => 'error',
-            ], 404);
-        }
-
-        return response()->json([
-            'data' => [
-                'product_id' => $inventory->product_id,
-                'variant_id' => $inventory->product_variant_id,
-                'warehouse_stock' => $inventory->warehouse_stock,
-                'current_stock' => $inventory->current_stock,
-                'is_low_stock' => $inventory->is_low_stock,
-                'reorder_threshold' => $inventory->reorder_threshold,
-            ],
-            'status' => 'success',
-        ]);
-    }
 }
