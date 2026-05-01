@@ -34,6 +34,7 @@ class RiderDashboardService
                                 $riderId,
                                 $latitude,
                                 $longitude,
+                                0,
                                 $delivery->tracking_number ?? 0
                             ));
                         }
@@ -43,8 +44,8 @@ class RiderDashboardService
 
             $stats = $this->buildDashboardStats($riderId, $today);
             $riderProfile = RiderProfile::where('user_id', $riderId)->first();
-            $riderLat = $riderProfile->current_latitude ?? null;
-            $riderLon = $riderProfile->current_longitude ?? null;
+            $riderLat = $riderProfile ? $riderProfile->current_latitude : null;
+            $riderLon = $riderProfile ? $riderProfile->current_longitude : null;
             $riderHasGps = $riderLat !== null && $riderLon !== null;
 
             $distanceCalculator = app(\App\Services\DistanceCalculator::class);

@@ -15,6 +15,7 @@ class RiderNotificationService
             'data'         => $notifications->toArray(),
             'unread_count' => $notifications->whereNull('read_at')->count(),
             'status'       => 'success',
+            'status_code'  => 200,
         ];
     }
 
@@ -27,6 +28,7 @@ class RiderNotificationService
 
         return [
             'status' => 'success',
+            'status_code' => 200,
         ];
     }
 
@@ -39,6 +41,7 @@ class RiderNotificationService
 
         return [
             'status' => 'success',
+            'status_code' => 200,
         ];
     }
 
@@ -51,6 +54,7 @@ class RiderNotificationService
 
         return [
             'status' => 'success',
+            'status_code' => 200,
         ];
     }
 
@@ -63,6 +67,7 @@ class RiderNotificationService
 
         return [
             'status' => 'success',
+            'status_code' => 200,
         ];
     }
 }

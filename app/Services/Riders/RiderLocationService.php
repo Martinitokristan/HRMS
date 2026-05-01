@@ -47,6 +47,7 @@ class RiderLocationService
                     $riderId,
                     $latitude,
                     $longitude,
+                    0,
                     $delivery->tracking_number ?? 0
                 ));
             }

@@ -93,7 +93,7 @@ class RiderQueryService
     {
         $ratings = Delivery::where('rider_id', $riderId)
             ->whereNotNull('rating')
-            ->get(['rating', 'rating_comment', 'rated_at'])->toArray();
+            ->get(['rating', 'rating_comment', 'rated_at']);
 
         $averageRating = $ratings->avg('rating') ? round($ratings->avg('rating'), 2) : 0;
         $totalRatings = $ratings->count();
