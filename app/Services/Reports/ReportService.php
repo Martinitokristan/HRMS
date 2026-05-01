@@ -11,8 +11,6 @@ use Carbon\Carbon;
 
 class ReportService
 {
-    private $allowedStatuses = ['delivered', 'paid', 'confirmed', 'out_for_delivery', 'pending', 'in_progress'];
-
     /**
      * Get sales report with period filtering.
      */
@@ -842,53 +840,112 @@ class ReportService
      */
     public function getRecentActivity()
     {
-        $recentSales = Sale::with('customer')
-            ->orderByDesc('created_at')
-            ->limit(15)
-            ->get()
-            ->map(function ($sale) {
-                return [
+        try {
+            $activities = [];
+
+            $sales = Sale::with(['customer', 'items.product', 'delivery'])
+                ->latest()
+                ->limit(15)
+                ->get();
+
+            foreach ($sales as $sale) {
+                $status = 'Processing';
+                $icon = 'ShoppingBag';
+                $badgeVariant = 'secondary';
+
+                switch ($sale->status) {
+                    case 'delivered':
+                        $status = 'Delivered';
+                        $icon = 'CheckCircle';
+                        $badgeVariant = 'success';
+                        break;
+                    case 'out_for_delivery':
+                        $status = 'In Transit';
+                        $icon = 'Bike';
+                        $badgeVariant = 'blue';
+                        break;
+                    case 'confirmed':
+                        $status = 'Processing';
+                        $icon = 'Package';
+                        $badgeVariant = 'blue';
+                        break;
+                    case 'cancelled':
+                    case 'failed':
+                        $status = 'Alert';
+                        $icon = 'AlertTriangle';
+                        $badgeVariant = 'destructive';
+                        break;
+                    case 'returned':
+                        $status = 'Alert';
+                        $icon = 'RefreshCcw';
+                        $badgeVariant = 'amber';
+                        break;
+                    case 'pending_payment':
+                    case 'verifying_payment':
+                        $status = 'Warning';
+                        $icon = 'Clock';
+                        $badgeVariant = 'amber';
+                        break;
+                    case 'paid':
+                        $status = 'Paid';
+                        $icon = 'Check';
+                        $badgeVariant = 'success';
+                        break;
+                    default:
+                        $status = 'Processing';
+                        $icon = 'ShoppingBag';
+                        $badgeVariant = 'secondary';
+                }
+
+                $activities[] = [
                     'id' => 'sale-' . $sale->id,
                     'type' => 'sale',
-                    'title' => 'New Order #' . $sale->order_number,
-                    'message' => ($sale->customer->name ?? 'Guest') . ' placed an order',
-                    'timestamp' => $sale->created_at,
-                    'status' => 'Processing',
-                    'icon' => 'ShoppingBag',
+                    'status' => $status,
+                    'badgeVariant' => $badgeVariant,
+                    'icon' => $icon,
+                    'title' => "Order #{$sale->order_number}",
+                    'message' => (optional($sale->customer)->name ?? 'A customer') . " - " . number_format($sale->total_amount, 2) . " PHP",
+                    'timestamp' => ($sale->created_at ?? $sale->updated_at ?? now())->toIso8601String(),
                 ];
-            })->toArray();
+            }
 
-        $recentDeliveries = DB::table('deliveries')
-            ->join('sales', 'deliveries.sale_id', '=', 'sales.id')
-            ->join('users', 'deliveries.rider_id', '=', 'users.id')
-            ->where('deliveries.status', 'delivered')
-            ->select(
-                'deliveries.id',
-                'sales.order_number',
-                'users.name as rider_name',
-                'deliveries.updated_at'
-            )
-            ->orderByDesc('deliveries.updated_at')
-            ->limit(10)
-            ->get()
-            ->map(function ($delivery) {
-                return [
-                    'id' => 'delivery-' . $delivery->id,
-                    'type' => 'delivery',
-                    'title' => 'Order Delivered',
-                    'message' => 'Order #' . $delivery->order_number . ' delivered by ' . $delivery->rider_name,
-                    'timestamp' => $delivery->updated_at,
-                    'status' => 'Delivered',
-                    'icon' => 'CheckCircle',
+            $lowStock = Inventory::with('product')
+                ->where('is_low_stock', 1)
+                ->limit(5)
+                ->get();
+
+            foreach ($lowStock as $inv) {
+                $stockVal = (int) round($inv->current_stock);
+                $stockSuffix = $stockVal === 1 ? 'pc' : 'pcs';
+                $isOutOfStock = $stockVal <= 0;
+                $activities[] = [
+                    'id' => 'stock-' . $inv->id,
+                    'type' => 'inventory',
+                    'status' => $isOutOfStock ? 'Alert' : 'Warning',
+                    'badgeVariant' => $isOutOfStock ? 'red' : 'amber',
+                    'icon' => 'AlertTriangle',
+                    'title' => $isOutOfStock ? 'Out of Stock' : 'Stock Alert',
+                    'message' => ($inv->product->name ?? 'Product') . ($isOutOfStock
+                        ? ' is out of stock!'
+                        : " is low on stock ({$stockVal}{$stockSuffix} remaining)"),
+                    'timestamp' => ($inv->updated_at ?? $inv->last_adjusted_at ?? $inv->created_at ?? now())->toIso8601String(),
                 ];
-            })->toArray();
+            }
 
-        $activities = array_merge($recentSales, $recentDeliveries);
-        usort($activities, function ($a, $b) {
-            return strtotime($b['timestamp']) - strtotime($a['timestamp']);
-        });
+            usort($activities, function ($a, $b) {
+                return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+            });
 
-        return ['data' => array_slice($activities, 0, 20), 'status' => 'success'];
+            return [
+                'data' => array_slice($activities, 0, 15),
+                'status' => 'success',
+            ];
+        } catch (\Exception $e) {
+            return [
+                'error' => 'Failed to fetch activity',
+                'message' => $e->getMessage(),
+            ];
+        }
     }
 
     /**
