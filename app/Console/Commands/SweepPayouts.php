@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\DeliveryController;
+use App\Services\Deliveries\DeliveryPayoutEligibilityService;
 use App\Models\Delivery;
 use App\Models\Setting;
 use Illuminate\Console\Command;
@@ -17,7 +17,7 @@ class SweepPayouts extends Command
         $hours = (int) Setting::get('rider_customer_confirm_window_hours', 24);
         $cutoff = now()->subHours($hours);
 
-        $promoter = app(DeliveryController::class);
+        $promoter = app(DeliveryPayoutEligibilityService::class);
 
         // 1. Auto-confirm rows past the customer window with no response.
         Delivery::where('status', 'delivered')

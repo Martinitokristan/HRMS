@@ -22,7 +22,9 @@ class ReportController extends Controller
      */
     public function topProducts(Request $request, ReportService $reportService)
     {
-        return response()->json($reportService->getTopProducts($request));
+        $result = $reportService->getTopProducts($request);
+        $status = isset($result['error']) ? 500 : 200;
+        return response()->json($result, $status);
     }
 
     /**
@@ -30,7 +32,9 @@ class ReportController extends Controller
      */
     public function categorySales(Request $request, ReportService $reportService)
     {
-        return response()->json($reportService->getCategorySales($request));
+        $result = $reportService->getCategorySales($request);
+        $status = isset($result['error']) ? 500 : 200;
+        return response()->json($result, $status);
     }
 
     /**
@@ -38,7 +42,9 @@ class ReportController extends Controller
      */
     public function yearlyCategoryRevenue(Request $request, ReportService $reportService)
     {
-        return response()->json($reportService->getYearlyCategoryRevenue($request));
+        $result = $reportService->getYearlyCategoryRevenue($request);
+        $status = isset($result['error']) ? 500 : 200;
+        return response()->json($result, $status);
     }
 
     /**
@@ -46,7 +52,9 @@ class ReportController extends Controller
      */
     public function returnRateByCategory(Request $request, ReportService $reportService)
     {
-        return response()->json($reportService->getReturnRateByCategory($request));
+        $result = $reportService->getReturnRateByCategory($request);
+        $status = isset($result['error']) ? 500 : 200;
+        return response()->json($result, $status);
     }
 
     /**
@@ -139,6 +147,8 @@ class ReportController extends Controller
      */
     public function recentActivity(Request $request, ReportService $reportService)
     {
-        return response()->json($reportService->getRecentActivity());
+        $result = $reportService->getRecentActivity();
+        $status = isset($result['error']) ? 500 : 200;
+        return response()->json($result, $status);
     }
 }

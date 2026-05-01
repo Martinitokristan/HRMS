@@ -32,7 +32,6 @@ class InventoryController extends Controller
 
         return response()->json([
             'message' => $result['message'],
-            'data'    => $result['inventory'],
             'status'  => 'success',
         ]);
     }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\DeliveryController;
 use App\Models\Delivery;
 use Illuminate\Http\Request;
 
@@ -69,7 +68,7 @@ class CashRemittanceController extends Controller
             ->whereNull('cash_remitted_at')
             ->get();
 
-        $promoter = app(DeliveryController::class);
+        $promoter = app(\App\Services\Deliveries\DeliveryPayoutEligibilityService::class);
         foreach ($deliveries as $d) {
             $d->update(['cash_remitted_at' => $now, 'cash_remitted_by' => $adminId]);
             $promoter->maybePromoteToEligible($d->fresh());

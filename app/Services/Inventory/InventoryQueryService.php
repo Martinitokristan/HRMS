@@ -34,8 +34,7 @@ class InventoryQueryService
     {
         // Optimized: Load essential relationships for list view including variants.
         // Order newest first so freshly received stock appears immediately on page 1.
-        $pQuery = Product::with(['category', 'inventory', 'inventory.supplierProduct.variants', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue', 'unitType'])
-            ->orderByDesc('id');
+        $pQuery = Product::with(['category', 'inventory', 'inventory.supplierProduct.variants', 'productVariants.sizeValue', 'productVariants.colorValue', 'productVariants.weightValue', 'unitType']);
 
         // Query warehouse-only items (orphans)
         $wQuery = Inventory::with(['supplierProduct.category', 'supplierProduct.supplier'])
@@ -46,8 +45,7 @@ class InventoryQueryService
                     ->from('inventory as inv2')
                     ->whereColumn('inv2.supplier_product_id', 'inventory.supplier_product_id')
                     ->whereNotNull('inv2.product_id');
-            })
-            ->orderByDesc('id');
+            });
 
         if ($request->filled('search')) {
             $s = $request->search;

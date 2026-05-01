@@ -20,7 +20,7 @@ class SettingsService
             ? Cache::tags(['settings'])->remember($cacheKey, 86400, fn() => Setting::all())
             : Cache::remember($cacheKey, 86400, fn() => Setting::all());
 
-        $isAdmin = $user && $user->role === 'admin';
+        $isAdmin = $user instanceof \App\Models\User && $user->role === 'admin';
         if (!$isAdmin) {
             $allSettings = $allSettings->whereNotIn('group', ['security', 'notifications']);
         }
